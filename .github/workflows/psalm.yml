@@ -1,11 +1,17 @@
-on:
+on:  # yamllint disable-line rule:truthy
     pull_request: null
     push:
         branches:
-            - master
-            - '*.*'
+            - 2.x
 
 name: static analysis
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
     psalm:
@@ -13,3 +19,6 @@ jobs:
         with:
             os: >-
                 ['ubuntu-latest']
+            php: '["8.4"]'
+            bin-tool: psalm
+            command: composer psalm:ci

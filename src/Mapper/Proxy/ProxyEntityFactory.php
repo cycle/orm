@@ -166,7 +166,7 @@ class ProxyEntityFactory
                 $classNameStr = $className;
             }
 
-            /** @see \Cycle\ORM\Mapper\Proxy\EntityProxyTrait */
+            /** @see EntityProxyTrait */
             $classStr = <<<PHP
                 {$namespaceStr}
                 #[\AllowDynamicProperties]

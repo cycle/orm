@@ -7,10 +7,10 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\ManyToMany\Cyclic;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContextTyped;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 

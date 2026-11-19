@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\Morphed;
 
+use Cycle\Database\Exception\StatementException;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\Database\Exception\StatementException;
 
 abstract class MorphedHasManyScopeTest extends BaseTest
 {

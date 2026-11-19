@@ -8,10 +8,10 @@ use Cycle\Database\DatabaseInterface;
 use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use Cycle\ORM\Parser\TypecastInterface;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Spiral\Core\FactoryInterface as CoreFactory;
 
 /**

@@ -12,12 +12,12 @@ use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Options;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Relation\SpecialValue;
-use Cycle\ORM\Service\IndexProviderInterface;
-use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Relation\ShadowBelongsTo;
+use Cycle\ORM\Relation\SpecialValue;
 use Cycle\ORM\RelationMap;
+use Cycle\ORM\Service\IndexProviderInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
 
 final class UnitOfWork implements StateInterface
 {

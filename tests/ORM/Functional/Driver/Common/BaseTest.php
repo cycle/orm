@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common;
 
+use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\Config\DriverConfig;
+use Cycle\Database\Database;
+use Cycle\Database\DatabaseManager;
+use Cycle\Database\Driver\Driver;
+use Cycle\Database\Driver\HandlerInterface;
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
@@ -22,11 +27,6 @@ use Cycle\ORM\Tests\Fixtures\TestLogger;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
-use Cycle\Database\Config\DatabaseConfig;
-use Cycle\Database\Database;
-use Cycle\Database\DatabaseManager;
-use Cycle\Database\Driver\Driver;
-use Cycle\Database\Driver\HandlerInterface;
 
 abstract class BaseTest extends TestCase
 {

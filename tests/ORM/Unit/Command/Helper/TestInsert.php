@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Unit\Command\Helper;
 
+use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\Traits\ErrorTrait;
-use Cycle\Database\DatabaseInterface;
 
 class TestInsert extends DatabaseCommand
 {

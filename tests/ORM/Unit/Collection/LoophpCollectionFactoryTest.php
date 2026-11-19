@@ -9,9 +9,9 @@ use Cycle\ORM\Collection\LoophpCollectionFactory;
 use Cycle\ORM\Collection\Pivoted\LoophpPivotedCollection;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Cycle\ORM\Exception\CollectionFactoryException;
+use loophp\collection\Collection;
 use loophp\collection\CollectionDecorator;
 use loophp\collection\Contract\Collection as CollectionInterface;
-use loophp\collection\Collection;
 
 class LoophpCollectionFactoryTest extends BaseTest
 {

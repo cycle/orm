@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Parser;
 
-use Cycle\ORM\Exception\ParserException;
 use Cycle\Database\Injection\Parameter;
+use Cycle\ORM\Exception\ParserException;
 
 /**
  * @internal

@@ -100,7 +100,7 @@ return [
             'id' => Type\TargetGroupId::class,
             'name' => Type\TargetGroupName::class,
         ],
-        Schema::TYPECAST_HANDLER => [TypeCaster::class, Cycle\ORM\Parser\Typecast::class],
+        Schema::TYPECAST_HANDLER => [TypeCaster::class, Typecast::class],
     ],
 
     'pivot' => [
@@ -119,7 +119,7 @@ return [
             'targetGroupId' => Type\TargetGroupId::class,
             'hash' => Type\Hash::class,
         ],
-        Schema::TYPECAST_HANDLER => [TypeCaster::class, Cycle\ORM\Parser\Typecast::class],
+        Schema::TYPECAST_HANDLER => [TypeCaster::class, Typecast::class],
     ],
 
     // 'pivotChild' => [

@@ -1,0 +1,47 @@
+---
+
+name: 🔐 Security analysis
+
+on:  # yamllint disable-line rule:truthy
+  pull_request: null
+  push:
+    branches:
+      - 2.x
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  security-analysis:
+    name: Composer audit
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Check out the codebase
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: 🛠️ Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          ini-values: error_reporting=E_ALL
+          coverage: none
+
+      - name: 🤖 Validate composer.json
+        run: composer validate --ansi --strict
+
+      - name: 📥 Install dependencies with composer
+        uses: ramsey/composer-install@v3
+        env:
+          COMPOSER_ROOT_VERSION: 2.x-dev
+        with:
+          dependency-versions: highest
+
+      - name: 🐛 Check installed packages for security vulnerability advisories
+        run: composer audit --ansi

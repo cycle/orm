@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Classless;
 
+use Cycle\Database\ForeignKeyInterface;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
@@ -11,7 +12,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\Database\ForeignKeyInterface;
 
 abstract class ClasslessCyclicReferencesTest extends BaseTest
 {

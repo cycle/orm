@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation;
 
+use Cycle\Database\ForeignKeyInterface;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Favorite;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Cycle\Database\ForeignKeyInterface;
 
 abstract class CyclicReferencesTest extends BaseTest
 {

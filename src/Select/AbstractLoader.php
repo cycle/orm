@@ -10,14 +10,14 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
-use Cycle\ORM\Select\Options\LoadOptions;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\Traits\AliasTrait;
 use Cycle\ORM\Select\Traits\ChainTrait;
+use Cycle\ORM\Service\SourceProviderInterface;
 use JetBrains\PhpStorm\Deprecated;
 
 /**

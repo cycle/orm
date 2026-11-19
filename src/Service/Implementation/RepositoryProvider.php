@@ -7,11 +7,11 @@ namespace Cycle\ORM\Service\Implementation;
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Service\RepositoryProviderInterface;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
+use Cycle\ORM\Service\RepositoryProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 
 /**
  * @internal

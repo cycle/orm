@@ -7,11 +7,11 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Mapper;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\NotDeletedScope;
 use Cycle\ORM\Tests\Fixtures\NotDeletedWrappedScope;
 use Cycle\ORM\Tests\Fixtures\SoftDeletedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 

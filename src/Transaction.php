@@ -14,7 +14,7 @@ use Cycle\ORM\Transaction\UnitOfWork;
  * Internally, upon "run", transaction will request mappers to generate graph of linked commands to create, update or
  * delete entities.
  *
- * @deprecated since 2.0 use {@see \Cycle\ORM\EntityManager}
+ * @deprecated since 2.0 use {@see EntityManager}
  */
 final class Transaction implements TransactionInterface
 {

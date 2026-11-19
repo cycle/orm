@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Unit\Command;
 
+use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\Node;
@@ -11,7 +12,6 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Cycle\Database\DatabaseInterface;
 
 class DeleteCommandTest extends TestCase
 {

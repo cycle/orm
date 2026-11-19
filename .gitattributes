@@ -1,5 +1,6 @@
 /.*      export-ignore
 /tests   export-ignore
+/vendor-bin export-ignore
 /*.xml   export-ignore
 /*.yml   export-ignore
 /*.lock  export-ignore

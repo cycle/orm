@@ -9,10 +9,10 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\BookStates;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 final class ObjectsCompareTest extends BaseTest

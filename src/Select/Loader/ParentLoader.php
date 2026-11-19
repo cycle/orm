@@ -8,11 +8,11 @@ use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\ParentMergeNode;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
+use Cycle\ORM\Service\SourceProviderInterface;
 
 /**
  * Load parent data.

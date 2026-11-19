@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation;
 
+use Cycle\Database\Injection\Expression;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -11,14 +12,13 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
-use Cycle\Database\Injection\Expression;
 
 abstract class RelationWithColumnAliasTest extends BaseTest
 {

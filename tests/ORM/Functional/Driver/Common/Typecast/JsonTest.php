@@ -12,8 +12,8 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Admin;
 use Cycle\ORM\Tests\Fixtures\JsonSerializableClass;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Functional\Driver\Common\Typecast\Fixture\JsonTypecast;
 use Cycle\ORM\Tests\Traits\TableTrait;
 

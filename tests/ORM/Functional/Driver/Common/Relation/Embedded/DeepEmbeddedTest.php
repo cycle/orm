@@ -8,10 +8,10 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Group;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class DeepEmbeddedTest extends BaseTest

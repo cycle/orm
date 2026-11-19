@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader\Morphed;
 
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Select\Loader\HasOneLoader;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Cycle\Database\Query\SelectQuery;
 
 /**
  * Creates an additional query constrain based on parent entity alias.

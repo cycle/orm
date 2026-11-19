@@ -5,11 +5,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
+use Cycle\Database\Injection\Fragment;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\Database\Injection\Fragment;
 
 class SequenceDefaultValueMapper extends Mapper
 {

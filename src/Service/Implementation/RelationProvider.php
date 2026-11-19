@@ -6,8 +6,8 @@ namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\Exception\ORMException;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\RelationMap;
+use Cycle\ORM\Service\RelationProviderInterface;
 
 /**
  * @internal

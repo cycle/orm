@@ -9,10 +9,10 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 
@@ -476,7 +476,7 @@ abstract class MorphedHasOneRelationTest extends BaseTest
                 // Post 4 doesn't have an image
                 if ($post->id !== 4) {
                     $this->assertNotNull($post->image);
-                    $this->assertInstanceOf(\Cycle\ORM\Tests\Fixtures\Image::class, $post->image);
+                    $this->assertInstanceOf(Image::class, $post->image);
                 }
             }
         }

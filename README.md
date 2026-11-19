@@ -67,6 +67,16 @@ foreach($users as $user) {
 $em->run();
 ```
 
+## Agent skills
+
+Cycle ORM comes with the `cycle-orm` [Agent Skill](https://agentskills.io) from [cycle/skills](https://github.com/cycle/skills): it teaches coding agents such as Claude Code and Codex to work with the ORM runtime — bootstrap the ORM, query through repositories and `Select`, save entities with the `EntityManager`, and write custom repositories, scopes, mappers and typecasters. Install the [llm/skills](https://github.com/roxblnfk/skills) Composer plugin, and it copies the skill into `.agents/skills/` on every `composer install` and `update`:
+
+```bash
+composer require --dev llm/skills
+```
+
+Entity mapping with PHP attributes is covered by the `cycle-orm-attributes` skill that comes with [cycle/annotated](https://github.com/cycle/annotated).
+
 ## Features
 
 - ORM with has-one, has-many, many-through-many and polymorphic relations

@@ -8,3 +8,5 @@ composer.lock
 *.db
 clover.xml
 docker-compose.override.yml
+/vendor-bin/*/vendor/
+/vendor-bin/*/composer.lock

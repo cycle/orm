@@ -45,6 +45,7 @@
     },
     "require-dev": {
         "ext-pdo": "*",
+        "bamarni/composer-bin-plugin": "^1.9",
         "buggregator/trap": "^1.20",
         "doctrine/collections": "^2.6 || ^3.0",
         "illuminate/collections": "12 - 13",
@@ -53,9 +54,7 @@
         "phpunit/phpunit": "^9.6",
         "ramsey/uuid": "^4.10",
         "roxblnfk/unpoly": "^1.8",
-        "spiral/code-style": "~2.2.0",
-        "spiral/tokenizer": "^3.18",
-        "vimeo/psalm": "^6.0"
+        "spiral/tokenizer": "^3.18"
     },
     "suggest": {
         "llm/skills": "To sync the cycle-orm AI skill into your project"
@@ -71,9 +70,17 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        }
     },
     "extra": {
+        "bamarni-bin": {
+            "bin-links": true,
+            "forward-command": false,
+            "target-directory": "vendor-bin"
+        },
         "branch-alias": {
             "dev-2.x": "2.x-dev"
         },
@@ -88,10 +95,11 @@
         }
     },
     "scripts": {
-        "cs:diff": "php-cs-fixer fix --dry-run -v --diff",
-        "cs:fix": "php-cs-fixer fix -v",
-        "psalm": "psalm",
-        "psalm:baseline": "psalm --set-baseline=psalm-baseline.xml",
+        "cs:diff": "php-cs-fixer fix --dry-run -v --diff --config=vendor-bin/code-style/.php-cs-fixer.dist.php",
+        "cs:fix": "php-cs-fixer fix -v --config=vendor-bin/code-style/.php-cs-fixer.dist.php",
+        "psalm": "psalm -c vendor-bin/psalm/psalm.xml",
+        "psalm:baseline": "psalm -c vendor-bin/psalm/psalm.xml --set-baseline=vendor-bin/psalm/psalm-baseline.xml",
+        "psalm:ci": "psalm -c vendor-bin/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
         "test": "phpunit --color=always",
         "test:unit": "phpunit --exclude-group driver --colors=always",
         "test:sqlite": "phpunit --group driver-sqlite --colors=always"

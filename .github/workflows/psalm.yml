@@ -13,3 +13,6 @@ jobs:
         with:
             os: >-
                 ['ubuntu-latest']
+            php: '["8.4"]'
+            bin-tool: psalm
+            command: composer psalm:ci

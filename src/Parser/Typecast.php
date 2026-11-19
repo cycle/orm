@@ -135,7 +135,8 @@ final class Typecast implements CastableInterface, UncastableInterface
 
                 // The callable accepts DatabaseInterface as second argument
                 $reflection = new \ReflectionFunction($closure);
-                if ($reflection->getParameters()[1]?->getType()->getName() === DatabaseInterface::class) {
+                $type = ($reflection->getParameters()[1] ?? null)?->getType();
+                if ($type instanceof \ReflectionNamedType && $type->getName() === DatabaseInterface::class) {
                     $this->casters[$key] = fn(mixed $value): mixed => $closure($value, $this->database, ...$args);
                     continue;
                 }

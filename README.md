@@ -1,21 +1,71 @@
-# Cycle ORM
+<div align="center">
+    <a href="https://cycle-orm.dev" target="_blank">
+        <picture>
+            <source media="(prefers-color-scheme: dark)" srcset="https://github.com/cycle/.github/blob/main/logo/words-vector-dark.svg?raw=true">
+            <img width="50%" align="center" src="https://github.com/cycle/.github/blob/main/logo/words-vector-light.svg?raw=true" alt="CycleORM Logo">
+        </picture>
+    </a>
+</div>
 
-[![Latest Stable Version](https://poser.pugx.org/cycle/orm/version)](https://packagist.org/packages/cycle/orm)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/cycle/orm/badges/quality-score.png?b=2.x)](https://scrutinizer-ci.com/g/cycle/orm/?branch=2.x)
+<p align="center">PHP DataMapper ORM and Data Modelling Engine</p>
+
+<div align="center">
+
+[![Documentation](https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=gitbook&logoColor=white)](https://cycle-orm.dev/docs)
+[![Sponsor](https://img.shields.io/static/v1?style=for-the-badge&label=&message=Sponsor&logo=githubsponsors&logoColor=white&color=%23EA4AAA)](https://github.com/sponsors/cycle)
+
+[![Psalm Level](https://shepherd.dev/github/cycle/orm/level.svg)](https://shepherd.dev/github/cycle/orm)
+[![Type Coverage](https://shepherd.dev/github/cycle/orm/coverage.svg)](https://shepherd.dev/github/cycle/orm)
 [![Codecov](https://codecov.io/gh/cycle/orm/graph/badge.svg)](https://codecov.io/gh/cycle/orm)
-[![Discord](https://img.shields.io/static/v1?label=Discord&message=chat&logo=Discord&color=%235865F2)](https://discord.gg/qF3HpXhMEP)
-[![Meta Storm Plugin](https://img.shields.io/static/v1?&label=Powered+by&message=Meta+Storm+Plugin&logo=phpstorm&color=aa55ee)](https://github.com/xepozz/meta-storm-idea-plugin)
+[![Discord](https://img.shields.io/discord/538114875570913290?style=flat-square&logo=discord&labelColor=7289d9&logoColor=white&color=39456d)](https://discord.gg/spiralphp)
 
-<img src="https://cycle-orm.dev/cycle.png" height="135px" alt="Cycle ORM" align="left"/>
+</div>
 
-Cycle is PHP DataMapper, ORM and Data Modelling engine designed to safely work in classic and daemonized PHP
-applications (like [RoadRunner](https://github.com/spiral/roadrunner)). The ORM provides flexible configuration options
-to model datasets, powerful query builder and supports dynamic mapping schema. The engine can work with plain PHP
-objects, support annotation declarations, and proxies via extensions.
+<br />
 
-<p align="center">
-	<a href="https://cycle-orm.dev/docs"><b>Website and Documentation</b></a> | <a href="https://github.com/cycle/docs/issues/3">Comparison with Eloquent and Doctrine</a>
-</p>
+Cycle is PHP DataMapper, ORM and Data Modelling engine designed to safely work in classic and daemonized PHP applications (like [RoadRunner](https://github.com/roadrunner-server/roadrunner)). The ORM provides flexible configuration options to model datasets, powerful query builder and supports dynamic mapping schema. The engine can work with plain PHP objects, support annotation declarations, and proxies via extensions.
+
+## Get Started
+
+### Installation
+
+The package requires PHP 8.2+.
+
+```bash
+composer require cycle/orm
+```
+
+[![PHP](https://img.shields.io/packagist/php-v/cycle/orm.svg?style=flat-square&logo=php)](https://packagist.org/packages/cycle/orm)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/cycle/orm.svg?style=flat-square&logo=packagist)](https://packagist.org/packages/cycle/orm)
+[![License](https://img.shields.io/packagist/l/cycle/orm.svg?style=flat-square)](LICENSE)
+[![Total Downloads](https://img.shields.io/packagist/dt/cycle/orm.svg?style=flat-square)](https://packagist.org/packages/cycle/orm/stats)
+
+See the [documentation](https://cycle-orm.dev/docs) to configure the database connection and the mapping schema, and the [comparison with Eloquent and Doctrine](https://github.com/cycle/docs/issues/3).
+
+### Example
+
+```php
+// load all active users and pre-load their paid orders sorted from newest to olders
+// the pre-load will be complete using LEFT JOIN
+$users = $orm->getRepository(User::class)
+    ->select()
+    ->where('active', true)
+    ->load('orders', [
+        'method' => Select::SINGLE_QUERY,
+        'load'   => function($q) {
+            $q->where('paid', true)->orderBy('timeCreated', 'DESC');
+        }
+    ])
+    ->fetchAll();
+
+$em = new EntityManager($orm);
+
+foreach($users as $user) {
+    $em->persist($user);
+}
+
+$em->run();
+```
 
 ## Features
 
@@ -52,33 +102,3 @@ objects, support annotation declarations, and proxies via extensions.
 | [cycle/database](https://github.com/cycle/database)                                       | ![License](https://img.shields.io/packagist/l/cycle/database.svg?style=flat-square&label=) [![PHP](https://img.shields.io/packagist/php-v/cycle/database.svg?style=flat-square&logo=php)](https://packagist.org/packages/cycle/database) [![Stable Release](https://poser.pugx.org/cycle/database/version?style=flat-square)](https://packagist.org/packages/cycle/database) [![Total Downloads](https://img.shields.io/packagist/dt/cycle/database.svg?style=flat-square)](https://packagist.org/packages/cycle/database/stats)                                                                                                                                      |
 | [cycle/schema-migrations-generator](https://github.com/cycle/schema-migrations-generator) | ![License](https://img.shields.io/packagist/l/cycle/schema-migrations-generator.svg?style=flat-square&label=) [![PHP](https://img.shields.io/packagist/php-v/cycle/schema-migrations-generator.svg?style=flat-square&logo=php)](https://packagist.org/packages/cycle/schema-migrations-generator) [![Stable Release](https://poser.pugx.org/cycle/schema-migrations-generator/version?style=flat-square)](https://packagist.org/packages/cycle/schema-migrations-generator) [![Total Downloads](https://img.shields.io/packagist/dt/cycle/schema-migrations-generator.svg?style=flat-square)](https://packagist.org/packages/cycle/schema-migrations-generator/stats) |
 | [cycle/orm-promise-mapper](https://github.com/cycle/orm-promise-mapper)                   | ![License](https://img.shields.io/packagist/l/cycle/orm-promise-mapper.svg?style=flat-square&label=) [![PHP](https://img.shields.io/packagist/php-v/cycle/orm-promise-mapper.svg?style=flat-square&logo=php)](https://packagist.org/packages/cycle/orm-promise-mapper) [![Stable Release](https://poser.pugx.org/cycle/orm-promise-mapper/version?style=flat-square)](https://packagist.org/packages/cycle/orm-promise-mapper) [![Total Downloads](https://img.shields.io/packagist/dt/cycle/orm-promise-mapper.svg?style=flat-square)](https://packagist.org/packages/cycle/orm-promise-mapper/stats)                                                                |
-
-## Example:
-
-```php
-// load all active users and pre-load their paid orders sorted from newest to olders
-// the pre-load will be complete using LEFT JOIN
-$users = $orm->getRepository(User::class)
-    ->select()
-    ->where('active', true)
-    ->load('orders', [
-        'method' => Select::SINGLE_QUERY,
-        'load'   => function($q) {
-            $q->where('paid', true)->orderBy('timeCreated', 'DESC');
-        }
-    ])
-    ->fetchAll();
-
-$em = new EntityManager($orm);
-
-foreach($users as $user) {
-    $em->persist($user);
-}
-
-$em->run();
-```
-
-## License:
-
-Cycle ORM is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-Maintained by [Spiral Scout](https://spiralscout.com).

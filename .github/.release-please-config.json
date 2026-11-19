@@ -1,0 +1,80 @@
+{
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "release-type": "php",
+    "packages": {
+        ".": {
+            "package-name": "cycle/orm",
+            "changelog-path": "/CHANGELOG.md"
+        }
+    },
+    "bootstrap-sha": "4dd4ed48c267b4a0458b3f1a67bdf4e3c75a57e1",
+    "include-component-in-tag": false,
+    "include-v-in-tag": true,
+    "changelog-sections": [
+        {
+            "type": "feat",
+            "section": "Features",
+            "hidden": false
+        },
+        {
+            "type": "fix",
+            "section": "Bug Fixes",
+            "hidden": false
+        },
+        {
+            "type": "perf",
+            "section": "Performance Improvements",
+            "hidden": false
+        },
+        {
+            "type": "docs",
+            "section": "Documentation",
+            "hidden": false
+        },
+        {
+            "type": "deps",
+            "section": "Dependencies",
+            "hidden": false
+        },
+        {
+            "type": "refactor",
+            "section": "Code Refactoring",
+            "hidden": false
+        },
+        {
+            "type": "test",
+            "section": "Tests",
+            "hidden": true
+        },
+        {
+            "type": "tests",
+            "section": "Tests",
+            "hidden": true
+        },
+        {
+            "type": "build",
+            "section": "Build System",
+            "hidden": true
+        },
+        {
+            "type": "ci",
+            "section": "Continuous Integration",
+            "hidden": true
+        },
+        {
+            "type": "chore",
+            "section": "Miscellaneous",
+            "hidden": true
+        },
+        {
+            "type": "style",
+            "section": "Styles",
+            "hidden": true
+        },
+        {
+            "type": "revert",
+            "section": "Reverts",
+            "hidden": true
+        }
+    ]
+}

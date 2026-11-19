@@ -105,6 +105,18 @@ abstract class HasManyCollectionsTest extends BaseTest
             'Alias Common Illuminate collection eager' => [
                 'illuminate', false, \Illuminate\Support\Collection::class,
             ],
+            'Interface Doctrine collection lazy' => [
+                \Doctrine\Common\Collections\Collection::class, true, \Doctrine\Common\Collections\ArrayCollection::class,
+            ],
+            'Interface Doctrine collection eager' => [
+                \Doctrine\Common\Collections\Collection::class, false, \Doctrine\Common\Collections\ArrayCollection::class,
+            ],
+            'Base Illuminate collection lazy' => [
+                \Illuminate\Support\Collection::class, true, \Illuminate\Support\Collection::class,
+            ],
+            'Base Illuminate collection eager' => [
+                \Illuminate\Support\Collection::class, false, \Illuminate\Support\Collection::class,
+            ],
             'Class Custom Doctrine collection lazy' => [
                 CustomCollection::class, true, CustomCollection::class,
             ],

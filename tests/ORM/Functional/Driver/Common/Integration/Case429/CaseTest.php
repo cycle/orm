@@ -20,30 +20,30 @@ abstract class CaseTest extends BaseTest
     public function testSelect(): void
     {
         // Order 1
-        $order = (new Select($this->orm, Entity\Order::class))
+        $order = (new Select($this->orm, Order::class))
             ->load('items')
             ->wherePK(1)
             ->fetchOne();
 
         // Check result
-        $this->assertInstanceOf(Entity\Order::class, $order);
+        $this->assertInstanceOf(Order::class, $order);
         $this->assertCount(2, $order->items);
 
         // Order 2
-        $order = (new Select($this->orm, Entity\Order::class))
+        $order = (new Select($this->orm, Order::class))
             ->load('items')
             ->wherePK(2)
             ->fetchOne();
 
         // Check result
-        $this->assertInstanceOf(Entity\Order::class, $order);
+        $this->assertInstanceOf(Order::class, $order);
         $this->assertCount(1, $order->items);
     }
 
     public function testSave(): void
     {
         /** @var Order $order */
-        $order = (new Select($this->orm, Entity\Order::class))
+        $order = (new Select($this->orm, Order::class))
             ->wherePK(1)
             ->load('items')
             ->fetchOne();
@@ -64,7 +64,7 @@ abstract class CaseTest extends BaseTest
 
     public function testCreate(): void
     {
-        $order = new Entity\Order('O0101');
+        $order = new Order('O0101');
         $purchaseOrder = new PurchaseOrder('PO101');
 
         $orderItems = [];

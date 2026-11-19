@@ -11,10 +11,10 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityA;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityB;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\MorphedInterface;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 /**

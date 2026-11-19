@@ -5,11 +5,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
+use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Delete;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\Special\WrappedCommand;
-use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;

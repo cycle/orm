@@ -336,12 +336,12 @@ class BulkLoaderTest extends TestCase
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [
                     'profile' => [
-                        \Cycle\ORM\Relation::TYPE => \Cycle\ORM\Relation::HAS_ONE,
-                        \Cycle\ORM\Relation::TARGET => Profile::class,
-                        \Cycle\ORM\Relation::SCHEMA => [
-                            \Cycle\ORM\Relation::CASCADE => true,
-                            \Cycle\ORM\Relation::INNER_KEY => 'id',
-                            \Cycle\ORM\Relation::OUTER_KEY => 'user_id',
+                        Relation::TYPE => Relation::HAS_ONE,
+                        Relation::TARGET => Profile::class,
+                        Relation::SCHEMA => [
+                            Relation::CASCADE => true,
+                            Relation::INNER_KEY => 'id',
+                            Relation::OUTER_KEY => 'user_id',
                         ],
                     ],
                 ],

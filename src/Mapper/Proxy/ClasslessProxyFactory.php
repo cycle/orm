@@ -106,7 +106,7 @@ class ClasslessProxyFactory
         $properties = \implode("\n    ", $properties);
 
         $this->classMap[$role] = $class;
-        /** @see \Cycle\ORM\Mapper\Proxy\ClasslessProxyTrait */
+        /** @see ClasslessProxyTrait */
         $classStr = <<<PHP
             namespace {$namespace};
             class {$className} implements \\Cycle\\ORM\\EntityProxyInterface {

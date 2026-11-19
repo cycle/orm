@@ -19,14 +19,14 @@ abstract class CaseTest extends BaseTest
     public function testSelect(): void
     {
         /** @var User $user */
-        $user = (new Select($this->orm, Entity\User::class))
+        $user = (new Select($this->orm, User::class))
             ->load('billing')
             ->wherePK(1)
             ->fetchOne();
         $this->assertInstanceOf(Billing::class, $user->billing);
 
         /** @var User $user */
-        $user = (new Select($this->orm, Entity\User::class))
+        $user = (new Select($this->orm, User::class))
             ->load('billing')
             ->wherePK(2)
             ->fetchOne();

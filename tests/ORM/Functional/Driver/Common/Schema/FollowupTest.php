@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Schema;
 
 use Cycle\ORM\Schema;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserSnapshotMapper;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class FollowupTest extends BaseTest

@@ -30,7 +30,7 @@ use Cycle\ORM\Transaction\Tuple;
 /**
  * @internal
  */
-class ManyToMany extends Relation\AbstractRelation
+class ManyToMany extends AbstractRelation
 {
     /** @var string[] */
     protected array $throughInnerKeys;

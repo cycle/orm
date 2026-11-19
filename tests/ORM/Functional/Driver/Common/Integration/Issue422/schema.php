@@ -8,8 +8,8 @@ use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue422\Entity\Billing;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue422\Entity\User;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue422\Entity\SomeEmbedded;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue422\Entity\User;
 
 return [
     'user' => [
@@ -50,8 +50,8 @@ return [
     ],
     'billing' => [
         Schema::ENTITY => Billing::class,
-        Schema::MAPPER => Cycle\ORM\Mapper\Mapper::class,
-        Schema::SOURCE => Cycle\ORM\Select\Source::class,
+        Schema::MAPPER => Mapper::class,
+        Schema::SOURCE => Source::class,
         Schema::DATABASE => 'default',
         Schema::TABLE => 'billing',
         Schema::PRIMARY_KEY => ['id'],

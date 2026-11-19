@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Special;
 
+use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Heap\State;
-use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\MapperInterface;
 
 class WrappedCommand implements CommandInterface

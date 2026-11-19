@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Cycle\ORM\Select\Repository;
-use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Mapper\Mapper;
-use Cycle\ORM\Select\Source;
+use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
+use Cycle\ORM\Select\Repository;
+use Cycle\ORM\Select\Source;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Case2;
 
 return [

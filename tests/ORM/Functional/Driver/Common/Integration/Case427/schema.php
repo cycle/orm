@@ -21,7 +21,7 @@ return [
         Schema::TYPECAST => [
             'id' => 'uuid',
         ],
-        Schema::TYPECAST_HANDLER => [UuidTypecast::class, Cycle\ORM\Parser\Typecast::class],
+        Schema::TYPECAST_HANDLER => [UuidTypecast::class, \Cycle\ORM\Parser\Typecast::class],
     ],
     'buyer' => [
         Schema::ENTITY => Buyer::class,
@@ -49,7 +49,7 @@ return [
                 ],
             ],
         ],
-        Schema::TYPECAST_HANDLER => [UuidTypecast::class, Cycle\ORM\Parser\Typecast::class],
+        Schema::TYPECAST_HANDLER => [UuidTypecast::class, \Cycle\ORM\Parser\Typecast::class],
     ],
     'buyer_partner' => [
         Schema::ENTITY => BuyerPartner::class,
@@ -63,6 +63,6 @@ return [
             'buyer_id' => 'int',
             'partner_id' => 'uuid',
         ],
-        Schema::TYPECAST_HANDLER => [UuidTypecast::class, Cycle\ORM\Parser\Typecast::class],
+        Schema::TYPECAST_HANDLER => [UuidTypecast::class, \Cycle\ORM\Parser\Typecast::class],
     ],
 ];

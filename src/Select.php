@@ -10,14 +10,14 @@ use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\Database\StatementInterface;
 use Cycle\ORM\Heap\Node;
-use Cycle\ORM\Select\Options\LoadOptions;
-use Cycle\ORM\Service\EntityFactoryInterface;
-use Cycle\ORM\Service\MapperProviderInterface;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Select\JoinableLoader;
+use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\RootLoader;
 use Cycle\ORM\Select\ScopeInterface;
+use Cycle\ORM\Service\EntityFactoryInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Spiral\Pagination\PaginableInterface;
 
 /**
@@ -665,13 +665,13 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *     ));
      *
      * Available DTO classes (one per relation type):
-     * - {@see \Cycle\ORM\Select\Options\HasOneLoadOptions}
-     * - {@see \Cycle\ORM\Select\Options\HasManyLoadOptions}
-     * - {@see \Cycle\ORM\Select\Options\BelongsToLoadOptions} applicable for both Belongs To and Refers To relations
-     * - {@see \Cycle\ORM\Select\Options\ManyToManyLoadOptions}
-     * - {@see \Cycle\ORM\Select\Options\MorphedHasOneLoadOptions}
-     * - {@see \Cycle\ORM\Select\Options\MorphedHasManyLoadOptions}
-     * - {@see \Cycle\ORM\Select\Options\BelongsToMorphedLoadOptions}
+     * - {@see Select\Options\HasOneLoadOptions}
+     * - {@see Select\Options\HasManyLoadOptions}
+     * - {@see Select\Options\BelongsToLoadOptions} applicable for both Belongs To and Refers To relations
+     * - {@see Select\Options\ManyToManyLoadOptions}
+     * - {@see Select\Options\MorphedHasOneLoadOptions}
+     * - {@see Select\Options\MorphedHasManyLoadOptions}
+     * - {@see Select\Options\BelongsToMorphedLoadOptions}
      *
      * Raw array options are still supported for backwards compatibility:
      *
@@ -911,7 +911,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
      *
      * Entity identity: if a yielded row corresponds to a PK already attached to the
      * heap, the same instance is returned. Fresh data from the current row is merged
-     * into previously-unresolved relations ({@see \Cycle\ORM\Reference\ReferenceInterface})
+     * into previously-unresolved relations ({@see Reference\ReferenceInterface})
      * via {@see EntityFactoryInterface::make()}.
      *
      * @return \Generator<int, TEntity>
@@ -1123,7 +1123,7 @@ class Select implements \IteratorAggregate, \Countable, PaginableInterface
             }
         }
 
-        $this->__call('where', [static function (Select\QueryBuilder $q) use ($prepared): void {
+        $this->__call('where', [static function (QueryBuilder $q) use ($prepared): void {
             foreach ($prepared as $set) {
                 $q->orWhere($set);
             }

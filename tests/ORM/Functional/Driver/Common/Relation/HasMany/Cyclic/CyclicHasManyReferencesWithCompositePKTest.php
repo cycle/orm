@@ -7,11 +7,11 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\HasMany\Cyclic;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
-use Cycle\ORM\Tests\Fixtures\CyclicRef2\Tenant;
-use Cycle\ORM\Tests\Fixtures\CyclicRef2\Preference;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Document;
+use Cycle\ORM\Tests\Fixtures\CyclicRef2\Preference;
+use Cycle\ORM\Tests\Fixtures\CyclicRef2\Tenant;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 
 abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\FactoryInterface;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 
 /**
  * @internal

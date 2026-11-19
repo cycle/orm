@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select;
 
-use Cycle\ORM\Exception\BuilderException;
-use JetBrains\PhpStorm\ExpectedValues;
 use Cycle\Database\Driver\Compiler;
 use Cycle\Database\Query\SelectQuery;
+use Cycle\ORM\Exception\BuilderException;
+use JetBrains\PhpStorm\ExpectedValues;
 
 /**
  * Mocks SelectQuery and automatically resolves identifiers for the loaded relations.

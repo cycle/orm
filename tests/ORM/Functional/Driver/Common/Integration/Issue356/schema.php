@@ -8,10 +8,10 @@ use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356\ActiveScope;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356\Entity\Actor;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356\Entity\LogRecord;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356\Entity\Tenant;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356\Entity\User;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356\Entity\LogRecord;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue356\Entity\Actor;
 
 return [
     LogRecord::ROLE => [

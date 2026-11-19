@@ -9,9 +9,9 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\ReferenceInterface;
-use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Service\MapperProviderInterface;
 
 /**
  * @internal

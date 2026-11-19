@@ -6,9 +6,9 @@ namespace Cycle\ORM\Tests\Functional\Driver\Common\Transaction;
 
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\OptimisticLockMapper;
 use Cycle\ORM\Tests\Fixtures\Post;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Util;
 
-use Cycle\ORM\Exception\SchemaException;
 use Cycle\Database\Schema\AbstractColumn;
 use Cycle\Database\Schema\AbstractTable;
+use Cycle\ORM\Exception\SchemaException;
 
 /**
  * Implements the ability to define column in AbstractSchema based on string representation and

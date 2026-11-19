@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
 
-use Cycle\ORM\Select\ScopeInterface;
-use Cycle\ORM\Select\QueryBuilder;
 use Cycle\Database\Query\SelectQuery;
+use Cycle\ORM\Select\QueryBuilder;
+use Cycle\ORM\Select\ScopeInterface;
 
 /**
  * Provides the ability to assign the scope to the AbstractLoader.

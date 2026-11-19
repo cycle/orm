@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Relation\BelongsTo;
 
+use Cycle\Database\Injection\Parameter;
 use Cycle\ORM\Exception\Relation\NullException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
@@ -11,13 +12,12 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
-use Cycle\Database\Injection\Parameter;
 
 abstract class BelongsToWithHasOneTest extends BaseTest
 {

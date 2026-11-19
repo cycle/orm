@@ -8,8 +8,8 @@ use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Parser\UncastableInterface;
-use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
 class CompositeTypecastTest extends TestCase

@@ -7,9 +7,9 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface as Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\Source;
-use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528\Entity\Translation;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528\Entity\Country;
 use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528\Entity\Locale;
+use Cycle\ORM\Tests\Functional\Driver\Common\Integration\Issue528\Entity\Translation;
 
 return [
     'country' => [

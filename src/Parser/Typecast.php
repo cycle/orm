@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Parser;
 
 use BackedEnum;
-use Cycle\ORM\Exception\TypecastException;
 use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\Exception\TypecastException;
 
 /**
  * Default typecasting class for ORM entities.

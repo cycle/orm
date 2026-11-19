@@ -6,9 +6,9 @@ namespace Cycle\ORM\Service\Implementation;
 
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\TypecastInterface;
+use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
-use Cycle\ORM\SchemaInterface;
 
 /**
  * @internal

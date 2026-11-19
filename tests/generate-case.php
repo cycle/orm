@@ -40,8 +40,8 @@ function copyTemplateFiles(string $copyDir, string $caseTemplateDirName): void
 
     echo \sprintf("Using template files from '%s'...\n", $caseTemplateDir);
 
-    $rii = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($caseTemplateDir, FilesystemIterator::SKIP_DOTS),
+    $rii = new \RecursiveIteratorIterator(
+        new \RecursiveDirectoryIterator($caseTemplateDir, \FilesystemIterator::SKIP_DOTS),
     );
     foreach ($rii as $file) {
         $filePath = $file->getRealPath();

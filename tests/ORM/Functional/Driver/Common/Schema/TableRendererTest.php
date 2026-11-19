@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Functional\Driver\Common\Schema;
 
+use Cycle\Database\Schema\AbstractTable;
 use Cycle\ORM\Exception\SchemaException;
 use Cycle\ORM\Tests\Functional\Driver\Common\BaseTest;
 use Cycle\ORM\Tests\Util\TableRenderer as Renderer;
-use Cycle\Database\Schema\AbstractTable;
 
 abstract class TableRendererTest extends BaseTest
 {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Fixtures;
 
+use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\SourceInterface;
-use Cycle\Database\DatabaseInterface;
 
 class DifferentSource implements SourceInterface
 {

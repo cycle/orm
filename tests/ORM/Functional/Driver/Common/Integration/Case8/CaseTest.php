@@ -59,7 +59,7 @@ use Cycle\ORM\Tests\Util\DontGenerateAttribute;
  * (`parentId`) lets INSERTs succeed but breaks reads with `Undefined array key ...` during result
  * parsing, because the parser keys rows by field name.
  *
- * @see Entity\Event The mapped entity.
+ * @see Event The mapped entity.
  * @see \Cycle\ORM\Tests\Functional\Driver\Postgres\Integration\Case8\CaseTest
  *      The PostgreSQL variant that runs the same assertions against a real RANGE-partitioned table.
  * @see \Cycle\ORM\Tests\Functional\Driver\SQLite\Integration\Case8\CaseTest
@@ -115,7 +115,7 @@ abstract class CaseTest extends BaseTest
      * map), which also exercises result parsing keyed by field name — the place that breaks if
      * {@see \Cycle\ORM\SchemaInterface::PRIMARY_KEY} lists column names instead of field names.
      *
-     * The argument to {@see \Cycle\ORM\Select::wherePK()} is ordered to match `PRIMARY_KEY`
+     * The argument to {@see Select::wherePK()} is ordered to match `PRIMARY_KEY`
      * (`['parentId', 'id']`): `parent_id` first, then `id`.
      */
     public function testFetchByCompositePk(): void

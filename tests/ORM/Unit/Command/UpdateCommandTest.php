@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Unit\Command;
 
+use Cycle\Database\DatabaseInterface;
 use Cycle\Database\Query\UpdateQuery;
 use Cycle\ORM\Command\Database\Update;
 use Cycle\ORM\Exception\CommandException;
@@ -12,7 +13,6 @@ use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Cycle\Database\DatabaseInterface;
 
 class UpdateCommandTest extends TestCase
 {

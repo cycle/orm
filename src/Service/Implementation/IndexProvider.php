@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Service\Implementation;
 
-use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Service\IndexProviderInterface;
 
 /**
  * @internal

@@ -49,6 +49,7 @@
         "buggregator/trap": "^1.20",
         "doctrine/collections": "^2.6 || ^3.0",
         "illuminate/collections": "12 - 13",
+        "llm/skills": "^1.20",
         "loophp/collection": "^7.6",
         "mockery/mockery": "^1.6",
         "phpunit/phpunit": "^9.6",
@@ -72,7 +73,8 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "bamarni/composer-bin-plugin": true
+            "bamarni/composer-bin-plugin": true,
+            "llm/skills": true
         }
     },
     "extra": {

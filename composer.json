@@ -53,7 +53,7 @@
         "ext-pdo": "*",
         "bamarni/composer-bin-plugin": "^1.9",
         "buggregator/trap": "^1.20",
-        "cycle/testing": "^0.1",
+        "cycle/testing": "^0.1.1",
         "doctrine/collections": "^2.6 || ^3.0",
         "illuminate/collections": "12 - 13",
         "llm/skills": "^1.20",

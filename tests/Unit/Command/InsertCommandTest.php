@@ -189,6 +189,68 @@ final class InsertCommandTest
         Assert::true($cmd->isExecuted());
     }
 
+    public function severalReturnedFieldsAreCastAndRegistered(): void
+    {
+        $state = new State(Node::SCHEDULED_INSERT, ['name' => 'Antony']);
+        $generated = ['id' => GeneratedField::ON_INSERT, 'created_at' => GeneratedField::ON_INSERT];
+        $cmd = new Insert($this->db, 'table', $state, $this->mapper, ['id'], 'id', $generated);
+        $this->mapper->allows('uncast')->andReturnArg(0);
+        $this->mapper->allows('mapColumns')->andReturnArg(0);
+        $this->mapper->shouldReceive('cast')
+            ->once()
+            ->with(['id' => '7', 'created_at' => '2020-01-01'])
+            ->andReturn(['id' => 7, 'created_at' => 'casted']);
+        $query = m::mock(TestInsertCommandWithReturning::class);
+        $query->shouldReceive('values')->once()->with(['name' => 'Antony'])->andReturnSelf();
+        $query->shouldReceive('returning')->once()->with('id', 'created_at')->andReturnSelf();
+        $query->shouldReceive('run')->once()->andReturn(['id' => '7', 'created_at' => '2020-01-01']);
+        $this->db->allows('insert')->with('table')->andReturn($query);
+
+        $cmd->execute();
+
+        Assert::same($state->getValue('id'), 7);
+        Assert::same($state->getValue('created_at'), 'casted');
+    }
+
+    public function storeDataHoldsColumnsAndMappedData(): void
+    {
+        $this->cmd->registerColumn('type', 'admin');
+        $this->cmd->registerAppendix('name', 'Antony');
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with(['foo' => 'bar', 'name' => 'Antony'])
+            ->andReturn(['foo' => 'bar', 'user_name' => 'Antony']);
+
+        Assert::same($this->cmd->getStoreData(), ['type' => 'admin', 'foo' => 'bar', 'user_name' => 'Antony']);
+        Assert::same($this->state->getData(), ['foo' => 'bar', 'name' => 'Antony']);
+    }
+
+    public function storeDataWithoutMapperHoldsRawData(): void
+    {
+        $cmd = new Insert($this->db, 'table', $this->state, null);
+
+        Assert::same($cmd->getStoreData(), ['foo' => 'bar']);
+    }
+
+    public function registeredValueGoesToTheState(): void
+    {
+        $this->cmd->register('id', 5);
+
+        Assert::same($this->state->getValue('id'), 5);
+    }
+
+    public function databaseCanBeReplaced(): void
+    {
+        $this->cmd->setDatabase($db = m::mock(DatabaseInterface::class));
+
+        Assert::same($this->cmd->getDatabase(), $db);
+    }
+
+    public function errorOfCommandWithoutAwaitedValuesIsEmpty(): void
+    {
+        Assert::same($this->cmd->__toError(), Insert::class . '()');
+    }
+
     #[BeforeTest]
     protected function setUp(): void
     {

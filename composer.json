@@ -113,9 +113,13 @@
         "db:up": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml up -d --wait",
         "test": "testo",
         "test:mysql": "testo --suite=Feature/MySQL --suite=Regression/MySQL",
+        "test:new-case": "cycle-testing new-case --template=orm",
         "test:postgres": "testo --suite=Feature/Postgres --suite=Regression/Postgres",
         "test:sqlite": "testo --suite=Feature/SQLite --suite=Regression/SQLite",
         "test:sqlserver": "testo --suite=Feature/SQLServer --suite=Regression/SQLServer",
         "test:unit": "testo --suite=Unit"
+    },
+    "scripts-descriptions": {
+        "test:new-case": "Create a regression case for an issue: composer test:new-case -- <issue>"
     }
 }

@@ -178,8 +178,10 @@ final class JsonMethodsTest extends OrmTestCase
     public function testWhereJsonContainsKey(): void
     {
         $selector = new Select($this->orm, User::class);
-        $user = $selector->whereJsonContainsKey('settings->foo')->fetchOne();
+        $users = $selector->whereJsonContainsKey('settings->foo')->fetchAll();
 
+        Assert::count($users, 1);
+        $user = $users[0];
         Assert::same($user->id, 1);
         Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
@@ -270,8 +272,10 @@ final class JsonMethodsTest extends OrmTestCase
     public function testWhereJsonLength(): void
     {
         $selector = new Select($this->orm, User::class);
-        $user = $selector->whereJsonLength('settings->foo', 2)->fetchOne();
+        $users = $selector->whereJsonLength('settings->foo', 2)->fetchAll();
 
+        Assert::count($users, 1);
+        $user = $users[0];
         Assert::same($user->id, 1);
         Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }

@@ -84,6 +84,14 @@ class SimpleCasesTest extends JtiBaseTest
     }
 
     #[Test]
+    public function testSelectEmployeeRawDataWithInheritanceHasNoRoleKey(): void
+    {
+        $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))->orderBy(static::EMPLOYEE_DEFAULT_SORTING);
+
+        Assert::equals($selector->fetchData(false), static::EMPLOYEE_INHERITED_LOADED);
+    }
+
+    #[Test]
     public function testSelectEmployeeAllDataWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))

@@ -113,6 +113,40 @@ final class QueryBuilderTest
         Assert::array($onTokens[0][1]);
     }
 
+    public function getQueryReturnsACopy(): void
+    {
+        $builder = $this->makeBuilder();
+
+        $builder->getQuery()->where('id', 1);
+
+        Assert::same($builder->getQuery()->getTokens()['where'], []);
+    }
+
+    public function withForwardLeavesTheOriginalBuilderUnchanged(): void
+    {
+        $query = new SelectQuery(['users']);
+        $query->leftJoin('posts')->on('posts.user_id', 'users.id');
+        $builder = new QueryBuilder($query, new StubLoader());
+
+        $builder->withForward('onWhere');
+        $builder->where('users.active', true);
+
+        Assert::count($query->getTokens()['where'], 1);
+        Assert::count($query->getTokens()['join'][1]['on'], 1);
+    }
+
+    public function withQueryLeavesTheOriginalBuilderUnchanged(): void
+    {
+        $query = new SelectQuery(['users']);
+        $builder = new QueryBuilder($query, new StubLoader());
+
+        $builder->withQuery(new SelectQuery(['posts']))->where('id', 2);
+        $builder->where('id', 1);
+
+        Assert::count($query->getTokens()['where'], 1);
+        Assert::same($query->getTokens()['where'][0][1][0], 'users.id');
+    }
+
     private function makeBuilder(): QueryBuilder
     {
         $query = new SelectQuery(['users']);

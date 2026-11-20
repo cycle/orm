@@ -18,19 +18,19 @@ $tokenizer = new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig([
 
 $databases = [
     'sqlite' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLite',
+        'namespace' => 'Cycle\ORM\Tests\Feature\SQLite',
         'directory' => __DIR__ . '/ORM/Functional/Driver/SQLite/',
     ],
     'mysql' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\MySQL',
+        'namespace' => 'Cycle\ORM\Tests\Feature\MySQL',
         'directory' => __DIR__ . '/ORM/Functional/Driver/MySQL/',
     ],
     'postgres' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\Postgres',
+        'namespace' => 'Cycle\ORM\Tests\Feature\Postgres',
         'directory' => __DIR__ . '/ORM/Functional/Driver/Postgres/',
     ],
     'sqlserver' => [
-        'namespace' => 'Cycle\ORM\Tests\Functional\Driver\SQLServer',
+        'namespace' => 'Cycle\ORM\Tests\Feature\SQLServer',
         'directory' => __DIR__ . '/ORM/Functional/Driver/SQLServer/',
     ],
 ];
@@ -39,7 +39,7 @@ echo "Generating test classes for all database types...\n";
 
 $classes = $tokenizer
     ->classLocator()
-    ->getClasses(\Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class);
+    ->getClasses(\Cycle\ORM\Tests\Feature\Common\BaseTest::class);
 
 foreach ($classes as $class) {
     foreach ($class->getMethods() as $method) {
@@ -52,7 +52,7 @@ foreach ($classes as $class) {
     if (
         !$class->isAbstract()
         // Has abstract methods
-        || $class->getName() == \Cycle\ORM\Tests\Functional\Driver\Common\BaseTest::class
+        || $class->getName() == \Cycle\ORM\Tests\Feature\Common\BaseTest::class
     ) {
         continue;
     }

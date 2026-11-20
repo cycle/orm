@@ -16,7 +16,7 @@ use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
 
-final class SimpleTest extends StiBaseTest
+class SimpleTest extends StiBaseTest
 {
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';

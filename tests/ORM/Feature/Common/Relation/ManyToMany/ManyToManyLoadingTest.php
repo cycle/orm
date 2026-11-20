@@ -161,7 +161,7 @@ final class ManyToManyLoadingTest extends OrmTestCase
                 Assert::notBlank($user->tags);
                 // Check order
                 if (\count($user->tags) > 1) {
-                    Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan($user->tags->offsetGet(1)->id);
+                    Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan((int) $user->tags->offsetGet(1)->id);
                 }
             }
         });

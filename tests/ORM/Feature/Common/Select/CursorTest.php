@@ -14,6 +14,8 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\Testing\Database\Attribute\ExceptDriver;
+use Cycle\Testing\Database\Driver;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Core\Exception\SkipTest;
@@ -21,6 +23,7 @@ use Testo\Expect;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
 
+#[ExceptDriver(Driver::MySQL)]
 final class CursorTest extends OrmTestCase
 {
     #[Test]

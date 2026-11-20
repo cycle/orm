@@ -412,7 +412,7 @@ final class MorphedHasManyRelationTest extends OrmTestCase
                 Assert::iterable($user->comments);
                 // Check order
                 if (\count($user->comments) > 1) {
-                    Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
+                    Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan((int) $user->comments->offsetGet(1)->id);
                     $checked = true;
                 }
             }

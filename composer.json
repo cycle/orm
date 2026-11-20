@@ -62,12 +62,9 @@
         "llm/skills": "^1.20",
         "loophp/collection": "^7.6",
         "mockery/mockery": "^1.6",
-        "phpunit/phpunit": "^9.6",
         "ramsey/uuid": "^4.10",
         "roxblnfk/unpoly": "^1.8",
-        "spiral/tokenizer": "^3.18",
         "testo/bridge-mockery": "^0.1.2",
-        "testo/bridge-rector": "^0.3.6",
         "testo/testo": "^0.10.60"
     },
     "suggest": {
@@ -115,8 +112,13 @@
         "psalm": "psalm -c vendor-bin/psalm/psalm.xml",
         "psalm:baseline": "psalm -c vendor-bin/psalm/psalm.xml --set-baseline=vendor-bin/psalm/psalm-baseline.xml",
         "psalm:ci": "psalm -c vendor-bin/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
-        "test": "phpunit --color=always",
-        "test:unit": "phpunit --exclude-group driver --colors=always",
-        "test:sqlite": "phpunit --group driver-sqlite --colors=always"
+        "db:down": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml down -v",
+        "db:up": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml up -d --wait",
+        "test": "testo",
+        "test:mysql": "testo --suite=Feature/MySQL --suite=Regression/MySQL",
+        "test:postgres": "testo --suite=Feature/Postgres --suite=Regression/Postgres",
+        "test:sqlite": "testo --suite=Feature/SQLite --suite=Regression/SQLite",
+        "test:sqlserver": "testo --suite=Feature/SQLServer --suite=Regression/SQLServer",
+        "test:unit": "testo --suite=Unit"
     }
 }

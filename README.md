@@ -81,7 +81,7 @@ Entity mapping with PHP attributes is covered by the `cycle-orm-attributes` skil
 
 - ORM with has-one, has-many, many-through-many and polymorphic relations
 - Plain Old PHP objects, [AR](https://github.com/cycle/active-record), Custom objects
-  or [same entity type for multiple repositories](https://github.com/cycle/orm/tree/2.x/tests/ORM/Functional/Driver/Common/Classless)
+  or [same entity type for multiple repositories](https://github.com/cycle/orm/tree/2.x/tests/ORM/Feature/Common/Classless)
 - eager and lazy loading, query builder with multiple fetch strategies
 - embedded entities, lazy/eager loaded embedded partials
 - runtime configuration with/without code-generation
@@ -96,6 +96,22 @@ Entity mapping with PHP attributes is covered by the `cycle-orm-attributes` skil
 - use with or without annotations, proxy classes, and auto-migrations
 - compatible with Doctrine Collections, Illuminate Collections and custom collections
 - compatible with Doctrine Annotations, PHP8 attributes
+
+## Testing
+
+The tests run on [Testo](https://github.com/php-testo/testo) through the shared [cycle/testing](https://github.com/cycle/testing) harness:
+`tests/ORM/Unit` needs no database, `tests/ORM/Feature` and `tests/ORM/Regression` (one folder per reported issue) run once per database driver.
+
+```bash
+composer test:unit         # no database
+composer test:sqlite       # in-memory SQLite, no docker
+composer db:up             # MySQL, Postgres and SQL Server in docker
+composer test              # every suite; a driver whose server is down is skipped
+composer db:down
+```
+
+`composer test:mysql`, `test:postgres` and `test:sqlserver` run one driver. To reproduce a new issue, copy the case
+template: `php tests/generate-case.php --case-name=Issue123`.
 
 ## Extensions
 

@@ -13,7 +13,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -62,10 +61,10 @@ class BelongsToProxyMapperTest extends OrmTestCase
         Assert::null($b->user);
         Assert::null($c->user);
 
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::same($a->user, $a->user);
-            Assert::null($b->user);
-        });
+        $this->captureReadQueries();
+        Assert::same($a->user, $a->user);
+        Assert::null($b->user);
+        $this->assertNumReads(0);
 
         Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -87,13 +86,14 @@ class BelongsToProxyMapperTest extends OrmTestCase
         // warm up
         (new Select($this->orm, User::class))->fetchAll();
 
-        QueryAssert::reads(0, function () use ($a): void {
-            Assert::instanceOf($a->user, User::class);
-            Assert::same($a->user, $a->user);
-        });
-
+        $this->captureReadQueries();
+        Assert::instanceOf($a->user, User::class);
+        Assert::same($a->user, $a->user);
+        $this->assertNumReads(0);
         // invalid object can't be cached
-        QueryAssert::reads(1, fn() => Assert::null($b->user));
+        $this->captureReadQueries();
+        Assert::null($b->user);
+        $this->assertNumReads(1);
 
         Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -104,11 +104,11 @@ class BelongsToProxyMapperTest extends OrmTestCase
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
 
-        QueryAssert::writes(0, function () use ($p): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($p);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($p);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -123,9 +123,15 @@ class BelongsToProxyMapperTest extends OrmTestCase
         $np = new Profile();
         $np->image = 'new image';
 
-        QueryAssert::reads(0, fn() => $np->user = $pData['user']);
+        $this->captureReadQueries();
+        $np->user = $pData['user'];
+        $this->assertNumReads(0);
 
-        QueryAssert::count(0, 1, fn() => $this->save($np));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($np);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))->wherePK(4)->fetchOne();
 
@@ -140,7 +146,11 @@ class BelongsToProxyMapperTest extends OrmTestCase
             ->wherePK(1)->fetchOne();
         $p->user->balance = 400;
 
-        QueryAssert::count(0, 1, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($p);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
             ->wherePK(1)->fetchOne();

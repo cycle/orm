@@ -12,7 +12,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookStates;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -27,9 +26,13 @@ final class ObjectsCompareTest extends OrmTestCase
         $book->states = new BookStates(['foo']);
         $book->nested_states = new BookNestedStates(['bar']);
 
-        QueryAssert::writes(1, fn() => $this->save($book));
+        $this->captureWriteQueries();
+        $this->save($book);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($book));
+        $this->captureWriteQueries();
+        $this->save($book);
+        $this->assertNumWrites(0);
 
         Assert::equals($book->id, 1);
 
@@ -42,9 +45,13 @@ final class ObjectsCompareTest extends OrmTestCase
         $fetched->states->states = ['foo', 'bar'];
         $fetched->nested_states->states[0]->title = 'baz';
 
-        QueryAssert::writes(1, fn() => $this->save($fetched));
+        $this->captureWriteQueries();
+        $this->save($fetched);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($fetched));
+        $this->captureWriteQueries();
+        $this->save($fetched);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
         $changed = (new Select($this->orm, Book::class))->fetchOne();
@@ -60,9 +67,13 @@ final class ObjectsCompareTest extends OrmTestCase
         $book->states = new BookStates(['foo']);
         $book->nested_states = new BookNestedStates(['bar']);
 
-        QueryAssert::writes(1, fn() => $this->save($book));
+        $this->captureWriteQueries();
+        $this->save($book);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($book));
+        $this->captureWriteQueries();
+        $this->save($book);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
         $data = (new Select($this->orm, Book::class))->fetchData();
@@ -71,9 +82,13 @@ final class ObjectsCompareTest extends OrmTestCase
         $fetched = $this->orm->make('book', $data[0], Node::MANAGED, typecast: false);
         $fetched->published_at->setDate(2010, 1, 1);
 
-        QueryAssert::writes(1, fn() => $this->save($fetched));
+        $this->captureWriteQueries();
+        $this->save($fetched);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($fetched));
+        $this->captureWriteQueries();
+        $this->save($fetched);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
         $changed = (new Select($this->orm, Book::class))->fetchOne();

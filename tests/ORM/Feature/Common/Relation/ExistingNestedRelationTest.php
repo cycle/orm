@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -27,11 +26,11 @@ final class ExistingNestedRelationTest extends OrmTestCase
         $u->email = 'test@email.com';
         $u->balance = 1000;
 
-        QueryAssert::writes(1, function () use (&$tr, $u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -45,11 +44,11 @@ final class ExistingNestedRelationTest extends OrmTestCase
 
         $u->addComment($c);
 
-        QueryAssert::writes(1, function () use (&$tr, $u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(1);
     }
 
     #[BeforeTest]

@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -146,25 +145,30 @@ final class ManyToManyLoadingTest extends OrmTestCase
     #[Test]
     public function testUpdateRelationSortedByPivot(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)
             ->load('tags', [
                 // 'load' => function (Select\QueryBuilder $q): void {
                 //     $q->orderBy('@.@.as', 'DESC');
                 // },
                 'orderBy' => ['@.@.as' => 'DESC'],
-            ])->run());
-        QueryAssert::reads(0, function () use ($users): void {
-            foreach ($users as $user) {
-                Assert::iterable($user->tags);
-                Assert::notBlank($user->tags);
-                // Check order
-                if (\count($user->tags) > 1) {
-                    Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan((int) $user->tags->offsetGet(1)->id);
-                }
+            ])->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            Assert::iterable($user->tags);
+            Assert::notBlank($user->tags);
+            // Check order
+            if (\count($user->tags) > 1) {
+                Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan((int) $user->tags->offsetGet(1)->id);
             }
-        });
+        }
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

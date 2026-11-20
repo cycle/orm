@@ -17,7 +17,6 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -290,11 +289,11 @@ final class ManyToManyDeepenedTest extends OrmTestCase
 
         $b->tags->getPivot($b->tags[0])->image->url = 'new.gif';
 
-        QueryAssert::writes(1, function () use ($b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $selector->load('tags.@.image')->orderBy('id', 'ASC');

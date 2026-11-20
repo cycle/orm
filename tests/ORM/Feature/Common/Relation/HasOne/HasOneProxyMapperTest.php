@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -64,10 +63,10 @@ final class HasOneProxyMapperTest extends OrmTestCase
         Assert::instanceOf($a->profile, Profile::class);
         Assert::null($b->profile);
 
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::same($a->profile, $a->profile);
-            Assert::null($b->profile);
-        });
+        $this->captureReadQueries();
+        Assert::same($a->profile, $a->profile);
+        Assert::null($b->profile);
+        $this->assertNumReads(0);
 
         Assert::equals($a->profile->image, 'image.png');
     }
@@ -130,10 +129,13 @@ final class HasOneProxyMapperTest extends OrmTestCase
         // warm up
         (new Select($this->orm, Profile::class))->fetchAll();
 
-        QueryAssert::reads(0, fn() => Assert::same($a->profile, $a->profile));
-
+        $this->captureReadQueries();
+        Assert::same($a->profile, $a->profile);
+        $this->assertNumReads(0);
         // invalid object can't be cached
-        QueryAssert::reads(1, fn() => Assert::null($b->profile));
+        $this->captureReadQueries();
+        Assert::null($b->profile);
+        $this->assertNumReads(1);
 
         Assert::equals($a->profile->image, 'image.png');
     }
@@ -144,11 +146,11 @@ final class HasOneProxyMapperTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
-        QueryAssert::writes(0, function () use ($u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -159,7 +161,11 @@ final class HasOneProxyMapperTest extends OrmTestCase
 
         $a->profile = null;
 
-        QueryAssert::count(1, 1, fn() => $this->save($a));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($a);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -179,7 +185,11 @@ final class HasOneProxyMapperTest extends OrmTestCase
         $b->profile = $a->profile;
         $a->profile = null;
 
-        QueryAssert::count(1, 1, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(1);
 
         $this->orm->getHeap()->clean();
         $selector = new Select($this->orm, User::class);
@@ -199,7 +209,11 @@ final class HasOneProxyMapperTest extends OrmTestCase
         $b->profile = $a->profile;
         $a->profile = null;
 
-        QueryAssert::count(1, 1, fn() => $this->save($b));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($b);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);

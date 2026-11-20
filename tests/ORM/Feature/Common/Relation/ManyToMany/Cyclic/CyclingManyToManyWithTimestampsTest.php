@@ -11,7 +11,6 @@ use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -30,11 +29,11 @@ final class CyclingManyToManyWithTimestampsTest extends OrmTestCase
         $tag->users->add($u);
         $u->tags->add($tag);
 
-        QueryAssert::writes(2, function () use ($tag): void {
-            $t = new Transaction($this->orm);
-            $t->persist($tag);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($tag);
+        $t->run();
+        $this->assertNumWrites(2);
     }
 
     #[Test]
@@ -50,7 +49,9 @@ final class CyclingManyToManyWithTimestampsTest extends OrmTestCase
         $tag->users->add($u);
         $u->tags->add($tag);
 
-        QueryAssert::writes(3, fn() => $this->save($tag));
+        $this->captureWriteQueries();
+        $this->save($tag);
+        $this->assertNumWrites(3);
     }
 
     #[BeforeTest]

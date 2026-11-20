@@ -15,7 +15,6 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\Collection;
 use Testo\Assert;
@@ -89,26 +88,27 @@ final class ManyToManyPromiseTest extends OrmTestCase
          */
         [$a, $b] = $selector->fetchAll();
 
-        QueryAssert::reads(2, function () use ($a, $b): void {
-            Assert::count($a->tags, 2);
-            Assert::count($b->tags, 1);
-        });
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::instanceOf($a->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
-            Assert::instanceOf($b->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
-            Assert::true($a->tags->hasPivot($a->tags[0]));
-            Assert::true($a->tags->hasPivot($a->tags[1]));
-            Assert::true($b->tags->hasPivot($b->tags[0]));
-            Assert::false($b->tags->hasPivot($a->tags[0]));
-            Assert::false($b->tags->hasPivot($a->tags[1]));
-            Assert::false($a->tags->hasPivot($b->tags[0]));
-            Assert::instanceOf($a->tags->getPivot($a->tags[0]), TagContext::class);
-            Assert::instanceOf($a->tags->getPivot($a->tags[1]), TagContext::class);
-            Assert::instanceOf($b->tags->getPivot($b->tags[0]), TagContext::class);
-            Assert::equals($a->tags->getPivot($a->tags[0])->as, 'primary');
-            Assert::equals($a->tags->getPivot($a->tags[1])->as, 'secondary');
-            Assert::equals($b->tags->getPivot($b->tags[0])->as, 'primary');
-        });
+        $this->captureReadQueries();
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 1);
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        Assert::instanceOf($a->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
+        Assert::instanceOf($b->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
+        Assert::true($a->tags->hasPivot($a->tags[0]));
+        Assert::true($a->tags->hasPivot($a->tags[1]));
+        Assert::true($b->tags->hasPivot($b->tags[0]));
+        Assert::false($b->tags->hasPivot($a->tags[0]));
+        Assert::false($b->tags->hasPivot($a->tags[1]));
+        Assert::false($a->tags->hasPivot($b->tags[0]));
+        Assert::instanceOf($a->tags->getPivot($a->tags[0]), TagContext::class);
+        Assert::instanceOf($a->tags->getPivot($a->tags[1]), TagContext::class);
+        Assert::instanceOf($b->tags->getPivot($b->tags[0]), TagContext::class);
+        Assert::equals($a->tags->getPivot($a->tags[0])->as, 'primary');
+        Assert::equals($a->tags->getPivot($a->tags[1])->as, 'secondary');
+        Assert::equals($b->tags->getPivot($b->tags[0])->as, 'primary');
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -121,7 +121,9 @@ final class ManyToManyPromiseTest extends OrmTestCase
         [$a, $b] = (new Select($this->orm, User::class))
             ->fetchAll();
 
-        QueryAssert::reads(0, fn() => $this->save($a, $b));
+        $this->captureReadQueries();
+        $this->save($a, $b);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -150,9 +152,13 @@ final class ManyToManyPromiseTest extends OrmTestCase
         $b->tags->add($t);
         $b->tags->setPivot($t, $pc);
 
-        QueryAssert::writes(6, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(6);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         /**
@@ -181,11 +187,11 @@ final class ManyToManyPromiseTest extends OrmTestCase
 
         Assert::instanceOf($user->tags, Collection::class);
 
-        QueryAssert::writes(0, function () use (&$tr, $user): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($user);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($user);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $wantTags = ['tag a', 'tag c'];
 
@@ -208,11 +214,12 @@ final class ManyToManyPromiseTest extends OrmTestCase
         $user->tags = $user->tags->filter(function ($t) use ($wantTags) {
             return in_array($t->name, $wantTags);
         });
-        QueryAssert::writes(2, function () use (&$tr, $user): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($user);
-            $tr->run();
-        });
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($user);
+        $tr->run();
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

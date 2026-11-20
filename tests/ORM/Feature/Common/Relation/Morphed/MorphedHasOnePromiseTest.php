@@ -13,7 +13,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -33,10 +32,10 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
         Assert::instanceOf($aData['image'], ReferenceInterface::class);
         Assert::instanceOf($bData['image'], ReferenceInterface::class);
 
-        QueryAssert::reads(2, function () use ($a, $b): void {
-            Assert::same($a->image->url, 'user-image.png');
-            Assert::same($b->image->url, 'user-2-image.png');
-        });
+        $this->captureReadQueries();
+        Assert::same($a->image->url, 'user-image.png');
+        Assert::same($b->image->url, 'user-2-image.png');
+        $this->assertNumReads(2);
     }
 
     #[Test]
@@ -46,7 +45,9 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -58,9 +59,13 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
 
         $a->image = null;
 
-        QueryAssert::writes(1, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -83,12 +88,21 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        QueryAssert::reads(0, fn() => [$a->image, $b->image] = [$bData['image'], $aData['image']]);
+        $this->captureReadQueries();
+        [$a->image, $b->image] = [$bData['image'], $aData['image']];
+        $this->assertNumReads(0);
 
-        QueryAssert::count(2, 2, fn() => $this->save($a, $b));
-
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(2);
+        $this->assertNumReads(2);
         // consecutive
-        QueryAssert::count(0, 0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -106,10 +120,17 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
 
         [$a->image, $b->image] = [$b->image, $a->image];
 
-        QueryAssert::count(0, 2, fn() => $this->save($a, $b));
-
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(2);
+        $this->assertNumReads(0);
         // consecutive
-        QueryAssert::count(0, 0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -129,10 +150,13 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
         $u->image = new Image();
         $u->image->url = 'new.png';
 
-        QueryAssert::writes(2, fn() => $this->save($u));
-
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -156,10 +180,13 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
         $p->image = new Image();
         $p->image->url = 'new-post.png';
 
-        QueryAssert::writes(2, fn() => $this->save($p));
-
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $p = (new Select($this->orm, Post::class))
@@ -177,13 +204,22 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
         /** @var Post $p */
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
 
-        QueryAssert::reads(1, function () use ($u, $p): void {
-            $u->image = $p->image;
-            $p->image = null;
-        });
-        QueryAssert::count(1, 2, fn() => $this->save($u, $p));
+        $this->captureReadQueries();
+        $u->image = $p->image;
+        $p->image = null;
+        $this->assertNumReads(1);
 
-        QueryAssert::count(0, 0, fn() => $this->save($u, $p));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u, $p);
+        $this->assertNumWrites(2);
+        $this->assertNumReads(1);
+
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u, $p);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -203,12 +239,21 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
         $uData = $this->extractEntity($u);
         $pData = $this->extractEntity($p);
 
-        QueryAssert::reads(0, fn() => [$u->image, $p->image] = [$pData['image'], $uData['image']]);
+        $this->captureReadQueries();
+        [$u->image, $p->image] = [$pData['image'], $uData['image']];
+        $this->assertNumReads(0);
 
-        QueryAssert::count(2, 2, fn() => $this->save($u, $p));
-
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u, $p);
+        $this->assertNumWrites(2);
+        $this->assertNumReads(2);
         // no changes expected
-        QueryAssert::count(0, 0, fn() => $this->save($u, $p));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u, $p);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -227,10 +272,17 @@ final class MorphedHasOnePromiseTest extends OrmTestCase
 
         [$u->image, $p->image] = [$p->image, $u->image];
 
-        QueryAssert::count(0, 2, fn() => $this->save($u, $p));
-
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u, $p);
+        $this->assertNumWrites(2);
+        $this->assertNumReads(0);
         // no changes expected
-        QueryAssert::count(0, 0, fn() => $this->save($u, $p));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u, $p);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

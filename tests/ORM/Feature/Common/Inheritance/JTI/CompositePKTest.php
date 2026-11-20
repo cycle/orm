@@ -12,7 +12,6 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Engineer;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -149,9 +148,13 @@ final class CompositePKTest extends SimpleCasesTest
         $programator->level = 50;
         $programator->language = 'VanillaJS';
 
-        QueryAssert::writes(3, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->with(heap: new Heap()), Programator::class))

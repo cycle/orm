@@ -10,7 +10,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Data\DataProvider;
@@ -57,7 +56,9 @@ final class CompositePKTest extends OrmTestCase
         $e->key2 = 3;
         $e->key3 = 9;
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         $e = (new Select($this->orm, CompositePK::class))
             ->fetchOne();

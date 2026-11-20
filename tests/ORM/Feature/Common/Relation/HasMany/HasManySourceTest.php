@@ -12,7 +12,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\LeveledHasManyScope;
 use Cycle\ORM\Tests\Fixtures\ShortLeveledHasManyScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -86,10 +85,10 @@ final class HasManySourceTest extends OrmTestCase
 
         [$b, $a] = $res;
 
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::count($a->comments, 4);
-            Assert::count($b->comments, 3);
-        });
+        $this->captureReadQueries();
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
+        $this->assertNumReads(0);
 
         Assert::same($a->comments[3]->message, 'msg 4');
         Assert::same($a->comments[2]->message, 'msg 3');

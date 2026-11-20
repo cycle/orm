@@ -11,7 +11,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -39,10 +38,10 @@ final class EntityManagerTest extends OrmTestCase
 
         $em->clean();
 
-        QueryAssert::writes(0, function () use ($em): void {
-            $result = $em->run();
-            Assert::true($result->isSuccess());
-        });
+        $this->captureWriteQueries();
+        $result = $em->run();
+        Assert::true($result->isSuccess());
+        $this->assertNumWrites(0);
 
         Assert::true($this->orm->getHeap()->has($entity0));
         Assert::true($this->orm->getHeap()->has($entity1));
@@ -67,10 +66,10 @@ final class EntityManagerTest extends OrmTestCase
 
         $em->clean(true);
 
-        QueryAssert::writes(0, function () use ($em): void {
-            $result = $em->run();
-            Assert::true($result->isSuccess());
-        });
+        $this->captureWriteQueries();
+        $result = $em->run();
+        Assert::true($result->isSuccess());
+        $this->assertNumWrites(0);
 
         Assert::false($this->orm->getHeap()->has($entity0));
         Assert::false($this->orm->getHeap()->has($entity1));
@@ -91,10 +90,10 @@ final class EntityManagerTest extends OrmTestCase
         $em->persist($entity);
         $entity->title = 'changed title';
 
-        QueryAssert::writes(1, function () use ($em): void {
-            $result = $em->run();
-            Assert::true($result->isSuccess());
-        });
+        $this->captureWriteQueries();
+        $result = $em->run();
+        Assert::true($result->isSuccess());
+        $this->assertNumWrites(1);
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
@@ -117,10 +116,10 @@ final class EntityManagerTest extends OrmTestCase
         $em->persistState($entity);
         $entity->title = 'changed title';
 
-        QueryAssert::writes(1, function () use ($em): void {
-            $result = $em->run();
-            Assert::true($result->isSuccess());
-        });
+        $this->captureWriteQueries();
+        $result = $em->run();
+        Assert::true($result->isSuccess());
+        $this->assertNumWrites(1);
 
         Assert::notNull($entity->id);
 
@@ -145,10 +144,10 @@ final class EntityManagerTest extends OrmTestCase
         $em->persistState($entity);
         $entity->title = 'Title 3';
 
-        QueryAssert::writes(1, function () use ($em): void {
-            $result = $em->run();
-            Assert::true($result->isSuccess());
-        });
+        $this->captureWriteQueries();
+        $result = $em->run();
+        Assert::true($result->isSuccess());
+        $this->assertNumWrites(1);
 
         Assert::notNull($entity->id);
 
@@ -174,10 +173,10 @@ final class EntityManagerTest extends OrmTestCase
         $em->persistState($entity);
         $entity->title = 'Title 4';
 
-        QueryAssert::writes(1, function () use ($em): void {
-            $result = $em->run();
-            Assert::true($result->isSuccess());
-        });
+        $this->captureWriteQueries();
+        $result = $em->run();
+        Assert::true($result->isSuccess());
+        $this->assertNumWrites(1);
 
         Assert::notNull($entity->id);
 
@@ -200,11 +199,15 @@ final class EntityManagerTest extends OrmTestCase
             'content' => 'Test content',
         ]);
 
-        QueryAssert::writes(1, fn() => $em->persistState($entity)->run());
+        $this->captureWriteQueries();
+        $em->persistState($entity)->run();
+        $this->assertNumWrites(1);
 
         Assert::notNull($entity->id);
 
-        QueryAssert::writes(0, fn() => $em->persistState($entity)->run());
+        $this->captureWriteQueries();
+        $em->persistState($entity)->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]

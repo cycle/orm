@@ -17,7 +17,6 @@ use Cycle\ORM\Tests\Fixtures\ImagedInterface;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -35,10 +34,10 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         Assert::instanceOf($cData['parent'], ReferenceInterface::class);
 
-        QueryAssert::reads(1, function () use ($c): void {
-            Assert::instanceOf($c->parent, User::class);
-            Assert::same($c->parent->email, 'hello@world.com');
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($c->parent, User::class);
+        Assert::same($c->parent->email, 'hello@world.com');
+        $this->assertNumReads(1);
     }
 
     #[Test]
@@ -49,7 +48,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         Assert::instanceOf($cData['parent'], ReferenceInterface::class);
 
-        QueryAssert::writes(0, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -77,7 +78,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         Assert::instanceOf($c->parent, User::class);
 
-        QueryAssert::writes(0, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -90,10 +93,10 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         $u = $this->orm->getRepository(User::class)->findByPK(1);
 
-        QueryAssert::reads(0, function () use ($c): void {
-            Assert::instanceOf($c->parent, User::class);
-            Assert::same($c->parent->email, 'hello@world.com');
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($c->parent, User::class);
+        Assert::same($c->parent->email, 'hello@world.com');
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -107,10 +110,13 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
 
-        QueryAssert::writes(1, fn() => $this->save($c));
-
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(1);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -119,10 +125,10 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         Assert::instanceOf($cData['parent'], ReferenceInterface::class);
 
-        QueryAssert::reads(1, function () use ($c): void {
-            Assert::instanceOf($c->parent, User::class);
-            Assert::same($c->parent->email, 'hello@world.com');
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($c->parent, User::class);
+        Assert::same($c->parent->email, 'hello@world.com');
+        $this->assertNumReads(1);
     }
 
     #[Test]
@@ -139,10 +145,13 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
         $c->parent->title = 'post title';
         $c->parent->content = 'post content';
 
-        QueryAssert::writes(2, fn() => $this->save($c));
-
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -151,10 +160,10 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         Assert::instanceOf($cData['parent'], ReferenceInterface::class);
 
-        QueryAssert::reads(1, function () use ($c): void {
-            Assert::instanceOf($c->parent, Post::class);
-            Assert::same($c->parent->title, 'post title');
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($c->parent, Post::class);
+        Assert::same($c->parent->title, 'post title');
+        $this->assertNumReads(1);
     }
 
     #[Test]
@@ -166,18 +175,17 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
         $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
         $c->parent->balance = 777;
 
-        QueryAssert::writes(2, function () use (&$tr, $c): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c);
+        $tr->run();
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $c): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -186,11 +194,11 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         Assert::instanceOf($cData['parent'], ReferenceInterface::class);
 
-        QueryAssert::reads(1, function () use ($c): void {
-            Assert::instanceOf($c->parent, User::class);
-            Assert::same($c->parent->email, 'hello@world.com');
-            Assert::equals($c->parent->balance, 777);
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($c->parent, User::class);
+        Assert::same($c->parent->email, 'hello@world.com');
+        Assert::equals($c->parent->balance, 777);
+        $this->assertNumReads(1);
     }
 
     #[Test]
@@ -204,7 +212,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
 
-        QueryAssert::writes(2, fn() => $this->save($c1, $c2));
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
@@ -222,7 +232,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
 
-        QueryAssert::writes(2, fn() => $this->save($c1, $c2));
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
@@ -243,7 +255,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
 
         [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
 
-        QueryAssert::writes(2, fn() => $this->save($c1, $c2));
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
@@ -262,7 +276,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $c->parent = null;
 
-        QueryAssert::writes(1, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
@@ -358,15 +374,19 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
     #[Test]
     public function testUpdateRelation(): void
     {
-        $images = QueryAssert::reads(1, fn() => (new Select($this->orm, Image::class))->fetchAll());
+        $this->captureReadQueries();
+        $images = (new Select($this->orm, Image::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))->collect(...$images)->load('parent')->run());
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$images)->load('parent')->run();
+        $this->assertNumReads(2);
 
-        QueryAssert::reads(0, function () use ($images): void {
-            foreach ($images as $image) {
-                Assert::notNull($image->parent);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($images as $image) {
+            Assert::notNull($image->parent);
+        }
+        $this->assertNumReads(0);
     }
 
     /**
@@ -380,7 +400,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
         Assert::instanceOf($c->parent, User::class);
         unset($c->parent);
 
-        QueryAssert::writes(0, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
 
         $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
         Assert::same((string) $row[0]['parent_id'], '1');
@@ -401,7 +423,9 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
         Assert::instanceOf($c->parent, User::class);
         unset($c->parent);
 
-        QueryAssert::writes(1, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(1);
 
         $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
         Assert::null($row[0]['parent_id'], 'parent_id should be NULL when the unset relation is treated as null');

@@ -16,7 +16,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -149,12 +148,12 @@ final class HasManyRelationTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('comments')->orderBy('user.id')->fetchAll();
 
-        QueryAssert::writes(0, function () use ($a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -169,10 +168,13 @@ final class HasManyRelationTest extends OrmTestCase
         $e->comments[0]->message = 'msg A';
         $e->comments[1]->message = 'msg B';
 
-        QueryAssert::writes(3, fn() => $this->save($e));
-
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(3);
         // consecutive test
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         Assert::equals($e->id, 3);
 
@@ -315,18 +317,17 @@ final class HasManyRelationTest extends OrmTestCase
         $c->message = 'msg 4';
         $e->comments->add($c);
 
-        QueryAssert::writes(2, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(2);
         // consecutive test
-        QueryAssert::writes(0, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $selector->load('comments');
@@ -364,20 +365,19 @@ final class HasManyRelationTest extends OrmTestCase
         Assert::count($a->comments, 1);
         Assert::count($b->comments, 2);
 
-        QueryAssert::writes(2, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
@@ -444,11 +444,15 @@ final class HasManyRelationTest extends OrmTestCase
         $e->balance = 300;
         unset($e->comments);
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         Assert::false(isset($e->comments));
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -461,13 +465,17 @@ final class HasManyRelationTest extends OrmTestCase
         $e->email = 'test@email.com';
         $e->balance = 300;
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         Assert::iterable($e->comments);
 
         $e->comments = null;
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -485,7 +493,9 @@ final class HasManyRelationTest extends OrmTestCase
         Assert::count($e->comments, 3);
         unset($e->comments);
         // Ignore uninitialized collection
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -503,10 +513,13 @@ final class HasManyRelationTest extends OrmTestCase
         Assert::count($e->comments, 3);
         $e->comments = null;
 
-        QueryAssert::writes(3, fn() => $this->save($e));
-
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(3);
         // consecutive test
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
 

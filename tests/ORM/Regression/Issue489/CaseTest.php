@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\Issue489;
 
 use Cycle\ORM\Tests\Regression\Issue489\Entity\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Skip;
@@ -17,7 +16,9 @@ final class CaseTest extends OrmTestCase
     #[Skip('todo: fix later')]
     public function testSave(): void
     {
-        QueryAssert::writes(1, fn() => $this->save(new User()));
+        $this->captureWriteQueries();
+        $this->save(new User());
+        $this->assertNumWrites(1);
     }
 
     #[BeforeTest]

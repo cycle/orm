@@ -10,7 +10,6 @@ use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -133,16 +132,17 @@ final class StdMapperTest extends OrmTestCase
         $e->email = 'test@email.com';
         $e->balance = 300;
 
-        QueryAssert::writes(1, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
-        QueryAssert::writes(0, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         Assert::equals($e->id, 3);
 
@@ -157,12 +157,12 @@ final class StdMapperTest extends OrmTestCase
         $e->email = 'test@email.com';
         $e->balance = 300;
 
-        QueryAssert::writes(1, function () use ($e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $e->balance = 400;
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $e->balance = 400;
+        $tr->run();
+        $this->assertNumWrites(1);
 
         Assert::equals($e->id, 3);
         Assert::true($this->orm->getHeap()->has($e));

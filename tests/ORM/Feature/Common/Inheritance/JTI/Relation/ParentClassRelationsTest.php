@@ -16,7 +16,6 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Tool;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\SimpleCasesTest;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -91,9 +90,13 @@ class ParentClassRelationsTest extends SimpleCasesTest
             ->loadSubclasses(false)
             ->wherePK(2)->fetchOne();
 
-        QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($engineer)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->delete($engineer)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($engineer)->run();
+        $this->assertNumWrites(0);
 
         Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(2)

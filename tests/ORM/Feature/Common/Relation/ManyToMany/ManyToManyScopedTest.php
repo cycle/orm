@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\SortByLevelScope;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -194,10 +193,10 @@ final class ManyToManyScopedTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::count($a->tags, 4);
-            Assert::count($b->tags, 3);
-        });
+        $this->captureReadQueries();
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
+        $this->assertNumReads(0);
 
         Assert::same($a->tags[0]->name, 'tag a');
         Assert::same($a->tags[1]->name, 'tag b');
@@ -268,10 +267,10 @@ final class ManyToManyScopedTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::count($a->tags, 4);
-            Assert::count($b->tags, 3);
-        });
+        $this->captureReadQueries();
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
+        $this->assertNumReads(0);
 
         Assert::same($a->tags[3]->name, 'tag a');
         Assert::same($a->tags[2]->name, 'tag b');
@@ -344,10 +343,10 @@ final class ManyToManyScopedTest extends OrmTestCase
             'scope' => new SortByLevelScope(),
         ])->orderBy('user.id')->fetchAll();
 
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::count($a->tags, 4);
-            Assert::count($b->tags, 3);
-        });
+        $this->captureReadQueries();
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
+        $this->assertNumReads(0);
 
         Assert::same($a->tags[0]->name, 'tag a');
         Assert::same($a->tags[1]->name, 'tag b');
@@ -419,10 +418,10 @@ final class ManyToManyScopedTest extends OrmTestCase
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
-        QueryAssert::reads(2, function () use ($a, $b): void {
-            Assert::count($a->tags, 4);
-            Assert::count($b->tags, 3);
-        });
+        $this->captureReadQueries();
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
+        $this->assertNumReads(2);
 
         Assert::same($a->tags[0]->name, 'tag a');
         Assert::same($a->tags[1]->name, 'tag b');
@@ -494,10 +493,10 @@ final class ManyToManyScopedTest extends OrmTestCase
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
-        QueryAssert::reads(2, function () use ($a, $b): void {
-            Assert::count($a->tags, 4);
-            Assert::count($b->tags, 3);
-        });
+        $this->captureReadQueries();
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
+        $this->assertNumReads(2);
 
         Assert::same($a->tags[3]->name, 'tag a');
         Assert::same($a->tags[2]->name, 'tag b');

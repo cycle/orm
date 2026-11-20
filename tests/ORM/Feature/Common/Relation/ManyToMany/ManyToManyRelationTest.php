@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\Collection;
 use Testo\Assert;
@@ -287,7 +286,9 @@ final class ManyToManyRelationTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -349,9 +350,13 @@ final class ManyToManyRelationTest extends OrmTestCase
         $b->tags->add($t);
         $b->tags->setPivot($t, $pc);
 
-        QueryAssert::writes(6, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(6);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         /**
          * @var User $a
@@ -374,7 +379,9 @@ final class ManyToManyRelationTest extends OrmTestCase
 
         $a->tags->add((new Select($this->orm, Tag::class))->wherePK(3)->fetchOne());
 
-        QueryAssert::writes(1, fn() => $this->save($a));
+        $this->captureWriteQueries();
+        $this->save($a);
+        $this->assertNumWrites(1);
 
         Assert::true(true);
     }
@@ -392,7 +399,9 @@ final class ManyToManyRelationTest extends OrmTestCase
 
         Assert::instanceOf($user->tags, Collection::class);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
 
         $wantTags = ['tag a', 'tag c'];
 
@@ -415,11 +424,12 @@ final class ManyToManyRelationTest extends OrmTestCase
         $user->tags = $user->tags->filter(function ($t) use ($wantTags) {
             return in_array($t->name, $wantTags);
         });
-        QueryAssert::writes(2, function () use ($user): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($user);
-            $tr->run();
-        });
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($user);
+        $tr->run();
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -440,11 +450,15 @@ final class ManyToManyRelationTest extends OrmTestCase
         $e->balance = 300;
         unset($e->tags);
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         Assert::false(isset($e->tags));
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -457,7 +471,9 @@ final class ManyToManyRelationTest extends OrmTestCase
         $e->email = 'test@email.com';
         $e->balance = 300;
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         Assert::iterable($e->tags);
 
@@ -477,13 +493,17 @@ final class ManyToManyRelationTest extends OrmTestCase
         $u->balance = 900;
         unset($u->tags);
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         Assert::false(isset($u->tags));
 
         $u->tags = [];
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -500,7 +520,9 @@ final class ManyToManyRelationTest extends OrmTestCase
 
         unset($user->tags);
         // Ignore uninitialized collection
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -515,13 +537,19 @@ final class ManyToManyRelationTest extends OrmTestCase
         Assert::instanceOf($user->tags, Collection::class);
         Assert::count($user->tags, 2);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
 
         $user->tags = null;
 
-        QueryAssert::writes(2, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(2);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
 

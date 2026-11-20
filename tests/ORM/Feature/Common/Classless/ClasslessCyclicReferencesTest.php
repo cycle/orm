@@ -10,7 +10,6 @@ use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -33,10 +32,13 @@ final class ClasslessCyclicReferencesTest extends OrmTestCase
         $u->comments[] = $c;
         $u->favorites->add($c);
 
-        QueryAssert::writes(4, fn() => $this->save($u));
-
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(4);
         // no changes!
-        QueryAssert::writes(0, fn() => $this->save($u, $c));
+        $this->captureWriteQueries();
+        $this->save($u, $c);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u1 = (new Select($this->orm, 'user'))
@@ -77,10 +79,13 @@ final class ClasslessCyclicReferencesTest extends OrmTestCase
         $u->favorites->add($c);
         $u2->favorites->add($c);
 
-        QueryAssert::writes(6, fn() => $this->save($u, $u2));
-
+        $this->captureWriteQueries();
+        $this->save($u, $u2);
+        $this->assertNumWrites(6);
         // no changes!
-        QueryAssert::writes(0, fn() => $this->save($u, $u2));
+        $this->captureWriteQueries();
+        $this->save($u, $u2);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -150,10 +155,13 @@ final class ClasslessCyclicReferencesTest extends OrmTestCase
         $u->favorites->add($c);
         $u2->favorites->add($c2);
 
-        QueryAssert::writes(10, fn() => $this->save($u, $u2));
-
+        $this->captureWriteQueries();
+        $this->save($u, $u2);
+        $this->assertNumWrites(10);
         // no changes!
-        QueryAssert::writes(0, fn() => $this->save($u, $u2));
+        $this->captureWriteQueries();
+        $this->save($u, $u2);
+        $this->assertNumWrites(0);
     }
 
     #[BeforeTest]

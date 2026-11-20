@@ -6,7 +6,6 @@ namespace Cycle\ORM\Tests\Regression\Case3;
 
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Case3\Entity\Currency;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -24,7 +23,9 @@ final class CaseTest extends OrmTestCase
         // Change data
         $user->currency = new Currency('eur', 'EURO');
         // Store changes and calc write queries
-        QueryAssert::writes(2, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(2);
 
         $user = (new Select($this->orm, Entity\User::class))
             ->wherePK(1)

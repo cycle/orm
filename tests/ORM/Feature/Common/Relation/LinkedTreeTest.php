@@ -13,7 +13,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -72,12 +71,12 @@ final class LinkedTreeTest extends OrmTestCase
         $u1->nested = $n;
         $u2->owned = $n;
 
-        QueryAssert::writes(3, function () use ($u1, $u2): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u1);
-            $tr->persist($u2);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u1);
+        $tr->persist($u2);
+        $tr->run();
+        $this->assertNumWrites(3);
 
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');

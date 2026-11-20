@@ -6,7 +6,6 @@ namespace Cycle\ORM\Tests\Regression\Issue575;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Select;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Common\Attribute\AssertMethod;
@@ -24,10 +23,10 @@ final class CaseTest extends OrmTestCase
         $user = $this->fetchUser();
         $user->comments = \array_reverse($user->comments);
 
-        QueryAssert::writes(0, function () use ($user): void {
-            $this->save($user);
-            $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3']);
-        });
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3']);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -38,10 +37,10 @@ final class CaseTest extends OrmTestCase
         $comment->user = $user;
         \array_unshift($user->comments, $comment);
 
-        QueryAssert::writes(1, function () use ($user): void {
-            $this->save($user);
-            $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3', 'comment 4']);
-        });
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3', 'comment 4']);
+        $this->assertNumWrites(1);
     }
 
     #[Test]
@@ -53,10 +52,10 @@ final class CaseTest extends OrmTestCase
         $comment->user = $user;
         $user->comments[1] = $comment;
 
-        QueryAssert::writes(2, function () use ($user): void {
-            $this->save($user);
-            $this->assertOwnedComments(['comment 1', 'comment 3', 'comment 4']);
-        });
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertOwnedComments(['comment 1', 'comment 3', 'comment 4']);
+        $this->assertNumWrites(2);
 
         Assert::same($this->getDatabase()->table('comment')
             ->select('content')

@@ -6,7 +6,6 @@ namespace Cycle\ORM\Tests\Regression\Issue430;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Ramsey\Uuid\UuidInterface;
 use Testo\Assert;
@@ -38,17 +37,19 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($users, 3);
         // Bulk load posts for all users — single query
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('posts')
-            ->run());
+            ->run();
+        $this->assertNumReads(1);
         // Verify posts are loaded without additional queries
-        QueryAssert::reads(0, function () use (&$postCounts, $users): void {
-            $postCounts = [];
-            foreach ($users as $user) {
-                $postCounts[$user->uuid->toString()] = \count($user->posts);
-            }
-        });
+        $this->captureReadQueries();
+        $postCounts = [];
+        foreach ($users as $user) {
+            $postCounts[$user->uuid->toString()] = \count($user->posts);
+        }
+        $this->assertNumReads(0);
 
         Assert::same($postCounts[self::USER_1], 1);
         Assert::same($postCounts[self::USER_2], 2);
@@ -64,17 +65,19 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($posts, 4);
         // Bulk load user for all posts — single query
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
-            ->run());
+            ->run();
+        $this->assertNumReads(1);
         // Verify users are loaded without additional queries
-        QueryAssert::reads(0, function () use ($posts, &$post): void {
-            foreach ($posts as $post) {
-                Assert::instanceOf($post->user, Entity\User::class);
-                Assert::instanceOf($post->user->uuid, UuidInterface::class);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($posts as $post) {
+            Assert::instanceOf($post->user, Entity\User::class);
+            Assert::instanceOf($post->user->uuid, UuidInterface::class);
+        }
+        $this->assertNumReads(0);
 
         // Verify correct user assignment
         $postsByUuid = [];
@@ -95,19 +98,21 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($posts, 4);
         // Load both user and comments in one BulkLoader call
-        QueryAssert::reads(3, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
             ->load('comments')
-            ->run());
+            ->run();
+        $this->assertNumReads(3);
         // 1 for users + 1 for comments + 1 for eager-loaded comment.user
         // Verify all relations loaded without queries
-        QueryAssert::reads(0, function () use ($posts): void {
-            foreach ($posts as $post) {
-                Assert::instanceOf($post->user, Entity\User::class);
-                Assert::array($post->comments);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($posts as $post) {
+            Assert::instanceOf($post->user, Entity\User::class);
+            Assert::array($post->comments);
+        }
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -119,11 +124,16 @@ final class CaseTest extends OrmTestCase
 
         Assert::instanceOf($user, Entity\User::class);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect($user)
             ->load('posts')
-            ->run());
-        QueryAssert::reads(0, fn() => Assert::count($user->posts, 2));
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        Assert::count($user->posts, 2);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -135,16 +145,19 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($comments, 3);
         // Bulk load the lazy post relation
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$comments)
             ->load('post')
-            ->run());
-        QueryAssert::reads(0, function () use ($comments): void {
-            foreach ($comments as $comment) {
-                Assert::instanceOf($comment->post, Entity\Post::class);
-                Assert::instanceOf($comment->post->uuid, UuidInterface::class);
-            }
-        });
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($comments as $comment) {
+            Assert::instanceOf($comment->post, Entity\Post::class);
+            Assert::instanceOf($comment->post->uuid, UuidInterface::class);
+        }
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

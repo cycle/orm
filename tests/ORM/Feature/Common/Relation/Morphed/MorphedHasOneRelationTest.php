@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -211,12 +210,12 @@ final class MorphedHasOneRelationTest extends OrmTestCase
         $selector->load('image')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        QueryAssert::writes(0, function () use ($a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -228,18 +227,19 @@ final class MorphedHasOneRelationTest extends OrmTestCase
 
         $a->image = null;
 
-        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -259,20 +259,19 @@ final class MorphedHasOneRelationTest extends OrmTestCase
 
         [$a->image, $b->image] = [$b->image, $a->image];
 
-        QueryAssert::writes(2, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -295,18 +294,17 @@ final class MorphedHasOneRelationTest extends OrmTestCase
         $u->image = new Image();
         $u->image->url = 'new.png';
 
-        QueryAssert::writes(2, function () use (&$tr, $u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -331,10 +329,13 @@ final class MorphedHasOneRelationTest extends OrmTestCase
         $p->image = new Image();
         $p->image->url = 'new-post.png';
 
-        QueryAssert::writes(2, fn() => $this->save($p));
-
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $p = (new Select($this->orm, Post::class))
@@ -371,10 +372,13 @@ final class MorphedHasOneRelationTest extends OrmTestCase
         $p->image = new Image();
         $p->image->url = 'new-post.png';
 
-        QueryAssert::writes(3, fn() => $this->save($p));
-
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(3);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $p = (new Select($this->orm, Post::class))
@@ -394,12 +398,12 @@ final class MorphedHasOneRelationTest extends OrmTestCase
         $u->image = $p->image;
         $p->image = null;
 
-        QueryAssert::writes(2, function () use ($u, $p): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->persist($p);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($p);
+        $tr->run();
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -418,20 +422,19 @@ final class MorphedHasOneRelationTest extends OrmTestCase
 
         [$u->image, $p->image] = [$p->image, $u->image];
 
-        QueryAssert::writes(2, function () use (&$tr, $u, $p): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->persist($p);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($p);
+        $tr->run();
+        $this->assertNumWrites(2);
         // no changes expected
-        QueryAssert::writes(0, function () use (&$tr, $u, $p): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->persist($p);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($p);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -445,37 +448,46 @@ final class MorphedHasOneRelationTest extends OrmTestCase
     #[Test]
     public function testUpdateRelation(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)->load('image')->run());
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)->load('image')->run();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(0, function () use ($users): void {
-            foreach ($users as $user) {
-                Assert::notNull($user->image);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            Assert::notNull($user->image);
+        }
+        $this->assertNumReads(0);
     }
 
     #[Test]
     public function testUpdateNestedRelation(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)
             ->load('posts.image')
-            ->run());
-        QueryAssert::reads(0, function () use ($users): void {
-            foreach ($users as $user) {
-                Assert::iterable($user->posts);
-                foreach ($user->posts as $post) {
-                    // Post 4 doesn't have an image
-                    if ($post->id !== 4) {
-                        Assert::notNull($post->image);
-                        Assert::instanceOf($post->image, Image::class);
-                    }
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            Assert::iterable($user->posts);
+            foreach ($user->posts as $post) {
+                // Post 4 doesn't have an image
+                if ($post->id !== 4) {
+                    Assert::notNull($post->image);
+                    Assert::instanceOf($post->image, Image::class);
                 }
             }
-        });
+        }
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

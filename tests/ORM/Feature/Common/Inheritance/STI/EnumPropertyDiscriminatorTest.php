@@ -12,7 +12,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\BossWithKind;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\EmployeeType;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\WorkerWithKind;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -108,7 +107,9 @@ final class EnumPropertyDiscriminatorTest extends StiBaseTest
             ->wherePK($boss->id)
             ->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($loaded));
+        $this->captureWriteQueries();
+        $this->save($loaded);
+        $this->assertNumWrites(0);
     }
 
     #[BeforeTest]

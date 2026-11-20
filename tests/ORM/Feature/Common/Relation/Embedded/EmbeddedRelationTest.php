@@ -14,7 +14,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -87,7 +86,9 @@ final class EmbeddedRelationTest extends OrmTestCase
         $u->credentials->username = 'user3';
         $u->credentials->password = 'pass3';
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         Assert::same((int) $u->id, 3);
 
@@ -104,11 +105,11 @@ final class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
 
-        QueryAssert::writes(0, function () use ($u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -130,16 +131,17 @@ final class EmbeddedRelationTest extends OrmTestCase
             ],
         )->run();
 
-        QueryAssert::writes(1, function () use (&$t, $u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
-        QueryAssert::writes(0, function () use (&$t, $u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -156,11 +158,11 @@ final class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        QueryAssert::writes(0, function () use ($u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -172,19 +174,19 @@ final class EmbeddedRelationTest extends OrmTestCase
             ->load('credentials')
             ->fetchOne();
 
-        QueryAssert::writes(0, function () use (&$t, $u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u->credentials);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u->credentials);
+        $t->run();
+        $this->assertNumWrites(0);
 
         $u->credentials->username = 'altered';
 
-        QueryAssert::writes(1, function () use (&$t, $u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u->credentials);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u->credentials);
+        $t->run();
+        $this->assertNumWrites(1);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -210,11 +212,11 @@ final class EmbeddedRelationTest extends OrmTestCase
 
         $u->credentials->username = 'user3';
 
-        QueryAssert::writes(1, function () use ($u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -229,11 +231,13 @@ final class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        QueryAssert::count(0, 0, function () use ($u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -248,7 +252,11 @@ final class EmbeddedRelationTest extends OrmTestCase
         $u2Data = $this->extractEntity($u2);
         $u->credentials = $u2Data['credentials'];
 
-        QueryAssert::count(1, 1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(1);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
@@ -279,7 +287,11 @@ final class EmbeddedRelationTest extends OrmTestCase
 
         $u->credentials = $promise;
 
-        QueryAssert::count(0, 1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
@@ -306,11 +318,13 @@ final class EmbeddedRelationTest extends OrmTestCase
 
         $u->credentials = clone $u2->credentials;
 
-        QueryAssert::count(0, 1, function () use ($u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -345,11 +359,11 @@ final class EmbeddedRelationTest extends OrmTestCase
         $u->credentials->username = 'abc';
         $u->credentials->password = 'new-pass';
 
-        QueryAssert::writes(1, function () use ($u): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->run();
+        $this->assertNumWrites(1);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -370,7 +384,9 @@ final class EmbeddedRelationTest extends OrmTestCase
 
         $u->credentials = null;
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')
@@ -394,7 +410,9 @@ final class EmbeddedRelationTest extends OrmTestCase
 
         unset($user->credentials);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
     }
 
     // Embedded Relation doesn't support null yet

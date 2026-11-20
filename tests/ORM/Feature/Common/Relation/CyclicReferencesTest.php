@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Favorite;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -36,18 +35,17 @@ final class CyclicReferencesTest extends OrmTestCase
         $u->addComment($c);
         $u->favorites->add($c);
 
-        QueryAssert::writes(4, function () use (&$tr, $u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(4);
         // no changes!
-        QueryAssert::writes(0, function () use (&$tr, $u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -87,10 +85,13 @@ final class CyclicReferencesTest extends OrmTestCase
         $u->favorites->add($c);
         $u2->favorites->add($c);
 
-        QueryAssert::writes(6, fn() => $this->save($u, $u2));
-
+        $this->captureWriteQueries();
+        $this->save($u, $u2);
+        $this->assertNumWrites(6);
         // no changes!
-        QueryAssert::writes(0, fn() => $this->save($u, $u2));
+        $this->captureWriteQueries();
+        $this->save($u, $u2);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -155,20 +156,19 @@ final class CyclicReferencesTest extends OrmTestCase
         $u->favorites->add($c);
         $u2->favorites->add($c2);
 
-        QueryAssert::writes(10, function () use (&$tr, $u, $u2): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->persist($u2);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($u2);
+        $tr->run();
+        $this->assertNumWrites(10);
         // no changes!
-        QueryAssert::writes(0, function () use (&$tr, $u, $u2): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->persist($u2);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->persist($u2);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[BeforeTest]

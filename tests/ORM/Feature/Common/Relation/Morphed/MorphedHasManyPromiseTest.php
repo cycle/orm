@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\Collection;
 use Testo\Assert;
@@ -47,12 +46,12 @@ final class MorphedHasManyPromiseTest extends OrmTestCase
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        QueryAssert::writes(0, function () use ($a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -64,20 +63,19 @@ final class MorphedHasManyPromiseTest extends OrmTestCase
 
         $a->comments->remove(0);
 
-        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -103,20 +101,20 @@ final class MorphedHasManyPromiseTest extends OrmTestCase
         foreach ($b->comments as $c) {
             $a->comments->removeElement($c);
         }
-        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
 
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -144,20 +142,19 @@ final class MorphedHasManyPromiseTest extends OrmTestCase
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
 
-        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $a = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();

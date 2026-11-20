@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -86,11 +85,11 @@ final class InverseRelationTest extends OrmTestCase
         // cyclic
         $u->profile->user = $u;
 
-        QueryAssert::writes(2, function () use ($u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(2);
 
         Assert::equals($u->id, 3);
         Assert::equals($u->profile->id, 4);

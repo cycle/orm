@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\SortByMsgScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UUIDMapper;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
@@ -137,7 +136,9 @@ final class UUIDTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -152,10 +153,13 @@ final class UUIDTest extends OrmTestCase
         $e->comments[0]->message = 'msg A';
         $e->comments[1]->message = 'msg B';
 
-        QueryAssert::writes(3, fn() => $this->save($e));
-
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(3);
         // consecutive test
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         Assert::string($e->id);
         Assert::equals(strlen($e->id), 36);
@@ -237,10 +241,13 @@ final class UUIDTest extends OrmTestCase
         $c->message = 'msg 4';
         $e->comments->add($c);
 
-        QueryAssert::writes(2, fn() => $this->save($e));
-
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(2);
         // consecutive test
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $selector->load('comments');
@@ -278,10 +285,13 @@ final class UUIDTest extends OrmTestCase
         Assert::count($a->comments, 1);
         Assert::count($b->comments, 2);
 
-        QueryAssert::writes(2, fn() => $this->save($a, $b));
-
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 

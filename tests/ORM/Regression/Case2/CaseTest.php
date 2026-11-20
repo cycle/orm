@@ -8,7 +8,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Case2\Entity\MarkCriterionResult;
 use Cycle\ORM\Tests\Regression\Case2\Entity\MarkSubcriterionResult;
 use Cycle\ORM\Tests\Regression\Case2\Entity\StudentProgress;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -33,7 +32,9 @@ final class CaseTest extends OrmTestCase
         $student = $aspect->student;
         $student->studentProgresses->add(new StudentProgress('new-progress-42'));
 
-        QueryAssert::writes(1, fn() => $this->save($markCriterionResult, $sub, $aspect));
+        $this->captureWriteQueries();
+        $this->save($markCriterionResult, $sub, $aspect);
+        $this->assertNumWrites(1);
 
         $this->orm->getHeap()->clean();
         $studentProgress = (new Select($this->orm, StudentProgress::class))

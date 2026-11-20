@@ -15,7 +15,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityA;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityB;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\MorphedInterface;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -71,7 +70,9 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
         // Not resolved yet — the relation is a promise reference.
         Assert::instanceOf($this->extractEntity($a)['parent'], ReferenceInterface::class);
 
-        QueryAssert::reads(0, fn() => Assert::same($a->parent, $a));
+        $this->captureReadQueries();
+        Assert::same($a->parent, $a);
+        $this->assertNumReads(0);
     }
 
     /**
@@ -84,13 +85,14 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
         $a = $this->orm->getRepository(EntityA::class)->findByPK(2);
         Assert::instanceOf($this->extractEntity($a)['parent'], ReferenceInterface::class);
         // entity_b #1 is not in the heap yet -> exactly one lazy query.
-        QueryAssert::reads(1, function () use (&$b, $a): void {
-            $b = $a->parent;
-            Assert::instanceOf($b, EntityB::class);
-        });
-
+        $this->captureReadQueries();
+        $b = $a->parent;
+        Assert::instanceOf($b, EntityB::class);
+        $this->assertNumReads(1);
         // The back-reference entity_a #2 is already in the heap -> no extra query.
-        QueryAssert::reads(0, fn() => Assert::same($b->parent, $a));
+        $this->captureReadQueries();
+        Assert::same($b->parent, $a);
+        $this->assertNumReads(0);
     }
 
     /**
@@ -106,13 +108,13 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
             ->orderBy('entity_a.id')
             ->fetchAll();
 
-        QueryAssert::reads(0, function () use ($all): void {
-            // #1 references itself, #2 references entity_b #1 — both already loaded.
-            Assert::instanceOf($all[0]->parent, EntityA::class);
-            Assert::same($all[0]->parent, $all[0]);
-            Assert::instanceOf($all[1]->parent, EntityB::class);
-            Assert::same($all[1]->parent->name, 'b-1');
-        });
+        $this->captureReadQueries();
+        // #1 references itself, #2 references entity_b #1 — both already loaded.
+        Assert::instanceOf($all[0]->parent, EntityA::class);
+        Assert::same($all[0]->parent, $all[0]);
+        Assert::instanceOf($all[1]->parent, EntityB::class);
+        Assert::same($all[1]->parent->name, 'b-1');
+        $this->assertNumReads(0);
     }
 
     /**
@@ -122,16 +124,18 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
     #[Test]
     public function testBulkLoadParent(): void
     {
-        $all = QueryAssert::reads(1, fn() => (new Select($this->orm, EntityA::class))->orderBy('entity_a.id')->fetchAll());
+        $this->captureReadQueries();
+        $all = (new Select($this->orm, EntityA::class))->orderBy('entity_a.id')->fetchAll();
+        $this->assertNumReads(1);
 
         (new BulkLoader($this->orm))->collect(...$all)->load('parent')->run();
 
-        QueryAssert::reads(0, function () use ($all): void {
-            Assert::instanceOf($all[0]->parent, EntityA::class);
-            Assert::same($all[0]->parent, $all[0]);
-            Assert::instanceOf($all[1]->parent, EntityB::class);
-            Assert::same($all[1]->parent->name, 'b-1');
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($all[0]->parent, EntityA::class);
+        Assert::same($all[0]->parent, $all[0]);
+        Assert::instanceOf($all[1]->parent, EntityB::class);
+        Assert::same($all[1]->parent->name, 'b-1');
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -155,10 +159,13 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
         $a->name = 'new-self';
         $a->parent = $a;
 
-        QueryAssert::writes(2, fn() => $this->save($a));
-
+        $this->captureWriteQueries();
+        $this->save($a);
+        $this->assertNumWrites(2);
         // consecutive save does nothing
-        QueryAssert::writes(0, fn() => $this->save($a));
+        $this->captureWriteQueries();
+        $this->save($a);
+        $this->assertNumWrites(0);
 
         Assert::same($a->parentId, $a->id);
         Assert::same($a->parentType, 'entity_a');
@@ -185,10 +192,13 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
         $a->parent = $b;
         $b->parent = $a;
 
-        QueryAssert::writes(3, fn() => $this->save($a));
-
+        $this->captureWriteQueries();
+        $this->save($a);
+        $this->assertNumWrites(3);
         // consecutive save does nothing
-        QueryAssert::writes(0, fn() => $this->save($a));
+        $this->captureWriteQueries();
+        $this->save($a);
+        $this->assertNumWrites(0);
 
         Assert::same($a->parentId, $b->id);
         Assert::same($a->parentType, 'entity_b');
@@ -215,7 +225,9 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
         Assert::instanceOf($a->parent, EntityA::class);
         unset($a->parent);
 
-        QueryAssert::writes(0, fn() => $this->save($a));
+        $this->captureWriteQueries();
+        $this->save($a);
+        $this->assertNumWrites(0);
 
         $row = $this->getDatabase()->table('entity_a')->select()->where('id', 1)->fetchAll();
         Assert::same((string) $row[0]['parent_id'], '1');
@@ -235,7 +247,9 @@ final class RefersToMorphedCyclicTest extends OrmTestCase
         Assert::instanceOf($a->parent, EntityA::class);
         unset($a->parent);
 
-        QueryAssert::writes(1, fn() => $this->save($a));
+        $this->captureWriteQueries();
+        $this->save($a);
+        $this->assertNumWrites(1);
 
         $row = $this->getDatabase()->table('entity_a')->select()->where('id', 1)->fetchAll();
         Assert::null($row[0]['parent_id'], 'parent_id should be NULL when the unset relation is treated as null');

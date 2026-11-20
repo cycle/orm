@@ -17,7 +17,6 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -196,16 +195,17 @@ class HasOneRelationTest extends OrmTestCase
 
         $e->profile->image = 'updated.png';
 
-        QueryAssert::writes(1, function () use (&$tr, $orm, $e): void {
-            $tr = new Transaction($orm);
-            $tr->persist($e);
-            $tr->run();
-        });
-        QueryAssert::writes(0, function () use (&$tr, $orm, $e): void {
-            $tr = new Transaction($orm);
-            $tr->persist($e);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         // Re-select
         $orm = $this->orm->withHeap(new Heap());
@@ -316,7 +316,9 @@ class HasOneRelationTest extends OrmTestCase
         $e->profile = new Profile();
         $e->profile->image = 'new.jpg';
 
-        QueryAssert::writes(2, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(2);
 
         Assert::same($this->orm->getHeap()->has($oP), static::NULLABLE);
         Assert::true($this->orm->getHeap()->has($e->profile));
@@ -506,11 +508,11 @@ class HasOneRelationTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
 
-        QueryAssert::writes(0, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -623,7 +625,9 @@ class HasOneRelationTest extends OrmTestCase
 
         Assert::same($u4->profile->image, 'new', 'the new value should be saved');
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -634,13 +638,17 @@ class HasOneRelationTest extends OrmTestCase
         $u->balance = 900;
         unset($u->profile);
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         Assert::false(isset($u->profile));
 
         $u->profile = null;
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -656,7 +664,9 @@ class HasOneRelationTest extends OrmTestCase
 
         unset($user->profile);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
     }
 
     /**
@@ -672,13 +682,19 @@ class HasOneRelationTest extends OrmTestCase
 
         Assert::instanceOf($user->profile, Profile::class);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
 
         $user->profile = null;
 
-        QueryAssert::writes(1, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
         $user = (new Select($this->orm, User::class))
@@ -690,33 +706,42 @@ class HasOneRelationTest extends OrmTestCase
     #[Test]
     public function testUpdateRelation(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)->load('profile')->run());
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)->load('profile')->run();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(0, function () use ($users): void {
-            Assert::notNull($users[0]->profile);
-            static::NULLABLE and Assert::null($users[1]->profile);
-        });
+        $this->captureReadQueries();
+        Assert::notNull($users[0]->profile);
+        static::NULLABLE and Assert::null($users[1]->profile);
+        $this->assertNumReads(0);
     }
 
     #[Test]
     public function testUpdateNestedRelation(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)
             ->load('profile.nested')
-            ->run());
-        QueryAssert::reads(0, function () use ($users): void {
-            foreach ($users as $user) {
-                if ($user->id === 1) {
-                    Assert::notNull($user->profile);
-                    Assert::notNull($user->profile->nested);
-                    Assert::same($user->profile->nested->label, 'nested-label');
-                }
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            if ($user->id === 1) {
+                Assert::notNull($user->profile);
+                Assert::notNull($user->profile->nested);
+                Assert::same($user->profile->nested->label, 'nested-label');
             }
-        });
+        }
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

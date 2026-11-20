@@ -11,7 +11,6 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\UserWithUUIDPrimaryKey;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Ramsey\Uuid\Uuid;
 use Testo\Assert;
@@ -25,9 +24,13 @@ final class UUIDTest extends OrmTestCase
     {
         $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey(Uuid::uuid4()->toString()), 'hello@world.com', 500);
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
     }
 
     #[Test]

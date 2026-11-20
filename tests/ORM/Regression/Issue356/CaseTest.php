@@ -6,7 +6,6 @@ namespace Cycle\ORM\Tests\Regression\Issue356;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -21,82 +20,103 @@ final class CaseTest extends OrmTestCase
     public function testSelectOne(): void
     {
         // Eager load morphed relation
-        $log = QueryAssert::reads(2, fn() => (new Select($this->orm, Entity\LogRecord::class))
+        $this->captureReadQueries();
+        $log = (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
             ->wherePK(1)
-            ->fetchOne());
+            ->fetchOne();
+        $this->assertNumReads(2);
         // Check result
-        QueryAssert::reads(0, fn() => Assert::instanceOf($log, Entity\LogRecord::class));
+        $this->captureReadQueries();
+        Assert::instanceOf($log, Entity\LogRecord::class);
+        $this->assertNumReads(0);
     }
 
     #[Test]
     public function testUpdateOne(): void
     {
         // Eager load morphed relation
-        $log = QueryAssert::reads(1, fn() => (new Select($this->orm, Entity\LogRecord::class))
+        $this->captureReadQueries();
+        $log = (new Select($this->orm, Entity\LogRecord::class))
             ->wherePK(1)
-            ->fetchOne());
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+            ->fetchOne();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect($log)
             ->load('actor')
-            ->run());
+            ->run();
+        $this->assertNumReads(1);
         // Check result
-        QueryAssert::reads(0, fn() => Assert::instanceOf($log->actor, Entity\Actor::class));
+        $this->captureReadQueries();
+        Assert::instanceOf($log->actor, Entity\Actor::class);
+        $this->assertNumReads(0);
     }
 
     #[Test]
     public function testSelectAll(): void
     {
         // Eager load morphed relation for multiple entities
-        $logs = QueryAssert::reads(3, fn() => (new Select($this->orm, Entity\LogRecord::class))
+        $this->captureReadQueries();
+        $logs = (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
-            ->fetchAll());
+            ->fetchAll();
+        $this->assertNumReads(3);
         // Check result
-        QueryAssert::reads(0, function () use ($logs): void {
-            foreach ($logs as $log) {
-                Assert::instanceOf($log, Entity\LogRecord::class);
-                \in_array($log->lid, [9], true)
-                    ? Assert::null($log->actor)
-                    : Assert::instanceOf($log->actor, Entity\Actor::class);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($logs as $log) {
+            Assert::instanceOf($log, Entity\LogRecord::class);
+            \in_array($log->lid, [9], true)
+                ? Assert::null($log->actor)
+                : Assert::instanceOf($log->actor, Entity\Actor::class);
+        }
+        $this->assertNumReads(0);
     }
 
     #[Test]
     public function testUpdateMany(): void
     {
         // Eager load morphed relation
-        $logs = QueryAssert::reads(1, fn() => (new Select($this->orm, Entity\LogRecord::class))
-            ->fetchAll());
-        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        $logs = (new Select($this->orm, Entity\LogRecord::class))
+            ->fetchAll();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$logs)
             ->load('actor')
-            ->run());
+            ->run();
+        $this->assertNumReads(2);
         // Check result
-        QueryAssert::reads(0, function () use ($logs): void {
-            foreach ($logs as $log) {
-                \in_array($log->lid, [9], true)
-                    ? Assert::null($log->actor)
-                    : Assert::instanceOf($log->actor, Entity\Actor::class);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($logs as $log) {
+            \in_array($log->lid, [9], true)
+                ? Assert::null($log->actor)
+                : Assert::instanceOf($log->actor, Entity\Actor::class);
+        }
+        $this->assertNumReads(0);
     }
 
     #[Test]
     public function testScoped(): void
     {
         // Eager load morphed relation
-        $logs = QueryAssert::reads(3, fn() => (new Select($this->orm, Entity\LogRecord::class))
+        $this->captureReadQueries();
+        $logs = (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
             ->wherePK(9, 10)
             ->orderBy('l_id')
-            ->fetchAll());
+            ->fetchAll();
+        $this->assertNumReads(3);
+
         Assert::count($logs, 2);
         // Check result
-        QueryAssert::reads(0, function () use ($logs): void {
-            Assert::null($logs[0]->actor);
-            Assert::instanceOf($logs[1]->actor, Entity\Tenant::class);
-        });
+        $this->captureReadQueries();
+        Assert::null($logs[0]->actor);
+        Assert::instanceOf($logs[1]->actor, Entity\Tenant::class);
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

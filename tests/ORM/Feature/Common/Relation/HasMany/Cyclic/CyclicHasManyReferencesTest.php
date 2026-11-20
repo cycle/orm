@@ -12,7 +12,6 @@ use Cycle\ORM\Tests\Fixtures\CyclicRef\Comment;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\Post;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -36,10 +35,13 @@ final class CyclicHasManyReferencesTest extends OrmTestCase
 
         $p->addComment($c);
 
-        QueryAssert::writes(4, fn() => $this->save($p));
-
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(4);
         // no changes!
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Post::class);
@@ -80,7 +82,9 @@ final class CyclicHasManyReferencesTest extends OrmTestCase
         $p->addComment($c1);
         $p->addComment($c2);
 
-        QueryAssert::writes(6, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(6);
 
         $c3 = new Comment();
         $c3->user = $u2;
@@ -88,7 +92,9 @@ final class CyclicHasManyReferencesTest extends OrmTestCase
 
         $p->addComment($c3);
 
-        QueryAssert::writes(2, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

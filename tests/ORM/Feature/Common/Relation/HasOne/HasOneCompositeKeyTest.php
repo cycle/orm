@@ -16,7 +16,6 @@ use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Tests\Fixtures\CompositePKNested;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -188,9 +187,13 @@ final class HasOneCompositeKeyTest extends OrmTestCase
 
         $e->child_entity->key3 = 'bar';
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         // Re-select
         $this->orm = $this->orm->withHeap(new Heap());
@@ -214,7 +217,9 @@ final class HasOneCompositeKeyTest extends OrmTestCase
         $e->child_entity->key2 = 800;
         $e->child_entity->key3 = 'foo foo';
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         // Re-select
         $this->orm = $this->orm->withHeap(new Heap());
@@ -240,7 +245,9 @@ final class HasOneCompositeKeyTest extends OrmTestCase
         $e->child_entity = null;
         Assert::same((new Select($this->orm, CompositePKChild::class))->count(), 3);
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         /** @var CompositePK $e */
         $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -432,7 +439,9 @@ final class HasOneCompositeKeyTest extends OrmTestCase
             ->load('child_entity.nested')
             ->fetchOne();
 
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($e)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($e)->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -556,7 +565,9 @@ final class HasOneCompositeKeyTest extends OrmTestCase
         // Relation was not overwritten
         Assert::same($u2->child_entity->key3, 'new');
 
-        QueryAssert::writes(2, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(2);
     }
 
     #[BeforeTest]

@@ -11,7 +11,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -37,7 +36,9 @@ final class DeepCyclicTest extends OrmTestCase
         $c3->other = $c4;
         $c4->other = $c2;
 
-        QueryAssert::writes(7, fn() => $this->save($c1, $c2, $c3, $c4, $c5));
+        $this->captureWriteQueries();
+        $this->save($c1, $c2, $c3, $c4, $c5);
+        $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
@@ -80,12 +81,12 @@ final class DeepCyclicTest extends OrmTestCase
         $c3->other = $c4;
         $c4->other = $c2;
 
-        QueryAssert::writes(7, function () use ($c1, $c2): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c1);
-            $tr->persist($c2);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c1);
+        $tr->persist($c2);
+        $tr->run();
+        $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
@@ -128,12 +129,12 @@ final class DeepCyclicTest extends OrmTestCase
         $c3->other = $c4;
         $c4->other = $c2;
 
-        QueryAssert::writes(7, function () use ($c5, $c4): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c5);
-            $tr->persist($c4);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c5);
+        $tr->persist($c4);
+        $tr->run();
+        $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
@@ -178,15 +179,15 @@ final class DeepCyclicTest extends OrmTestCase
         $c1->other = $c5;
         $c5->other = $c2;
 
-        QueryAssert::writes(7, function () use ($c1, $c2, $c3, $c4, $c5): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c1);
-            $tr->persist($c2);
-            $tr->persist($c3);
-            $tr->persist($c4);
-            $tr->persist($c5);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c1);
+        $tr->persist($c2);
+        $tr->persist($c3);
+        $tr->persist($c4);
+        $tr->persist($c5);
+        $tr->run();
+        $this->assertNumWrites(7);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);

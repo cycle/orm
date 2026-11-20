@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\Collection;
 use Testo\Assert;
@@ -257,12 +256,12 @@ final class MorphedHasManyRelationTest extends OrmTestCase
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        QueryAssert::writes(0, function () use ($a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -274,20 +273,19 @@ final class MorphedHasManyRelationTest extends OrmTestCase
 
         $a->comments->remove(0);
 
-        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -313,20 +311,20 @@ final class MorphedHasManyRelationTest extends OrmTestCase
         foreach ($b->comments as $c) {
             $a->comments->removeElement($c);
         }
-        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
 
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -354,20 +352,19 @@ final class MorphedHasManyRelationTest extends OrmTestCase
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
 
-        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
-
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(1);
         // consecutive
-        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($a);
-            $tr->persist($b);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($a);
+        $tr->persist($b);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $a = (new Select($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
@@ -400,24 +397,29 @@ final class MorphedHasManyRelationTest extends OrmTestCase
     #[Test]
     public function testUpdateRelationSortedById(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)
             ->load('comments', [
                 'orderBy' => ['id' => 'DESC'],
-            ])->run());
-        QueryAssert::reads(0, function () use ($users): void {
-            $checked = false;
-            foreach ($users as $user) {
-                Assert::iterable($user->comments);
-                // Check order
-                if (\count($user->comments) > 1) {
-                    Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan((int) $user->comments->offsetGet(1)->id);
-                    $checked = true;
-                }
+            ])->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $checked = false;
+        foreach ($users as $user) {
+            Assert::iterable($user->comments);
+            // Check order
+            if (\count($user->comments) > 1) {
+                Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan((int) $user->comments->offsetGet(1)->id);
+                $checked = true;
             }
-            Assert::true($checked, 'No comments to check order.');
-        });
+        }
+        Assert::true($checked, 'No comments to check order.');
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

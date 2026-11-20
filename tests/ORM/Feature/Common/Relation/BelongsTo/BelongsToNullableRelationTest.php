@@ -9,7 +9,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Test;
 
@@ -42,13 +41,19 @@ final class BelongsToNullableRelationTest extends BelongsToRelationTest
 
         Assert::instanceOf($profile->user, User::class);
 
-        QueryAssert::writes(0, fn() => $this->save($profile));
+        $this->captureWriteQueries();
+        $this->save($profile);
+        $this->assertNumWrites(0);
 
         $profile->user = null;
 
-        QueryAssert::writes(1, fn() => $this->save($profile));
+        $this->captureWriteQueries();
+        $this->save($profile);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($profile));
+        $this->captureWriteQueries();
+        $this->save($profile);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
         $profile = (new Select($this->orm, Profile::class))
@@ -71,6 +76,8 @@ final class BelongsToNullableRelationTest extends BelongsToRelationTest
 
         unset($profile->user);
 
-        QueryAssert::writes(1, fn() => $this->save($profile));
+        $this->captureWriteQueries();
+        $this->save($profile);
+        $this->assertNumWrites(1);
     }
 }

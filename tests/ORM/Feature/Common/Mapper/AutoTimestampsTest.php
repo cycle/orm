@@ -11,7 +11,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -48,7 +47,9 @@ final class AutoTimestampsTest extends OrmTestCase
         $s = new Select($orm, User::class);
         $u = $s->fetchOne();
 
-        QueryAssert::writes(0, fn() => (new Transaction($orm))->persist($u)->run());
+        $this->captureWriteQueries();
+        (new Transaction($orm))->persist($u)->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -67,7 +68,9 @@ final class AutoTimestampsTest extends OrmTestCase
 
         $u->balance = 200;
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
     }
 
     #[BeforeTest]

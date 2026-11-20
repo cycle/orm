@@ -7,7 +7,6 @@ namespace Cycle\ORM\Tests\Regression\Issue322;
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Issue322\Entity\PostTag;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -41,7 +40,9 @@ final class CaseTest extends OrmTestCase
         $post->tags = new PivotedCollection();
         $post->tags->add($tag1);
 
-        QueryAssert::writes(2, fn() => $this->save($post));
+        $this->captureWriteQueries();
+        $this->save($post);
+        $this->assertNumWrites(2);
     }
 
     /**
@@ -67,7 +68,9 @@ final class CaseTest extends OrmTestCase
         $post->tags = new PivotedCollection();
         $post->tags->setPivot($tag1, new PostTag());
 
-        QueryAssert::writes(3, fn() => $this->save($post));
+        $this->captureWriteQueries();
+        $this->save($post);
+        $this->assertNumWrites(3);
     }
 
     #[BeforeTest]

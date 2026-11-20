@@ -9,7 +9,6 @@ use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\Relation\ParentClassRelationsTest;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Skip;
 use Testo\Test;
@@ -26,9 +25,13 @@ class ParentClassRelationsStdMapperTest extends ParentClassRelationsTest
         $programator->level = 50;
         $programator->language = 'VanillaJS';
 
-        QueryAssert::writes(3, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
 
         $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK($programator->id)

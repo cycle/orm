@@ -11,7 +11,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -31,15 +30,21 @@ final class DoubleLinkedTest extends OrmTestCase
         $c1->cyclic = $c2;
         $c2->cyclic = $c1;
 
-        QueryAssert::writes(3, fn() => $this->save($c1, $c2));
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(3);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
-        QueryAssert::reads(0, fn() => Assert::same($a->cyclic, $b));
+        $this->captureReadQueries();
+        Assert::same($a->cyclic, $b);
+        $this->assertNumReads(0);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -57,17 +62,21 @@ final class DoubleLinkedTest extends OrmTestCase
         $c1->other = $c2;
         $c2->other = $c1;
 
-        QueryAssert::writes(3, fn() => $this->save($c1, $c2));
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($c1, $c2));
+        $this->captureWriteQueries();
+        $this->save($c1, $c2);
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
         [$a, $b] = (new Select($this->orm, Cyclic::class))->orderBy('id')->fetchAll();
 
-        QueryAssert::reads(0, function () use ($b, $a): void {
-            Assert::same($b->cyclic, $a);
-            Assert::same($a->cyclic, $b);
-        });
+        $this->captureReadQueries();
+        Assert::same($b->cyclic, $a);
+        Assert::same($a->cyclic, $b);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -80,20 +89,20 @@ final class DoubleLinkedTest extends OrmTestCase
         $c1->cyclic = $c1;
         $c1->other = $c1;
 
-        QueryAssert::writes(2, function () use ($c1): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c1);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c1);
+        $tr->run();
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         $a = $selector->orderBy('id')->fetchOne();
 
-        QueryAssert::reads(0, function () use ($a): void {
-            Assert::same($a->cyclic, $a);
-            Assert::same($a->other, $a);
-        });
+        $this->captureReadQueries();
+        Assert::same($a->cyclic, $a);
+        Assert::same($a->other, $a);
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

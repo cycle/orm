@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Tests\Fixtures\CompositePKPivot;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\Collection;
 use Testo\Assert;
@@ -251,7 +250,9 @@ final class ManyToManyCompositeKeyTest extends OrmTestCase
             ->wherePK([901, 902])
             ->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -325,9 +326,13 @@ final class ManyToManyCompositeKeyTest extends OrmTestCase
         $b->pivoted->add($t);
         $b->pivoted->setPivot($t, $pc);
 
-        QueryAssert::writes(7, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(7);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         /**
          * @var CompositePK $a
@@ -358,7 +363,9 @@ final class ManyToManyCompositeKeyTest extends OrmTestCase
 
         Assert::instanceOf($u->pivoted, Collection::class);
 
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($u)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($u)->run();
+        $this->assertNumWrites(0);
 
         $wantTags = [self::CHILD_1['key3'], self::CHILD_4['key3']];
 
@@ -381,7 +388,10 @@ final class ManyToManyCompositeKeyTest extends OrmTestCase
         $u->pivoted = $u->pivoted->filter(function ($t) use ($wantTags) {
             return in_array($t->key3, $wantTags);
         });
-        QueryAssert::writes(3, fn() => (new Transaction($this->orm))->persist($u)->run());
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($u)->run();
+        $this->assertNumWrites(3);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

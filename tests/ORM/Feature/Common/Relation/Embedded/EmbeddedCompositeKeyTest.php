@@ -12,7 +12,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -85,7 +84,9 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
         $u->child_entity = new CompositePKChild();
         $u->child_entity->key3 = 'user3';
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -107,7 +108,9 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
             ->orderBy('key3', 'ASC')
             ->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -129,9 +132,13 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
             ],
         )->run();
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -150,7 +157,9 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
         $u = (new Select($this->orm, CompositePK::class))
             ->orderBy('key3', 'ASC')->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -161,11 +170,15 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
             ->load(self::CHILD_CONTAINER)
             ->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($u->child_entity));
+        $this->captureWriteQueries();
+        $this->save($u->child_entity);
+        $this->assertNumWrites(0);
 
         $u->child_entity->key3 = 'altered';
 
-        QueryAssert::writes(1, fn() => $this->save($u->child_entity));
+        $this->captureWriteQueries();
+        $this->save($u->child_entity);
+        $this->assertNumWrites(1);
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -197,7 +210,9 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
 
         $u->child_entity->key3 = 'user3';
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -215,7 +230,11 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
         $selector = new Select($this->orm, CompositePK::class);
         $u = $selector->orderBy('key3', 'ASC')->fetchOne();
 
-        QueryAssert::count(0, 0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -234,7 +253,11 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = $u2Data['child_entity'];
 
-        QueryAssert::count(1, 1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(1);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -272,7 +295,11 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = clone $u2->child_entity;
 
-        QueryAssert::count(0, 1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -316,7 +343,9 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
         $u->child_entity = new CompositePKChild();
         $u->child_entity->key3 = 'abc';
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();
@@ -336,7 +365,9 @@ final class EmbeddedCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = null;
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();

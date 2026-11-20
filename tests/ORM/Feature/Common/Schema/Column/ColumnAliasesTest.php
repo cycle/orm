@@ -10,7 +10,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -25,11 +24,11 @@ final class ColumnAliasesTest extends OrmTestCase
         $e->email = 'test@email.com';
         $e->balance = 300;
 
-        QueryAssert::writes(1, function () use ($e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(1);
 
         Assert::equals($e->id, 3);
 

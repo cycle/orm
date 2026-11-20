@@ -8,7 +8,6 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -22,7 +21,9 @@ final class ORMTest extends OrmTestCase
         Assert::null($this->orm->get(User::class, ['id' => 1], false));
         Assert::instanceOf($this->orm->get(User::class, ['id' => 1], true), User::class);
 
-        QueryAssert::reads(0, fn() => Assert::instanceOf($this->orm->get(User::class, ['id' => 1]), User::class));
+        $this->captureReadQueries();
+        Assert::instanceOf($this->orm->get(User::class, ['id' => 1]), User::class);
+        $this->assertNumReads(0);
 
         Assert::count($this->orm->getSchema()->getRoles(), 1);
     }
@@ -33,7 +34,9 @@ final class ORMTest extends OrmTestCase
         Assert::null($this->orm->get('user', ['id' => 1], false));
         Assert::instanceOf($this->orm->get('user', ['id' => 1], true), User::class);
 
-        QueryAssert::reads(0, fn() => Assert::instanceOf($this->orm->get('user', ['id' => 1]), User::class));
+        $this->captureReadQueries();
+        Assert::instanceOf($this->orm->get('user', ['id' => 1]), User::class);
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

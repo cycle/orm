@@ -9,7 +9,6 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\OptimisticLockMapper;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -29,12 +28,16 @@ final class OptimisticLockTest extends OrmTestCase
         $entity->content = 'Test content';
         $entity->lock = microtime();
 
-        QueryAssert::writes(1, fn() => $this->save($entity));
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(1);
 
         $oldLock = $entity->lock;
         $entity->title = 'new title';
 
-        QueryAssert::writes(1, fn() => $this->save($entity));
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(1);
 
         Assert::notSame($entity->lock, $oldLock);
     }
@@ -72,7 +75,9 @@ final class OptimisticLockTest extends OrmTestCase
         $entity->lock = microtime();
         $this->save($entity);
 
-        QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($entity)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($entity)->run();
+        $this->assertNumWrites(1);
     }
 
     #[Test]

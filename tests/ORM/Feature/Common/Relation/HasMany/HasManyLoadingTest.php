@@ -11,7 +11,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -145,24 +144,29 @@ final class HasManyLoadingTest extends OrmTestCase
     #[Test]
     public function testUpdateRelationSortedById(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)
             ->load('comments', [
                 'orderBy' => ['id' => 'DESC'],
-            ])->run());
-        QueryAssert::reads(0, function () use ($users): void {
-            $checked = false;
-            foreach ($users as $user) {
-                Assert::iterable($user->comments);
-                // Check order
-                if (\count($user->comments) > 1) {
-                    Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan((int) $user->comments->offsetGet(1)->id);
-                    $checked = true;
-                }
+            ])->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $checked = false;
+        foreach ($users as $user) {
+            Assert::iterable($user->comments);
+            // Check order
+            if (\count($user->comments) > 1) {
+                Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan((int) $user->comments->offsetGet(1)->id);
+                $checked = true;
             }
-            Assert::true($checked, 'No comments to check order.');
-        });
+        }
+        Assert::true($checked, 'No comments to check order.');
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

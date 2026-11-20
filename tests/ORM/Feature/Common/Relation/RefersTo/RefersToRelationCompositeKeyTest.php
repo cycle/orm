@@ -13,7 +13,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -41,7 +40,9 @@ final class RefersToRelationCompositeKeyTest extends OrmTestCase
         $u->child_entity = $c;
         $u->children->add($c);
 
-        QueryAssert::writes(3, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(3);
 
         $u = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -77,9 +78,13 @@ final class RefersToRelationCompositeKeyTest extends OrmTestCase
         $p->child_entity = $c;
         $p->children->add($c);
 
-        QueryAssert::writes(3, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(0);
 
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -109,9 +114,13 @@ final class RefersToRelationCompositeKeyTest extends OrmTestCase
         $u->child_entity = $c;
         $u->children->add($c);
 
-        QueryAssert::writes(3, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $u2 = new CompositePK();
         $u2->key1 = 300;
@@ -119,9 +128,13 @@ final class RefersToRelationCompositeKeyTest extends OrmTestCase
         $u2->key3 = 303;
         $u2->child_entity = $c;
 
-        QueryAssert::writes(1, fn() => $this->save($u2));
+        $this->captureWriteQueries();
+        $this->save($u2);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($u2));
+        $this->captureWriteQueries();
+        $this->save($u2);
+        $this->assertNumWrites(0);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -152,7 +165,9 @@ final class RefersToRelationCompositeKeyTest extends OrmTestCase
         $u->child_entity = $c;
         $u->children->add($c);
 
-        QueryAssert::writes(2, fn() => (new Transaction($this->orm))->persist($u)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($u)->run();
+        $this->assertNumWrites(2);
 
         $s = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
         $u = $s->load(self::CHILD_CONTAINER)
@@ -245,7 +260,9 @@ final class RefersToRelationCompositeKeyTest extends OrmTestCase
         $u->child_entity = $c;
         $u->children->add($c);
 
-        QueryAssert::writes(3, fn() => (new Transaction($this->orm))->persist($u)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($u)->run();
+        $this->assertNumWrites(3);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $s = new Select($this->orm, CompositePK::class);
@@ -260,7 +277,9 @@ final class RefersToRelationCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = null;
 
-        QueryAssert::writes(1, fn() => (new Transaction($this->orm))->persist($u)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($u)->run();
+        $this->assertNumWrites(1);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

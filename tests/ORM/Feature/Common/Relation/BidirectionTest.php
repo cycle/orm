@@ -12,7 +12,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -88,7 +87,9 @@ final class BidirectionTest extends OrmTestCase
 
         $u->comments[0]->user = null;
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $this->orm->getHeap()->clean();
         $u = (new Select($this->orm, User::class))
@@ -133,12 +134,12 @@ final class BidirectionTest extends OrmTestCase
         $c->user = null;
         $u->comments->removeElement($c);
 
-        QueryAssert::writes(1, function () use ($u, $c): void {
-            $t = new Transaction($this->orm);
-            $t->persist($u);
-            $t->persist($c);
-            $t->run();
-        });
+        $this->captureWriteQueries();
+        $t = new Transaction($this->orm);
+        $t->persist($u);
+        $t->persist($c);
+        $t->run();
+        $this->assertNumWrites(1);
 
         $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();

@@ -10,7 +10,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -82,7 +81,9 @@ final class ClasslessInverseRelationTest extends OrmTestCase
         // cyclic
         $u->profile->user = $u;
 
-        QueryAssert::writes(2, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(2);
 
         Assert::equals($u->id, 3);
         Assert::equals($u->profile->id, 4);

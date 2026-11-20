@@ -14,7 +14,6 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -112,10 +111,12 @@ final class HasManyCompositeKeyTest extends OrmTestCase
          */
         [$a, $b] = $selector->load(self::CHILD_CONTAINER)->orderBy('parent_entity.key3')->fetchAll();
 
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))
             ->persist($a)
             ->persist($b)
-            ->run());
+            ->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -133,9 +134,14 @@ final class HasManyCompositeKeyTest extends OrmTestCase
         $e->children[1]->key1 = 921;
         $e->children[1]->key2 = 922;
         $e->children[1]->key3 = 'bar14';
-        QueryAssert::writes(3, fn() => (new Transaction($this->orm))->persist($e)->run());
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($e)->run();
+        $this->assertNumWrites(3);
         // consecutive test
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($e)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($e)->run();
+        $this->assertNumWrites(0);
 
         Assert::true($this->orm->getHeap()->has($e));
         Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -254,9 +260,14 @@ final class HasManyCompositeKeyTest extends OrmTestCase
         $c->key2 = 90;
         $c->key3 = 'fiz';
         $e->children->add($c);
-        QueryAssert::writes(2, fn() => $this->save($e));
+
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(2);
         // consecutive test
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         $selector = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER);
@@ -297,9 +308,14 @@ final class HasManyCompositeKeyTest extends OrmTestCase
 
         Assert::count($a->children, 1);
         Assert::count($d->children, 2);
-        QueryAssert::writes(2, fn() => (new Transaction($this->orm))->persist($a)->persist($d)->run());
+
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($a)->persist($d)->run();
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($a)->persist($d)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($a)->persist($d)->run();
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
 

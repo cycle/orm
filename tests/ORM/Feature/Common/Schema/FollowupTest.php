@@ -7,7 +7,6 @@ namespace Cycle\ORM\Tests\Feature\Common\Schema;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserSnapshotMapper;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -22,7 +21,9 @@ final class FollowupTest extends OrmTestCase
         $u->email = 'email';
         $u->balance = 100;
 
-        QueryAssert::writes(2, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(2);
 
         $snap = $this->getSnap($u);
         Assert::same($snap['action'], 'create');
@@ -36,7 +37,9 @@ final class FollowupTest extends OrmTestCase
         $u->email = 'email';
         $u->balance = 100;
 
-        QueryAssert::writes(2, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(2);
 
         $snap = $this->getSnap($u);
         Assert::same($snap['action'], 'create');
@@ -44,7 +47,9 @@ final class FollowupTest extends OrmTestCase
 
         $u->email = 'new-email';
 
-        QueryAssert::writes(2, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(2);
 
         $snap = $this->getSnap($u);
         Assert::same($snap['action'], 'update');

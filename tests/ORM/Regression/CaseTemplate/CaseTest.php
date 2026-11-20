@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\CaseTemplate;
 
 use Cycle\ORM\Select;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -37,7 +36,9 @@ final class CaseTest extends OrmTestCase
         // Change data
         $user->setPassword('new-password-42');
         // Store changes and calc write queries
-        QueryAssert::writes(1, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(1);
     }
 
     #[BeforeTest]

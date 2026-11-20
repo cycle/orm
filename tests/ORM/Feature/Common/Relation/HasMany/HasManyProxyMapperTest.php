@@ -14,7 +14,6 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -69,10 +68,10 @@ final class HasManyProxyMapperTest extends OrmTestCase
 
         Assert::instanceOf($uData['comments'], ReferenceInterface::class);
 
-        QueryAssert::reads(1, function () use ($u): void {
-            Assert::count($u->comments, 3);
-            Assert::instanceOf($u->comments[0], Comment::class);
-        });
+        $this->captureReadQueries();
+        Assert::count($u->comments, 3);
+        Assert::instanceOf($u->comments[0], Comment::class);
+        $this->assertNumReads(1);
     }
 
     #[Test]
@@ -83,11 +82,15 @@ final class HasManyProxyMapperTest extends OrmTestCase
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
 
-        QueryAssert::reads(0, fn() => Assert::instanceOf($r, ReferenceInterface::class));
+        $this->captureReadQueries();
+        Assert::instanceOf($r, ReferenceInterface::class);
+        $this->assertNumReads(0);
 
         Assert::false($r->hasValue());
 
-        QueryAssert::reads(1, fn() => Assert::iterable($u->comments));
+        $this->captureReadQueries();
+        Assert::iterable($u->comments);
+        $this->assertNumReads(1);
 
         Assert::true($r->hasValue());
     }
@@ -100,7 +103,9 @@ final class HasManyProxyMapperTest extends OrmTestCase
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
 
-        QueryAssert::reads(0, fn() => Assert::instanceOf($r, ReferenceInterface::class));
+        $this->captureReadQueries();
+        Assert::instanceOf($r, ReferenceInterface::class);
+        $this->assertNumReads(0);
 
         Assert::same($r->getRole(), 'comment');
     }
@@ -113,7 +118,9 @@ final class HasManyProxyMapperTest extends OrmTestCase
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
 
-        QueryAssert::reads(0, fn() => Assert::instanceOf($r, ReferenceInterface::class));
+        $this->captureReadQueries();
+        Assert::instanceOf($r, ReferenceInterface::class);
+        $this->assertNumReads(0);
 
         Assert::equals($r->getScope(), [
             'user_id' => 1,
@@ -128,10 +135,10 @@ final class HasManyProxyMapperTest extends OrmTestCase
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
 
-        QueryAssert::reads(1, function () use ($r, $u): void {
-            Assert::instanceOf($r, ReferenceInterface::class);
-            Assert::count($u->comments, 0);
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($r, ReferenceInterface::class);
+        Assert::count($u->comments, 0);
+        $this->assertNumReads(1);
     }
 
     #[Test]
@@ -140,7 +147,11 @@ final class HasManyProxyMapperTest extends OrmTestCase
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
 
-        QueryAssert::count(0, 0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -149,7 +160,11 @@ final class HasManyProxyMapperTest extends OrmTestCase
         $u = (new Select($this->orm, User::class))
             ->wherePK(2)->fetchOne();
 
-        QueryAssert::count(0, 0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -220,10 +235,13 @@ final class HasManyProxyMapperTest extends OrmTestCase
         Assert::count($a->comments, 1);
         Assert::count($b->comments, 2);
 
-        QueryAssert::writes(2, fn() => $this->save($a, $b));
-
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         /**
          * @var User $a

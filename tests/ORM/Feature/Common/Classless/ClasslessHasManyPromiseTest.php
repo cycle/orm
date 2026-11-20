@@ -12,7 +12,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\ArrayCollection;
 use Testo\Assert;
@@ -72,13 +71,14 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
 
-        QueryAssert::reads(0, function () use ($u): void {
-            Assert::instanceOf($u->comments, Promise::class);
-            Assert::false($u->comments->hasValue());
-        });
-
+        $this->captureReadQueries();
+        Assert::instanceOf($u->comments, Promise::class);
+        Assert::false($u->comments->hasValue());
+        $this->assertNumReads(0);
         // Resolve promise
-        $resolved = QueryAssert::reads(1, fn() => $u->comments->fetch());
+        $this->captureReadQueries();
+        $resolved = $u->comments->fetch();
+        $this->assertNumReads(1);
 
         Assert::true($u->comments->hasValue());
         Assert::count($resolved, 3);
@@ -90,9 +90,9 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
 
-        QueryAssert::reads(0, function () use (&$p, $u): void {
-            Assert::instanceOf($p = $u->comments, Promise::class);
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($p = $u->comments, Promise::class);
+        $this->assertNumReads(0);
 
         /** @var Promise $p */
         Assert::false($p->hasValue());
@@ -107,9 +107,9 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
 
-        QueryAssert::reads(0, function () use (&$p, $u): void {
-            Assert::instanceOf($p = $u->comments, Promise::class);
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($p = $u->comments, Promise::class);
+        $this->assertNumReads(0);
 
         /** @var Promise $p */
         Assert::same($p->getRole(), 'comment');
@@ -121,9 +121,9 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
         $u = (new Select($this->orm, 'user'))
             ->wherePK(1)->fetchOne();
 
-        QueryAssert::reads(0, function () use (&$r, $u): void {
-            Assert::instanceOf($r = $u->comments, ReferenceInterface::class);
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($r = $u->comments, ReferenceInterface::class);
+        $this->assertNumReads(0);
 
         /** @var ReferenceInterface $r */
         Assert::equals($r->getScope(), [
@@ -137,12 +137,13 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
 
-        QueryAssert::reads(0, function () use ($u): void {
-            Assert::instanceOf($u->comments, Promise::class);
-            Assert::false($u->comments->hasValue());
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($u->comments, Promise::class);
+        Assert::false($u->comments->hasValue());
+        $this->assertNumReads(0);
 
-        Assert::count(QueryAssert::reads(1, fn() => $u->comments->fetch()), 0);
+        Assert::count($u->comments->fetch(), 0);
+        $this->assertNumReads(1);
     }
 
     #[Test]
@@ -150,7 +151,11 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
     {
         $u = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
 
-        QueryAssert::count(0, 0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -159,7 +164,11 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
 
-        QueryAssert::count(0, 0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -229,10 +238,13 @@ final class ClasslessHasManyPromiseTest extends OrmTestCase
         Assert::count($a->comments, 1);
         Assert::count($b->comments, 2);
 
-        QueryAssert::writes(2, fn() => $this->save($a, $b));
-
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(2);
         // consecutive
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         [$a, $b] = (new Select($this->orm->withHeap(new Heap()), 'user'))
             ->load('comments', [

@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Engineer;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -240,7 +239,9 @@ class SimpleCasesTest extends JtiBaseTest
         $programator = (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -251,9 +252,13 @@ class SimpleCasesTest extends JtiBaseTest
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $programator->language = 'Kotlin';
 
-        QueryAssert::writes(1, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->with(heap: new Heap()), static::PROGRAMATOR_ROLE))
@@ -271,9 +276,13 @@ class SimpleCasesTest extends JtiBaseTest
         $programator->level = 99;
         $programator->name = 'Thomas';
 
-        QueryAssert::writes(3, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
@@ -291,9 +300,13 @@ class SimpleCasesTest extends JtiBaseTest
         $programator->level = 50;
         $programator->language = 'VanillaJS';
 
-        QueryAssert::writes(3, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($programator));
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
@@ -312,9 +325,13 @@ class SimpleCasesTest extends JtiBaseTest
             ->loadSubclasses(false)
             ->wherePK(static::ENGINEER_2_PK)->fetchOne();
 
-        QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($entity)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($entity)->run();
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->delete($entity)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->delete($entity)->run();
+        $this->assertNumWrites(0);
 
         // todo load without inheritance
         Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))

@@ -19,7 +19,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\CustomCollection;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Data\DataProvider;
@@ -66,9 +65,13 @@ final class HasManyCollectionsTest extends OrmTestCase
         $user = $this->orm->make(User::class, ['email' => 'new-test@mail', 'balance' => 101]);
         $user->comments = $comments;
 
-        QueryAssert::writes(5, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(5);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
     }
 
     public function collectionFactoryProvider(): array

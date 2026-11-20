@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\JsonTypecast;
 use Cycle\ORM\Tests\Fixtures\Admin;
 use Cycle\ORM\Tests\Fixtures\JsonSerializableClass;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -49,7 +48,9 @@ final class JsonTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($result));
+        $this->captureWriteQueries();
+        $this->save($result);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -60,9 +61,13 @@ final class JsonTest extends OrmTestCase
         $e->settings = ['theme' => 'light'];
         $e->settingsNullable = ['some' => 'data'];
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         Assert::true($this->orm->getHeap()->has($e));
         Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -87,9 +92,13 @@ final class JsonTest extends OrmTestCase
         $e->settings = [];
         $e->settingsNullable = [];
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         Assert::true($this->orm->getHeap()->has($e));
         Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -111,9 +120,13 @@ final class JsonTest extends OrmTestCase
         $e->settings = [];
         $e->settingsNullable = null;
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         Assert::true($this->orm->getHeap()->has($e));
         Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -138,9 +151,13 @@ final class JsonTest extends OrmTestCase
         $e->settings = ['theme' => 'light'];
         $e->jsonSerializable = new JsonSerializableClass();
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         Assert::true($this->orm->getHeap()->has($e));
         Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -157,9 +174,13 @@ final class JsonTest extends OrmTestCase
         $e = $this->orm->get('user', ['id' => 1]);
         $e->settings = ['theme' => 'light'];
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
 
         $this->orm->getHeap()->clean();
 
@@ -180,7 +201,9 @@ final class JsonTest extends OrmTestCase
         $e->email = 'test@email.com';
         $e->settings = ['theme' => 'light'];
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
         $this->orm->getHeap()->clean();
 

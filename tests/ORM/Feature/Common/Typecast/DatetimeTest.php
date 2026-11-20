@@ -12,7 +12,6 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Common\Attribute\AssertMethod;
@@ -67,11 +66,11 @@ final class DatetimeTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
 
-        QueryAssert::writes(0, function () use ($result): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($result);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($result);
+        $tr->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -82,16 +81,17 @@ final class DatetimeTest extends OrmTestCase
         $e->balance = 300;
         $e->time_created = new \DateTimeImmutable('tomorrow 10am');
 
-        QueryAssert::writes(1, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
-        QueryAssert::writes(0, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         Assert::equals($e->id, 3);
 
@@ -112,16 +112,17 @@ final class DatetimeTest extends OrmTestCase
         $e = $this->orm->get('user', ['id' => 1]);
         $e->time_created = new \DateTimeImmutable('tomorrow 10pm');
 
-        QueryAssert::writes(1, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
-        QueryAssert::writes(0, function () use (&$tr, $e): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($e);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(1);
+
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($e);
+        $tr->run();
+        $this->assertNumWrites(0);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

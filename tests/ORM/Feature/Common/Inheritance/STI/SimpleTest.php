@@ -11,7 +11,6 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -185,9 +184,13 @@ class SimpleTest extends StiBaseTest
 
         Assert::instanceOf($entity, Manager::class);
 
-        QueryAssert::writes(1, fn() => $this->save($entity));
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($entity));
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(0);
 
         $loadedEntity = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($entity->id)->fetchData();

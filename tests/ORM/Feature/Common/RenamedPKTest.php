@@ -9,7 +9,6 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Identity;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\Database\Attribute\ExceptDriver;
 use Cycle\Testing\Database\Driver;
 use Cycle\Testing\ORM\OrmTestCase;
@@ -71,7 +70,9 @@ final class RenamedPKTest extends OrmTestCase
         $u = $data[0];
         $u->setId(8);
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();

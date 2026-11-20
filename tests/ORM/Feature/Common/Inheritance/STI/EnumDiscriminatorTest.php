@@ -12,7 +12,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\EmployeeType;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -101,7 +100,9 @@ final class EnumDiscriminatorTest extends StiBaseTest
         $manager = (new Select($this->orm, Employee::class))->orderBy('id')->fetchOne();
         Assert::instanceOf($manager, Manager::class);
 
-        QueryAssert::writes(0, fn() => $this->save($manager));
+        $this->captureWriteQueries();
+        $this->save($manager);
+        $this->assertNumWrites(0);
     }
 
     #[Test]

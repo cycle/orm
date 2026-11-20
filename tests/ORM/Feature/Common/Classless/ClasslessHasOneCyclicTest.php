@@ -10,7 +10,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -100,9 +99,13 @@ final class ClasslessHasOneCyclicTest extends OrmTestCase
         $c->name = 'new';
         $c->cyclic = $c;
 
-        QueryAssert::writes(2, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(2);
 
-        QueryAssert::writes(0, fn() => $this->save($c));
+        $this->captureWriteQueries();
+        $this->save($c);
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');
         $c = $selector->load('cyclic')->wherePK($c->id)->fetchOne();

@@ -16,7 +16,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -182,7 +181,9 @@ final class ManyToManyNonPivotedCollectionTest extends OrmTestCase
 
         $this->save($u);
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
@@ -211,7 +212,9 @@ final class ManyToManyNonPivotedCollectionTest extends OrmTestCase
 
         $this->save($u);
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
 
         $u = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('tags')->wherePK(3)->fetchOne();
@@ -239,9 +242,13 @@ final class ManyToManyNonPivotedCollectionTest extends OrmTestCase
 
         $b->tags = [$t];
 
-        QueryAssert::writes(5, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(5);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         /**
          * @var User $a
@@ -266,7 +273,9 @@ final class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         /** @var User $user */
         $user = $userSelect->load('tags')->fetchOne(['id' => 1]);
 
-        QueryAssert::writes(0, fn() => $this->save($user));
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(0);
 
         $wantTags = ['tag a', 'tag c'];
 
@@ -290,7 +299,10 @@ final class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         array_filter($user->tags, function ($t) use ($wantTags) {
             return in_array($t->name, $wantTags);
         });
-        QueryAssert::writes(2, fn() => $this->save($user));
+
+        $this->captureWriteQueries();
+        $this->save($user);
+        $this->assertNumWrites(2);
 
         $this->orm = $this->orm->withHeap(new Heap());
 

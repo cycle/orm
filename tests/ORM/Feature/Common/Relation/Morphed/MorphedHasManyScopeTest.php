@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -321,10 +320,10 @@ final class MorphedHasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
 
-        QueryAssert::reads(2, function () use ($a, $b): void {
-            Assert::count($a->comments, 3);
-            Assert::count($b->comments, 2);
-        });
+        $this->captureReadQueries();
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 2);
+        $this->assertNumReads(2);
 
         Assert::same($a->comments[2]->message, 'p.msg 4');
         Assert::same($a->comments[1]->message, 'p.msg 3');

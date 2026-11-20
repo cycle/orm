@@ -11,7 +11,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -36,9 +35,13 @@ final class TypecastEnumTest extends OrmTestCase
         $e->enum_string = TypeStringEnum::Admin;
         $e->enum_int = TypeIntEnum::Admin;
 
-        QueryAssert::writes(1, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($e));
+        $this->captureWriteQueries();
+        $this->save($e);
+        $this->assertNumWrites(0);
     }
 
     #[Test]

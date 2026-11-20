@@ -12,7 +12,6 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -61,10 +60,10 @@ class RefersToProxyMapperTest extends OrmTestCase
         Assert::instanceOf($a->user, User::class);
         Assert::null($b->user);
 
-        QueryAssert::reads(0, function () use ($a, $b): void {
-            Assert::same($a->user, $a->user);
-            Assert::null($b->user);
-        });
+        $this->captureReadQueries();
+        Assert::same($a->user, $a->user);
+        Assert::null($b->user);
+        $this->assertNumReads(0);
 
         Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -85,13 +84,14 @@ class RefersToProxyMapperTest extends OrmTestCase
         // warm up
         (new Select($this->orm, User::class))->fetchAll();
 
-        QueryAssert::reads(0, function () use ($a): void {
-            Assert::instanceOf($a->user, User::class);
-            Assert::same($a->user, $a->user);
-        });
-
+        $this->captureReadQueries();
+        Assert::instanceOf($a->user, User::class);
+        Assert::same($a->user, $a->user);
+        $this->assertNumReads(0);
         // invalid object can't be cached
-        QueryAssert::reads(1, fn() => Assert::null($b->user));
+        $this->captureReadQueries();
+        Assert::null($b->user);
+        $this->assertNumReads(1);
 
         Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -101,7 +101,9 @@ class RefersToProxyMapperTest extends OrmTestCase
     {
         $p = (new Select($this->orm, Profile::class))->wherePK(1)->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -116,9 +118,15 @@ class RefersToProxyMapperTest extends OrmTestCase
         $np = new Profile();
         $np->image = 'new image';
 
-        QueryAssert::reads(1, fn() => $np->user = $p->user);
+        $this->captureReadQueries();
+        $np->user = $p->user;
+        $this->assertNumReads(1);
 
-        QueryAssert::count(0, 1, fn() => $this->save($np));
+        $this->captureWriteQueries();
+        $this->captureReadQueries();
+        $this->save($np);
+        $this->assertNumWrites(1);
+        $this->assertNumReads(0);
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
             ->wherePK(4)->fetchOne();

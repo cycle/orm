@@ -11,7 +11,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Core\Exception\SkipTest;
@@ -90,7 +89,9 @@ final class EnumTest extends OrmTestCase
                 ],
             );
 
-            QueryAssert::writes(1, fn() => $this->save($user));
+            $this->captureWriteQueries();
+            $this->save($user);
+            $this->assertNumWrites(1);
 
         } catch (\Throwable) {
             throw new SkipTest("Can't save a Enum value because it is not supported yet.");

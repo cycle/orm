@@ -17,7 +17,6 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -312,7 +311,9 @@ final class BelongsToWithHasOneTest extends OrmTestCase
         $this->orm = $this->orm->withHeap(new Heap());
         $p = (new Select($this->orm, Profile::class))->load('user')->wherePK(4)->fetchOne();
 
-        QueryAssert::writes(0, fn() => $this->save($p));
+        $this->captureWriteQueries();
+        $this->save($p);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -398,9 +399,13 @@ final class BelongsToWithHasOneTest extends OrmTestCase
 
         [$a->user, $b->user] = [$b->user, $a->user];
 
-        QueryAssert::writes(2, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(2);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
@@ -442,9 +447,13 @@ final class BelongsToWithHasOneTest extends OrmTestCase
         $n->profile->user->email = 'new@email.com';
         $n->profile->user->balance = 999;
 
-        QueryAssert::writes(3, fn() => $this->save($n));
+        $this->captureWriteQueries();
+        $this->save($n);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($n));
+        $this->captureWriteQueries();
+        $this->save($n);
+        $this->assertNumWrites(0);
 
         $n = (new Select($this->orm->withHeap(new Heap()), Nested::class))
             ->wherePK(2)->load('profile.user')->fetchOne();
@@ -479,18 +488,23 @@ final class BelongsToWithHasOneTest extends OrmTestCase
     #[Test]
     public function testUpdateNestedRelation(): void
     {
-        $nested = QueryAssert::reads(1, fn() => (new Select($this->orm, Nested::class))->fetchAll());
+        $this->captureReadQueries();
+        $nested = (new Select($this->orm, Nested::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))->collect(...$nested)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$nested)
             ->load('profile.user')
-            ->run());
-        QueryAssert::reads(0, function () use ($nested): void {
-            foreach ($nested as $item) {
-                Assert::notNull($item->profile);
-                Assert::notNull($item->profile->user);
-                Assert::instanceOf($item->profile->user, User::class);
-            }
-        });
+            ->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        foreach ($nested as $item) {
+            Assert::notNull($item->profile);
+            Assert::notNull($item->profile->user);
+            Assert::instanceOf($item->profile->user, User::class);
+        }
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

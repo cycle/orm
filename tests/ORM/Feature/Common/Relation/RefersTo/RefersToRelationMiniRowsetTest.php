@@ -12,7 +12,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -25,11 +24,11 @@ final class RefersToRelationMiniRowsetTest extends OrmTestCase
     {
         $c = new Comment();
 
-        QueryAssert::writes(1, function () use ($c): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c);
+        $tr->run();
+        $this->assertNumWrites(1);
 
         $s = new Select($this->orm->withHeap(new Heap()), Comment::class);
         $cd = $s->fetchData();
@@ -44,13 +43,13 @@ final class RefersToRelationMiniRowsetTest extends OrmTestCase
         $c2 = new Comment();
         $c3 = new Comment();
 
-        QueryAssert::writes(3, function () use ($c1, $c2, $c3): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($c1);
-            $tr->persist($c2);
-            $tr->persist($c3);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($c1);
+        $tr->persist($c2);
+        $tr->persist($c3);
+        $tr->run();
+        $this->assertNumWrites(3);
 
         $cd = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
 
@@ -64,11 +63,11 @@ final class RefersToRelationMiniRowsetTest extends OrmTestCase
     {
         $u = new User();
 
-        QueryAssert::writes(1, function () use ($u): void {
-            $tr = new Transaction($this->orm);
-            $tr->persist($u);
-            $tr->run();
-        });
+        $this->captureWriteQueries();
+        $tr = new Transaction($this->orm);
+        $tr->persist($u);
+        $tr->run();
+        $this->assertNumWrites(1);
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
 
@@ -82,7 +81,9 @@ final class RefersToRelationMiniRowsetTest extends OrmTestCase
         $u = new User();
         $u->lastComment = $c;
 
-        QueryAssert::writes(2, fn() => $this->save($c, $u));
+        $this->captureWriteQueries();
+        $this->save($c, $u);
+        $this->assertNumWrites(2);
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
         $commentData = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();

@@ -9,7 +9,6 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Options\LoadOptions;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -93,12 +92,12 @@ final class CaseTest extends OrmTestCase
             ->load('credentials')
             ->run();
         // After BulkLoader the relation is hydrated; reading the fields must not query the DB.
-        QueryAssert::reads(0, function () use ($user): void {
-            Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
-            Assert::same($user->credentials->username, 'user1');
-            Assert::same($user->credentials->password, 'pass1');
-            Assert::same($user->credentials->numLogins, 0);
-        });
+        $this->captureReadQueries();
+        Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
+        Assert::same($user->credentials->username, 'user1');
+        Assert::same($user->credentials->password, 'pass1');
+        Assert::same($user->credentials->numLogins, 0);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -118,12 +117,12 @@ final class CaseTest extends OrmTestCase
             ->load('credentials')
             ->run();
 
-        QueryAssert::reads(0, function () use ($users): void {
-            Assert::same($users[0]->credentials->username, 'user1');
-            Assert::same($users[1]->credentials->username, 'user2');
-            Assert::same($users[0]->credentials->numLogins, 0);
-            Assert::same($users[1]->credentials->numLogins, 1);
-        });
+        $this->captureReadQueries();
+        Assert::same($users[0]->credentials->username, 'user1');
+        Assert::same($users[1]->credentials->username, 'user2');
+        Assert::same($users[0]->credentials->numLogins, 0);
+        Assert::same($users[1]->credentials->numLogins, 1);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -142,12 +141,12 @@ final class CaseTest extends OrmTestCase
             ->load('comments')
             ->run();
 
-        QueryAssert::reads(0, function () use ($users): void {
-            Assert::same($users[0]->credentials->username, 'user1');
-            Assert::same($users[1]->credentials->username, 'user2');
-            Assert::count($users[0]->comments, 2);
-            Assert::count($users[1]->comments, 1);
-        });
+        $this->captureReadQueries();
+        Assert::same($users[0]->credentials->username, 'user1');
+        Assert::same($users[1]->credentials->username, 'user2');
+        Assert::count($users[0]->comments, 2);
+        Assert::count($users[1]->comments, 1);
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -161,18 +160,21 @@ final class CaseTest extends OrmTestCase
             ->fetchAll();
         // All embedded relations share the parent table, so loading any number of them
         // must collapse into one SQL query.
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('credentials')
             ->load('profile')
-            ->run());
-        QueryAssert::reads(0, function () use ($users): void {
-            Assert::same($users[0]->credentials->username, 'user1');
-            Assert::same($users[1]->credentials->username, 'user2');
-            Assert::same($users[0]->profile->bio, 'bio 1');
-            Assert::same($users[1]->profile->bio, 'bio 2');
-            Assert::same($users[0]->profile->image, 'image1.png');
-        });
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        Assert::same($users[0]->credentials->username, 'user1');
+        Assert::same($users[1]->credentials->username, 'user2');
+        Assert::same($users[0]->profile->bio, 'bio 1');
+        Assert::same($users[1]->profile->bio, 'bio 2');
+        Assert::same($users[0]->profile->image, 'image1.png');
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -231,16 +233,19 @@ final class CaseTest extends OrmTestCase
         Assert::count($orders, 3);
         // Composite PK: BulkLoader must build (tenant_id, number) tuples and pass them
         // through Select::wherePK's composite branch.
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$orders)
             ->load('shipping')
-            ->run());
-        QueryAssert::reads(0, function () use ($orders): void {
-            Assert::same($orders[0]->shipping->address, 'Addr A');
-            Assert::same($orders[0]->shipping->recipient, 'Alice');
-            Assert::same($orders[1]->shipping->address, 'Addr B');
-            Assert::same($orders[2]->shipping->address, 'Addr C');
-        });
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        Assert::same($orders[0]->shipping->address, 'Addr A');
+        Assert::same($orders[0]->shipping->recipient, 'Alice');
+        Assert::same($orders[1]->shipping->address, 'Addr B');
+        Assert::same($orders[2]->shipping->address, 'Addr C');
+        $this->assertNumReads(0);
     }
 
     #[Test]

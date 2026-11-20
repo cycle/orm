@@ -6,7 +6,6 @@ namespace Cycle\ORM\Tests\Regression\Issue431;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -45,17 +44,20 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($users, 3);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('posts')
-            ->run());
-        QueryAssert::reads(0, function () use (&$postCounts, $users): void {
-            $postCounts = [];
-            foreach ($users as $user) {
-                Assert::instanceOf($user->id, Typecast\StringableUuid::class);
-                $postCounts[$user->id->toString()] = \count($user->posts);
-            }
-        });
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        $postCounts = [];
+        foreach ($users as $user) {
+            Assert::instanceOf($user->id, Typecast\StringableUuid::class);
+            $postCounts[$user->id->toString()] = \count($user->posts);
+        }
+        $this->assertNumReads(0);
 
         Assert::same($postCounts[self::USER_1], 1);
         Assert::same($postCounts[self::USER_2], 2);
@@ -71,11 +73,16 @@ final class CaseTest extends OrmTestCase
 
         Assert::instanceOf($user, Entity\User::class);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect($user)
             ->load('posts')
-            ->run());
-        QueryAssert::reads(0, fn() => Assert::count($user->posts, 2));
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        Assert::count($user->posts, 2);
+        $this->assertNumReads(0);
     }
 
     // =============================================
@@ -95,16 +102,19 @@ final class CaseTest extends OrmTestCase
         foreach ($posts as $post) {
             Assert::instanceOf($post->id, Typecast\ValueInterfaceUuid::class);
         }
-        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))
+
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('comments')
-            ->run());
+            ->run();
+        $this->assertNumReads(2);
         // 1 comments + 1 eager comment.user
-        QueryAssert::reads(0, function () use ($posts, &$post): void {
-            foreach ($posts as $post) {
-                Assert::array($post->comments);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($posts as $post) {
+            Assert::array($post->comments);
+        }
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -116,15 +126,18 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($posts, 4);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
-            ->run());
-        QueryAssert::reads(0, function () use ($posts): void {
-            foreach ($posts as $post) {
-                Assert::instanceOf($post->user, Entity\User::class);
-            }
-        });
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($posts as $post) {
+            Assert::instanceOf($post->user, Entity\User::class);
+        }
+        $this->assertNumReads(0);
     }
 
     #[Test]
@@ -135,18 +148,20 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($posts, 4);
 
-        QueryAssert::reads(3, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
             ->load('comments')
-            ->run());
+            ->run();
+        $this->assertNumReads(3);
         // 1 users + 1 comments + 1 eager comment.user
-        QueryAssert::reads(0, function () use ($posts): void {
-            foreach ($posts as $post) {
-                Assert::instanceOf($post->user, Entity\User::class);
-                Assert::array($post->comments);
-            }
-        });
+        $this->captureReadQueries();
+        foreach ($posts as $post) {
+            Assert::instanceOf($post->user, Entity\User::class);
+            Assert::array($post->comments);
+        }
+        $this->assertNumReads(0);
     }
 
     // =============================================
@@ -161,16 +176,19 @@ final class CaseTest extends OrmTestCase
 
         Assert::count($comments, 3);
 
-        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))
             ->collect(...$comments)
             ->load('post')
-            ->run());
-        QueryAssert::reads(0, function () use ($comments): void {
-            foreach ($comments as $comment) {
-                Assert::instanceOf($comment->post, Entity\Post::class);
-                Assert::instanceOf($comment->post->id, Typecast\ValueInterfaceUuid::class);
-            }
-        });
+            ->run();
+        $this->assertNumReads(1);
+
+        $this->captureReadQueries();
+        foreach ($comments as $comment) {
+            Assert::instanceOf($comment->post, Entity\Post::class);
+            Assert::instanceOf($comment->post->id, Typecast\ValueInterfaceUuid::class);
+        }
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

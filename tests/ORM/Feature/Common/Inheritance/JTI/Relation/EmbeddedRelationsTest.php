@@ -13,7 +13,6 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\ManagerWithCredentials;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Skip;
@@ -44,7 +43,9 @@ final class EmbeddedRelationsTest extends JtiBaseTest
         $entity->credentials->username = 'roquie';
         $entity->credentials->password = 'secret';
 
-        QueryAssert::writes(1, fn() => $this->save($entity));
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(1);
 
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
             ->wherePK(1)
@@ -72,7 +73,9 @@ final class EmbeddedRelationsTest extends JtiBaseTest
 
         $entity->credentials = $credentials;
 
-        QueryAssert::writes(1, fn() => $this->save($entity));
+        $this->captureWriteQueries();
+        $this->save($entity);
+        $this->assertNumWrites(1);
 
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
             ->wherePK(1)

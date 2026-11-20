@@ -16,7 +16,6 @@ use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Tests\Fixtures\CompositePKNested;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -169,7 +168,9 @@ final class BelongsToCompositeKeyTest extends OrmTestCase
             ->wherePK([201, 201])
             ->fetchOne();
 
-        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($p)->run());
+        $this->captureWriteQueries();
+        (new Transaction($this->orm))->persist($p)->run();
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -250,9 +251,13 @@ final class BelongsToCompositeKeyTest extends OrmTestCase
 
         [$a->parent, $b->parent] = [$b->parent, $a->parent];
 
-        QueryAssert::writes(2, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(2);
 
-        QueryAssert::writes(0, fn() => $this->save($a, $b));
+        $this->captureWriteQueries();
+        $this->save($a, $b);
+        $this->assertNumWrites(0);
 
         $s = new Select($this->orm->withHeap(new Heap()), CompositePKChild::class);
         [$a2, $b2] = $s->wherePK([1, 1], [1, 2])
@@ -300,9 +305,13 @@ final class BelongsToCompositeKeyTest extends OrmTestCase
         $n->parent->parent->key2 = 242;
         $n->parent->parent->key3 = 999;
 
-        QueryAssert::writes(3, fn() => $this->save($n));
+        $this->captureWriteQueries();
+        $this->save($n);
+        $this->assertNumWrites(3);
 
-        QueryAssert::writes(0, fn() => $this->save($n));
+        $this->captureWriteQueries();
+        $this->save($n);
+        $this->assertNumWrites(0);
 
         $n = (new Select($this->orm->withHeap(new Heap()), CompositePKNested::class))
             ->wherePK(new Parameter($n->key1))

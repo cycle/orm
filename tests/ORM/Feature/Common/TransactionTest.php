@@ -46,27 +46,28 @@ final class TransactionTest extends OrmTestCase
         $t1 = clone $t;
         $t2 = clone $t1;
 
-        // Every run fails at the same point, so the write count stays at the first run's three writes.
-        $log = $this->context->queryLog();
-        $writes = $log->countWrites();
         try {
+            $this->captureWriteQueries();
             $t->run();
         } catch (\Exception $e) {
-            Assert::same($log->countWrites() - $writes, 3);
+            $this->assertNumWrites(3);
+
             Assert::null($u->id);
         }
 
         try {
             $t1->run();
         } catch (\Exception $e) {
-            Assert::same($log->countWrites() - $writes, 3);
+            $this->assertNumWrites(3);
+
             Assert::null($u->id);
         }
 
         try {
             $t2->run();
         } catch (\Exception $e) {
-            Assert::same($log->countWrites() - $writes, 3);
+            $this->assertNumWrites(3);
+
             Assert::null($u->id);
         }
 

@@ -14,7 +14,6 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Lifecycle\BeforeTest;
@@ -255,23 +254,28 @@ final class HasManyNestedConditionTest extends OrmTestCase
     #[Test]
     public function testUpdateNestedRelation(): void
     {
-        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        $this->captureReadQueries();
+        $users = (new Select($this->orm, User::class))->fetchAll();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))->collect(...$users)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect(...$users)
             ->load('posts.comments')
-            ->run());
-        QueryAssert::reads(0, function () use ($users): void {
-            foreach ($users as $user) {
-                Assert::iterable($user->posts);
-                foreach ($user->posts as $post) {
-                    Assert::iterable($post->comments);
-                    // Verify comments are loaded
-                    foreach ($post->comments as $comment) {
-                        Assert::notNull($comment->message);
-                    }
+            ->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        foreach ($users as $user) {
+            Assert::iterable($user->posts);
+            foreach ($user->posts as $post) {
+                Assert::iterable($post->comments);
+                // Verify comments are loaded
+                foreach ($post->comments as $comment) {
+                    Assert::notNull($comment->message);
                 }
             }
-        });
+        }
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

@@ -14,7 +14,6 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -35,7 +34,9 @@ class RefersToRelationTest extends OrmTestCase
 
         $u->addComment($c);
 
-        QueryAssert::writes(3, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(3);
 
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
@@ -56,16 +57,22 @@ class RefersToRelationTest extends OrmTestCase
 
         $u->addComment($c);
 
-        QueryAssert::writes(3, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(3);
 
         $u2 = new User();
         $u2->email = 'second@email.com';
         $u2->balance = 200;
         $u2->lastComment = $c;
 
-        QueryAssert::writes(1, fn() => $this->save($u2));
+        $this->captureWriteQueries();
+        $this->save($u2);
+        $this->assertNumWrites(1);
 
-        QueryAssert::writes(0, fn() => $this->save($u2));
+        $this->captureWriteQueries();
+        $this->save($u2);
+        $this->assertNumWrites(0);
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
@@ -88,7 +95,9 @@ class RefersToRelationTest extends OrmTestCase
 
         $u->addComment($c);
 
-        QueryAssert::writes(2, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(2);
 
         $u = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('lastComment')
@@ -170,7 +179,9 @@ class RefersToRelationTest extends OrmTestCase
         $c->message = 'last comment';
         $u->addComment($c);
 
-        QueryAssert::writes(3, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(3);
 
         $this->orm->getHeap()->clean();
         $u = (new Select($this->orm, User::class))
@@ -185,7 +196,9 @@ class RefersToRelationTest extends OrmTestCase
 
         $u->lastComment = null;
 
-        QueryAssert::writes(1, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(1);
 
         $this->orm->getHeap()->clean();
 
@@ -240,7 +253,9 @@ class RefersToRelationTest extends OrmTestCase
         Assert::notNull($u->lastComment);
         unset($u->lastComment);
 
-        QueryAssert::writes(0, fn() => $this->save($u));
+        $this->captureWriteQueries();
+        $this->save($u);
+        $this->assertNumWrites(0);
     }
 
     #[Test]
@@ -262,15 +277,20 @@ class RefersToRelationTest extends OrmTestCase
         $id = $u->id;
         unset($u, $c1, $c2);
 
-        $user = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->wherePK($id)->fetchOne());
+        $this->captureReadQueries();
+        $user = (new Select($this->orm, User::class))->wherePK($id)->fetchOne();
+        $this->assertNumReads(1);
 
-        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))->collect($user)
+        $this->captureReadQueries();
+        (new BulkLoader($this->orm))->collect($user)
             ->load('lastComment')
-            ->load('comments')->run());
-        QueryAssert::reads(0, function () use ($user): void {
-            Assert::notBlank($user->comments);
-            Assert::notNull($user->lastComment);
-        });
+            ->load('comments')->run();
+        $this->assertNumReads(2);
+
+        $this->captureReadQueries();
+        Assert::notBlank($user->comments);
+        Assert::notNull($user->lastComment);
+        $this->assertNumReads(0);
     }
 
     #[BeforeTest]

@@ -302,6 +302,55 @@ final class QueryBuilderTest extends OrmTestCase
     }
 
     #[Test]
+    public function testConditionAfterOrGroupIsApplied(): void
+    {
+        $users = (new Select($this->orm, User::class))
+            ->where([
+                '@or' => [
+                    ['id' => 1],
+                    ['id' => 2],
+                ],
+                'email' => 'another@world.com',
+            ])
+            ->fetchAll();
+
+        Assert::count($users, 1);
+        Assert::same($users[0]->id, 2);
+    }
+
+    #[Test]
+    public function testResolveWithoutAutoloadDoesNotJoinRelation(): void
+    {
+        $select = new Select($this->orm, User::class);
+
+        $column = $select->getBuilder()->resolve('comments.message', false);
+
+        Assert::same($column, 'user_comments.message_str');
+        Assert::string($select->sqlStatement())->notContains('JOIN');
+    }
+
+    #[Test]
+    public function testResolveWithAutoloadJoinsRelation(): void
+    {
+        $select = new Select($this->orm, User::class);
+
+        $select->getBuilder()->resolve('comments.message');
+
+        Assert::string($select->sqlStatement())->contains('JOIN');
+    }
+
+    #[Test]
+    public function testCountKeepsTheSelectQuery(): void
+    {
+        $select = new Select($this->orm, User::class);
+        $select->count();
+
+        $select->where('id', 2);
+
+        Assert::count($select->fetchAll(), 1);
+    }
+
+    #[Test]
     public function testRelationComplexArrayORAliased(): void
     {
         $select = new Select($this->orm, User::class);

@@ -14,6 +14,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\Database\Attribute\ExceptDriver;
 use Cycle\Testing\Database\Driver;
 use Cycle\Testing\ORM\OrmTestCase;
@@ -408,6 +409,76 @@ final class CursorTest extends OrmTestCase
     }
 
     #[Test]
+    public function testCursorRunsPostloadQueryPerChunk(): void
+    {
+        $this->fillUsers(5);
+        $this->fillCommentsForUsers([1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1]);
+
+        $queries = $this->captureCursorQueries((new Select($this->orm, User::class))->load('comments'), 2);
+
+        Assert::count($this->queriesFrom('comment', $queries), 3);
+    }
+
+    #[Test]
+    public function testCursorOnEmptyTableRunsNoPostloadQuery(): void
+    {
+        $queries = $this->captureCursorQueries((new Select($this->orm, User::class))->load('comments'), 2);
+
+        Assert::count($this->queriesFrom('comment', $queries), 0);
+    }
+
+    #[Test]
+    public function testCursorOrdersByPrimaryKey(): void
+    {
+        $this->fillUsers(1);
+
+        $queries = $this->captureCursorQueries(new Select($this->orm, User::class), 10);
+
+        Assert::string($this->queriesFrom('user', $queries)[0])->matchesRegex('/ORDER BY\W+user\W*\.\W*id/i');
+    }
+
+    #[Test]
+    public function testCursorFillsUnloadedRelationOfHeapEntity(): void
+    {
+        $this->fillUsers(1);
+        $this->fillCommentsForUsers([1 => 2]);
+        $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+
+        $this->captureCursorQueries((new Select($this->orm, User::class))->load('comments'), 10);
+
+        QueryAssert::none(static fn() => Assert::count($user->comments, 2));
+    }
+
+    #[Test]
+    public function testCursorAppliesTypecast(): void
+    {
+        $this->fillUsers(1);
+        $orm = $this->withSchema(new Schema([
+            User::class => [
+                Schema::ROLE => 'user',
+                Schema::MAPPER => Mapper::class,
+                Schema::DATABASE => 'default',
+                Schema::TABLE => 'user',
+                Schema::PRIMARY_KEY => 'id',
+                Schema::COLUMNS => ['id', 'email', 'balance'],
+                Schema::TYPECAST => ['id' => 'int', 'balance' => 'int'],
+                Schema::SCHEMA => [],
+                Schema::RELATIONS => [],
+            ],
+        ]));
+
+        $balances = $this->getDatabase()->transaction(static function () use ($orm): array {
+            $out = [];
+            foreach ((new Select($orm, User::class))->cursor(10) as $user) {
+                $out[] = $user->balance;
+            }
+            return $out;
+        });
+
+        Assert::same($balances, [100]);
+    }
+
+    #[Test]
     public function testCursorOnNonCursorableDriverThrows(): void
     {
         if ($this->getDatabase()->getDriver() instanceof CursorInterface) {
@@ -545,6 +616,32 @@ final class CursorTest extends OrmTestCase
         if ($rows !== []) {
             $this->getDatabase()->table('user')->insertMultiple(['email', 'balance'], $rows);
         }
+    }
+
+    /**
+     * @return list<string> Queries run while the cursor is drained inside a transaction.
+     */
+    private function captureCursorQueries(Select $select, int $chunkSize): array
+    {
+        return $this->getDatabase()->transaction(fn(): array => $this->context->queryLog()->capture(
+            static function () use ($select, $chunkSize): void {
+                foreach ($select->cursor($chunkSize) as $_) {
+                }
+            },
+        )['queries']);
+    }
+
+    /**
+     * @param list<string> $queries
+     *
+     * @return list<string>
+     */
+    private function queriesFrom(string $table, array $queries): array
+    {
+        return \array_values(\array_filter(
+            $queries,
+            static fn(string $sql): bool => \preg_match("/FROM\\W+{$table}\\W/i", $sql) === 1,
+        ));
     }
 
     private function countHeapEntries($heap, string $role): int

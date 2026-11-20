@@ -6,6 +6,7 @@ namespace Cycle\ORM\Tests\Unit\Parser;
 
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\Driver\DriverInterface;
+use Cycle\ORM\Exception\TypecastException;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Tests\Fixtures\Enum\CustomStringable;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
@@ -15,6 +16,7 @@ use Cycle\ORM\Tests\Fixtures\Uuid;
 use Mockery as m;
 use Testo\Assert;
 use Testo\Data\DataProvider;
+use Testo\Expect;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
 
@@ -95,6 +97,8 @@ final class TypecastTest
                 'object' => [['foo' => new \stdClass()], ['foo' => null]],
                 'invalid str case' => [['foo' => 'foo-bar-baz'], ['foo' => null]],
                 'invalid int case' => [['foo' => -1], ['foo' => null]],
+                'digits then letters' => [['foo' => '0x'], ['foo' => null]],
+                'letters then digits' => [['foo' => 'x0'], ['foo' => null]],
                 'no needed key' => [['bar' => 0], ['bar' => 0]],
                 'stringable' => [['foo' => new CustomStringable('2')], ['foo' => null]],
             ] as $k => $v
@@ -214,6 +218,89 @@ final class TypecastTest
         Assert::same($val['foo'], "1917");
         Assert::same($val['bar'], '"string"');
         Assert::same($val['baz'], "3.14");
+    }
+
+    public function castsNumericStringToFloat(): void
+    {
+        $this->typecast->setRules(['price' => 'float']);
+
+        Assert::same($this->typecast->cast(['price' => '9.99'])['price'], 9.99);
+    }
+
+    public function decodesJsonUpToDefaultDepth(): void
+    {
+        $this->typecast->setRules(['foo' => 'json']);
+
+        $data = $this->typecast->cast(['foo' => \str_repeat('[', 511) . \str_repeat(']', 511)]);
+
+        Assert::count($data['foo'], 1);
+    }
+
+    public function rejectsJsonDeeperThanDefaultDepth(): never
+    {
+        $this->typecast->setRules(['foo' => 'json']);
+
+        Expect::exception(TypecastException::class);
+
+        $this->typecast->cast(['foo' => \str_repeat('[', 512) . \str_repeat(']', 512)]);
+    }
+
+    public function rejectsInvalidJson(): never
+    {
+        $this->typecast->setRules(['foo' => 'json']);
+
+        Expect::exception(TypecastException::class);
+
+        $this->typecast->cast(['foo' => '{invalid']);
+    }
+
+    public function substitutesInvalidUtf8InJson(): void
+    {
+        $this->typecast->setRules(['foo' => 'json']);
+
+        $data = $this->typecast->cast(['foo' => "\"a\xB1\""]);
+        $raw = $this->typecast->uncast(['foo' => "a\xB1"]);
+
+        Assert::same($data['foo'], "a\u{FFFD}");
+        Assert::same($raw['foo'], "\"a\u{FFFD}\"");
+    }
+
+    public function uncastKeepsUnicodeUnescaped(): void
+    {
+        $this->typecast->setRules(['foo' => 'json']);
+
+        Assert::same($this->typecast->uncast(['foo' => ['é']])['foo'], '["é"]');
+    }
+
+    public function leavesUnknownRulesUntouched(): void
+    {
+        $rules = [
+            'uuid' => 'uuid',
+            'tail' => [StaticCallableRule::class, 'invoke', [], 'extra'],
+            'id' => 'int',
+        ];
+
+        Assert::same($this->typecast->setRules($rules), [
+            'uuid' => 'uuid',
+            'tail' => [StaticCallableRule::class, 'invoke', [], 'extra'],
+        ]);
+    }
+
+    public function rejectsCallableArgumentsThatAreNotArray(): never
+    {
+        Expect::exception(\InvalidArgumentException::class)
+            ->withMessage('The third argument of typecast rule for the `role.foo` must be an array of arguments.');
+
+        $this->typecast->setRules(['foo' => [StaticCallableRule::class, 'invoke', 'bar']]);
+    }
+
+    public function castsWithSingleParameterCallableAndNoArguments(): void
+    {
+        @$this->typecast->setRules(['uuid' => [\Ramsey\Uuid\Uuid::class, 'fromString', []]]);
+
+        $result = $this->typecast->cast(['uuid' => '71ceb213-ec3d-4ae5-911b-ba042abfb204']);
+
+        Assert::same($result['uuid']->toString(), '71ceb213-ec3d-4ae5-911b-ba042abfb204');
     }
 
     public function testUncast(): void

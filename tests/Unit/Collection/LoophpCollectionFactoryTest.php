@@ -142,6 +142,28 @@ final class LoophpCollectionFactoryTest extends BaseTest
         Assert::same($collection->all(false), $array);
     }
 
+    #[Test]
+    public function pivotedCollectionKeepsGivenPivotContext(): void
+    {
+        $entity = new \stdClass();
+        $context = new \SplObjectStorage();
+        $context[$entity] = ['role' => 'admin'];
+
+        $collection = new LoophpPivotedCollection([$entity], $context);
+
+        Assert::same($collection->getPivot($entity), ['role' => 'admin']);
+    }
+
+    #[Test]
+    public function withDecoratorClassKeepsOriginalFactory(): void
+    {
+        $factory = $this->getFactory();
+
+        $factory->withCollectionClass(CustomLoophpPivotedCollection::class);
+
+        Assert::same($factory->collect(['foo' => 'bar'])::class, Collection::class);
+    }
+
     protected function getFactory(): CollectionFactoryInterface
     {
         return new LoophpCollectionFactory();

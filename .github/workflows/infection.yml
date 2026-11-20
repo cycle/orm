@@ -18,7 +18,7 @@ permissions:
 jobs:
   infection:
     name: Infection
-    uses: cycle/gh-actions/.github/workflows/infection.yml@master
+    uses: cycle/gh-actions/.github/workflows/infection.yml@v4.2.0
     with:
       timeout-minutes: 45
     secrets: inherit

@@ -18,7 +18,7 @@ concurrency:
 jobs:
   testo:
     name: Testo
-    uses: cycle/gh-actions/.github/workflows/testo.yml@master
+    uses: cycle/gh-actions/.github/workflows/testo.yml@v4.2.0
     with:
       coverage: true
     secrets: inherit

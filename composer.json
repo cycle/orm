@@ -37,6 +37,15 @@
             "url": "https://github.com/sponsors/cycle"
         }
     ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../testing",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "require": {
         "php": ">=8.2",
         "cycle/database": "^2.23",
@@ -47,6 +56,7 @@
         "ext-pdo": "*",
         "bamarni/composer-bin-plugin": "^1.9",
         "buggregator/trap": "^1.20",
+        "cycle/testing": "1.x-dev",
         "doctrine/collections": "^2.6 || ^3.0",
         "illuminate/collections": "12 - 13",
         "llm/skills": "^1.20",
@@ -55,7 +65,9 @@
         "phpunit/phpunit": "^9.6",
         "ramsey/uuid": "^4.10",
         "roxblnfk/unpoly": "^1.8",
-        "spiral/tokenizer": "^3.18"
+        "spiral/tokenizer": "^3.18",
+        "testo/bridge-mockery": "^0.1.2",
+        "testo/testo": "^0.10.60"
     },
     "suggest": {
         "llm/skills": "To sync the cycle-orm AI skill into your project"

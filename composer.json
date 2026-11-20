@@ -52,7 +52,7 @@
         "illuminate/collections": "12 - 13",
         "llm/skills": "^1.20",
         "loophp/collection": "^7.6",
-        "mockery/mockery": "^1.6",
+        "mockery/mockery": "^1.6.5",
         "ramsey/uuid": "^4.10",
         "roxblnfk/unpoly": "^1.8",
         "testo/bridge-mockery": "^0.1.2",

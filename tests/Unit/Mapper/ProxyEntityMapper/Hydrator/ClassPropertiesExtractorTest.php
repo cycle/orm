@@ -124,6 +124,25 @@ final class ClassPropertiesExtractorTest
         ]);
     }
 
+    public function testStaticPropertiesAreSkipped(): void
+    {
+        $map = $this->extractor->extract(UserWithStatics::class, []);
+
+        Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
+            '' => [
+                'id' => 'id',
+                'comments' => 'comments',
+            ],
+            User::class => [
+                'username' => 'username',
+                'email' => 'email',
+            ],
+            UserWithStatics::class => [
+                'nickname' => 'nickname',
+            ],
+        ]);
+    }
+
     #[BeforeTest]
     protected function setUp(): void
     {
@@ -152,5 +171,12 @@ class SuperUser extends ExtendedUser
 {
     public int $totalLogin;
     private int $isAdmin;
+}
+
+class UserWithStatics extends User
+{
+    public static int $instances = 0;
+    private static array $cache = [];
+    private string $nickname;
 }
 // phpcs:enable

@@ -11,6 +11,7 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
+use Cycle\ORM\Transaction\Runner;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
 use Testo\Expect;
@@ -238,6 +239,32 @@ final class EntityManagerTest extends OrmTestCase
 
         Assert::false($result->isSuccess());
         Assert::instanceOf($result->getLastError(), ConstrainException::class);
+    }
+
+    #[Test]
+    public function givenRunnerRunsTheCommands(): void
+    {
+        $runner = Runner::innerTransaction();
+        $entity = new Post();
+        $entity->title = 'Test title';
+        $entity->content = 'Test content';
+
+        (new EntityManager($this->orm))->persist($entity)->run(runner: $runner);
+
+        Assert::same($runner->count(), 1);
+        Assert::same($this->getDatabase()->table('post')->count(), 3);
+    }
+
+    #[Test]
+    public function entityIsDeletedWithoutCascade(): void
+    {
+        $entity = (new Select($this->orm, Post::class))->wherePK(1)->fetchOne();
+
+        $state = (new EntityManager($this->orm))->delete($entity, false)->run();
+
+        Assert::true($state->isSuccess());
+        Assert::same($this->getDatabase()->table('post')->select('title')->fetchAll(), [['title' => 'bar']]);
+        Assert::false($this->orm->getHeap()->has($entity));
     }
 
     #[BeforeTest]

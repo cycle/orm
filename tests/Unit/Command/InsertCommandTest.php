@@ -13,6 +13,7 @@ use Cycle\ORM\Command\Database\Insert;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
+use Cycle\ORM\Schema\GeneratedField;
 use Cycle\ORM\Tests\Fixtures\TestInsertCommand;
 use Cycle\ORM\Tests\Fixtures\TestInsertCommandWithReturning;
 use Mockery as m;
@@ -151,6 +152,41 @@ final class InsertCommandTest
         $this->cmd->execute();
 
         Assert::same($this->state->getValue('id'), 324);
+    }
+
+    public function registeredColumnsAreDataToInsert(): void
+    {
+        $cmd = new Insert($this->db, 'table', new State(Node::NEW, []), null);
+
+        Assert::false($cmd->hasData());
+
+        $cmd->registerColumn('type', 'admin');
+
+        Assert::true($cmd->hasData());
+    }
+
+    public function missingDatabaseGeneratedFieldIsDataToInsert(): void
+    {
+        $generated = ['updated_at' => GeneratedField::BEFORE_UPDATE, 'id' => GeneratedField::ON_INSERT];
+        $cmd = new Insert($this->db, 'table', new State(Node::NEW, []), null, generated: $generated);
+
+        Assert::true($cmd->hasData());
+    }
+
+    public function nullPrimaryKeyAndDatabaseGeneratedFieldsAreNotInserted(): void
+    {
+        $state = new State(Node::NEW, ['id' => null, 'name' => 'Antony', 'created_at' => null, 'updated_at' => null]);
+        $generated = ['updated_at' => GeneratedField::BEFORE_UPDATE, 'created_at' => GeneratedField::ON_INSERT];
+        $cmd = new Insert($this->db, 'table', $state, null, ['id'], generated: $generated);
+        $query = m::mock(TestInsertCommand::class);
+        $query->shouldReceive('values')->once()->with(['name' => 'Antony', 'updated_at' => null])->andReturnSelf();
+        $query->allows('run')->andReturn(42);
+        $this->db->allows('insert')->with('table')->andReturn($query);
+
+        $cmd->execute();
+
+        Assert::same($state->getValue('id'), 42);
+        Assert::true($cmd->isExecuted());
     }
 
     #[BeforeTest]

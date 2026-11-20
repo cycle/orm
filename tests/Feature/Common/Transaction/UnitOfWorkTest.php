@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Feature\Common\Transaction;
 
+use Cycle\ORM\Command\CommandInterface;
 use Cycle\ORM\Exception\RunnerException;
 use Cycle\ORM\Exception\SuccessTransactionRetryException;
+use Cycle\ORM\Exception\TransactionException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\Mapper\Mapper;
@@ -14,9 +16,11 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Transaction\Runner;
+use Cycle\ORM\Transaction\RunnerInterface;
 use Cycle\ORM\Transaction\UnitOfWork;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
+use Testo\Data\DataSet;
 use Testo\Expect;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
@@ -229,6 +233,68 @@ final class UnitOfWorkTest extends OrmTestCase
         $result->retry();
     }
 
+    #[Test]
+    public function emptyUnitHasNoPendingChanges(): void
+    {
+        Assert::false((new UnitOfWork($this->orm))->hasPendingChanges());
+    }
+
+    #[Test]
+    #[DataSet(['persistState', 'persist entity'])]
+    #[DataSet(['persistDeferred', 'schedule entity storing'])]
+    #[DataSet(['delete', 'schedule entity deletion'])]
+    public function finishedUnitRejectsNewEntities(string $method, string $action): never
+    {
+        $uow = new UnitOfWork($this->orm);
+        $uow->persistState($this->post('Title1'));
+        $uow->run();
+
+        Expect::exception(TransactionException::class)->withMessage("Can't $action. Transaction finished.");
+
+        $uow->$method($this->post('Title2'));
+    }
+
+    #[Test]
+    #[DataSet(['persistState', 'persist entity'])]
+    #[DataSet(['persistDeferred', 'schedule entity storing'])]
+    #[DataSet(['delete', 'schedule entity deletion'])]
+    public function runningUnitRejectsNewEntities(string $method, string $action): void
+    {
+        $errors = [];
+        $uow = new UnitOfWork($this->orm);
+        $uow->setRunner($this->runnerWithHook(function () use ($uow, $method, &$errors): void {
+            try {
+                $uow->$method($this->post('Title2'));
+            } catch (TransactionException $e) {
+                $errors[] = $e->getMessage();
+            }
+        }));
+        $uow->persistState($this->post('Title1'));
+
+        $uow->run();
+
+        Assert::same($errors, ["Can't $action. Transaction began."]);
+    }
+
+    #[Test]
+    public function runningUnitCannotBeRunAgain(): void
+    {
+        $errors = [];
+        $uow = new UnitOfWork($this->orm);
+        $uow->setRunner($this->runnerWithHook(static function () use ($uow, &$errors): void {
+            try {
+                $uow->run();
+            } catch (TransactionException $e) {
+                $errors[] = $e->getMessage();
+            }
+        }));
+        $uow->persistState($this->post('Title1'));
+
+        $uow->run();
+
+        Assert::same($errors, ["Can't run started transaction."]);
+    }
+
     #[BeforeTest]
     public function setUp(): void
     {
@@ -250,5 +316,49 @@ final class UnitOfWorkTest extends OrmTestCase
                 SchemaInterface::RELATIONS => [],
             ],
         ]));
+    }
+
+    private function post(string $title): Post
+    {
+        $post = new Post();
+        $post->title = $title;
+        $post->content = 'Test';
+        return $post;
+    }
+
+    /**
+     * @param \Closure(): void $hook Called once, while the first command runs.
+     */
+    private function runnerWithHook(\Closure $hook): RunnerInterface
+    {
+        return new class(Runner::innerTransaction(), $hook) implements RunnerInterface {
+            public function __construct(
+                private readonly RunnerInterface $runner,
+                private ?\Closure $hook,
+            ) {}
+
+            public function run(CommandInterface $command): void
+            {
+                $hook = $this->hook;
+                $this->hook = null;
+                $hook === null or $hook();
+                $this->runner->run($command);
+            }
+
+            public function complete(): void
+            {
+                $this->runner->complete();
+            }
+
+            public function count(): int
+            {
+                return $this->runner->count();
+            }
+
+            public function rollback(): void
+            {
+                $this->runner->rollback();
+            }
+        };
     }
 }

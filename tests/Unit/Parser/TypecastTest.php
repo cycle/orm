@@ -318,6 +318,17 @@ final class TypecastTest
         Assert::null($data['baz']);
     }
 
+    public function uncastFailureNamesTheField(): never
+    {
+        $this->typecast->setRules(['foo' => 'json']);
+
+        Expect::exception(TypecastException::class)
+            ->withMessageContaining('Unable to uncast the `role.foo` field: ')
+            ->withPrevious(\JsonException::class);
+
+        $this->typecast->uncast(['foo' => [\NAN]]);
+    }
+
     #[BeforeTest]
     protected function setUp(): void
     {

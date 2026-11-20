@@ -13,26 +13,29 @@ use Doctrine\Common\Collections\Collection;
 
 class DoctrineCollectionFactoryTest extends BaseTest
 {
+    #[\Testo\Test]
     public function testGetInterface(): void
     {
-        $this->assertSame(Collection::class, $this->getFactory()->getInterface());
+        \Testo\Assert::same($this->getFactory()->getInterface(), Collection::class);
     }
 
     /**
-     * @dataProvider collectionDataProvider
      * @param mixed $data
      */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('collectionDataProvider')]
     public function testCollectShouldReturnArray($data): void
     {
         $collection = $this->getFactory()->collect($data);
 
-        $this->assertInstanceOf(ArrayCollection::class, $collection);
-        $this->assertSame([
+        \Testo\Assert::instanceOf($collection, ArrayCollection::class);
+        \Testo\Assert::same($collection->toArray(), [
             'foo' => 'bar',
             'baz' => 'bar',
-        ], $collection->toArray());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testCollectPivotStorageWithArrayCollection(): void
     {
         $collection = $this->getFactory()->collect(
@@ -42,10 +45,11 @@ class DoctrineCollectionFactoryTest extends BaseTest
             ]),
         );
 
-        $this->assertInstanceOf(PivotedCollection::class, $collection);
-        $this->assertSame($array, $collection->toArray());
+        \Testo\Assert::instanceOf($collection, PivotedCollection::class);
+        \Testo\Assert::same($collection->toArray(), $array);
     }
 
+    #[\Testo\Test]
     public function testCollectPivotStorageWithPivotedCollection(): void
     {
         $collection = $this->getFactory()
@@ -57,8 +61,8 @@ class DoctrineCollectionFactoryTest extends BaseTest
                 ]),
             );
 
-        $this->assertInstanceOf(CustomPivotedCollection::class, $collection);
-        $this->assertSame($array, $collection->toArray());
+        \Testo\Assert::instanceOf($collection, CustomPivotedCollection::class);
+        \Testo\Assert::same($collection->toArray(), $array);
     }
 
     protected function getFactory(): CollectionFactoryInterface

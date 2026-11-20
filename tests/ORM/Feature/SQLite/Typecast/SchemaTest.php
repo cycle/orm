@@ -85,12 +85,10 @@ final class SchemaTest extends BaseTest
         );
     }
 
+    #[\Testo\Test]
     public function testEmptyStringShouldThrowAnException(): void
     {
-        $this->expectException(FactoryTypecastException::class);
-        $this->expectExceptionMessageMatches(
-            '/Bad typecast handler declaration for the `book` role./',
-        );
+        \Testo\Expect::exception(FactoryTypecastException::class)->withMessageMatchingRegex('/Bad typecast handler declaration for the `book` role./');
 
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => '',
@@ -99,20 +97,19 @@ final class SchemaTest extends BaseTest
         $this->getTypecast(self::PRIMARY_ROLE);
     }
 
+    #[\Testo\Test]
     public function testHandlerWithWrongInterfaceShouldThrowAnException(): void
     {
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => InvalidTypecaster::class,
         ]);
 
-        $this->expectException(FactoryTypecastException::class);
-        $this->expectExceptionMessage(
-            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned',
-        );
+        \Testo\Expect::exception(FactoryTypecastException::class)->withMessageContaining('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned');
 
         $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
     }
 
+    #[\Testo\Test]
     public function testHandlerWithWrongInterfaceAmongArrayShouldThrowAnException(): void
     {
         $this->container = new Container();
@@ -124,14 +121,12 @@ final class SchemaTest extends BaseTest
             ],
         ]);
 
-        $this->expectException(FactoryTypecastException::class);
-        $this->expectExceptionMessage(
-            'Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned',
-        );
+        \Testo\Expect::exception(FactoryTypecastException::class)->withMessageContaining('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned');
 
         $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
     }
 
+    #[\Testo\Test]
     public function testUseTypecastFromContainer(): void
     {
         $this->container = new Container();
@@ -142,9 +137,10 @@ final class SchemaTest extends BaseTest
         ]);
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
-        $this->assertSame(Typecaster::class, $typecast::class);
+        \Testo\Assert::same($typecast::class, Typecaster::class);
     }
 
+    #[\Testo\Test]
     public function testUseTypecastAliasAsString(): void
     {
         $tc = new Typecaster(new Schema([]), self::PRIMARY_ROLE);
@@ -154,9 +150,10 @@ final class SchemaTest extends BaseTest
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        $this->assertSame(Typecaster::class, $typecast::class);
+        \Testo\Assert::same($typecast::class, Typecaster::class);
     }
 
+    #[\Testo\Test]
     public function testUseTypecastClassAsString(): void
     {
         $options = ['id' => 'int', 'published_at' => 'datetime(d-m-Y-H-i-s-u)'];
@@ -168,11 +165,12 @@ final class SchemaTest extends BaseTest
         /** @var Typecaster $typecast */
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        $this->assertSame(Typecaster::class, $typecast::class);
-        $this->assertSame(self::PRIMARY_ROLE, $typecast->role);
-        $this->assertSame($options, $typecast->rules);
+        \Testo\Assert::same($typecast::class, Typecaster::class);
+        \Testo\Assert::same($typecast->role, self::PRIMARY_ROLE);
+        \Testo\Assert::same($typecast->rules, $options);
     }
 
+    #[\Testo\Test]
     public function testNullDefinitionAndEmptyRules(): void
     {
         $this->setUpOrm([
@@ -181,9 +179,10 @@ final class SchemaTest extends BaseTest
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        $this->assertNull($typecast);
+        \Testo\Assert::null($typecast);
     }
 
+    #[\Testo\Test]
     public function testTypecastWithJti(): void
     {
         $this->setUpOrm();
@@ -192,36 +191,25 @@ final class SchemaTest extends BaseTest
         $bar = $this->getTypecast('bar');
         $baz = $this->getTypecast('baz');
 
-        $this->assertNull($foo);
-        $this->assertSame(Typecast::class, $bar::class);
-        $this->assertSame(CompositeTypecast::class, $baz::class);
+        \Testo\Assert::null($foo);
+        \Testo\Assert::same($bar::class, Typecast::class);
+        \Testo\Assert::same($baz::class, CompositeTypecast::class);
     }
 
     /**
      * @see CompositeTypecast::cast()
      */
+    #[\Testo\Test]
     public function testUseCompositeTypecast(): void
     {
-        $containerTypecast = $this->createMock(CastableInterface::class);
-        $containerTypecast
-            ->expects($this->exactly(1))
-            ->method('cast')
-            ->with($this->equalTo(['foo' => 'bar'])) // waits from factory
-            ->willReturn(['foo' => 'bar3']); // passes to $aliasTypecast
+        $containerTypecast = \Mockery::mock(CastableInterface::class)->shouldIgnoreMissing();
+        $containerTypecast->shouldReceive('cast')->times(1)->with(['foo' => 'bar'], \Mockery::andAnyOtherArgs())->andReturn(['foo' => 'bar3']); // passes to $aliasTypecast
 
-        $aliasTypecast = $this->createMock(CastableInterface::class);
-        $aliasTypecast
-            ->expects($this->exactly(1))
-            ->method('cast')
-            ->with($this->equalTo(['foo' => 'bar3'])) // waits from $containerTypecast
-            ->willReturn(['foo' => 'bar1']); // passes to $typecast
+        $aliasTypecast = \Mockery::mock(CastableInterface::class)->shouldIgnoreMissing();
+        $aliasTypecast->shouldReceive('cast')->times(1)->with(['foo' => 'bar3'], \Mockery::andAnyOtherArgs())->andReturn(['foo' => 'bar1']); // passes to $typecast
 
-        $typecast = $this->createMock(CastableInterface::class);
-        $typecast
-            ->expects($this->exactly(1))
-            ->method('cast')
-            ->with($this->equalTo(['foo' => 'bar1'])) // waits from $aliasTypecast
-            ->willReturn(['foo' => 'bar2']); // passes to Composite typecast
+        $typecast = \Mockery::mock(CastableInterface::class)->shouldIgnoreMissing();
+        $typecast->shouldReceive('cast')->times(1)->with(['foo' => 'bar1'], \Mockery::andAnyOtherArgs())->andReturn(['foo' => 'bar2']); // passes to Composite typecast
 
         $this->container = new Container();
         $this->container->bindSingleton('bar-foo', fn() => $containerTypecast);
@@ -238,8 +226,8 @@ final class SchemaTest extends BaseTest
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        $this->assertSame(CompositeTypecast::class, $typecast::class);
-        $this->assertSame(['foo' => 'bar2'], $typecast->cast(['foo' => 'bar']));
+        \Testo\Assert::same($typecast::class, CompositeTypecast::class);
+        \Testo\Assert::same($typecast->cast(['foo' => 'bar']), ['foo' => 'bar2']);
     }
 
     private function getTypecast(string $role): ?TypecastInterface

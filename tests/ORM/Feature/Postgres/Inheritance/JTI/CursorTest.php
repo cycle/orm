@@ -11,14 +11,12 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\SimpleCasesTest;
 
-/**
- * @group driver
- * @group driver-postgres
- */
+#[\Testo\Filter\Group('driver', 'driver-postgres')]
 class CursorTest extends SimpleCasesTest
 {
     public const DRIVER = 'postgres';
 
+    #[\Testo\Test]
     public function testCursorReturnsCorrectHierarchyInstances(): void
     {
         $entities = $this->getDatabase()->transaction(function (): array {
@@ -32,27 +30,28 @@ class CursorTest extends SimpleCasesTest
             return $out;
         });
 
-        $this->assertCount(4, $entities);
+        \Testo\Assert::count($entities, 4);
 
         // id=1 → Manager (rank='top')
-        $this->assertInstanceOf(Manager::class, $entities[0]);
-        $this->assertSame('top', $entities[0]->rank);
+        \Testo\Assert::instanceOf($entities[0], Manager::class);
+        \Testo\Assert::same($entities[0]->rank, 'top');
 
         // id=2 → Programator (engineer.level=8, programator.language='php')
-        $this->assertInstanceOf(Programator::class, $entities[1]);
-        $this->assertSame(8, $entities[1]->level);
-        $this->assertSame('php', $entities[1]->language);
+        \Testo\Assert::instanceOf($entities[1], Programator::class);
+        \Testo\Assert::same($entities[1]->level, 8);
+        \Testo\Assert::same($entities[1]->language, 'php');
 
         // id=3 → Manager (rank='bottom')
-        $this->assertInstanceOf(Manager::class, $entities[2]);
-        $this->assertSame('bottom', $entities[2]->rank);
+        \Testo\Assert::instanceOf($entities[2], Manager::class);
+        \Testo\Assert::same($entities[2]->rank, 'bottom');
 
         // id=4 → Programator (engineer.level=10, programator.language='go')
-        $this->assertInstanceOf(Programator::class, $entities[3]);
-        $this->assertSame(10, $entities[3]->level);
-        $this->assertSame('go', $entities[3]->language);
+        \Testo\Assert::instanceOf($entities[3], Programator::class);
+        \Testo\Assert::same($entities[3]->level, 10);
+        \Testo\Assert::same($entities[3]->language, 'go');
     }
 
+    #[\Testo\Test]
     public function testCursorOnChildRoleReturnsFullParentColumns(): void
     {
         $entities = $this->getDatabase()->transaction(function (): array {
@@ -67,14 +66,14 @@ class CursorTest extends SimpleCasesTest
             return $out;
         });
 
-        $this->assertCount(2, $entities);
+        \Testo\Assert::count($entities, 2);
         foreach ($entities as $programator) {
-            $this->assertInstanceOf(Programator::class, $programator);
+            \Testo\Assert::instanceOf($programator, Programator::class);
             // Parent columns are populated
-            $this->assertNotEmpty($programator->name);
-            $this->assertNotNull($programator->age);
-            $this->assertGreaterThan(0, $programator->level);
-            $this->assertNotEmpty($programator->language);
+            \Testo\Assert::false(empty($programator->name));
+            \Testo\Assert::notNull($programator->age);
+            \Testo\Assert::numeric($programator->level)->greaterThan(0);
+            \Testo\Assert::false(empty($programator->language));
         }
     }
 }

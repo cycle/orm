@@ -10,10 +10,7 @@ use Cycle\Database\Schema\AbstractColumn;
 use Cycle\ORM\Tests\Feature\Common\GeneratedColumnTest as CommonClass;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @group driver
- * @group driver-sqlserver
- */
+#[\Testo\Filter\Group('driver', 'driver-sqlserver')]
 class GeneratedColumnTest extends CommonClass
 {
     public const DRIVER = 'sqlserver';

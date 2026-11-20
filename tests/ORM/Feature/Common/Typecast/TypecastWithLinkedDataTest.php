@@ -25,30 +25,33 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
 
     // Select
 
+    #[\Testo\Test]
     public function testSelectOne(): void
     {
         $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
 
-        $this->assertNotNull($user->id);
-        $this->assertIsNotObject($user->id->value);
-        $this->assertEquals(1, $user->id->value);
+        \Testo\Assert::notNull($user->id);
+        \Testo\Assert::false(\is_object($user->id->value));
+        \Testo\Assert::equals($user->id->value, 1);
     }
 
     /**
      * Test the Typecaster doesn't type casting twice when data passed via links
      */
+    #[\Testo\Test]
     public function testSelectMultiple(): void
     {
         $users = (new Select($this->orm, User::class))->orderBy('id', 'asc')->fetchAll();
 
-        $this->assertNotNull($users[0]->id);
-        $this->assertIsNotObject($users[0]->id->value);
-        $this->assertEquals(1, $users[0]->id->value);
+        \Testo\Assert::notNull($users[0]->id);
+        \Testo\Assert::false(\is_object($users[0]->id->value));
+        \Testo\Assert::equals($users[0]->id->value, 1);
     }
 
     /**
      * Test the Typecaster doesn't type casting twice when data passed via links
      */
+    #[\Testo\Test]
     public function testCustomArrayInIterator(): void
     {
         $bookData = [
@@ -77,9 +80,10 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
         /** @var User $user */
         $users = \iterator_to_array($iterator);
 
-        $this->assertCount(3, $users);
+        \Testo\Assert::count($users, 3);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

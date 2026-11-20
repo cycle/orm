@@ -19,13 +19,15 @@ abstract class InstantiatorTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testInitRelation(): void
     {
         $u = $this->orm->make(WithConstructor::class);
-        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
-        $this->assertNull($u->called);
+        \Testo\Assert::instanceOf($u->comments, ArrayCollection::class);
+        \Testo\Assert::null($u->called);
     }
 
+    #[\Testo\Test]
     public function testConstructor(): void
     {
         $u = new WithConstructor('email');
@@ -37,9 +39,10 @@ abstract class InstantiatorTest extends BaseTest
         $selector = new Select(clone $this->orm, 'user');
         $u = $selector->fetchOne();
 
-        $this->assertSame('email', $u->email);
+        \Testo\Assert::same($u->email, 'email');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

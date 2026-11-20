@@ -18,83 +18,80 @@ abstract class DeepEmbeddedTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, Group::class);
         $selector->load('users')->orderBy('id', 'ASC');
 
-        $this->assertSame(
+        \Testo\Assert::same($selector->fetchData(), [
             [
-                [
-                    'id' => 1,
-                    'name' => 'first',
-                    'users' => [
-                        [
-                            'id' => 1,
-                            'group_id' => 1,
-                            'email' => 'hello@world.com',
-                            'balance' => 100.0,
-                            'credentials' => [
-                                'username' => 'user1',
-                                'password' => 'pass1',
-                            ],
-                        ],
-                        [
-                            'id' => 2,
-                            'group_id' => 1,
-                            'email' => 'another@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user2',
-                                'password' => 'pass2',
-                            ],
+                'id' => 1,
+                'name' => 'first',
+                'users' => [
+                    [
+                        'id' => 1,
+                        'group_id' => 1,
+                        'email' => 'hello@world.com',
+                        'balance' => 100.0,
+                        'credentials' => [
+                            'username' => 'user1',
+                            'password' => 'pass1',
                         ],
                     ],
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'second',
-                    'users' => [
-                        [
-                            'id' => 3,
-                            'group_id' => 2,
-                            'email' => 'third@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user3',
-                                'password' => 'pass3',
-                            ],
+                    [
+                        'id' => 2,
+                        'group_id' => 1,
+                        'email' => 'another@world.com',
+                        'balance' => 200.0,
+                        'credentials' => [
+                            'username' => 'user2',
+                            'password' => 'pass2',
                         ],
                     ],
                 ],
             ],
-            $selector->fetchData(),
-        );
+            [
+                'id' => 2,
+                'name' => 'second',
+                'users' => [
+                    [
+                        'id' => 3,
+                        'group_id' => 2,
+                        'email' => 'third@world.com',
+                        'balance' => 200.0,
+                        'credentials' => [
+                            'username' => 'user3',
+                            'password' => 'pass3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
     }
 
+    #[\Testo\Test]
     public function testWithRelationIgnoreEager(): void
     {
         $selector = new Select($this->orm, Group::class);
         $selector->with('users')->orderBy('id', 'ASC');
 
-        $this->assertSame(
+        \Testo\Assert::same($selector->fetchData(), [
             [
-                [
-                    'id' => 1,
-                    'name' => 'first',
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'second',
-                ],
+                'id' => 1,
+                'name' => 'first',
             ],
-            $selector->fetchData(),
-        );
+            [
+                'id' => 2,
+                'name' => 'second',
+            ],
+        ]);
 
         // only parent entity!
-        $this->assertCount(2, $selector->buildQuery()->getColumns());
+        \Testo\Assert::count($selector->buildQuery()->getColumns(), 2);
     }
 
+    #[\Testo\Test]
     public function testFetchDataViaJoin(): void
     {
         $selector = new Select($this->orm, Group::class);
@@ -103,57 +100,55 @@ abstract class DeepEmbeddedTest extends BaseTest
             ->orderBy('id', 'ASC')
             ->orderBy('users.id', 'ASC');
 
-        $this->assertSame(
+        \Testo\Assert::same($selector->fetchData(), [
             [
-                [
-                    'id' => 1,
-                    'name' => 'first',
-                    'users' => [
-                        [
-                            'id' => 1,
-                            'group_id' => 1,
-                            'email' => 'hello@world.com',
-                            'balance' => 100.0,
-                            'credentials' => [
-                                'username' => 'user1',
-                                'password' => 'pass1',
-                            ],
-                        ],
-                        [
-                            'id' => 2,
-                            'group_id' => 1,
-                            'email' => 'another@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user2',
-                                'password' => 'pass2',
-                            ],
+                'id' => 1,
+                'name' => 'first',
+                'users' => [
+                    [
+                        'id' => 1,
+                        'group_id' => 1,
+                        'email' => 'hello@world.com',
+                        'balance' => 100.0,
+                        'credentials' => [
+                            'username' => 'user1',
+                            'password' => 'pass1',
                         ],
                     ],
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'second',
-                    'users' => [
-                        [
-                            'id' => 3,
-                            'group_id' => 2,
-                            'email' => 'third@world.com',
-                            'balance' => 200.0,
-                            'credentials' => [
-                                'username' => 'user3',
-                                'password' => 'pass3',
-                            ],
+                    [
+                        'id' => 2,
+                        'group_id' => 1,
+                        'email' => 'another@world.com',
+                        'balance' => 200.0,
+                        'credentials' => [
+                            'username' => 'user2',
+                            'password' => 'pass2',
                         ],
                     ],
                 ],
             ],
-            $selector->fetchData(),
-        );
+            [
+                'id' => 2,
+                'name' => 'second',
+                'users' => [
+                    [
+                        'id' => 3,
+                        'group_id' => 2,
+                        'email' => 'third@world.com',
+                        'balance' => 200.0,
+                        'credentials' => [
+                            'username' => 'user3',
+                            'password' => 'pass3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
 
-        $this->assertCount(8, $selector->buildQuery()->getColumns());
+        \Testo\Assert::count($selector->buildQuery()->getColumns(), 8);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

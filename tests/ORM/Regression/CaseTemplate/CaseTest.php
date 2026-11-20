@@ -14,6 +14,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         // Get entity
@@ -23,10 +24,11 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         // Check result
-        $this->assertInstanceOf(Entity\User::class, $user);
-        $this->assertCount(2, $user->posts);
+        \Testo\Assert::instanceOf($user, Entity\User::class);
+        \Testo\Assert::count($user->posts, 2);
     }
 
+    #[\Testo\Test]
     public function testSave(): void
     {
         // Get entity
@@ -44,6 +46,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

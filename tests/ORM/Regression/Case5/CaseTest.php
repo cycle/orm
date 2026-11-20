@@ -15,6 +15,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         /** @var Buyer $buyer */
@@ -23,16 +24,17 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         // It's important. $buyer->partners - will trigger relation load and we test it
-        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
+        \Testo\Assert::true($buyer->partners->exists(function (int $key, Buyer $element): bool {
             return $element->id === 2;
         }));
-        $this->assertTrue($buyer->partners->exists(function (int $key, Buyer $element): bool {
+        \Testo\Assert::true($buyer->partners->exists(function (int $key, Buyer $element): bool {
             return $element->id === 3;
         }));
-        $this->assertCount(2, $buyer->partners);
-        $this->assertSame('lab', $buyer->badge->label);
+        \Testo\Assert::count($buyer->partners, 2);
+        \Testo\Assert::same($buyer->badge->label, 'lab');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

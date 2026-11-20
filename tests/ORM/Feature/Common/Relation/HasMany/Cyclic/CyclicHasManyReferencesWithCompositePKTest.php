@@ -18,6 +18,7 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $t = new Tenant();
@@ -34,7 +35,7 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
         $this->save($t);
         $this->assertNumWrites(3);
 
-        $this->assertNotNull($p->tenant_id);
+        \Testo\Assert::notNull($p->tenant_id);
 
         // no changes!
         $this->captureWriteQueries();
@@ -42,6 +43,7 @@ abstract class CyclicHasManyReferencesWithCompositePKTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -8,11 +8,10 @@ namespace Cycle\ORM\Tests\Feature\MySQL\Enum;
 use Cycle\ORM\Tests\Feature\Common\Enum\EnumTest as CommonClass;
 
 /**
- * @group driver
- * @group driver-mysql
  *
  * @requires PHP >= 8.1
  */
+#[\Testo\Filter\Group('driver', 'driver-mysql')]
 class EnumTest extends CommonClass
 {
     public const DRIVER = 'mysql';

@@ -6,7 +6,7 @@ namespace Cycle\ORM\Tests\Unit\Select\Traits;
 
 use PHPUnit\Framework\TestCase;
 
-final class ColumnsTrait extends TestCase
+final class ColumnsTrait
 {
     private const FIELDS = ['id' => 'column_id'];
 
@@ -20,9 +20,8 @@ final class ColumnsTrait extends TestCase
         yield ['', null];
     }
 
-    /**
-     * @dataProvider getColumnsDataProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('getColumnsDataProvider')]
     public function testGetColumns(string $input, ?string $expected): void
     {
         $class = $this->prepareClass();
@@ -31,7 +30,7 @@ final class ColumnsTrait extends TestCase
             $class->fieldAlias($input);
         }
 
-        $this->assertSame($expected, $class->fieldAlias($input));
+        \Testo\Assert::same($class->fieldAlias($input), $expected);
     }
 
     private function prepareClass(): object

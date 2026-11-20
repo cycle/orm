@@ -28,7 +28,7 @@ use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
 
-abstract class BaseTest extends TestCase
+abstract class BaseTest
 {
     // currently active driver
     public const DRIVER = null;
@@ -86,16 +86,13 @@ abstract class BaseTest extends TestCase
         $this->numWrites = $this->logger->countWriteQueries();
     }
 
+    #[\Testo\Common\Attribute\AssertMethod]
     public function assertNumWrites(int $numWrites): void
     {
         $queries = $this->logger->countWriteQueries() - $this->numWrites;
 
         if (!empty(self::$config['strict'])) {
-            $this->assertSame(
-                $numWrites,
-                $queries,
-                "Number of write SQL queries do not match, expected {$numWrites} got {$queries}.",
-            );
+            \Testo\Assert::same($queries, $numWrites, "Number of write SQL queries do not match, expected {$numWrites} got {$queries}.");
         }
     }
 
@@ -107,26 +104,22 @@ abstract class BaseTest extends TestCase
         $this->numReads = $this->logger->countReadQueries();
     }
 
+    #[\Testo\Common\Attribute\AssertMethod]
     public function assertNumReads(int $numReads): void
     {
         $queries = $this->logger->countReadQueries() - $this->numReads;
 
         if (!empty(self::$config['strict'])) {
-            $this->assertSame(
-                $numReads,
-                $queries,
-                "Number of read SQL queries do not match, expected {$numReads} got {$queries}.",
-            );
+            \Testo\Assert::same($queries, $numReads, "Number of read SQL queries do not match, expected {$numReads} got {$queries}.");
         }
     }
 
     /**
      * Init all we need.
      */
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->getDriver()->rollbackTransaction();
 
         $this->dbal = new DatabaseManager(new DatabaseConfig());
@@ -163,6 +156,7 @@ abstract class BaseTest extends TestCase
     /**
      * Cleanup.
      */
+    #[\Testo\Lifecycle\AfterTest]
     public function tearDown(): void
     {
         $this->assertClearState($this->orm);
@@ -244,13 +238,15 @@ abstract class BaseTest extends TestCase
         return $this->orm->getMapper($entity)->extract($entity);
     }
 
+    #[\Testo\Common\Attribute\AssertMethod]
     protected function assertSQL($expected, $given): void
     {
         $expected = preg_replace("/[ \s\'\[\]\"]+/", ' ', $expected);
         $given = preg_replace("/[ \s'\[\]\"]+/", ' ', $given);
-        $this->assertSame($expected, $given);
+        \Testo\Assert::same($given, $expected);
     }
 
+    #[\Testo\Common\Attribute\AssertMethod]
     protected function assertClearState(ORM $orm): void
     {
         $r = new \ReflectionClass(Node::class);
@@ -261,7 +257,7 @@ abstract class BaseTest extends TestCase
         $heap = $orm->getHeap();
         foreach ($heap as $entity) {
             $node = $heap->get($entity);
-            $this->assertNotNull($node);
+            \Testo\Assert::notNull($node);
 
             $this->assertEntitySynced(
                 $orm,
@@ -272,12 +268,13 @@ abstract class BaseTest extends TestCase
             );
 
             // all the states must be closed
-            $this->assertNotEquals(Node::SCHEDULED_INSERT, $node);
-            $this->assertNotEquals(Node::SCHEDULED_UPDATE, $node);
-            $this->assertNotEquals(Node::SCHEDULED_DELETE, $node);
+            \Testo\Assert::notEquals($node, Node::SCHEDULED_INSERT);
+            \Testo\Assert::notEquals($node, Node::SCHEDULED_UPDATE);
+            \Testo\Assert::notEquals($node, Node::SCHEDULED_DELETE);
         }
     }
 
+    #[\Testo\Common\Attribute\AssertMethod]
     protected function assertEntitySynced(
         ORMInterface $orm,
         string $eName,
@@ -287,11 +284,7 @@ abstract class BaseTest extends TestCase
     ): void {
         foreach ($entity as $name => $eValue) {
             if (array_key_exists($name, $stateData)) {
-                $this->assertEquals(
-                    $eValue,
-                    $stateData[$name],
-                    "Entity and State are not in sync `{$eName}`.`{$name}`",
-                );
+                \Testo\Assert::equals($stateData[$name], $eValue, "Entity and State are not in sync `{$eName}`.`{$name}`");
 
                 continue;
             }
@@ -316,7 +309,7 @@ abstract class BaseTest extends TestCase
             } while ($parent);
 
             $roles = implode('`, `', $parentChain);
-            $this->assertNotNull($relation, "Relation `{$name}` is not found among roles `{$roles}`. Check `{$eName}` and its parent roles.");
+            \Testo\Assert::notNull($relation, "Relation `{$name}` is not found among roles `{$roles}`. Check `{$eName}` and its parent roles.");
 
             $rValue = $relations[$name];
 
@@ -359,22 +352,10 @@ abstract class BaseTest extends TestCase
             }
 
             if ($rValue instanceof ReferenceInterface && $eValue instanceof ReferenceInterface) {
-                $this->assertEquals(
-                    $rValue->getScope(),
-                    $eValue->getScope(),
-                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference scope)",
-                );
-                $this->assertEquals(
-                    $rValue->getRole(),
-                    $eValue->getRole(),
-                    "Entity and State are not in sync `{$eName}`.`{$name}` (Reference role)",
-                );
+                \Testo\Assert::equals($eValue->getScope(), $rValue->getScope(), "Entity and State are not in sync `{$eName}`.`{$name}` (Reference scope)");
+                \Testo\Assert::equals($eValue->getRole(), $rValue->getRole(), "Entity and State are not in sync `{$eName}`.`{$name}` (Reference role)");
             } else {
-                $this->assertEquals(
-                    $rValue,
-                    $eValue,
-                    "Entity and State are not in sync `{$eName}`.`{$name}`",
-                );
+                \Testo\Assert::equals($eValue, $rValue, "Entity and State are not in sync `{$eName}`.`{$name}`");
             }
         }
     }

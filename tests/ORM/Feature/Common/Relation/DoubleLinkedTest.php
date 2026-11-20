@@ -18,6 +18,7 @@ abstract class DoubleLinkedTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateDoubleLink(): void
     {
         $c1 = new Cyclic();
@@ -39,7 +40,7 @@ abstract class DoubleLinkedTest extends BaseTest
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertSame($b, $a->cyclic);
+        \Testo\Assert::same($a->cyclic, $b);
         $this->assertNumReads(0);
 
         $this->captureWriteQueries();
@@ -47,6 +48,7 @@ abstract class DoubleLinkedTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testCreateDoubleLinkWithInverted(): void
     {
         $c1 = new Cyclic();
@@ -74,11 +76,12 @@ abstract class DoubleLinkedTest extends BaseTest
         [$a, $b] = (new Select($this->orm, Cyclic::class))->orderBy('id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertSame($a, $b->cyclic);
-        $this->assertSame($b, $a->cyclic);
+        \Testo\Assert::same($b->cyclic, $a);
+        \Testo\Assert::same($a->cyclic, $b);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testSelfReference(): void
     {
         $c1 = new Cyclic();
@@ -99,11 +102,12 @@ abstract class DoubleLinkedTest extends BaseTest
         $a = $selector->orderBy('id')->fetchOne();
 
         $this->captureReadQueries();
-        $this->assertSame($a, $a->cyclic);
-        $this->assertSame($a, $a->other);
+        \Testo\Assert::same($a->cyclic, $a);
+        \Testo\Assert::same($a->other, $a);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

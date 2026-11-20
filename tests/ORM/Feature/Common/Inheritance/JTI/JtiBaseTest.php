@@ -18,6 +18,7 @@ abstract class JtiBaseTest extends BaseTest
 
     protected const DEFAULT_MAPPER = Mapper::class;
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

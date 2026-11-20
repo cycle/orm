@@ -21,12 +21,13 @@ abstract class HasOneProxyMapperTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -43,9 +44,10 @@ abstract class HasOneProxyMapperTest extends BaseTest
                 'balance' => 200.0,
                 'profile' => null,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchPromises(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -55,20 +57,21 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
+        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        $this->assertInstanceOf(Profile::class, $a->profile);
-        $this->assertNull($b->profile);
+        \Testo\Assert::instanceOf($a->profile, Profile::class);
+        \Testo\Assert::null($b->profile);
 
         $this->captureReadQueries();
-        $this->assertSame($a->profile, $a->profile);
-        $this->assertNull($b->profile);
+        \Testo\Assert::same($a->profile, $a->profile);
+        \Testo\Assert::null($b->profile);
         $this->assertNumReads(0);
 
-        $this->assertEquals('image.png', $a->profile->image);
+        \Testo\Assert::equals($a->profile->image, 'image.png');
     }
 
+    #[\Testo\Test]
     public function testOnePromiseLoaded(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -76,14 +79,15 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
+        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        $this->assertFalse($aData['profile']->hasValue());
-        $this->assertInstanceOf(Profile::class, $a->profile);
-        $this->assertTrue($aData['profile']->hasValue());
+        \Testo\Assert::false($aData['profile']->hasValue());
+        \Testo\Assert::instanceOf($a->profile, Profile::class);
+        \Testo\Assert::true($aData['profile']->hasValue());
     }
 
+    #[\Testo\Test]
     public function testOnePromiseRole(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -91,12 +95,13 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
+        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        $this->assertSame('profile', $aData['profile']->getRole());
+        \Testo\Assert::same($aData['profile']->getRole(), 'profile');
     }
 
+    #[\Testo\Test]
     public function testOnePromiseScope(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -104,12 +109,13 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
+        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        $this->assertEquals(['user_id' => 1], $aData['profile']->getScope());
+        \Testo\Assert::equals($aData['profile']->getScope(), ['user_id' => 1]);
     }
 
+    #[\Testo\Test]
     public function testFetchPromisesFromHeap(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -117,24 +123,25 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['profile']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['profile']);
+        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
         // warm up
         (new Select($this->orm, Profile::class))->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertSame($a->profile, $a->profile);
+        \Testo\Assert::same($a->profile, $a->profile);
         $this->assertNumReads(0);
 
         // invalid object can't be cached
         $this->captureReadQueries();
-        $this->assertNull($b->profile);
+        \Testo\Assert::null($b->profile);
         $this->assertNumReads(1);
 
-        $this->assertEquals('image.png', $a->profile->image);
+        \Testo\Assert::equals($a->profile->image, 'image.png');
     }
 
+    #[\Testo\Test]
     public function testNoWriteOperations(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -147,6 +154,7 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testRemoveAssignment(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -169,10 +177,11 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
-        $this->assertNull($a->profile);
-        $this->assertNull($b->profile);
+        \Testo\Assert::null($a->profile);
+        \Testo\Assert::null($b->profile);
     }
 
+    #[\Testo\Test]
     public function testMoveToAnotherUser(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))
@@ -197,10 +206,11 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
-        $this->assertNull($a->profile);
-        $this->assertEquals(1, $b->profile->id);
+        \Testo\Assert::null($a->profile);
+        \Testo\Assert::equals($b->profile->id, 1);
     }
 
+    #[\Testo\Test]
     public function testMoveToAnotherUserPartial(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))
@@ -225,10 +235,11 @@ abstract class HasOneProxyMapperTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
-        $this->assertNull($a->profile);
-        $this->assertEquals(1, $b->profile->id);
+        \Testo\Assert::null($a->profile);
+        \Testo\Assert::equals($b->profile->id, 1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

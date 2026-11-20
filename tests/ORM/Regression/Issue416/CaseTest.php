@@ -18,6 +18,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         $uuid = Uuid::uuid7();
@@ -46,12 +47,13 @@ abstract class CaseTest extends BaseTest
         // Cannot assign Cycle\ORM\Reference\Reference to property
         // Cycle\ORM\Tests\Regression\Issue416\Entity\Profile::$identity of type
         // Cycle\ORM\Tests\Regression\Issue416\Entity\Identity
-        $this->assertTrue(true);
+        \Testo\Assert::true(true);
 
         // To avoid `Entity and State are not in sync` exception
         $this->orm->getHeap()->clean();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

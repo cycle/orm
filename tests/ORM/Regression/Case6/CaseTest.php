@@ -15,6 +15,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         /** @var User $model */
@@ -22,13 +23,13 @@ abstract class CaseTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertSame('foo', $model->getLogin());
-        $this->expectException(\Error::class);
-        $this->expectExceptionMessage('Cannot access non-public property ' . User::class . '::$login');
+        \Testo\Assert::same($model->getLogin(), 'foo');
+        \Testo\Expect::exception(\Error::class)->withMessageContaining('Cannot access non-public property ' . User::class . '::$login');
 
         $model->login = 'new login';
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

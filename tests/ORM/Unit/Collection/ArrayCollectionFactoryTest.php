@@ -9,21 +9,23 @@ use Cycle\ORM\Collection\CollectionFactoryInterface;
 
 class ArrayCollectionFactoryTest extends BaseTest
 {
+    #[\Testo\Test]
     public function testGetInterface(): void
     {
-        $this->assertNull($this->getFactory()->getInterface());
+        \Testo\Assert::null($this->getFactory()->getInterface());
     }
 
     /**
-     * @dataProvider collectionDataProvider
      * @param mixed $data
      */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('collectionDataProvider')]
     public function testCollectShouldReturnArray($data): void
     {
-        $this->assertSame([
+        \Testo\Assert::same($this->getFactory()->collect($data), [
             'foo' => 'bar',
             'baz' => 'bar',
-        ], $this->getFactory()->collect($data));
+        ]);
     }
 
     protected function getFactory(): CollectionFactoryInterface

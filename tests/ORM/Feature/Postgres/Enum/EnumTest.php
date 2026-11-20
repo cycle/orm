@@ -8,11 +8,10 @@ namespace Cycle\ORM\Tests\Feature\Postgres\Enum;
 use Cycle\ORM\Tests\Feature\Common\Enum\EnumTest as CommonClass;
 
 /**
- * @group driver
- * @group driver-postgres
  *
  * @requires PHP >= 8.1
  */
+#[\Testo\Filter\Group('driver', 'driver-postgres')]
 class EnumTest extends CommonClass
 {
     public const DRIVER = 'postgres';

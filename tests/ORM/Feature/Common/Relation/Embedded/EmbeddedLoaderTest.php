@@ -19,11 +19,12 @@ abstract class EmbeddedLoaderTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadDataNoRelation(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -34,15 +35,16 @@ abstract class EmbeddedLoaderTest extends BaseTest
                 'email' => 'another@world.com',
                 'balance' => 200.0,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadDataLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -63,9 +65,10 @@ abstract class EmbeddedLoaderTest extends BaseTest
                     'num_logins' => 1,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadDataLoadAutomatically(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -106,7 +109,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $selector = new Select($this->orm, User::class);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -127,9 +130,10 @@ abstract class EmbeddedLoaderTest extends BaseTest
                     'num_logins' => 1,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadDataLoadTypecast(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -177,7 +181,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
 
         $selector = new Select($this->orm, User::class);
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -198,23 +202,25 @@ abstract class EmbeddedLoaderTest extends BaseTest
                     'num_logins' => 1,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFilterByEmbeddedDoNotLoad(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->where('credentials.username', 'user1');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFilterAndLoad(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -222,7 +228,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
             ->where('credentials.username', 'user2')
             ->load('credentials');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 2,
                 'email' => 'another@world.com',
@@ -233,9 +239,10 @@ abstract class EmbeddedLoaderTest extends BaseTest
                     'num_logins' => 1,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testDeduplicate(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -243,7 +250,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
             ->load('comments')
             ->load('credentials');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -283,9 +290,10 @@ abstract class EmbeddedLoaderTest extends BaseTest
                     'num_logins' => 1,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testDeduplicateInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -293,7 +301,7 @@ abstract class EmbeddedLoaderTest extends BaseTest
             ->load('comments', ['method' => Select\JoinableLoader::INLOAD])
             ->load('credentials');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -333,9 +341,10 @@ abstract class EmbeddedLoaderTest extends BaseTest
                     'num_logins' => 1,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

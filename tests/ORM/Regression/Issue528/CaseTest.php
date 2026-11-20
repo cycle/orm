@@ -19,6 +19,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadWherePagination(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -27,10 +28,11 @@ abstract class CaseTest extends BaseTest
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();
-        $this->assertSame(10, $paginator->count());
-        $this->assertCount(2, $data);
+        \Testo\Assert::same($paginator->count(), 10);
+        \Testo\Assert::count($data, 2);
     }
 
+    #[\Testo\Test]
     public function testLoadWherePagination2(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -40,10 +42,11 @@ abstract class CaseTest extends BaseTest
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();
-        $this->assertSame(10, $paginator->count());
-        $this->assertCount(2, $data);
+        \Testo\Assert::same($paginator->count(), 10);
+        \Testo\Assert::count($data, 2);
     }
 
+    #[\Testo\Test]
     public function testWithLeft(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -55,10 +58,11 @@ abstract class CaseTest extends BaseTest
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();
-        $this->assertSame(10, $paginator->count());
-        $this->assertCount(2, $data);
+        \Testo\Assert::same($paginator->count(), 10);
+        \Testo\Assert::count($data, 2);
     }
 
+    #[\Testo\Test]
     public function testWithLeftAndWhere(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -71,10 +75,11 @@ abstract class CaseTest extends BaseTest
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();
-        $this->assertSame(10, $paginator->count());
-        $this->assertCount(2, $data);
+        \Testo\Assert::same($paginator->count(), 10);
+        \Testo\Assert::count($data, 2);
     }
 
+    #[\Testo\Test]
     public function testWithInner(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -86,10 +91,11 @@ abstract class CaseTest extends BaseTest
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();
-        $this->assertSame(10, $paginator->count());
-        $this->assertCount(2, $data);
+        \Testo\Assert::same($paginator->count(), 10);
+        \Testo\Assert::count($data, 2);
     }
 
+    #[\Testo\Test]
     public function testWithInnerAndWhere(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -102,10 +108,11 @@ abstract class CaseTest extends BaseTest
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();
-        $this->assertSame(10, $paginator->count());
-        $this->assertCount(2, $data);
+        \Testo\Assert::same($paginator->count(), 10);
+        \Testo\Assert::count($data, 2);
     }
 
+    #[\Testo\Test]
     public function testWithAndLoad(): void
     {
         $select = (new Select($this->orm, Country::class))
@@ -118,14 +125,14 @@ abstract class CaseTest extends BaseTest
         /** @var Paginator $paginator */
         $paginator = (new Paginator(2))->paginate($select);
         $data = $select->fetchData();
-        $this->assertSame(10, $paginator->count());
-        $this->assertCount(2, $data);
+        \Testo\Assert::same($paginator->count(), 10);
+        \Testo\Assert::count($data, 2);
     }
 
+    #[\Testo\Test]
     public function testWithAndLoadUsing(): void
     {
-        self::expectException(LoaderException::class);
-        self::expectExceptionMessage('Unable to load data using join with limit on parent query');
+        \Testo\Expect::exception(LoaderException::class)->withMessageContaining('Unable to load data using join with limit on parent query');
 
         $select = (new Select($this->orm, Country::class))
             ->with('translations', [
@@ -138,6 +145,7 @@ abstract class CaseTest extends BaseTest
         $select->fetchData();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

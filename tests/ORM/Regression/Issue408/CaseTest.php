@@ -15,6 +15,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelectHasMany(): void
     {
         // Get entity
@@ -23,9 +24,10 @@ abstract class CaseTest extends BaseTest
             ->where('id', 1)
             ->fetchOne();
 
-        self::assertCount(3, $group->getTargets());
+        \Testo\Assert::count($group->getTargets(), 3);
     }
 
+    #[\Testo\Test]
     public function testSelectManyManyToMany(): void
     {
         // Get entity
@@ -34,9 +36,10 @@ abstract class CaseTest extends BaseTest
             ->where('id', 1)
             ->fetchOne();
 
-        self::assertCount(2, $group->getManyTargets());
+        \Testo\Assert::count($group->getManyTargets(), 2);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

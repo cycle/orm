@@ -18,6 +18,7 @@ abstract class AutoTimestampsTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $u = new User();
@@ -29,10 +30,11 @@ abstract class AutoTimestampsTest extends BaseTest
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $data = $s->fetchData();
 
-        $this->assertNotNull($data[0]['created_at']);
-        $this->assertNotNull($data[0]['updated_at']);
+        \Testo\Assert::notNull($data[0]['created_at']);
+        \Testo\Assert::notNull($data[0]['updated_at']);
     }
 
+    #[\Testo\Test]
     public function testNoWrites(): void
     {
         $u = new User();
@@ -50,6 +52,7 @@ abstract class AutoTimestampsTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testUpdate(): void
     {
         $u = new User();
@@ -70,6 +73,7 @@ abstract class AutoTimestampsTest extends BaseTest
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

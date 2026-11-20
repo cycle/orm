@@ -10,41 +10,44 @@ use Illuminate\Support\Collection;
 
 class IlluminateCollectionFactoryTest extends BaseTest
 {
+    #[\Testo\Test]
     public function testGetInterface(): void
     {
-        $this->assertSame(Collection::class, $this->getFactory()->getInterface());
+        \Testo\Assert::same($this->getFactory()->getInterface(), Collection::class);
     }
 
     /**
-     * @dataProvider collectionDataProvider
      * @param mixed $data
      */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('collectionDataProvider')]
     public function testCollectShouldReturnArray($data): void
     {
         $collection = $this->getFactory()->collect($data);
 
-        $this->assertInstanceOf(Collection::class, $collection);
-        $this->assertSame([
+        \Testo\Assert::instanceOf($collection, Collection::class);
+        \Testo\Assert::same($collection->toArray(), [
             'foo' => 'bar',
             'baz' => 'bar',
-        ], $collection->toArray());
+        ]);
     }
 
     /**
-     * @dataProvider collectionDataProvider
      * @param mixed $data
      */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('collectionDataProvider')]
     public function testCollectShouldReturnArrayForCustomCollection($data): void
     {
         $collection = $this->getFactory()
             ->withCollectionClass(CustomCollection::class)
             ->collect($data);
 
-        $this->assertInstanceOf(CustomCollection::class, $collection);
-        $this->assertSame([
+        \Testo\Assert::instanceOf($collection, CustomCollection::class);
+        \Testo\Assert::same($collection->toArray(), [
             'foo' => 'bar',
             'baz' => 'bar',
-        ], $collection->toArray());
+        ]);
     }
 
     protected function getFactory(): CollectionFactoryInterface

@@ -25,18 +25,20 @@ abstract class HasManyRelationTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
-        $this->assertInstanceOf(ArrayCollection::class, $u->comments);
+        \Testo\Assert::instanceOf($u->comments, ArrayCollection::class);
     }
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -65,15 +67,16 @@ abstract class HasManyRelationTest extends BaseTest
                 'balance' => 200.0,
                 'comments' => [],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => JoinableLoader::INLOAD])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -102,16 +105,18 @@ abstract class HasManyRelationTest extends BaseTest
                 'balance' => 200.0,
                 'comments' => [],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, User::class);
         $data = $selector->with('comments')->buildQuery()->fetchAll();
-        $this->assertCount(3, $data[0]);
+        \Testo\Assert::count($data[0], 3);
     }
 
+    #[\Testo\Test]
     public function testAccessRelated(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -121,17 +126,18 @@ abstract class HasManyRelationTest extends BaseTest
          */
         [$a, $b] = $selector->load('comments')->orderBy('user.id')->fetchAll();
 
-        $this->assertInstanceOf(Collection::class, $a->comments);
-        $this->assertInstanceOf(Collection::class, $b->comments);
+        \Testo\Assert::instanceOf($a->comments, Collection::class);
+        \Testo\Assert::instanceOf($b->comments, Collection::class);
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 0);
 
-        $this->assertEquals('msg 1', $a->comments[0]->message);
-        $this->assertEquals('msg 2', $a->comments[1]->message);
-        $this->assertEquals('msg 3', $a->comments[2]->message);
+        \Testo\Assert::equals($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::equals($a->comments[1]->message, 'msg 2');
+        \Testo\Assert::equals($a->comments[2]->message, 'msg 3');
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -149,6 +155,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testCreateWithRelations(): void
     {
         $e = new User();
@@ -169,23 +176,23 @@ abstract class HasManyRelationTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(0);
 
-        $this->assertEquals(3, $e->id);
+        \Testo\Assert::equals($e->id, 3);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
-        $this->assertTrue($this->orm->getHeap()->has($e->comments[0]));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->comments[0])->getStatus());
-        $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[0])->getData()['user_id']);
+        \Testo\Assert::true($this->orm->getHeap()->has($e->comments[0]));
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[0])->getStatus(), Node::MANAGED);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[0])->getData()['user_id'], $e->id);
 
-        $this->assertTrue($this->orm->getHeap()->has($e->comments[1]));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->comments[1])->getStatus());
-        $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[1])->getData()['user_id']);
+        \Testo\Assert::true($this->orm->getHeap()->has($e->comments[1]));
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[1])->getStatus(), Node::MANAGED);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[1])->getData()['user_id'], $e->id);
 
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->wherePK(3)->fetchData(), [
             [
                 'id' => 3,
                 'email' => 'test@email.com',
@@ -203,9 +210,10 @@ abstract class HasManyRelationTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->wherePK(3)->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -226,12 +234,13 @@ abstract class HasManyRelationTest extends BaseTest
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
 
-        $this->assertCount(2, $e->comments);
+        \Testo\Assert::count($e->comments, 2);
 
-        $this->assertSame('msg 1', $e->comments[0]->message);
-        $this->assertSame('msg 3', $e->comments[1]->message);
+        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
     }
 
+    #[\Testo\Test]
     public function testRemoveChildrenNullable(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -285,14 +294,15 @@ abstract class HasManyRelationTest extends BaseTest
         $e = (new Select($this->orm, User::class))
             ->orderBy('user.id')->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertCount(2, $e->comments);
+        \Testo\Assert::count($e->comments, 2);
 
-        $this->assertSame('msg 1', $e->comments[0]->message);
-        $this->assertSame('msg 3', $e->comments[1]->message);
+        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
 
-        $this->assertSame(3, (new Select($this->orm, Comment::class))->count());
+        \Testo\Assert::same((new Select($this->orm, Comment::class))->count(), 3);
     }
 
+    #[\Testo\Test]
     public function testAddAndRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -326,13 +336,14 @@ abstract class HasManyRelationTest extends BaseTest
         /** @var User $e */
         $e = $selector->wherePK(1)->fetchOne();
 
-        $this->assertCount(3, $e->comments);
+        \Testo\Assert::count($e->comments, 3);
 
-        $this->assertSame('msg 1', $e->comments[0]->message);
-        $this->assertSame('msg 3', $e->comments[1]->message);
-        $this->assertSame('msg 4', $e->comments[2]->message);
+        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($e->comments[2]->message, 'msg 4');
     }
 
+    #[\Testo\Test]
     public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -342,8 +353,8 @@ abstract class HasManyRelationTest extends BaseTest
          */
         [$a, $b] = $selector->load('comments')->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 0);
 
         $b->comments = $a->comments->slice(0, 2);
         foreach ($b->comments as $c) {
@@ -352,8 +363,8 @@ abstract class HasManyRelationTest extends BaseTest
 
         $b->comments[0]->message = 'new b';
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 2);
 
         $this->captureWriteQueries();
         $tr = new Transaction($this->orm);
@@ -381,35 +392,37 @@ abstract class HasManyRelationTest extends BaseTest
             'as' => 'comment',
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertEquals(3, $a->comments[0]->id);
-        $this->assertEquals(1, $b->comments[0]->id);
-        $this->assertEquals(2, $b->comments[1]->id);
+        \Testo\Assert::equals($a->comments[0]->id, 3);
+        \Testo\Assert::equals($b->comments[0]->id, 1);
+        \Testo\Assert::equals($b->comments[1]->id, 2);
 
-        $this->assertEquals('new b', $b->comments[0]->message);
+        \Testo\Assert::equals($b->comments[0]->message, 'new b');
     }
 
+    #[\Testo\Test]
     public function testNotTriggersRehydrate(): void
     {
         $comment = (new Select($this->orm, Comment::class))->wherePK(1)->fetchOne();
 
-        self::assertInstanceOf(Comment::class, $comment);
+        \Testo\Assert::instanceOf($comment, Comment::class);
 
         $comment->message = 'updated message';
-        self::assertSame('updated message', $comment->message);
+        \Testo\Assert::same($comment->message, 'updated message');
 
         $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
 
         // Trigger loading of user comments
         $comments = \iterator_to_array($user->comments);
-        self::assertContains($comment, $comments);
-        self::assertSame('updated message', $comment->message);
+        \Testo\Assert::contains($comments, $comment);
+        \Testo\Assert::same($comment->message, 'updated message');
 
         $this->orm = $this->orm->withHeap(new Heap());
     }
 
+    #[\Testo\Test]
     public function testBadRelationValue(): void
     {
         $e = new User();
@@ -417,8 +430,7 @@ abstract class HasManyRelationTest extends BaseTest
         $e->balance = 12.3;
         $e->comments = false;
 
-        $this->expectException(BadRelationValueException::class);
-        $this->expectExceptionMessage('must be of the iterable type');
+        \Testo\Expect::exception(BadRelationValueException::class)->withMessageContaining('must be of the iterable type');
 
         $this->save($e);
     }
@@ -426,6 +438,7 @@ abstract class HasManyRelationTest extends BaseTest
     /**
      * Ignore uninitialized collection
      */
+    #[\Testo\Test]
     public function testCreateWithUninitialisedField(): void
     {
         $e = new User();
@@ -436,7 +449,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->captureWriteQueries();
         $this->save($e);
         $this->assertNumWrites(1);
-        $this->assertFalse(isset($e->comments));
+        \Testo\Assert::false(isset($e->comments));
 
         $this->captureWriteQueries();
         $this->save($e);
@@ -446,6 +459,7 @@ abstract class HasManyRelationTest extends BaseTest
     /**
      * Nothing to update if empty collection is replaced with null
      */
+    #[\Testo\Test]
     public function testUpdateEntityWithUnsetCollection(): void
     {
         $e = new User();
@@ -455,7 +469,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->captureWriteQueries();
         $this->save($e);
         $this->assertNumWrites(1);
-        $this->assertIsIterable($e->comments);
+        \Testo\Assert::iterable($e->comments);
 
         $e->comments = null;
 
@@ -467,6 +481,7 @@ abstract class HasManyRelationTest extends BaseTest
     /**
      * If relation property was unset - ignore this field
      */
+    #[\Testo\Test]
     public function testUnsetProperty(): void
     {
         /** @var User $e */
@@ -475,7 +490,7 @@ abstract class HasManyRelationTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertCount(3, $e->comments);
+        \Testo\Assert::count($e->comments, 3);
         unset($e->comments);
 
         // Ignore uninitialized collection
@@ -487,6 +502,7 @@ abstract class HasManyRelationTest extends BaseTest
     /**
      * If collection is replaced with null - remove all children
      */
+    #[\Testo\Test]
     public function testRemoveChildrenUsingSetNull(): void
     {
         /** @var User $e */
@@ -495,7 +511,7 @@ abstract class HasManyRelationTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertCount(3, $e->comments);
+        \Testo\Assert::count($e->comments, 3);
         $e->comments = null;
 
         $this->captureWriteQueries();
@@ -513,9 +529,10 @@ abstract class HasManyRelationTest extends BaseTest
             ->load('comments')
             ->wherePK(1)
             ->fetchOne();
-        $this->assertCount(0, $e->comments);
+        \Testo\Assert::count($e->comments, 0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

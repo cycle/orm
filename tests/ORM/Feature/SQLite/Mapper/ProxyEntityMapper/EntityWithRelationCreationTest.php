@@ -13,6 +13,7 @@ class EntityWithRelationCreationTest extends BaseMapperTest
 {
     public const DRIVER = 'sqlite';
 
+    #[\Testo\Test]
     public function testProxyEntityRelationPropertiesShouldBeUnsetAfterCreation(): void
     {
         $mapper = $this->orm->getMapper(EntityWithRelationCreationUser::class);
@@ -24,12 +25,13 @@ class EntityWithRelationCreationTest extends BaseMapperTest
         $profileProperty = $refl->getProperty('profile');
         PHP_VERSION_ID < 80100 and $profileProperty->setAccessible(true);
 
-        $this->assertFalse($profileProperty->isInitialized($emptyObject));
-        $this->assertEquals(123, $emptyObject->id);
-        $this->assertEquals('test', $emptyObject->getUsername());
-        $this->assertEquals('test@site.com', $emptyObject->getEmail());
+        \Testo\Assert::false($profileProperty->isInitialized($emptyObject));
+        \Testo\Assert::equals($emptyObject->id, 123);
+        \Testo\Assert::equals($emptyObject->getUsername(), 'test');
+        \Testo\Assert::equals($emptyObject->getEmail(), 'test@site.com');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

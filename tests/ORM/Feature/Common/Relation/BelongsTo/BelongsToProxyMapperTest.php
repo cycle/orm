@@ -20,12 +20,13 @@ abstract class BelongsToProxyMapperTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -41,9 +42,10 @@ abstract class BelongsToProxyMapperTest extends BaseTest
                 'user_id' => null,
                 'image' => 'third.png',
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchPromises(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -53,21 +55,22 @@ abstract class BelongsToProxyMapperTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['user']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['user']);
-        $this->assertInstanceOf(User::class, $a->user);
-        $this->assertNull($b->user);
-        $this->assertNull($c->user);
+        \Testo\Assert::instanceOf($aData['user'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['user'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($a->user, User::class);
+        \Testo\Assert::null($b->user);
+        \Testo\Assert::null($c->user);
 
 
         $this->captureReadQueries();
-        $this->assertSame($a->user, $a->user);
-        $this->assertNull($b->user);
+        \Testo\Assert::same($a->user, $a->user);
+        \Testo\Assert::null($b->user);
         $this->assertNumReads(0);
 
-        $this->assertEquals('hello@world.com', $a->user->email);
+        \Testo\Assert::equals($a->user->email, 'hello@world.com');
     }
 
+    #[\Testo\Test]
     public function testFetchPromisesFromHeap(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -77,26 +80,27 @@ abstract class BelongsToProxyMapperTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['user']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['user']);
-        $this->assertNull($c->user);
+        \Testo\Assert::instanceOf($aData['user'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['user'], ReferenceInterface::class);
+        \Testo\Assert::null($c->user);
 
         // warm up
         (new Select($this->orm, User::class))->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $a->user);
-        $this->assertSame($a->user, $a->user);
+        \Testo\Assert::instanceOf($a->user, User::class);
+        \Testo\Assert::same($a->user, $a->user);
         $this->assertNumReads(0);
 
         // invalid object can't be cached
         $this->captureReadQueries();
-        $this->assertNull($b->user);
+        \Testo\Assert::null($b->user);
         $this->assertNumReads(1);
 
-        $this->assertEquals('hello@world.com', $a->user->email);
+        \Testo\Assert::equals($a->user->email, 'hello@world.com');
     }
 
+    #[\Testo\Test]
     public function testNoWriteOperations(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -109,13 +113,14 @@ abstract class BelongsToProxyMapperTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testAssignPromiseAsRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
 
         $pData = $this->extractEntity($p);
-        $this->assertInstanceOf(ReferenceInterface::class, $pData['user']);
+        \Testo\Assert::instanceOf($pData['user'], ReferenceInterface::class);
 
         $np = new Profile();
         $np->image = 'new image';
@@ -134,10 +139,11 @@ abstract class BelongsToProxyMapperTest extends BaseTest
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))->wherePK(4)->fetchOne();
 
-        $this->assertInstanceOf(User::class, $p->user);
-        $this->assertEquals('hello@world.com', $p->user->email);
+        \Testo\Assert::instanceOf($p->user, User::class);
+        \Testo\Assert::equals($p->user->email, 'hello@world.com');
     }
 
+    #[\Testo\Test]
     public function testEditPromised(): void
     {
         $p = (new Select($this->orm, Profile::class))
@@ -155,9 +161,10 @@ abstract class BelongsToProxyMapperTest extends BaseTest
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
             ->wherePK(1)->fetchOne();
 
-        $this->assertSame(400, (int) $p->user->balance);
+        \Testo\Assert::same((int) $p->user->balance, 400);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

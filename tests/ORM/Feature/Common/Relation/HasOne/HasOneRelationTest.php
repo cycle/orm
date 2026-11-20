@@ -25,17 +25,19 @@ abstract class HasOneRelationTest extends BaseTest
 
     protected const NULLABLE = false;
 
+    #[\Testo\Test]
     public function testHasInSchema(): void
     {
-        $this->assertSame(['profile'], $this->orm->getSchema()->getRelations('user'));
+        \Testo\Assert::same($this->orm->getSchema()->getRelations('user'), ['profile']);
     }
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -52,23 +54,25 @@ abstract class HasOneRelationTest extends BaseTest
                 'balance' => 200.0,
                 'profile' => null,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, User::class);
         $data = $selector->with('profile')->buildQuery()->fetchAll();
 
-        $this->assertCount(3, $data[0]);
+        \Testo\Assert::count($data[0], 3);
     }
 
+    #[\Testo\Test]
     public function testFetchRelationPostload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile', ['method' => JoinableLoader::POSTLOAD]);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -85,23 +89,25 @@ abstract class HasOneRelationTest extends BaseTest
                 'balance' => 200.0,
                 'profile' => null,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testAccessEntities(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
         $result = $selector->fetchAll();
 
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertInstanceOf(Profile::class, $result[0]->profile);
-        $this->assertEquals('image.png', $result[0]->profile->image);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::instanceOf($result[0]->profile, Profile::class);
+        \Testo\Assert::equals($result[0]->profile->image, 'image.png');
 
-        $this->assertInstanceOf(User::class, $result[1]);
-        $this->assertEquals(null, $result[1]->profile);
+        \Testo\Assert::instanceOf($result[1], User::class);
+        \Testo\Assert::equals($result[1]->profile, null);
     }
 
+    #[\Testo\Test]
     public function testCreateWithRelations(): void
     {
         $e = new User();
@@ -114,17 +120,18 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($e);
         $tr->run();
 
-        $this->assertEquals(3, $e->id);
+        \Testo\Assert::equals($e->id, 3);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
-        $this->assertTrue($this->orm->getHeap()->has($e->profile));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->profile)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e->profile));
+        \Testo\Assert::same($this->orm->getHeap()->get($e->profile)->getStatus(), Node::MANAGED);
 
-        $this->assertSame($e->id, $this->orm->getHeap()->get($e->profile)->getData()['user_id']);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->profile)->getData()['user_id'], $e->id);
     }
 
+    #[\Testo\Test]
     public function testMountRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -140,7 +147,7 @@ abstract class HasOneRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -161,9 +168,10 @@ abstract class HasOneRelationTest extends BaseTest
                     'image' => 'secondary.gif',
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testCreateAndUpdateRelatedData(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -182,7 +190,7 @@ abstract class HasOneRelationTest extends BaseTest
         $selector = new Select($orm, User::class);
         $e = $selector->wherePK($e->id)->load('profile')->fetchOne();
 
-        $this->assertSame('secondary.gif', $e->profile->image);
+        \Testo\Assert::same($e->profile->image, 'secondary.gif');
 
         $e->profile->image = 'updated.png';
 
@@ -204,9 +212,10 @@ abstract class HasOneRelationTest extends BaseTest
         $selector = new Select($orm, User::class);
         $e = $selector->wherePK($e->id)->load('profile')->fetchOne();
 
-        $this->assertSame('updated.png', $e->profile->image);
+        \Testo\Assert::same($e->profile->image, 'updated.png');
     }
 
+    #[\Testo\Test]
     public function testDeleteChildrenByAssigningNull(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -220,9 +229,10 @@ abstract class HasOneRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
-        $this->assertSame(null, $e->profile);
+        \Testo\Assert::same($e->profile, null);
     }
 
+    #[\Testo\Test]
     public function testDeleteNullableChild(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -290,10 +300,11 @@ abstract class HasOneRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
-        $this->assertSame(null, $e->profile);
-        $this->assertSame(1, (new Select($this->orm, Profile::class))->count());
+        \Testo\Assert::same($e->profile, null);
+        \Testo\Assert::same((new Select($this->orm, Profile::class))->count(), 1);
     }
 
+    #[\Testo\Test]
     public function testAssignNewChild(): void
     {
         $e = (new Select($this->orm, User::class))
@@ -308,23 +319,24 @@ abstract class HasOneRelationTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(2);
 
-        $this->assertSame(static::NULLABLE, $this->orm->getHeap()->has($oP));
-        $this->assertTrue($this->orm->getHeap()->has($e->profile));
+        \Testo\Assert::same($this->orm->getHeap()->has($oP), static::NULLABLE);
+        \Testo\Assert::true($this->orm->getHeap()->has($e->profile));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile')->fetchOne();
 
-        $this->assertNotEquals($oP, $e->profile->id);
-        $this->assertSame('new.jpg', $e->profile->image);
+        \Testo\Assert::notEquals($e->profile->id, $oP);
+        \Testo\Assert::same($e->profile->image, 'new.jpg');
     }
 
+    #[\Testo\Test]
     public function testMoveToAnotherEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
-        $this->assertNotNull($a->profile);
-        $this->assertNull($b->profile);
+        \Testo\Assert::notNull($a->profile);
+        \Testo\Assert::null($b->profile);
 
         $p = $a->profile;
         [$b->profile, $a->profile] = [$a->profile, null];
@@ -334,16 +346,17 @@ abstract class HasOneRelationTest extends BaseTest
         $tr->persist($b);
         $tr->run();
 
-        $this->assertTrue($this->orm->getHeap()->has($b->profile));
+        \Testo\Assert::true($this->orm->getHeap()->has($b->profile));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
 
-        $this->assertNull($a->profile);
-        $this->assertNotNull($b->profile);
-        $this->assertEquals($p->id, $b->profile->id);
+        \Testo\Assert::null($a->profile);
+        \Testo\Assert::notNull($b->profile);
+        \Testo\Assert::equals($b->profile->id, $p->id);
     }
 
+    #[\Testo\Test]
     public function testExchange(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -359,8 +372,8 @@ abstract class HasOneRelationTest extends BaseTest
 
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->load('profile')->orderBy('user.id')->fetchAll();
-        $this->assertSame('image.png', $a->profile->image);
-        $this->assertSame('secondary.gif', $b->profile->image);
+        \Testo\Assert::same($a->profile->image, 'image.png');
+        \Testo\Assert::same($b->profile->image, 'secondary.gif');
 
         [$a->profile, $b->profile] = [$b->profile, $a->profile];
 
@@ -373,16 +386,17 @@ abstract class HasOneRelationTest extends BaseTest
         [$a, $b] = $selector
             ->load('profile')
             ->orderBy('user.id')->fetchAll();
-        $this->assertSame('image.png', $b->profile->image);
-        $this->assertSame('secondary.gif', $a->profile->image);
+        \Testo\Assert::same($b->profile->image, 'image.png');
+        \Testo\Assert::same($a->profile->image, 'secondary.gif');
     }
 
+    #[\Testo\Test]
     public function testFetchNestedRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile.nested');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -404,16 +418,17 @@ abstract class HasOneRelationTest extends BaseTest
                 'balance' => 200.0,
                 'profile' => null,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchNestedRelationPostload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile', ['method' => JoinableLoader::POSTLOAD]);
         $selector->load('profile.nested');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -435,9 +450,10 @@ abstract class HasOneRelationTest extends BaseTest
                 'balance' => 200.0,
                 'profile' => null,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testUpdateNestedChild(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -452,9 +468,10 @@ abstract class HasOneRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
 
-        $this->assertSame('new-label', $e->profile->nested->label);
+        \Testo\Assert::same($e->profile->nested->label, 'new-label');
     }
 
+    #[\Testo\Test]
     public function testChangeNestedChild(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -470,9 +487,10 @@ abstract class HasOneRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $e = $selector->wherePK(1)->load('profile.nested')->fetchOne();
 
-        $this->assertSame('another', $e->profile->nested->label);
+        \Testo\Assert::same($e->profile->nested->label, 'another');
     }
 
+    #[\Testo\Test]
     public function testNoWriteQueries(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -496,6 +514,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testFindByRelatedID(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -503,11 +522,12 @@ abstract class HasOneRelationTest extends BaseTest
         $selector->with('profile')->where('profile.id', 1);
 
         $result = $selector->fetchAll();
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertEquals(1, $result[0]->id);
+        \Testo\Assert::count($result, 1);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::equals($result[0]->id, 1);
     }
 
+    #[\Testo\Test]
     public function testFindByRelatedIDAliased(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -515,11 +535,12 @@ abstract class HasOneRelationTest extends BaseTest
         $selector->with('profile', ['as' => 'profile_relation'])->where('profile.id', 1);
 
         $result = $selector->fetchAll();
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertEquals(1, $result[0]->id);
+        \Testo\Assert::count($result, 1);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::equals($result[0]->id, 1);
     }
 
+    #[\Testo\Test]
     public function testFindByRelatedIDArray(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -527,11 +548,12 @@ abstract class HasOneRelationTest extends BaseTest
         $selector->with('profile')->where('profile.id', new Parameter([1]));
 
         $result = $selector->fetchAll();
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertEquals(1, $result[0]->id);
+        \Testo\Assert::count($result, 1);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::equals($result[0]->id, 1);
     }
 
+    #[\Testo\Test]
     public function testFindByRelatedColumn(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -539,11 +561,12 @@ abstract class HasOneRelationTest extends BaseTest
         $selector->with('profile')->where('profile.image', '=', 'image.png');
 
         $result = $selector->fetchAll();
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertEquals(1, $result[0]->id);
+        \Testo\Assert::count($result, 1);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::equals($result[0]->id, 1);
     }
 
+    #[\Testo\Test]
     public function testDoNotOverwriteRelation(): void
     {
         $select = new Select($this->orm, User::class);
@@ -555,12 +578,12 @@ abstract class HasOneRelationTest extends BaseTest
         $u->profile = $newProfile;
 
         $u2 = $this->orm->getRepository(User::class)->findByPK(1);
-        $this->assertSame('new', $u2->profile->image);
+        \Testo\Assert::same($u2->profile->image, 'new');
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
             ->select()->load('profile')->wherePK(1)->fetchOne();
 
-        $this->assertSame('image.png', $u3->profile->image);
+        \Testo\Assert::same($u3->profile->image, 'image.png');
 
         $t = new Transaction($this->orm);
         $t->persist($u);
@@ -569,9 +592,10 @@ abstract class HasOneRelationTest extends BaseTest
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
             ->select()->load('profile')->wherePK(1)->fetchOne();
 
-        $this->assertSame('new', $u4->profile->image);
+        \Testo\Assert::same($u4->profile->image, 'new');
     }
 
+    #[\Testo\Test]
     public function testOverwritePromisedRelation(): void
     {
         $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
@@ -586,11 +610,11 @@ abstract class HasOneRelationTest extends BaseTest
             ->load('profile')
             ->wherePK(1)->fetchOne();
 
-        $this->assertSame('new', $u2->profile->image, 'Not promised relation should not be overwritten');
+        \Testo\Assert::same($u2->profile->image, 'new', 'Not promised relation should not be overwritten');
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)
             ->select()->load('profile')->wherePK(1)->fetchOne();
-        $this->assertSame('image.png', $u3->profile->image, 'Clrearly loaded entity has not changed fields');
+        \Testo\Assert::same($u3->profile->image, 'image.png', 'Clrearly loaded entity has not changed fields');
 
         $this->save($u);
 
@@ -598,13 +622,14 @@ abstract class HasOneRelationTest extends BaseTest
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)
             ->select()->load('profile')->wherePK(1)->fetchOne();
 
-        $this->assertSame('new', $u4->profile->image, 'the new value should be saved');
+        \Testo\Assert::same($u4->profile->image, 'new', 'the new value should be saved');
 
         $this->captureWriteQueries();
         $this->save($u);
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testUninitializedProperty(): void
     {
         $u = new User();
@@ -616,7 +641,7 @@ abstract class HasOneRelationTest extends BaseTest
         $this->save($u);
         $this->assertNumWrites(1);
 
-        self::assertFalse(isset($u->profile));
+        \Testo\Assert::false(isset($u->profile));
 
         $u->profile = null;
 
@@ -628,6 +653,7 @@ abstract class HasOneRelationTest extends BaseTest
     /**
      * If relation property was unset - ignore this field
      */
+    #[\Testo\Test]
     public function testUnsetProperty(): void
     {
         /** @var User $user */
@@ -645,6 +671,7 @@ abstract class HasOneRelationTest extends BaseTest
     /**
      * If relation is replaced with null - delete the child (set user_id to null)
      */
+    #[\Testo\Test]
     public function testRemoveChildrenUsingSetNull(): void
     {
         /** @var User $user */
@@ -652,7 +679,7 @@ abstract class HasOneRelationTest extends BaseTest
             ->wherePK(1)
             ->with('profile')->fetchOne();
 
-        $this->assertInstanceOf(Profile::class, $user->profile);
+        \Testo\Assert::instanceOf($user->profile, Profile::class);
 
         $this->captureWriteQueries();
         $this->save($user);
@@ -672,9 +699,10 @@ abstract class HasOneRelationTest extends BaseTest
         $user = (new Select($this->orm, User::class))
             ->wherePK(1)
             ->load('profile')->fetchOne();
-        $this->assertNull($user->profile);
+        \Testo\Assert::null($user->profile);
     }
 
+    #[\Testo\Test]
     public function testUpdateRelation(): void
     {
         $this->captureReadQueries();
@@ -687,11 +715,12 @@ abstract class HasOneRelationTest extends BaseTest
         $this->assertNumReads(1);
 
         $this->captureReadQueries();
-        $this->assertNotNull($users[0]->profile);
-        static::NULLABLE and $this->assertNull($users[1]->profile);
+        \Testo\Assert::notNull($users[0]->profile);
+        static::NULLABLE and \Testo\Assert::null($users[1]->profile);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testUpdateNestedRelation(): void
     {
         $this->captureReadQueries();
@@ -709,14 +738,15 @@ abstract class HasOneRelationTest extends BaseTest
         $this->captureReadQueries();
         foreach ($users as $user) {
             if ($user->id === 1) {
-                $this->assertNotNull($user->profile);
-                $this->assertNotNull($user->profile->nested);
-                $this->assertSame('nested-label', $user->profile->nested->label);
+                \Testo\Assert::notNull($user->profile);
+                \Testo\Assert::notNull($user->profile->nested);
+                \Testo\Assert::same($user->profile->nested->label, 'nested-label');
             }
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

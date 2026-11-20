@@ -7,17 +7,18 @@ namespace Cycle\ORM\Tests\Unit\Mapper\ProxyEntityMapper\Hydrator;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
 use PHPUnit\Framework\TestCase;
 
-class ClassPropertiesExtractorTest extends TestCase
+class ClassPropertiesExtractorTest
 {
     private ClassPropertiesExtractor $extractor;
 
+    #[\Testo\Test]
     public function testPropertyFromBaseClassShouldBeExtracted(): void
     {
         $class = User::class;
 
         $map = $this->extractor->extract($class, []);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
                 'comments' => 'comments',
@@ -26,19 +27,20 @@ class ClassPropertiesExtractorTest extends TestCase
                 'username' => 'username',
                 'email' => 'email',
             ],
-        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
+        ]);
 
-        $this->assertEquals([
-        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
+        ]);
     }
 
+    #[\Testo\Test]
     public function testPropertyFromBaseClassWithRelationsShouldBeExtracted(): void
     {
         $class = User::class;
 
         $map = $this->extractor->extract($class, ['comments']);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
             ],
@@ -46,22 +48,23 @@ class ClassPropertiesExtractorTest extends TestCase
                 'username' => 'username',
                 'email' => 'email',
             ],
-        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
+        ]);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
             '' => [
                 'comments' => 'comments',
             ],
-        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testPropertyFromExtendedClassShouldBeExtracted(): void
     {
         $class = SuperUser::class;
 
         $map = $this->extractor->extract($class, []);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
                 'age' => 'age',
@@ -80,19 +83,20 @@ class ClassPropertiesExtractorTest extends TestCase
             SuperUser::class => [
                 'isAdmin' => 'isAdmin',
             ],
-        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
+        ]);
 
-        $this->assertEquals([
-        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
+        ]);
     }
 
+    #[\Testo\Test]
     public function testPropertyFromExtendedClassWithRelationsShouldBeExtracted(): void
     {
         $class = SuperUser::class;
 
         $map = $this->extractor->extract($class, ['comments', 'tags']);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
                 'age' => 'age',
@@ -109,22 +113,21 @@ class ClassPropertiesExtractorTest extends TestCase
             SuperUser::class => [
                 'isAdmin' => 'isAdmin',
             ],
-        ], $map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties());
+        ]);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
             '' => [
                 'comments' => 'comments',
             ],
             ExtendedUser::class => [
                 'tags' => 'tags',
             ],
-        ], $map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties());
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->extractor = new ClassPropertiesExtractor();
     }
 }

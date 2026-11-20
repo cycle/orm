@@ -14,6 +14,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         /** @var Entity\Post $post */
@@ -21,17 +22,18 @@ abstract class CaseTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertSame(1, $post->user->id);
+        \Testo\Assert::same($post->user->id, 1);
 
         $post->user_id = 2;
 
         $this->save($post);
 
-        $this->assertSame(2, $post->user_id);
-        $this->assertSame(2, $post->user->id);
+        \Testo\Assert::same($post->user_id, 2);
+        \Testo\Assert::same($post->user->id, 2);
         $this->orm->getHeap()->clean();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

@@ -17,6 +17,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testRun(): void
     {
         $markCriterionResult = (new Select($this->orm, MarkCriterionResult::class))
@@ -29,7 +30,7 @@ abstract class CaseTest extends BaseTest
             ->filter(static fn(MarkSubcriterionResult $item) => $item->id === 'subcriterion-1')
             ->first();
         $aspect = $sub->markAspectResults->first();
-        $this->assertNotFalse($aspect);
+        \Testo\Assert::notSame($aspect, false);
         $student = $aspect->student;
         $student->studentProgresses->add(new StudentProgress('new-progress-42'));
 
@@ -41,9 +42,10 @@ abstract class CaseTest extends BaseTest
         $studentProgress = (new Select($this->orm, StudentProgress::class))
             ->wherePK('new-progress-42')
             ->fetchOne();
-        $this->assertNotNull($studentProgress);
+        \Testo\Assert::notNull($studentProgress);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

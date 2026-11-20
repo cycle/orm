@@ -21,6 +21,7 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         $this->orm = $this->withTagSchema([
@@ -37,18 +38,19 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(\count($expected), $res);
-        $this->assertCount(\count($expected[0]->tags), $res[0]->tags);
-        $this->assertCount(\count($expected[1]->tags), $res[1]->tags);
+        \Testo\Assert::count($res, \count($expected));
+        \Testo\Assert::count($res[0]->tags, \count($expected[0]->tags));
+        \Testo\Assert::count($res[1]->tags, \count($expected[1]->tags));
 
         foreach ($expected[0]->tags as $i => $tag) {
-            $this->assertSame($tag->name, $res[0]->tags[$i]->name);
+            \Testo\Assert::same($res[0]->tags[$i]->name, $tag->name);
         }
         foreach ($expected[1]->tags as $i => $tag) {
-            $this->assertSame($tag->name, $res[1]->tags[$i]->name);
+            \Testo\Assert::same($res[1]->tags[$i]->name, $tag->name);
         }
     }
 
+    #[\Testo\Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         $this->orm = $this->withTagSchema([
@@ -59,19 +61,20 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             method: LoadMethod::OuterQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testLoadWithOrderBy(): void
     {
         $this->orm = $this->withTagSchema([
@@ -82,19 +85,20 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             orderBy: ['@.level' => 'ASC'],
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -106,12 +110,13 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             where: ['@.level' => 1],
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $a->tags);
-        $this->assertCount(0, $b->tags);
+        \Testo\Assert::count($a->tags, 1);
+        \Testo\Assert::count($b->tags, 0);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomWhereAndSingleQuery(): void
     {
         $this->orm = $this->withTagSchema([
@@ -124,10 +129,11 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             where: ['@.level' => 1],
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $a->tags);
-        $this->assertSame('tag a', $a->tags[0]->name);
+        \Testo\Assert::count($a->tags, 1);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
     }
 
+    #[\Testo\Test]
     public function testLoadWithScopeDisabled(): void
     {
         $this->orm = $this->withTagSchema([
@@ -138,10 +144,11 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             scope: false,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomScope(): void
     {
         $this->orm = $this->withTagSchema([]);
@@ -150,17 +157,18 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             scope: new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'ASC']),
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag d', $a->tags[0]->name);
-        $this->assertSame('tag e', $a->tags[1]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag d');
+        \Testo\Assert::same($a->tags[1]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryAndScopeAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -178,18 +186,19 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(\count($expected), $res);
-        $this->assertCount(\count($expected[0]->tags), $res[0]->tags);
-        $this->assertCount(\count($expected[1]->tags), $res[1]->tags);
+        \Testo\Assert::count($res, \count($expected));
+        \Testo\Assert::count($res[0]->tags, \count($expected[0]->tags));
+        \Testo\Assert::count($res[1]->tags, \count($expected[1]->tags));
 
         foreach ($expected[0]->tags as $i => $tag) {
-            $this->assertSame($tag->name, $res[0]->tags[$i]->name);
+            \Testo\Assert::same($res[0]->tags[$i]->name, $tag->name);
         }
         foreach ($expected[1]->tags as $i => $tag) {
-            $this->assertSame($tag->name, $res[1]->tags[$i]->name);
+            \Testo\Assert::same($res[1]->tags[$i]->name, $tag->name);
         }
     }
 
+    #[\Testo\Test]
     public function testLoadWithDefaultOptions(): void
     {
         $this->orm = $this->withTagSchema([]);
@@ -197,10 +206,11 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
         [$a, $b] = (new Select($this->orm, User::class))->load('tags', new ManyToManyLoadOptions())
             ->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
     }
 
+    #[\Testo\Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('tag_archive', [
@@ -229,19 +239,20 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
             table: 'tag_archive',
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('archived a', $a->tags[0]->name);
-        $this->assertSame('archived b', $a->tags[1]->name);
-        $this->assertSame('archived d', $a->tags[2]->name);
-        $this->assertSame('archived e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'archived a');
+        \Testo\Assert::same($a->tags[1]->name, 'archived b');
+        \Testo\Assert::same($a->tags[2]->name, 'archived d');
+        \Testo\Assert::same($a->tags[3]->name, 'archived e');
 
-        $this->assertSame('archived c', $b->tags[0]->name);
-        $this->assertSame('archived d', $b->tags[1]->name);
-        $this->assertSame('archived f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'archived c');
+        \Testo\Assert::same($b->tags[1]->name, 'archived d');
+        \Testo\Assert::same($b->tags[2]->name, 'archived f');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

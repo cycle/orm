@@ -95,6 +95,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
     /**
      * Subclasses in relations should be loaded and initialized
      */
+    #[\Testo\Test]
     public function testLoadSubclassAndCheckParentsRelations(): void
     {
         /** @var Programator $entity */
@@ -102,26 +103,26 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             ->load('tech_book')
             ->wherePK(2)->fetchOne();
 
-        $this->assertInstanceof(Programator::class, $entity);
+        \Testo\Assert::instanceOf($entity, Programator::class);
         /** BOOK_3 */
-        $this->assertInstanceof(Book::class, $entity->tech_book);
-        $this->assertSame(3, $entity->tech_book->id);
+        \Testo\Assert::instanceOf($entity->tech_book, Book::class);
+        \Testo\Assert::same($entity->tech_book->id, 3);
         /** EBOOK_3 */
-        $this->assertInstanceof(EBook::class, $entity->tech_book);
-        $this->assertSame(static::EBOOK_3['url'], $entity->tech_book->url);
+        \Testo\Assert::instanceOf($entity->tech_book, EBook::class);
+        \Testo\Assert::same($entity->tech_book->url, static::EBOOK_3['url']);
         // Check relation eager loading in the book subclass
         /** @var EBook $ebook */
         $ebook = $entity->tech_book;
-        $this->assertCount(3, $ebook->pages);
+        \Testo\Assert::count($ebook->pages, 3);
     }
 
     /**
      * Subclass relations can't be resolved manually
      */
+    #[\Testo\Test]
     public function testLoadRelationOfSubclass(): void
     {
-        $this->expectException(LoaderException::class);
-        $this->expectExceptionMessage('Unable to create loader: Undefined relation `human`.`book`.');
+        \Testo\Expect::exception(LoaderException::class)->withMessageContaining('Unable to create loader: Undefined relation `human`.`book`.');
 
         /** @var Programator $entity */
         (new Select($this->orm, static::HUMAN_ROLE))
@@ -130,25 +131,27 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             ->wherePK(2)->fetchOne();
     }
 
+    #[\Testo\Test]
     public function testLoadBaseClassAndCheckSubclassEagerRelations(): void
     {
         /** @var Programator $entity */
         $entity = (new Select($this->orm, static::HUMAN_ROLE))
             ->wherePK(2)->fetchOne();
 
-        $this->assertInstanceof(Programator::class, $entity);
+        \Testo\Assert::instanceOf($entity, Programator::class);
         /** BOOK_4 */
-        $this->assertInstanceof(Book::class, $entity->book);
-        $this->assertSame(4, $entity->book->id);
+        \Testo\Assert::instanceOf($entity->book, Book::class);
+        \Testo\Assert::same($entity->book->id, 4);
         /** EBOOK_4 */
-        $this->assertInstanceof(EBook::class, $entity->book);
-        $this->assertSame(static::EBOOK_4['url'], $entity->book->url);
+        \Testo\Assert::instanceOf($entity->book, EBook::class);
+        \Testo\Assert::same($entity->book->url, static::EBOOK_4['url']);
         // Check relation eager loading in the book subclass
         /** @var EBook $ebook */
         $ebook = $entity->book;
-        $this->assertEmpty($ebook->pages);
+        \Testo\Assert::blank($ebook->pages);
     }
 
+    #[\Testo\Test]
     public function testInnerLoadParentClassRelation(): void
     {
         $this->captureReadQueries();
@@ -160,13 +163,14 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
 
         $this->assertNumReads(2);
 
-        $this->assertInstanceof(MarkdownPage::class, $entity);
-        $this->assertInstanceof(Programator::class, $entity->owner);
+        \Testo\Assert::instanceOf($entity, MarkdownPage::class);
+        \Testo\Assert::instanceOf($entity->owner, Programator::class);
     }
 
     /**
      * Inheritance hierarchy should be joined as sub-query
      */
+    #[\Testo\Test]
     public function testInnerLoadParentClassRelationNullToNull(): void
     {
         /** @var MarkdownPage $entity */
@@ -174,11 +178,12 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             ->load('ebook', ['method' => Select::SINGLE_QUERY])
             ->wherePK(5)->fetchOne();
 
-        $this->assertInstanceof(MarkdownPage::class, $entity);
-        $this->assertNull($entity->block_id);
-        $this->assertNull($entity->ebook);
+        \Testo\Assert::instanceOf($entity, MarkdownPage::class);
+        \Testo\Assert::null($entity->block_id);
+        \Testo\Assert::null($entity->ebook);
     }
 
+    #[\Testo\Test]
     public function testLoadTwoInheritancesInSingleQuery(): void
     {
         $this->captureReadQueries();
@@ -193,16 +198,17 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
         $this->assertNumReads(1);
         $this->captureReadQueries();
 
-        $this->assertInstanceof(EBook::class, $entity->book);
-        $this->assertSame(4, $entity->book->id);
-        $this->assertInstanceof(EBook::class, $entity->tech_book);
-        $this->assertSame(3, $entity->tech_book->id);
-        $this->assertNotEmpty($entity->tech_book->pages);
+        \Testo\Assert::instanceOf($entity->book, EBook::class);
+        \Testo\Assert::same($entity->book->id, 4);
+        \Testo\Assert::instanceOf($entity->tech_book, EBook::class);
+        \Testo\Assert::same($entity->tech_book->id, 3);
+        \Testo\Assert::notBlank($entity->tech_book->pages);
 
         // Don't use promises
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testPersistRelatedHierarchy(): void
     {
         /** @var EBook $entity */
@@ -224,15 +230,16 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
 
         // Relations are not non-rewritable on sync hydration
         // This behavior can be changed
-        $this->assertNull($entity->pages[0]->ebook);
-        $this->assertNull($entity->pages[1]->ebook);
-        $this->assertNull($entity->pages[2]->ebook);
+        \Testo\Assert::null($entity->pages[0]->ebook);
+        \Testo\Assert::null($entity->pages[1]->ebook);
+        \Testo\Assert::null($entity->pages[2]->ebook);
 
         // $this->captureWriteQueries();
         // $this->save($entity);
         // $this->assertNumWrites(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         JtiBaseTest::setUp();

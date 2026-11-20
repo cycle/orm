@@ -15,6 +15,7 @@ abstract class PersistRepositoryTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testPersist(): void
     {
         /** @var UserPersistRepository $users */
@@ -25,13 +26,14 @@ abstract class PersistRepositoryTest extends BaseTest
         $u->email = 'test@email.com';
         $u->balance = 1000;
 
-        $this->assertNull($u->id);
+        \Testo\Assert::null($u->id);
 
         $users->save($u);
 
-        $this->assertNotNull($u->id);
+        \Testo\Assert::notNull($u->id);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

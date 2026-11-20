@@ -20,6 +20,7 @@ abstract class ManyToManyScopedTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testOrderedByScope(): void
     {
         $this->orm = $this->withTagSchema([
@@ -34,19 +35,20 @@ abstract class ManyToManyScopedTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testOrderedByScopeDESC(): void
     {
         $this->orm = $this->withTagSchema([]);
@@ -61,19 +63,20 @@ abstract class ManyToManyScopedTest extends BaseTest
             'scope' => new Select\QueryScope([], ['@.level' => 'DESC']),
         ])->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeInload(): void
     {
         $this->orm = $this->withTagSchema([]);
@@ -89,19 +92,20 @@ abstract class ManyToManyScopedTest extends BaseTest
             'scope' => new Select\QueryScope([], ['@.level' => 'ASC']),
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([]);
@@ -117,19 +121,20 @@ abstract class ManyToManyScopedTest extends BaseTest
             'scope' => new Select\QueryScope([], ['@.level' => 'DESC']),
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testGlobalScope(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -189,20 +194,21 @@ abstract class ManyToManyScopedTest extends BaseTest
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(0);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testGlobalScopeDESC(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -262,20 +268,21 @@ abstract class ManyToManyScopedTest extends BaseTest
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(0);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testGlobalScopeDESCButASC(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -337,20 +344,21 @@ abstract class ManyToManyScopedTest extends BaseTest
         ])->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(0);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testGlobalScopePromised(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -411,20 +419,21 @@ abstract class ManyToManyScopedTest extends BaseTest
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(2);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testGlobalScopeDESCPromised(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -485,20 +494,21 @@ abstract class ManyToManyScopedTest extends BaseTest
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(2);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -16,6 +16,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelectWithJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -24,9 +25,10 @@ abstract class CaseTest extends BaseTest
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        $this->assertSame('Product-2', $product->title);
+        \Testo\Assert::same($product->title, 'Product-2');
     }
 
+    #[\Testo\Test]
     public function testSelectWithInnerJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -35,9 +37,10 @@ abstract class CaseTest extends BaseTest
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        $this->assertSame('Product-2', $product->title);
+        \Testo\Assert::same($product->title, 'Product-2');
     }
 
+    #[\Testo\Test]
     public function testSelectWithRightJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -46,9 +49,10 @@ abstract class CaseTest extends BaseTest
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        $this->assertSame('Product-2', $product->title);
+        \Testo\Assert::same($product->title, 'Product-2');
     }
 
+    #[\Testo\Test]
     public function testSelectWithLeftJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -57,9 +61,10 @@ abstract class CaseTest extends BaseTest
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        $this->assertSame('Product-2', $product->title);
+        \Testo\Assert::same($product->title, 'Product-2');
     }
 
+    #[\Testo\Test]
     public function testSelectWithFullJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -68,9 +73,10 @@ abstract class CaseTest extends BaseTest
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        $this->assertSame('Product-2', $product->title);
+        \Testo\Assert::same($product->title, 'Product-2');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

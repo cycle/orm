@@ -14,6 +14,7 @@ abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTes
 {
     protected const DEFAULT_MAPPER = StdMapper::class;
 
+    #[\Testo\Test]
     public function testCreateProgramator(): void
     {
         $programator = $this->orm->make(static::PROGRAMATOR_ROLE);
@@ -32,19 +33,21 @@ abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTes
         $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK($programator->id)
             ->fetchOne();
-        $this->assertSame('Merlin', $programator->name);
-        $this->assertSame(50, $programator->level);
-        $this->assertSame('VanillaJS', $programator->language);
+        \Testo\Assert::same($programator->name, 'Merlin');
+        \Testo\Assert::same($programator->level, 50);
+        \Testo\Assert::same($programator->language, 'VanillaJS');
     }
 
+    #[\Testo\Test]
+    #[\Testo\Skip('Skip for classless mapper.')]
     public function testSelectEngineerEntityFirstWithInheritance(): void
     {
-        $this->markTestSkipped('Skip for classless mapper.');
     }
 
+    #[\Testo\Test]
+    #[\Testo\Skip('Skip for classless mapper.')]
     public function testSelectEmployeeHierarchyByPK(): void
     {
-        $this->markTestSkipped('Skip for classless mapper.');
     }
 
     protected function getSchemaArray(): array

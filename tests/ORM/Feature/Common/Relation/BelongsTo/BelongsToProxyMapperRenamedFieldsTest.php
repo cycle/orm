@@ -13,6 +13,7 @@ use Cycle\ORM\Tests\Feature\Common\BaseTest;
 
 abstract class BelongsToProxyMapperRenamedFieldsTest extends BelongsToProxyMapperTest
 {
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         BaseTest::setUp();

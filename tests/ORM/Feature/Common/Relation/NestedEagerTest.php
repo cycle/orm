@@ -18,94 +18,91 @@ abstract class NestedEagerTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchEager(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('id', 'ASC');
 
-        $this->assertEquals(
+        \Testo\Assert::equals($selector->fetchData(), [
             [
-                [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
                     'id' => 1,
-                    'email' => 'hello@world.com',
-                    'balance' => 100.0,
-                    'profile' => [
-                        'id' => 1,
-                        'user_id' => 1,
-                        'image' => 'image.png',
-                        'nested' => [
-                            'label' => 'hello',
-                        ],
-                    ],
-                ],
-                [
-                    'id' => 2,
-                    'email' => 'another@world.com',
-                    'balance' => 200.0,
-                    'profile' => null,
-                ],
-                [
-                    'id' => 3,
-                    'email' => 'third@world.com',
-                    'balance' => 150.0,
-                    'profile' => [
-                        'id' => 2,
-                        'user_id' => 3,
-                        'image' => 'third.png',
-                        'nested' => [
-                            'label' => 'hello3',
-                        ],
+                    'user_id' => 1,
+                    'image' => 'image.png',
+                    'nested' => [
+                        'label' => 'hello',
                     ],
                 ],
             ],
-            $selector->fetchData(),
-        );
+            [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'profile' => null,
+            ],
+            [
+                'id' => 3,
+                'email' => 'third@world.com',
+                'balance' => 150.0,
+                'profile' => [
+                    'id' => 2,
+                    'user_id' => 3,
+                    'image' => 'third.png',
+                    'nested' => [
+                        'label' => 'hello3',
+                    ],
+                ],
+            ],
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchEagerReverse(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id', 'DESC');
 
-        $this->assertEquals(
+        \Testo\Assert::equals($selector->fetchData(), [
             [
-                [
-                    'id' => 3,
-                    'email' => 'third@world.com',
-                    'balance' => 150.0,
-                    'profile' => [
-                        'id' => 2,
-                        'user_id' => 3,
-                        'image' => 'third.png',
-                        'nested' => [
-                            'label' => 'hello3',
-                        ],
-                    ],
-                ],
-                [
+                'id' => 3,
+                'email' => 'third@world.com',
+                'balance' => 150.0,
+                'profile' => [
                     'id' => 2,
-                    'email' => 'another@world.com',
-                    'balance' => 200.0,
-                    'profile' => null,
-                ],
-                [
-                    'id' => 1,
-                    'email' => 'hello@world.com',
-                    'balance' => 100.0,
-                    'profile' => [
-                        'id' => 1,
-                        'user_id' => 1,
-                        'image' => 'image.png',
-                        'nested' => [
-                            'label' => 'hello',
-                        ],
+                    'user_id' => 3,
+                    'image' => 'third.png',
+                    'nested' => [
+                        'label' => 'hello3',
                     ],
                 ],
             ],
-            $selector->fetchData(),
-        );
+            [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'profile' => null,
+            ],
+            [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'profile' => [
+                    'id' => 1,
+                    'user_id' => 1,
+                    'image' => 'image.png',
+                    'nested' => [
+                        'label' => 'hello',
+                    ],
+                ],
+            ],
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

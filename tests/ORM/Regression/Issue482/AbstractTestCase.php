@@ -16,6 +16,7 @@ abstract class AbstractTestCase extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         $select = $this->orm->getRepository(Country::class)
@@ -51,39 +52,34 @@ abstract class AbstractTestCase extends BaseTest
         $this->assertExpectedSql($select);
 
         $data = $select->fetchData();
-        $this->assertCount(3, $data);
-        $this->assertEquals(
-            [
-                'America in english',
-                'China in english',
-                'Russia in english',
-            ],
-            \array_column(
-                \array_merge(
-                    ...\array_column($data, 'translations'),
-                ),
-                'title',
+        \Testo\Assert::count($data, 3);
+        \Testo\Assert::equals(\array_column(
+            \array_merge(
+                ...\array_column($data, 'translations'),
             ),
-        );
+            'title',
+        ), [
+            'America in english',
+            'China in english',
+            'Russia in english',
+        ]);
 
         $all = $select->fetchAll();
-        $this->assertCount(3, $all);
-        $this->assertEquals(
-            [
-                'America in english',
-                'China in english',
-                'Russia in english',
-            ],
-            \array_map(
-                static function (Country $c) {
-                    self::assertCount(1, $c->translations);
-                    return $c->translations[0]->title;
-                },
-                $all,
-            ),
-        );
+        \Testo\Assert::count($all, 3);
+        \Testo\Assert::equals(\array_map(
+            static function (Country $c) {
+                \Testo\Assert::count($c->translations, 1);
+                return $c->translations[0]->title;
+            },
+            $all,
+        ), [
+            'America in english',
+            'China in english',
+            'Russia in english',
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB
@@ -96,14 +92,12 @@ abstract class AbstractTestCase extends BaseTest
 
     abstract protected function getExpectedSql(): string;
 
+    #[\Testo\Common\Attribute\AssertMethod]
     private function assertExpectedSql(Select $select): void
     {
         $actual = (string) $select->buildQuery();
         $expected = $this->getExpectedSql();
-        $this->assertSame(
-            \array_map('trim', \explode("\n", $expected)),
-            \array_map('trim', \explode("\n", $actual)),
-        );
+        \Testo\Assert::same(\array_map('trim', \explode("\n", $actual)), \array_map('trim', \explode("\n", $expected)));
     }
 
     private function makeTables(): void

@@ -15,22 +15,24 @@ abstract class RepositoryTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFindAll(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findAll();
 
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertEquals(1, $result[0]->id);
-        $this->assertEquals('hello@world.com', $result[0]->email);
-        $this->assertEquals(100.0, $result[0]->balance);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::equals($result[0]->id, 1);
+        \Testo\Assert::equals($result[0]->email, 'hello@world.com');
+        \Testo\Assert::equals($result[0]->balance, 100.0);
 
-        $this->assertInstanceOf(User::class, $result[1]);
-        $this->assertEquals(2, $result[1]->id);
-        $this->assertEquals('another@world.com', $result[1]->email);
-        $this->assertEquals(200.0, $result[1]->balance);
+        \Testo\Assert::instanceOf($result[1], User::class);
+        \Testo\Assert::equals($result[1]->id, 2);
+        \Testo\Assert::equals($result[1]->email, 'another@world.com');
+        \Testo\Assert::equals($result[1]->balance, 200.0);
     }
 
+    #[\Testo\Test]
     public function testCloned(): void
     {
         $r = $this->orm->getRepository(User::class);
@@ -38,50 +40,55 @@ abstract class RepositoryTest extends BaseTest
         /** @var Repository $r2 */
         $r2 = clone $r;
 
-        $this->assertNotSame($r->select(), $r2->select());
+        \Testo\Assert::notSame($r2->select(), $r->select());
     }
 
+    #[\Testo\Test]
     public function testFindOne(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne();
 
-        $this->assertInstanceOf(User::class, $result);
-        $this->assertEquals(1, $result->id);
-        $this->assertEquals('hello@world.com', $result->email);
-        $this->assertEquals(100.0, $result->balance);
+        \Testo\Assert::instanceOf($result, User::class);
+        \Testo\Assert::equals($result->id, 1);
+        \Testo\Assert::equals($result->email, 'hello@world.com');
+        \Testo\Assert::equals($result->balance, 100.0);
     }
 
+    #[\Testo\Test]
     public function testFindOneWithWhere(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 2]);
 
-        $this->assertInstanceOf(User::class, $result);
-        $this->assertEquals(2, $result->id);
-        $this->assertEquals('another@world.com', $result->email);
-        $this->assertEquals(200.0, $result->balance);
+        \Testo\Assert::instanceOf($result, User::class);
+        \Testo\Assert::equals($result->id, 2);
+        \Testo\Assert::equals($result->email, 'another@world.com');
+        \Testo\Assert::equals($result->balance, 200.0);
     }
 
+    #[\Testo\Test]
     public function testFindNull(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findOne(['id' => 3]);
 
-        $this->assertNull($result);
+        \Testo\Assert::null($result);
     }
 
+    #[\Testo\Test]
     public function testFindByPK(): void
     {
         $r = $this->orm->getRepository(User::class);
         $result = $r->findByPK(2);
 
-        $this->assertInstanceOf(User::class, $result);
-        $this->assertEquals(2, $result->id);
-        $this->assertEquals('another@world.com', $result->email);
-        $this->assertEquals(200.0, $result->balance);
+        \Testo\Assert::instanceOf($result, User::class);
+        \Testo\Assert::equals($result->id, 2);
+        \Testo\Assert::equals($result->email, 'another@world.com');
+        \Testo\Assert::equals($result->balance, 200.0);
     }
 
+    #[\Testo\Test]
     public function testFindImmutable(): void
     {
         /** @var Repository $r */
@@ -89,30 +96,31 @@ abstract class RepositoryTest extends BaseTest
 
         $result = $r->select()->orderBy('id', 'DESC')->fetchAll();
 
-        $this->assertInstanceOf(User::class, $result[1]);
-        $this->assertEquals(1, $result[1]->id);
-        $this->assertEquals('hello@world.com', $result[1]->email);
-        $this->assertEquals(100.0, $result[1]->balance);
+        \Testo\Assert::instanceOf($result[1], User::class);
+        \Testo\Assert::equals($result[1]->id, 1);
+        \Testo\Assert::equals($result[1]->email, 'hello@world.com');
+        \Testo\Assert::equals($result[1]->balance, 100.0);
 
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertEquals(2, $result[0]->id);
-        $this->assertEquals('another@world.com', $result[0]->email);
-        $this->assertEquals(200.0, $result[0]->balance);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::equals($result[0]->id, 2);
+        \Testo\Assert::equals($result[0]->email, 'another@world.com');
+        \Testo\Assert::equals($result[0]->balance, 200.0);
 
         // immutable
         $result = $r->select()->fetchAll();
 
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertEquals(1, $result[0]->id);
-        $this->assertEquals('hello@world.com', $result[0]->email);
-        $this->assertEquals(100.0, $result[0]->balance);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::equals($result[0]->id, 1);
+        \Testo\Assert::equals($result[0]->email, 'hello@world.com');
+        \Testo\Assert::equals($result[0]->balance, 100.0);
 
-        $this->assertInstanceOf(User::class, $result[1]);
-        $this->assertEquals(2, $result[1]->id);
-        $this->assertEquals('another@world.com', $result[1]->email);
-        $this->assertEquals(200.0, $result[1]->balance);
+        \Testo\Assert::instanceOf($result[1], User::class);
+        \Testo\Assert::equals($result[1]->id, 2);
+        \Testo\Assert::equals($result[1]->email, 'another@world.com');
+        \Testo\Assert::equals($result[1]->balance, 200.0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -9,28 +9,32 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Options\LoadMethod;
 use PHPUnit\Framework\TestCase;
 
-final class LoadMethodTest extends TestCase
+final class LoadMethodTest
 {
+    #[\Testo\Test]
     public function testSingleQueryValue(): void
     {
-        $this->assertSame(Select::SINGLE_QUERY, LoadMethod::SingleQuery->value);
-        $this->assertSame(JoinableLoader::INLOAD, LoadMethod::SingleQuery->value);
+        \Testo\Assert::same(LoadMethod::SingleQuery->value, Select::SINGLE_QUERY);
+        \Testo\Assert::same(LoadMethod::SingleQuery->value, JoinableLoader::INLOAD);
     }
 
+    #[\Testo\Test]
     public function testOuterQueryValue(): void
     {
-        $this->assertSame(Select::OUTER_QUERY, LoadMethod::OuterQuery->value);
-        $this->assertSame(JoinableLoader::POSTLOAD, LoadMethod::OuterQuery->value);
+        \Testo\Assert::same(LoadMethod::OuterQuery->value, Select::OUTER_QUERY);
+        \Testo\Assert::same(LoadMethod::OuterQuery->value, JoinableLoader::POSTLOAD);
     }
 
+    #[\Testo\Test]
     public function testCaseCount(): void
     {
-        $this->assertCount(2, LoadMethod::cases());
+        \Testo\Assert::count(LoadMethod::cases(), 2);
     }
 
+    #[\Testo\Test]
     public function testFromValue(): void
     {
-        $this->assertSame(LoadMethod::SingleQuery, LoadMethod::from(JoinableLoader::INLOAD));
-        $this->assertSame(LoadMethod::OuterQuery, LoadMethod::from(JoinableLoader::POSTLOAD));
+        \Testo\Assert::same(LoadMethod::from(JoinableLoader::INLOAD), LoadMethod::SingleQuery);
+        \Testo\Assert::same(LoadMethod::from(JoinableLoader::POSTLOAD), LoadMethod::OuterQuery);
     }
 }

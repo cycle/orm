@@ -15,28 +15,31 @@ abstract class ORMTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testORMGet(): void
     {
-        $this->assertNull($this->orm->get(User::class, ['id' => 1], false));
-        $this->assertInstanceOf(User::class, $this->orm->get(User::class, ['id' => 1], true));
+        \Testo\Assert::null($this->orm->get(User::class, ['id' => 1], false));
+        \Testo\Assert::instanceOf($this->orm->get(User::class, ['id' => 1], true), User::class);
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $this->orm->get(User::class, ['id' => 1]));
+        \Testo\Assert::instanceOf($this->orm->get(User::class, ['id' => 1]), User::class);
         $this->assertNumReads(0);
 
-        $this->assertCount(1, $this->orm->getSchema()->getRoles());
+        \Testo\Assert::count($this->orm->getSchema()->getRoles(), 1);
     }
 
+    #[\Testo\Test]
     public function testORMGetByRole(): void
     {
-        $this->assertNull($this->orm->get('user', ['id' => 1], false));
-        $this->assertInstanceOf(User::class, $this->orm->get('user', ['id' => 1], true));
+        \Testo\Assert::null($this->orm->get('user', ['id' => 1], false));
+        \Testo\Assert::instanceOf($this->orm->get('user', ['id' => 1], true), User::class);
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(User::class, $this->orm->get('user', ['id' => 1]));
+        \Testo\Assert::instanceOf($this->orm->get('user', ['id' => 1]), User::class);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

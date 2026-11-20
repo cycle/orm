@@ -38,9 +38,8 @@ abstract class CaseTest extends BaseTest
         ];
     }
 
-    /**
-     * @dataProvider countProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('countProvider')]
     public function testRun(int $count): void
     {
         $generator = $this->generate($count);
@@ -56,11 +55,12 @@ abstract class CaseTest extends BaseTest
         $this->snapMemory('Clean state');
 
         // No errors
-        $this->assertTrue(true);
+        \Testo\Assert::true(true);
 
         // $this->printDebug();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         $this->resetState();

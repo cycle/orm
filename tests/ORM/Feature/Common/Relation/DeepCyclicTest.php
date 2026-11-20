@@ -18,6 +18,7 @@ abstract class DeepCyclicTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateDeepCyclic(): void
     {
         $c1 = new Cyclic('C1');
@@ -49,21 +50,22 @@ abstract class DeepCyclicTest extends BaseTest
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        $this->assertSame($c1->name, 'C1');
-        $this->assertSame($c2->name, 'C2');
-        $this->assertSame($c3->name, 'C3');
-        $this->assertSame($c4->name, 'C4');
-        $this->assertSame($c5->name, 'C5');
+        \Testo\Assert::same('C1', $c1->name);
+        \Testo\Assert::same('C2', $c2->name);
+        \Testo\Assert::same('C3', $c3->name);
+        \Testo\Assert::same('C4', $c4->name);
+        \Testo\Assert::same('C5', $c5->name);
 
-        $this->assertSame($c1->cyclic, $c5);
-        $this->assertSame($c5->cyclic, $c1);
+        \Testo\Assert::same($c5, $c1->cyclic);
+        \Testo\Assert::same($c1, $c5->cyclic);
 
-        $this->assertSame($c2->other, $c3);
-        $this->assertSame($c3->other, $c4);
-        $this->assertSame($c4->other, $c2);
+        \Testo\Assert::same($c3, $c2->other);
+        \Testo\Assert::same($c4, $c3->other);
+        \Testo\Assert::same($c2, $c4->other);
     }
 
     // make sure that graph transformation is homogeneous
+    #[\Testo\Test]
     public function testCreateDeepCyclicPartial(): void
     {
         $c1 = new Cyclic('C1');
@@ -98,21 +100,22 @@ abstract class DeepCyclicTest extends BaseTest
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        $this->assertSame($c1->name, 'C1');
-        $this->assertSame($c2->name, 'C2');
-        $this->assertSame($c3->name, 'C3');
-        $this->assertSame($c4->name, 'C4');
-        $this->assertSame($c5->name, 'C5');
+        \Testo\Assert::same('C1', $c1->name);
+        \Testo\Assert::same('C2', $c2->name);
+        \Testo\Assert::same('C3', $c3->name);
+        \Testo\Assert::same('C4', $c4->name);
+        \Testo\Assert::same('C5', $c5->name);
 
-        $this->assertSame($c1->cyclic, $c5);
-        $this->assertSame($c5->cyclic, $c1);
+        \Testo\Assert::same($c5, $c1->cyclic);
+        \Testo\Assert::same($c1, $c5->cyclic);
 
-        $this->assertSame($c2->other, $c3);
-        $this->assertSame($c3->other, $c4);
-        $this->assertSame($c4->other, $c2);
+        \Testo\Assert::same($c3, $c2->other);
+        \Testo\Assert::same($c4, $c3->other);
+        \Testo\Assert::same($c2, $c4->other);
     }
 
     // make sure that graph transformation is homogeneous
+    #[\Testo\Test]
     public function testCreateDeepCyclicPartial2(): void
     {
         $c1 = new Cyclic('C1');
@@ -147,21 +150,22 @@ abstract class DeepCyclicTest extends BaseTest
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        $this->assertSame($c1->name, 'C1');
-        $this->assertSame($c2->name, 'C2');
-        $this->assertSame($c3->name, 'C3');
-        $this->assertSame($c4->name, 'C4');
-        $this->assertSame($c5->name, 'C5');
+        \Testo\Assert::same('C1', $c1->name);
+        \Testo\Assert::same('C2', $c2->name);
+        \Testo\Assert::same('C3', $c3->name);
+        \Testo\Assert::same('C4', $c4->name);
+        \Testo\Assert::same('C5', $c5->name);
 
-        $this->assertSame($c1->cyclic, $c5);
-        $this->assertSame($c5->cyclic, $c1);
+        \Testo\Assert::same($c5, $c1->cyclic);
+        \Testo\Assert::same($c1, $c5->cyclic);
 
-        $this->assertSame($c2->other, $c3);
-        $this->assertSame($c3->other, $c4);
-        $this->assertSame($c4->other, $c2);
+        \Testo\Assert::same($c3, $c2->other);
+        \Testo\Assert::same($c4, $c3->other);
+        \Testo\Assert::same($c2, $c4->other);
     }
 
     // make sure that graph transformation is homogeneous
+    #[\Testo\Test]
     public function testOverlappingCycles(): void
     {
         $c1 = new Cyclic('C1');
@@ -201,22 +205,23 @@ abstract class DeepCyclicTest extends BaseTest
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        $this->assertSame($c1->name, 'C1');
-        $this->assertSame($c2->name, 'C2');
-        $this->assertSame($c3->name, 'C3');
-        $this->assertSame($c4->name, 'C4');
-        $this->assertSame($c5->name, 'C5');
+        \Testo\Assert::same('C1', $c1->name);
+        \Testo\Assert::same('C2', $c2->name);
+        \Testo\Assert::same('C3', $c3->name);
+        \Testo\Assert::same('C4', $c4->name);
+        \Testo\Assert::same('C5', $c5->name);
 
-        $this->assertSame($c1->cyclic, $c5);
-        $this->assertSame($c5->cyclic, $c1);
+        \Testo\Assert::same($c5, $c1->cyclic);
+        \Testo\Assert::same($c1, $c5->cyclic);
 
-        $this->assertSame($c2->other, $c3);
-        $this->assertSame($c3->other, $c4);
-        $this->assertSame($c4->other, $c1);
-        $this->assertSame($c1->other, $c5);
-        $this->assertSame($c5->other, $c2);
+        \Testo\Assert::same($c3, $c2->other);
+        \Testo\Assert::same($c4, $c3->other);
+        \Testo\Assert::same($c1, $c4->other);
+        \Testo\Assert::same($c5, $c1->other);
+        \Testo\Assert::same($c2, $c5->other);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

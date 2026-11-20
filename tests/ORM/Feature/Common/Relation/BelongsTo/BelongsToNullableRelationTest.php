@@ -20,22 +20,19 @@ abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
     /**
      * Nullable BelongsTo relation should not be transformed to RefersTo
      */
+    #[\Testo\Test]
     public function testSetNullable(): void
     {
-        $this->assertTrue(
-            $this->orm
-                ->getSchema()
-                ->defineRelation(Profile::class, 'user')[Relation::SCHEMA][Relation::NULLABLE],
-        );
-        $this->assertInstanceOf(
-            Relation\BelongsTo::class,
-            $this->orm->getRelationMap(Profile::class)->getRelations()['user'],
-        );
+        \Testo\Assert::true($this->orm
+            ->getSchema()
+            ->defineRelation(Profile::class, 'user')[Relation::SCHEMA][Relation::NULLABLE]);
+        \Testo\Assert::instanceOf($this->orm->getRelationMap(Profile::class)->getRelations()['user'], Relation\BelongsTo::class);
     }
 
     /**
      * If parent relation is replaced with null - set
      */
+    #[\Testo\Test]
     public function testRemoveParentUsingSetNull(): void
     {
         /** @var Profile $profile */
@@ -43,7 +40,7 @@ abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
             ->wherePK(1)
             ->with('user')->fetchOne();
 
-        $this->assertInstanceOf(User::class, $profile->user);
+        \Testo\Assert::instanceOf($profile->user, User::class);
 
         $this->captureWriteQueries();
         $this->save($profile);
@@ -64,12 +61,13 @@ abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
             ->wherePK(1)
             ->load('user')
             ->fetchOne();
-        $this->assertNull($profile->user);
+        \Testo\Assert::null($profile->user);
     }
 
     /**
      * If relation property was unset and IgnoreUninitializedRelations option is false - set to null
      */
+    #[\Testo\Test]
     public function testUnsetPropertyWithoutIgnoreUninitializedRelations(): void
     {
         $this->orm = $this->orm->with(options: (new Options())->withIgnoreUninitializedRelations(false));

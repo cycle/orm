@@ -13,6 +13,7 @@ use Cycle\ORM\Tests\Feature\Common\BaseTest;
 
 abstract class RefersToRelationRenamedFieldsTest extends RefersToRelationTest
 {
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         BaseTest::setUp();

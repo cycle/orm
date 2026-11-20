@@ -12,7 +12,7 @@ use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
-class CompositeTypecastTest extends TestCase
+class CompositeTypecastTest
 {
     use MockeryPHPUnitIntegration;
 
@@ -87,9 +87,8 @@ class CompositeTypecastTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider typecastProvider()
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('typecastProvider')]
     public function testSetRules(array $casters): void
     {
         $rules = self::RULES_INITIAL;
@@ -108,12 +107,11 @@ class CompositeTypecastTest extends TestCase
             ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
-        $this->assertSame(self::RULES_RESULT, $typecast->setRules(self::RULES_INITIAL));
+        \Testo\Assert::same($typecast->setRules(self::RULES_INITIAL), self::RULES_RESULT);
     }
 
-    /**
-     * @dataProvider typecastProvider()
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('typecastProvider')]
     public function testCast(array $casters): void
     {
         $values = self::CAST_INITIAL;
@@ -135,12 +133,11 @@ class CompositeTypecastTest extends TestCase
             ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
-        $this->assertSame(self::CAST_RESULT, $typecast->cast(self::CAST_INITIAL));
+        \Testo\Assert::same($typecast->cast(self::CAST_INITIAL), self::CAST_RESULT);
     }
 
-    /**
-     * @dataProvider typecastProvider()
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('typecastProvider')]
     public function testUncast(array $casters): void
     {
         $values = self::UNCAST_INITIAL;
@@ -163,9 +160,10 @@ class CompositeTypecastTest extends TestCase
             ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
-        $this->assertSame(self::UNCAST_RESULT, $typecast->uncast(self::UNCAST_INITIAL));
+        \Testo\Assert::same($typecast->uncast(self::UNCAST_INITIAL), self::UNCAST_RESULT);
     }
 
+    #[\Testo\Lifecycle\AfterTest]
     public function tearDown(): void
     {
         m::close();

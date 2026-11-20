@@ -10,7 +10,7 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Tests\Fixtures\User;
 use PHPUnit\Framework\TestCase;
 
-class HeapTest extends TestCase
+class HeapTest
 {
     protected const INDEX_FIELDS_1 = 'id';
     protected const INDEX_VALUES_1_1 = 42;
@@ -35,6 +35,7 @@ class HeapTest extends TestCase
         self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
     ];
 
+    #[\Testo\Test]
     public function testAttachAndFind(): void
     {
         $heap = $this->createHeap();
@@ -45,11 +46,12 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
-        $this->assertSame($entity2, $heap->find('user', static::INDEX_FIND_1_2), 'Found');
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_BAD), 'Not found');
-        $this->assertNull($heap->find('user', []), 'Empty scope');
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_2), $entity2, 'Found');
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_BAD), 'Not found');
+        \Testo\Assert::null($heap->find('user', []), 'Empty scope');
     }
 
+    #[\Testo\Test]
     public function testIndexAsArray(): void
     {
         $heap = $this->createHeap();
@@ -57,9 +59,10 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [(array) static::INDEX_FIELDS_1]);
 
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_1_1), 'Found');
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_1), $entity, 'Found');
     }
 
+    #[\Testo\Test]
     public function testFindByNotExistingIndex(): void
     {
         $heap = $this->createHeap();
@@ -67,9 +70,10 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_2_1), 'Index not found');
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_2_1), 'Index not found');
     }
 
+    #[\Testo\Test]
     public function testAttachWithEmptyIndex(): void
     {
         $heap = $this->createHeap();
@@ -77,10 +81,11 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [[], static::INDEX_FIELDS_1]);
 
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_1_1), 'Found');
-        $this->assertNull($heap->find('user', static::INDEX_FIND_2_1), 'Index not found');
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_1), $entity, 'Found');
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_2_1), 'Index not found');
     }
 
+    #[\Testo\Test]
     public function testAttachWithBadIndex(): void
     {
         $heap = $this->createHeap();
@@ -88,13 +93,14 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_BAD, static::INDEX_FIELDS_2]);
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_BAD), 'Bad index');
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_2_1), 'Found');
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_BAD), 'Bad index');
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_2_1), $entity, 'Found');
 
         // No error
         $heap->detach($entity);
     }
 
+    #[\Testo\Test]
     public function testFindWithBadIndex(): void
     {
         $heap = $this->createHeap();
@@ -102,17 +108,19 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_2]);
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_BAD), 'Bad index');
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_2_1), 'Found');
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_BAD), 'Bad index');
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_2_1), $entity, 'Found');
     }
 
+    #[\Testo\Test]
     public function testFindBadRole(): void
     {
         $heap = $this->createHeap();
 
-        $this->assertNull($heap->find('bad_role', static::INDEX_FIND_BAD));
+        \Testo\Assert::null($heap->find('bad_role', static::INDEX_FIND_BAD));
     }
 
+    #[\Testo\Test]
     public function testFindEmptyCriteria(): void
     {
         $heap = $this->createHeap();
@@ -120,9 +128,10 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_2]);
 
-        $this->assertNull($heap->find('user', []));
+        \Testo\Assert::null($heap->find('user', []));
     }
 
+    #[\Testo\Test]
     public function testDetach(): void
     {
         $heap = $this->createHeap();
@@ -133,21 +142,22 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
-        $this->assertSame($entity1, $heap->find('user', static::INDEX_FIND_1_1), 'Found');
-        $this->assertSame($entity2, $heap->find('user', static::INDEX_FIND_1_2), 'Found');
-        $this->assertTrue($heap->has($entity1));
-        $this->assertTrue($heap->has($entity2));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_1), $entity1, 'Found');
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_2), $entity2, 'Found');
+        \Testo\Assert::true($heap->has($entity1));
+        \Testo\Assert::true($heap->has($entity2));
 
         // Now detach it
         $heap->detach($entity1);
         $heap->detach($entity2);
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_1));
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_2));
-        $this->assertFalse($heap->has($entity1));
-        $this->assertFalse($heap->has($entity2));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_2));
+        \Testo\Assert::false($heap->has($entity1));
+        \Testo\Assert::false($heap->has($entity2));
     }
 
+    #[\Testo\Test]
     public function testNotEntity(): void
     {
         $heap = $this->createHeap();
@@ -155,13 +165,14 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
-        $this->assertTrue($heap->has($entity));
+        \Testo\Assert::true($heap->has($entity));
 
         $heap->detach(new \stdClass());
 
-        $this->assertTrue($heap->has($entity));
+        \Testo\Assert::true($heap->has($entity));
     }
 
+    #[\Testo\Test]
     public function testGet(): void
     {
         $heap = $this->createHeap();
@@ -172,10 +183,11 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
-        $this->assertSame($node1, $heap->get($entity1));
-        $this->assertSame($node2, $heap->get($entity2));
+        \Testo\Assert::same($heap->get($entity1), $node1);
+        \Testo\Assert::same($heap->get($entity2), $node2);
     }
 
+    #[\Testo\Test]
     public function testClean(): void
     {
         $heap = $this->createHeap();
@@ -189,17 +201,18 @@ class HeapTest extends TestCase
         // Now detach it
         $heap->clean();
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_1));
-        $this->assertFalse($heap->has($entity1));
-        $this->assertFalse($heap->has($entity2));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::false($heap->has($entity1));
+        \Testo\Assert::false($heap->has($entity2));
 
         $count = 0;
         foreach ($heap as $value) {
             ++$count;
         }
-        $this->assertSame(0, $count);
+        \Testo\Assert::same($count, 0);
     }
 
+    #[\Testo\Test]
     public function testSyncWhenIndexedValueChanged(): void
     {
         $heap = $this->createHeap();
@@ -213,10 +226,11 @@ class HeapTest extends TestCase
         }
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_1));
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_1_2));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_2), $entity);
     }
 
+    #[\Testo\Test]
     public function testSyncWhenEntitiesPKSwitch(): void
     {
         $heap = $this->createHeap();
@@ -238,10 +252,11 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
-        $this->assertSame($entity1, $heap->find('user', static::INDEX_FIND_1_2));
-        $this->assertSame($entity2, $heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_2), $entity1);
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_1), $entity2);
     }
 
+    #[\Testo\Test]
     public function testOverwriteEntity(): void
     {
         $heap = $this->createHeap();
@@ -253,13 +268,14 @@ class HeapTest extends TestCase
         $entity2 = new User();
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
-        $this->assertSame($entity2, $heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_1), $entity2);
 
         $heap->detach($entity1);
 
-        $this->assertSame($entity2, $heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_1), $entity2);
     }
 
+    #[\Testo\Test]
     public function testEditNodeStateWithConflict(): void
     {
         $heap = $this->createHeap();
@@ -275,11 +291,12 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
 
         // entity2 has been overwritten
-        $this->assertSame($entity1, $heap->find('user', static::INDEX_FIND_1_2));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_2), $entity1);
         // old value has been detached
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_1));
     }
 
+    #[\Testo\Test]
     public function testEditNodeStateNullPKAndSync(): void
     {
         $heap = $this->createHeap();
@@ -296,10 +313,11 @@ class HeapTest extends TestCase
         $state->setData($values);
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
-        $this->assertTrue($heap->has($entity));
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::true($heap->has($entity));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_1));
     }
 
+    #[\Testo\Test]
     public function testEditNodeStateNullPKAndDetach(): void
     {
         $heap = $this->createHeap();
@@ -315,10 +333,11 @@ class HeapTest extends TestCase
         $state->setData($values);
         $heap->detach($entity);
 
-        $this->assertFalse($heap->has($entity));
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::false($heap->has($entity));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_1));
     }
 
+    #[\Testo\Test]
     public function testEmptyNode(): void
     {
         $heap = $this->createHeap();
@@ -329,16 +348,17 @@ class HeapTest extends TestCase
         $heap->attach($entity1, $node1, [static::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [static::INDEX_FIELDS_1]);
 
-        $this->assertTrue($heap->has($entity2));
-        $this->assertTrue($heap->has($entity1));
+        \Testo\Assert::true($heap->has($entity2));
+        \Testo\Assert::true($heap->has($entity1));
 
         $heap->detach($entity2);
         $heap->detach($entity1);
 
-        $this->assertFalse($heap->has($entity2));
-        $this->assertFalse($heap->has($entity1));
+        \Testo\Assert::false($heap->has($entity2));
+        \Testo\Assert::false($heap->has($entity1));
     }
 
+    #[\Testo\Test]
     public function testAttachWithNewIndex(): void
     {
         $heap = $this->createHeap();
@@ -346,15 +366,16 @@ class HeapTest extends TestCase
         $entity = new User();
         $heap->attach($entity, $node, [static::INDEX_FIELDS_1]);
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_2_1));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_2_1));
 
         $heap->attach($entity, $node, [static::INDEX_FIELDS_2]);
 
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_2_1));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_2_1), $entity);
         // old index was not deleted
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_1_1), $entity);
     }
 
+    #[\Testo\Test]
     public function testSyncWhenIndexAndValuesChanged(): void
     {
         $heap = $this->createHeap();
@@ -370,10 +391,10 @@ class HeapTest extends TestCase
         }
         $heap->attach($entity, $node, [static::INDEX_FIELDS_2]);
 
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_1));
-        $this->assertNull($heap->find('user', static::INDEX_FIND_1_2));
-        $this->assertNull($heap->find('user', static::INDEX_FIND_2_1));
-        $this->assertSame($entity, $heap->find('user', static::INDEX_FIND_2_2));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_1));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_1_2));
+        \Testo\Assert::null($heap->find('user', static::INDEX_FIND_2_1));
+        \Testo\Assert::same($heap->find('user', static::INDEX_FIND_2_2), $entity);
     }
 
     protected function createHeap(): HeapInterface

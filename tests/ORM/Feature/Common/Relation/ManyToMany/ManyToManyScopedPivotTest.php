@@ -19,6 +19,7 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadRelation(): void
     {
         $this->orm = $this->withPivotSchema([
@@ -29,7 +30,7 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
             ->orderBy('id')
             ->orderBy('tags.id');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -130,9 +131,10 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
                         ],
                     ],
                 ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadRelationOrderByPivotColumn(): void
     {
         $this->orm = $this->withPivotSchema([
@@ -142,7 +144,7 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')->orderBy('id');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -242,9 +244,10 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
                         ],
                     ],
                 ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoaderRelationWithScope(): void
     {
         $this->orm = $this->withPivotSchema([
@@ -260,7 +263,7 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
             ->load('tags')
             ->orderBy('id');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -280,9 +283,10 @@ abstract class ManyToManyScopedPivotTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

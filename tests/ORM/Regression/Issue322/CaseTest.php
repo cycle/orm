@@ -22,6 +22,7 @@ abstract class CaseTest extends BaseTest
     /**
      * There pivoted collection is replaced with new one but one target is from old collection
      */
+    #[\Testo\Test]
     public function testPivotedCollectionUniqueIndex(): void
     {
         // Get entity
@@ -30,13 +31,13 @@ abstract class CaseTest extends BaseTest
             ->load('tags')
             ->fetchOne();
 
-        $this->assertCount(3, $post->tags);
+        \Testo\Assert::count($post->tags, 3);
 
         $tag1 = (new Select($this->orm, Entity\Tag::class))
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertSame($tag1, $post->tags[0]);
+        \Testo\Assert::same($post->tags[0], $tag1);
 
         $post->tags = new PivotedCollection();
         $post->tags->add($tag1);
@@ -50,6 +51,7 @@ abstract class CaseTest extends BaseTest
     /**
      * There pivoted collection is replaced with new one and one target is from old collection has a different pivot
      */
+    #[\Testo\Test]
     public function testPivotedCollectionUniqueIndexWithNewPivot(): void
     {
         // Get entity
@@ -58,13 +60,13 @@ abstract class CaseTest extends BaseTest
             ->load('tags')
             ->fetchOne();
 
-        $this->assertCount(3, $post->tags);
+        \Testo\Assert::count($post->tags, 3);
 
         $tag1 = (new Select($this->orm, Entity\Tag::class))
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertSame($tag1, $post->tags[0]);
+        \Testo\Assert::same($post->tags[0], $tag1);
 
         $post->tags = new PivotedCollection();
         $post->tags->setPivot($tag1, new PostTag());
@@ -75,6 +77,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(3);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

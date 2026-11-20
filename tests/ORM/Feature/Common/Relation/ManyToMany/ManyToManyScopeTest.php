@@ -20,6 +20,7 @@ abstract class ManyToManyScopeTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testScopeOrdered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -34,19 +35,20 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedDesc(): void
     {
         $this->orm = $this->withTagSchema([
@@ -61,19 +63,20 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -90,19 +93,20 @@ abstract class ManyToManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByAndScopeOrdered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -118,19 +122,20 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByAsc(): void
     {
         $this->orm = $this->withTagSchema([
@@ -145,19 +150,20 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByDesc(): void
     {
         $this->orm = $this->withTagSchema([
@@ -172,19 +178,20 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -201,19 +208,20 @@ abstract class ManyToManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByPostload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -230,19 +238,20 @@ abstract class ManyToManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::POSTLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
@@ -258,20 +267,21 @@ abstract class ManyToManyScopeTest extends BaseTest
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(2);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByAltered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -286,19 +296,20 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags', ['orderBy' => ['@.level' => 'ASC']])->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -315,19 +326,20 @@ abstract class ManyToManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
@@ -343,20 +355,21 @@ abstract class ManyToManyScopeTest extends BaseTest
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(2);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
-        $this->assertSame('tag b', $a->tags[1]->name);
-        $this->assertSame('tag d', $a->tags[2]->name);
-        $this->assertSame('tag e', $a->tags[3]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        \Testo\Assert::same($a->tags[1]->name, 'tag b');
+        \Testo\Assert::same($a->tags[2]->name, 'tag d');
+        \Testo\Assert::same($a->tags[3]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedPromisedDESC(): void
     {
         $this->orm = $this->withTagSchema([
@@ -372,20 +385,21 @@ abstract class ManyToManyScopeTest extends BaseTest
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 4);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(2);
 
-        $this->assertSame('tag a', $a->tags[3]->name);
-        $this->assertSame('tag b', $a->tags[2]->name);
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[3]->name, 'tag a');
+        \Testo\Assert::same($a->tags[2]->name, 'tag b');
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -401,17 +415,18 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag d', $a->tags[0]->name);
-        $this->assertSame('tag e', $a->tags[1]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag d');
+        \Testo\Assert::same($a->tags[1]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -429,17 +444,18 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag d', $a->tags[0]->name);
-        $this->assertSame('tag e', $a->tags[1]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag d');
+        \Testo\Assert::same($a->tags[1]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedDESCAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -455,17 +471,18 @@ abstract class ManyToManyScopeTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -483,17 +500,18 @@ abstract class ManyToManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag d', $a->tags[0]->name);
-        $this->assertSame('tag e', $a->tags[1]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag d');
+        \Testo\Assert::same($a->tags[1]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedDESCAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -511,17 +529,18 @@ abstract class ManyToManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
 
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
@@ -538,18 +557,19 @@ abstract class ManyToManyScopeTest extends BaseTest
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(2);
 
-        $this->assertSame('tag d', $a->tags[0]->name);
-        $this->assertSame('tag e', $a->tags[1]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag d');
+        \Testo\Assert::same($a->tags[1]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[0]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[2]->name);
+        \Testo\Assert::same($b->tags[0]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[2]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testOrderedDESCAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
@@ -566,18 +586,19 @@ abstract class ManyToManyScopeTest extends BaseTest
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(3, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 3);
         $this->assertNumReads(2);
 
-        $this->assertSame('tag d', $a->tags[1]->name);
-        $this->assertSame('tag e', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[1]->name, 'tag d');
+        \Testo\Assert::same($a->tags[0]->name, 'tag e');
 
-        $this->assertSame('tag c', $b->tags[2]->name);
-        $this->assertSame('tag d', $b->tags[1]->name);
-        $this->assertSame('tag f', $b->tags[0]->name);
+        \Testo\Assert::same($b->tags[2]->name, 'tag c');
+        \Testo\Assert::same($b->tags[1]->name, 'tag d');
+        \Testo\Assert::same($b->tags[0]->name, 'tag f');
     }
 
+    #[\Testo\Test]
     public function testCustomWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -595,12 +616,13 @@ abstract class ManyToManyScopeTest extends BaseTest
             'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $a->tags);
-        $this->assertCount(0, $b->tags);
+        \Testo\Assert::count($a->tags, 1);
+        \Testo\Assert::count($b->tags, 0);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
     }
 
+    #[\Testo\Test]
     public function testCustomWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -619,11 +641,12 @@ abstract class ManyToManyScopeTest extends BaseTest
             'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $a->tags);
+        \Testo\Assert::count($a->tags, 1);
 
-        $this->assertSame('tag a', $a->tags[0]->name);
+        \Testo\Assert::same($a->tags[0]->name, 'tag a');
     }
 
+    #[\Testo\Test]
     public function testWithWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -634,10 +657,11 @@ abstract class ManyToManyScopeTest extends BaseTest
 
         $res = $selector->with('tags')->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $res);
-        $this->assertSame('another@world.com', $res[0]->email);
+        \Testo\Assert::count($res, 1);
+        \Testo\Assert::same($res[0]->email, 'another@world.com');
     }
 
+    #[\Testo\Test]
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -650,11 +674,12 @@ abstract class ManyToManyScopeTest extends BaseTest
             'where' => ['@.level' => ['>=' => 5]],
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
-        $this->assertSame('another@world.com', $res[1]->email);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        \Testo\Assert::same($res[1]->email, 'another@world.com');
     }
 
+    #[\Testo\Test]
     public function testLimitParentSelection(): void
     {
         $this->orm = $this->withTagSchema([]);
@@ -667,14 +692,15 @@ abstract class ManyToManyScopeTest extends BaseTest
             ->limit(1)
             ->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
-        $this->assertCount(4, $res[0]->tags);
+        \Testo\Assert::count($res, 1);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        \Testo\Assert::count($res[0]->tags, 4);
     }
 
+    #[\Testo\Test]
     public function testLimitParentSelectionError(): void
     {
-        $this->expectException(LoaderException::class);
+        \Testo\Expect::exception(LoaderException::class);
 
         $this->orm = $this->withTagSchema([]);
 
@@ -687,9 +713,10 @@ abstract class ManyToManyScopeTest extends BaseTest
             ->orderBy('user.id')->fetchAll();
     }
 
+    #[\Testo\Test]
     public function testInvalidOrderBy(): void
     {
-        $this->expectException(StatementException::class);
+        \Testo\Expect::exception(StatementException::class);
 
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.column' => 'ASC']),
@@ -700,6 +727,7 @@ abstract class ManyToManyScopeTest extends BaseTest
         $res = $selector->with('tags')->orderBy('user.id')->fetchAll();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

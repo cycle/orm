@@ -14,48 +14,53 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Util\SimpleFactory;
 use PHPUnit\Framework\TestCase;
 
-final class OrmTest extends TestCase
+final class OrmTest
 {
+    #[\Testo\Test]
     public function testPrepareServicesTwice(): void
     {
         $orm = $this->createOrm();
         $orm->prepareServices();
         $orm->prepareServices();
-        $this->assertTrue(true, 'There aren\'t any errors.');
+        \Testo\Assert::true(true, 'There aren\'t any errors.');
     }
 
+    #[\Testo\Test]
     public function testORMClone(): void
     {
         $orm = $this->createOrm();
         $new = $orm->withFactory($orm->getFactory());
-        $this->assertNotSame($orm, $new);
+        \Testo\Assert::notSame($new, $orm);
     }
 
+    #[\Testo\Test]
     public function testORMCloneWithSchema(): void
     {
         $orm = $this->createOrm();
         $new = $orm->with(new Schema([]));
 
-        $this->assertNotSame($new, $orm);
-        $this->assertNotSame($new->getSchema(), $orm->getSchema());
+        \Testo\Assert::notSame($orm, $new);
+        \Testo\Assert::notSame($orm->getSchema(), $new->getSchema());
     }
 
+    #[\Testo\Test]
     public function testORMCloneWithFactory(): void
     {
         $orm = $this->createOrm();
         $new = $orm->with(factory: new Factory(new DatabaseManager(new DatabaseConfig([]))));
 
-        $this->assertNotSame($orm, $new);
-        $this->assertNotSame($new->getFactory(), $orm->getFactory());
+        \Testo\Assert::notSame($new, $orm);
+        \Testo\Assert::notSame($orm->getFactory(), $new->getFactory());
     }
 
+    #[\Testo\Test]
     public function testORMCloneWithHeap(): void
     {
         $orm = $this->createOrm();
         $new = $orm->with(heap: new Heap());
 
-        $this->assertNotSame($new, $orm);
-        $this->assertNotSame($new->getHeap(), $orm->getHeap());
+        \Testo\Assert::notSame($orm, $new);
+        \Testo\Assert::notSame($orm->getHeap(), $new->getHeap());
     }
 
     private function createOrm(): ORM

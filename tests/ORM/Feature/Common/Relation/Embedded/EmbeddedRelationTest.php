@@ -23,12 +23,13 @@ abstract class EmbeddedRelationTest extends BaseTest
 
     protected const NULLABLE = false;
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -47,9 +48,10 @@ abstract class EmbeddedRelationTest extends BaseTest
                     'password' => 'pass2',
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testInitRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -57,22 +59,24 @@ abstract class EmbeddedRelationTest extends BaseTest
 
         [$a, $b] = $selector->fetchAll();
 
-        $this->assertInstanceOf(UserCredentials::class, $a->credentials);
-        $this->assertInstanceOf(UserCredentials::class, $b->credentials);
+        \Testo\Assert::instanceOf($a->credentials, UserCredentials::class);
+        \Testo\Assert::instanceOf($b->credentials, UserCredentials::class);
 
-        $this->assertSame('user1', $a->credentials->username);
-        $this->assertSame('user2', $b->credentials->username);
+        \Testo\Assert::same($a->credentials->username, 'user1');
+        \Testo\Assert::same($b->credentials->username, 'user2');
     }
 
+    #[\Testo\Test]
     public function testInitRelationFetchOne(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
 
-        $this->assertInstanceOf(UserCredentials::class, $u->credentials);
-        $this->assertSame('user1', $u->credentials->username);
+        \Testo\Assert::instanceOf($u->credentials, UserCredentials::class);
+        \Testo\Assert::same($u->credentials->username, 'user1');
     }
 
+    #[\Testo\Test]
     public function testCreateUserWithEmbedded(): void
     {
         $u = new User();
@@ -85,15 +89,16 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->save($u);
         $this->assertNumWrites(1);
 
-        $this->assertSame(3, (int) $u->id);
+        \Testo\Assert::same((int) $u->id, 3);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u2->id);
-        $this->assertSame('user3', $u2->credentials->username);
+        \Testo\Assert::equals($u2->id, $u->id);
+        \Testo\Assert::same($u2->credentials->username, 'user3');
     }
 
+    #[\Testo\Test]
     public function testNoWrites(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -106,6 +111,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testUpdateEmbeddedValue(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -139,12 +145,13 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u2->id);
-        $this->assertEquals(800, $u2->balance);
-        $this->assertSame('altered', $u2->credentials->username);
-        $this->assertSame('newpass', $u2->credentials->password);
+        \Testo\Assert::equals($u2->id, $u->id);
+        \Testo\Assert::equals($u2->balance, 800);
+        \Testo\Assert::same($u2->credentials->username, 'altered');
+        \Testo\Assert::same($u2->credentials->password, 'newpass');
     }
 
+    #[\Testo\Test]
     public function testInitRelationReferenceNothing(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -157,6 +164,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testUpdateEmbeddedDirectly(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -182,18 +190,20 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u2->id);
-        $this->assertSame('altered', $u2->credentials->username);
+        \Testo\Assert::equals($u2->id, $u->id);
+        \Testo\Assert::same($u2->credentials->username, 'altered');
     }
 
+    #[\Testo\Test]
     public function testResolvePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        $this->assertSame('user1', $u->credentials->username);
+        \Testo\Assert::same($u->credentials->username, 'user1');
     }
 
+    #[\Testo\Test]
     public function testChangePromise(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -210,10 +220,11 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u2->id);
-        $this->assertSame('user3', $u2->credentials->username);
+        \Testo\Assert::equals($u2->id, $u->id);
+        \Testo\Assert::same($u2->credentials->username, 'user3');
     }
 
+    #[\Testo\Test]
     public function testSavePromise(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -228,6 +239,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testMovePromise(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -248,17 +260,18 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u3->id);
-        $this->assertSame('user2', $u3->credentials->username);
+        \Testo\Assert::equals($u3->id, $u->id);
+        \Testo\Assert::same($u3->credentials->username, 'user2');
 
         $u4 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
-        $this->assertEquals($u2->id, $u4->id);
-        $this->assertSame('user2', $u4->credentials->username);
+        \Testo\Assert::equals($u4->id, $u2->id);
+        \Testo\Assert::same($u4->credentials->username, 'user2');
     }
 
+    #[\Testo\Test]
     public function testMoveLoadedPromise(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -282,17 +295,18 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u3->id);
-        $this->assertSame('user2', $u3->credentials->username);
+        \Testo\Assert::equals($u3->id, $u->id);
+        \Testo\Assert::same($u3->credentials->username, 'user2');
 
         $u4 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
-        $this->assertEquals($u2->id, $u4->id);
-        $this->assertSame('user2', $u4->credentials->username);
+        \Testo\Assert::equals($u4->id, $u2->id);
+        \Testo\Assert::same($u4->credentials->username, 'user2');
     }
 
+    #[\Testo\Test]
     public function testMoveClonedEmbedding(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -314,25 +328,27 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u3->id);
-        $this->assertSame('user2', $u3->credentials->username);
+        \Testo\Assert::equals($u3->id, $u->id);
+        \Testo\Assert::same($u3->credentials->username, 'user2');
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u4 = $selector->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
-        $this->assertEquals($u2->id, $u4->id);
-        $this->assertSame('user2', $u4->credentials->username);
+        \Testo\Assert::equals($u4->id, $u2->id);
+        \Testo\Assert::same($u4->credentials->username, 'user2');
     }
 
+    #[\Testo\Test]
     public function testSelectEmbeddable(): void
     {
         $selector = new Select($this->orm, UserCredentials::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        $this->assertSame('user1', $u->username);
+        \Testo\Assert::same($u->username, 'user1');
     }
 
+    #[\Testo\Test]
     public function testChangeWhole(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -351,14 +367,15 @@ abstract class EmbeddedRelationTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u2->id);
-        $this->assertSame('abc', $u2->credentials->username);
-        $this->assertSame('new-pass', $u2->credentials->password);
+        \Testo\Assert::equals($u2->id, $u->id);
+        \Testo\Assert::same($u2->credentials->username, 'abc');
+        \Testo\Assert::same($u2->credentials->password, 'new-pass');
     }
 
+    #[\Testo\Test]
     public function testNullify(): void
     {
-        $this->expectException(NullException::class);
+        \Testo\Expect::exception(NullException::class);
 
         $u = (new Select($this->orm, User::class))
             ->orderBy('id', 'ASC')
@@ -375,13 +392,14 @@ abstract class EmbeddedRelationTest extends BaseTest
             ->wherePK($u->id)
             ->fetchOne();
 
-        $this->assertEquals($u->id, $u2->id);
-        $this->assertSame('user3', $u2->credentials->username);
+        \Testo\Assert::equals($u2->id, $u->id);
+        \Testo\Assert::same($u2->credentials->username, 'user3');
     }
 
     /**
      * If relation property was unset - ignore this field
      */
+    #[\Testo\Test]
     public function testUnsetProperty(): void
     {
         /** @var User $user */
@@ -451,6 +469,7 @@ abstract class EmbeddedRelationTest extends BaseTest
     //     $this->assertNumWrites(0);
     // }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -20,12 +20,13 @@ abstract class LinkedTreeTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelations(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -50,9 +51,10 @@ abstract class LinkedTreeTest extends BaseTest
                     'label' => 'nested-label',
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testCreateDoubleLinked(): void
     {
         $u1 = new User();
@@ -80,7 +82,7 @@ abstract class LinkedTreeTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 3,
                 'email' => 'u1@email.com',
@@ -105,16 +107,17 @@ abstract class LinkedTreeTest extends BaseTest
                     'label' => 'nested to u1 and u2',
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 
         [$u1, $u2] = $selector->fetchAll();
-        $this->assertSame($u1->nested, $u2->owned);
+        \Testo\Assert::same($u2->owned, $u1->nested);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -18,6 +18,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testReorderKeepsChildren(): void
     {
         $user = $this->fetchUser();
@@ -29,6 +30,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testPrependKeepsChildren(): void
     {
         $user = $this->fetchUser();
@@ -42,6 +44,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Test]
     public function testReplaceInTheMiddleDetachesOnlyReplacedChild(): void
     {
         $user = $this->fetchUser();
@@ -54,15 +57,13 @@ abstract class CaseTest extends BaseTest
         $this->save($user);
         $this->assertOwnedComments(['comment 1', 'comment 3', 'comment 4']);
         $this->assertNumWrites(2);
-        $this->assertSame(
-            ['comment 2'],
-            $this->getDatabase()->table('comment')
-                ->select('content')
-                ->where('user_id', null)
-                ->fetchAll(\PDO::FETCH_COLUMN),
-        );
+        \Testo\Assert::same($this->getDatabase()->table('comment')
+            ->select('content')
+            ->where('user_id', null)
+            ->fetchAll(\PDO::FETCH_COLUMN), ['comment 2']);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB
@@ -80,8 +81,8 @@ abstract class CaseTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertInstanceOf(Entity\User::class, $user);
-        $this->assertCount(3, $user->comments);
+        \Testo\Assert::instanceOf($user, Entity\User::class);
+        \Testo\Assert::count($user->comments, 3);
 
         return $user;
     }
@@ -89,6 +90,7 @@ abstract class CaseTest extends BaseTest
     /**
      * @param list<non-empty-string> $expected Contents of the user's comments, in id order.
      */
+    #[\Testo\Common\Attribute\AssertMethod]
     private function assertOwnedComments(array $expected): void
     {
         $user = (new Select($this->orm->withHeap(new Heap()), Entity\User::class))
@@ -96,10 +98,7 @@ abstract class CaseTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertSame(
-            $expected,
-            \array_map(static fn(Entity\Comment $comment): string => $comment->content, $user->comments),
-        );
+        \Testo\Assert::same(\array_map(static fn(Entity\Comment $comment): string => $comment->content, $user->comments), $expected);
     }
 
     private function makeTables(): void

@@ -17,6 +17,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         (new Select($this->orm, Entity\User::class))
@@ -25,9 +26,10 @@ abstract class CaseTest extends BaseTest
             ->load('passport')
             ->fetchAll();
 
-        $this->assertTrue(true);
+        \Testo\Assert::true(true);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

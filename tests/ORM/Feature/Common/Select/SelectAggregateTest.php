@@ -15,70 +15,79 @@ abstract class SelectAggregateTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testAvg(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->avg('balance');
 
-        $this->assertEquals(150, (float) $result);
+        \Testo\Assert::equals((float) $result, 150);
     }
 
+    #[\Testo\Test]
     public function testAvgWithWhere(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->where('id', 1)->avg('balance');
 
-        $this->assertEquals(100, (float) $result);
+        \Testo\Assert::equals((float) $result, 100);
     }
 
+    #[\Testo\Test]
     public function testMin(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->min('balance');
 
-        $this->assertEquals(100, (float) $result);
+        \Testo\Assert::equals((float) $result, 100);
     }
 
+    #[\Testo\Test]
     public function testMinWithWhere(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->where('balance', '>', 100)->min('balance');
 
-        $this->assertEquals(200, (float) $result);
+        \Testo\Assert::equals((float) $result, 200);
     }
 
+    #[\Testo\Test]
     public function testMax(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->max('balance');
 
-        $this->assertEquals(200, (float) $result);
+        \Testo\Assert::equals((float) $result, 200);
     }
 
+    #[\Testo\Test]
     public function testMaxWithWhere(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->where('balance', '<', 200)->max('balance');
 
-        $this->assertEquals(100, (float) $result);
+        \Testo\Assert::equals((float) $result, 100);
     }
 
+    #[\Testo\Test]
     public function testSum(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->sum('balance');
 
-        $this->assertEquals(300, (float) $result);
+        \Testo\Assert::equals((float) $result, 300);
     }
 
+    #[\Testo\Test]
     public function testSumWithWhere(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->where('id', 1)->sum('balance');
 
-        $this->assertEquals(100, (float) $result);
+        \Testo\Assert::equals((float) $result, 100);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

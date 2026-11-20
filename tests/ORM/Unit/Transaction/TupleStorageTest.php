@@ -8,19 +8,21 @@ use Cycle\ORM\Transaction\Tuple;
 use Cycle\ORM\Transaction\TupleStorage;
 use PHPUnit\Framework\TestCase;
 
-class TupleStorageTest extends TestCase
+class TupleStorageTest
 {
+    #[\Testo\Test]
     public function testNotAttachedEntity(): void
     {
         $storage = new TupleStorage();
         $entity = new \stdClass();
 
-        $this->assertCount(0, $storage);
-        $this->assertFalse($storage->contains($entity));
-        $this->expectException(\Throwable::class);
+        \Testo\Assert::count($storage, 0);
+        \Testo\Assert::false($storage->contains($entity));
+        \Testo\Expect::exception(\Throwable::class);
         $storage->getTuple(new \stdClass());
     }
 
+    #[\Testo\Test]
     public function testAttachedEntity(): void
     {
         $storage = new TupleStorage();
@@ -28,18 +30,19 @@ class TupleStorageTest extends TestCase
 
         $storage->attach($tuple);
 
-        self::assertCount(1, $storage);
-        self::assertTrue($storage->contains($entity));
-        self::assertSame($tuple, $storage->getTuple($entity));
+        \Testo\Assert::count($storage, 1);
+        \Testo\Assert::true($storage->contains($entity));
+        \Testo\Assert::same($storage->getTuple($entity), $tuple);
 
         $storage->detach($entity);
 
-        self::assertCount(0, $storage);
-        self::assertFalse($storage->contains($entity));
-        $this->expectException(\Throwable::class);
+        \Testo\Assert::count($storage, 0);
+        \Testo\Assert::false($storage->contains($entity));
+        \Testo\Expect::exception(\Throwable::class);
         $storage->getTuple($entity);
     }
 
+    #[\Testo\Test]
     public function testSequence(): void
     {
         $storage = new TupleStorage();
@@ -70,21 +73,22 @@ class TupleStorageTest extends TestCase
             }
         }
 
-        self::assertCount(\count($tuples), $storage);
+        \Testo\Assert::count($storage, \count($tuples));
         foreach ($tuples as $tuple) {
-            self::assertTrue($storage->contains($tuple->entity));
-            self::assertSame($tuple, $storage->getTuple($tuple->entity));
+            \Testo\Assert::true($storage->contains($tuple->entity));
+            \Testo\Assert::same($storage->getTuple($tuple->entity), $tuple);
         }
 
         $collection = [];
         foreach ($storage as $entity => $tuple) {
-            self::assertSame($entity, $tuple->entity);
+            \Testo\Assert::same($tuple->entity, $entity);
             $collection[] = $tuple;
         }
 
-        self::assertSame(\array_values($tuples), $collection);
+        \Testo\Assert::same($collection, \array_values($tuples));
     }
 
+    #[\Testo\Test]
     public function testAddItemsWhenIterating(): void
     {
         $storage = new TupleStorage();
@@ -93,7 +97,7 @@ class TupleStorageTest extends TestCase
         }
 
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+        \Testo\Assert::count((fn(): array => $this->iterators)->call($storage), 0);
 
         $iterator = $storage->getIterator();
         // Start generator
@@ -101,12 +105,12 @@ class TupleStorageTest extends TestCase
             break;
         }
         /** @see TupleStorage::$iterators */
-        self::assertCount(1, (fn(): array => $this->iterators)->call($storage));
+        \Testo\Assert::count((fn(): array => $this->iterators)->call($storage), 1);
 
         // Cleanup on iterator destruction
         unset($iterator);
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+        \Testo\Assert::count((fn(): array => $this->iterators)->call($storage), 0);
 
         // Cleanup on end of iteration
         $iterator = $storage->getIterator();
@@ -115,9 +119,10 @@ class TupleStorageTest extends TestCase
             // do nothing
         }
         /** @see TupleStorage::$iterators */
-        self::assertCount(0, (fn(): array => $this->iterators)->call($storage));
+        \Testo\Assert::count((fn(): array => $this->iterators)->call($storage), 0);
     }
 
+    #[\Testo\Test]
     public function testDetachWhenIterating(): void
     {
         $storage = new TupleStorage();
@@ -134,17 +139,18 @@ class TupleStorageTest extends TestCase
         $collection = [];
         foreach ($storage as $tuple) {
             $collection[] = $tuple;
-            self::assertTrue($storage->contains($tuple->entity));
-            self::assertSame($tuple, $storage->getTuple($tuple->entity));
+            \Testo\Assert::true($storage->contains($tuple->entity));
+            \Testo\Assert::same($storage->getTuple($tuple->entity), $tuple);
 
             if ($tuple === $tuple2) {
                 $storage->detach($tuple3->entity);
             }
         }
-        self::assertCount(3, $storage);
-        self::assertSame([$tuple1, $tuple2, $tuple4], $collection);
+        \Testo\Assert::count($storage, 3);
+        \Testo\Assert::same($collection, [$tuple1, $tuple2, $tuple4]);
     }
 
+    #[\Testo\Test]
     public function testCleanupIteratorState(): void
     {
         $storage = new TupleStorage();
@@ -161,17 +167,18 @@ class TupleStorageTest extends TestCase
         $collection = [];
         foreach ($storage as $tuple) {
             $collection[] = $tuple;
-            self::assertTrue($storage->contains($tuple->entity));
-            self::assertSame($tuple, $storage->getTuple($tuple->entity));
+            \Testo\Assert::true($storage->contains($tuple->entity));
+            \Testo\Assert::same($storage->getTuple($tuple->entity), $tuple);
 
             if ($tuple === $tuple2) {
                 $storage->detach($tuple3->entity);
             }
         }
-        self::assertCount(3, $storage);
-        self::assertSame([$tuple1, $tuple2, $tuple4], $collection);
+        \Testo\Assert::count($storage, 3);
+        \Testo\Assert::same($collection, [$tuple1, $tuple2, $tuple4]);
     }
 
+    #[\Testo\Test]
     public function testParallelIterators(): void
     {
         $storage = new TupleStorage();
@@ -185,8 +192,8 @@ class TupleStorageTest extends TestCase
 
         $i = 0;
         foreach ($storage as $tuple) {
-            self::assertTrue($iterator1->valid());
-            self::assertSame($tuple, $iterator1->current());
+            \Testo\Assert::true($iterator1->valid());
+            \Testo\Assert::same($iterator1->current(), $tuple);
 
             if (++$i % 2 === 0) {
                 $storage->attach($this->createTuple(new \stdClass()));

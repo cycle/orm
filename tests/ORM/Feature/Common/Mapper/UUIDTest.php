@@ -29,12 +29,13 @@ abstract class UUIDTest extends BaseTest
     private $c2;
     private $c3;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.email');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => $this->u2,
                 'email' => 'another@world.com',
@@ -63,15 +64,16 @@ abstract class UUIDTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => Select\JoinableLoader::INLOAD])->orderBy('user.email');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => $this->u2,
                 'email' => 'another@world.com',
@@ -100,9 +102,10 @@ abstract class UUIDTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testAccessRelated(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -112,17 +115,18 @@ abstract class UUIDTest extends BaseTest
          */
         [$b, $a] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
-        $this->assertInstanceOf(Collection::class, $a->comments);
-        $this->assertInstanceOf(Collection::class, $b->comments);
+        \Testo\Assert::instanceOf($a->comments, Collection::class);
+        \Testo\Assert::instanceOf($b->comments, Collection::class);
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 0);
 
-        $this->assertEquals('msg 1', $a->comments[0]->message);
-        $this->assertEquals('msg 2', $a->comments[1]->message);
-        $this->assertEquals('msg 3', $a->comments[2]->message);
+        \Testo\Assert::equals($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::equals($a->comments[1]->message, 'msg 2');
+        \Testo\Assert::equals($a->comments[2]->message, 'msg 3');
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -137,6 +141,7 @@ abstract class UUIDTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testCreateWithRelations(): void
     {
         $e = new User();
@@ -157,24 +162,24 @@ abstract class UUIDTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(0);
 
-        $this->assertIsString($e->id);
-        $this->assertEquals(36, strlen($e->id));
+        \Testo\Assert::string($e->id);
+        \Testo\Assert::equals(strlen($e->id), 36);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
-        $this->assertTrue($this->orm->getHeap()->has($e->comments[0]));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->comments[0])->getStatus());
-        $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[0])->getData()['user_id']);
+        \Testo\Assert::true($this->orm->getHeap()->has($e->comments[0]));
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[0])->getStatus(), Node::MANAGED);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[0])->getData()['user_id'], $e->id);
 
-        $this->assertTrue($this->orm->getHeap()->has($e->comments[1]));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->comments[1])->getStatus());
-        $this->assertSame($e->id, $this->orm->getHeap()->get($e->comments[1])->getData()['user_id']);
+        \Testo\Assert::true($this->orm->getHeap()->has($e->comments[1]));
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[1])->getStatus(), Node::MANAGED);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[1])->getData()['user_id'], $e->id);
 
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->wherePK($e->id)->fetchData(), [
             [
                 'id' => $e->id,
                 'email' => 'test@email.com',
@@ -192,9 +197,10 @@ abstract class UUIDTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->wherePK($e->id)->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -215,12 +221,13 @@ abstract class UUIDTest extends BaseTest
         /** @var User $e */
         $e = $selector->wherePK($this->u1)->fetchOne();
 
-        $this->assertCount(2, $e->comments);
+        \Testo\Assert::count($e->comments, 2);
 
-        $this->assertSame('msg 1', $e->comments[0]->message);
-        $this->assertSame('msg 3', $e->comments[1]->message);
+        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
     }
 
+    #[\Testo\Test]
     public function testAddAndRemoveChildren(): void
     {
         /** @var User $e */
@@ -250,13 +257,14 @@ abstract class UUIDTest extends BaseTest
         /** @var User $e */
         $e = $selector->wherePK($this->u1)->fetchOne();
 
-        $this->assertCount(3, $e->comments);
+        \Testo\Assert::count($e->comments, 3);
 
-        $this->assertSame('msg 1', $e->comments[0]->message);
-        $this->assertSame('msg 3', $e->comments[1]->message);
-        $this->assertSame('msg 4', $e->comments[2]->message);
+        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($e->comments[2]->message, 'msg 4');
     }
 
+    #[\Testo\Test]
     public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -266,8 +274,8 @@ abstract class UUIDTest extends BaseTest
          */
         [$b, $a] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 0);
 
         $b->comments = $a->comments->slice(0, 2);
         foreach ($b->comments as $c) {
@@ -276,8 +284,8 @@ abstract class UUIDTest extends BaseTest
 
         $b->comments[0]->message = 'new b';
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 2);
 
         $this->captureWriteQueries();
         $this->save($a, $b);
@@ -299,17 +307,18 @@ abstract class UUIDTest extends BaseTest
             'as' => 'comment',
         ])->orderBy('user.email')->fetchAll();
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertEquals($this->c3, $a->comments[0]->id);
+        \Testo\Assert::equals($a->comments[0]->id, $this->c3);
 
-        $this->assertEquals($this->c2, $b->comments[0]->id);
-        $this->assertEquals($this->c1, $b->comments[1]->id);
+        \Testo\Assert::equals($b->comments[0]->id, $this->c2);
+        \Testo\Assert::equals($b->comments[1]->id, $this->c1);
 
-        $this->assertEquals('new b', $b->comments[1]->message);
+        \Testo\Assert::equals($b->comments[1]->message, 'new b');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

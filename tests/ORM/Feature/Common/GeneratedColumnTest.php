@@ -23,6 +23,7 @@ abstract class GeneratedColumnTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testPersist(): void
     {
         $u = new User();
@@ -30,15 +31,16 @@ abstract class GeneratedColumnTest extends BaseTest
 
         $this->save($u);
 
-        $this->assertNotNull($u->balance);
+        \Testo\Assert::notNull($u->balance);
 
         $this->orm->getHeap()->clean();
 
         $s = (new Select($this->orm, User::class))->wherePK($u->id)->fetchOne();
 
-        $this->assertSame($u->balance, $s->balance);
+        \Testo\Assert::same($s->balance, $u->balance);
     }
 
+    #[\Testo\Test]
     public function testPersistMultipleSerial(): void
     {
         $d1 = new Document();
@@ -53,19 +55,20 @@ abstract class GeneratedColumnTest extends BaseTest
 
         $this->save($d1, $d2, $d3);
 
-        $this->assertEquals(1, $d1->id);
-        $this->assertEquals(1, $d1->body);
-        $this->assertNotSame('2020-01-01', $d1->created_at->format('Y-m-d'));
-        $this->assertEquals(2, $d2->id);
-        $this->assertEquals(213, $d2->body);
-        $this->assertSame('2020-01-01', $d2->created_at->format('Y-m-d'));
-        $this->assertEquals(3, $d3->id);
-        $this->assertEquals(2, $d3->body);
-        $this->assertSame('2020-01-01', $d3->created_at->format('Y-m-d'));
+        \Testo\Assert::equals($d1->id, 1);
+        \Testo\Assert::equals($d1->body, 1);
+        \Testo\Assert::notSame($d1->created_at->format('Y-m-d'), '2020-01-01');
+        \Testo\Assert::equals($d2->id, 2);
+        \Testo\Assert::equals($d2->body, 213);
+        \Testo\Assert::same($d2->created_at->format('Y-m-d'), '2020-01-01');
+        \Testo\Assert::equals($d3->id, 3);
+        \Testo\Assert::equals($d3->body, 2);
+        \Testo\Assert::same($d3->created_at->format('Y-m-d'), '2020-01-01');
     }
 
     abstract public function createTables(): void;
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

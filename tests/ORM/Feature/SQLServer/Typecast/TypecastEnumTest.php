@@ -8,11 +8,10 @@ namespace Cycle\ORM\Tests\Feature\SQLServer\Typecast;
 use Cycle\ORM\Tests\Feature\Common\Typecast\TypecastEnumTest as CommonClass;
 
 /**
- * @group driver
- * @group driver-sqlserver
  *
  * @requires PHP >= 8.1
  */
+#[\Testo\Filter\Group('driver', 'driver-sqlserver')]
 class TypecastEnumTest extends CommonClass
 {
     public const DRIVER = 'sqlserver';

@@ -13,13 +13,14 @@ use Cycle\ORM\MapperInterface;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
-class DeleteCommandTest extends TestCase
+class DeleteCommandTest
 {
     private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
 
+    #[\Testo\Test]
     public function testNoScope(): void
     {
-        $this->expectException(CommandException::class);
+        \Testo\Expect::exception(CommandException::class);
 
         $this->mapper = m::mock(MapperInterface::class);
         $state = new State(Node::SCHEDULED_DELETE, []);

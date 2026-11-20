@@ -7,10 +7,7 @@ namespace Cycle\ORM\Tests\Regression\MySQL\Issue482;
 // phpcs:ignore
 use Cycle\ORM\Tests\Regression\Issue482\AbstractTestCase;
 
-/**
- * @group driver
- * @group driver-mysql
- */
+#[\Testo\Filter\Group('driver', 'driver-mysql')]
 class CaseTest extends AbstractTestCase
 {
     public const DRIVER = 'mysql';

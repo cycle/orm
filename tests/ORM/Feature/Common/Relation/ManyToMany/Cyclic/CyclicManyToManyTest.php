@@ -19,62 +19,61 @@ abstract class CyclicManyToManyTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')->orderBy('id', 'ASC');
 
-        $this->assertSame(
+        \Testo\Assert::same($selector->fetchData(), [
             [
-                [
-                    'id' => 1,
-                    'email' => 'hello@world.com',
-                    'balance' => 100.0,
-                    'tags' => [
-                        [
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
+                'tags' => [
+                    [
+                        'id' => 1,
+                        'user_id' => 1,
+                        'tag_id' => 1,
+                        'as' => 'primary',
+                        '@' => [
                             'id' => 1,
-                            'user_id' => 1,
-                            'tag_id' => 1,
-                            'as' => 'primary',
-                            '@' => [
-                                'id' => 1,
-                                'name' => 'tag a',
-                            ],
-                        ],
-                        [
-                            'id' => 2,
-                            'user_id' => 1,
-                            'tag_id' => 2,
-                            'as' => 'secondary',
-                            '@' => [
-                                'id' => 2,
-                                'name' => 'tag b',
-                            ],
+                            'name' => 'tag a',
                         ],
                     ],
-                ],
-                [
-                    'id' => 2,
-                    'email' => 'another@world.com',
-                    'balance' => 200.0,
-                    'tags' => [
-                        [
-                            'id' => 3,
-                            'user_id' => 2,
-                            'tag_id' => 3,
-                            'as' => 'primary',
-                            '@' => [
-                                'id' => 3,
-                                'name' => 'tag c',
-                            ],
+                    [
+                        'id' => 2,
+                        'user_id' => 1,
+                        'tag_id' => 2,
+                        'as' => 'secondary',
+                        '@' => [
+                            'id' => 2,
+                            'name' => 'tag b',
                         ],
                     ],
                 ],
             ],
-            $selector->fetchData(),
-        );
+            [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+                'tags' => [
+                    [
+                        'id' => 3,
+                        'user_id' => 2,
+                        'tag_id' => 3,
+                        'as' => 'primary',
+                        '@' => [
+                            'id' => 3,
+                            'name' => 'tag c',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
     }
 
+    #[\Testo\Test]
     public function testCreateFromUser(): void
     {
         $u = new User();
@@ -90,10 +89,11 @@ abstract class CyclicManyToManyTest extends BaseTest
 
         $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
-        $this->assertSame($tag->id, $u2->tags->get(0)->id);
-        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
+        \Testo\Assert::same($u2->tags->get(0)->id, $tag->id);
+        \Testo\Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
     }
 
+    #[\Testo\Test]
     public function testCreateFromTag(): void
     {
         $u = new User();
@@ -109,10 +109,11 @@ abstract class CyclicManyToManyTest extends BaseTest
 
         $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
-        $this->assertSame($tag->id, $u2->tags->get(0)->id);
-        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
+        \Testo\Assert::same($u2->tags->get(0)->id, $tag->id);
+        \Testo\Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
     }
 
+    #[\Testo\Test]
     public function testCreateCyclic(): void
     {
         $u = new User();
@@ -129,10 +130,11 @@ abstract class CyclicManyToManyTest extends BaseTest
 
         $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
-        $this->assertSame($tag->id, $u2->tags->get(0)->id);
-        $this->assertSame($u->id, $u2->tags->get(0)->users->get(0)->id);
+        \Testo\Assert::same($u2->tags->get(0)->id, $tag->id);
+        \Testo\Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
     }
 
+    #[\Testo\Test]
     public function testCreateCyclicWithExisting(): void
     {
         $u = new User();
@@ -161,6 +163,7 @@ abstract class CyclicManyToManyTest extends BaseTest
         // $this->assertTrue($found);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

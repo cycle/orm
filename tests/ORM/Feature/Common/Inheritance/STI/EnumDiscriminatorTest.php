@@ -20,24 +20,27 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
 
     protected static string $discriminator = 'discriminator_value';
 
+    #[\Testo\Test]
     public function testChildClassResolvedFromScalarInDatabase(): void
     {
         $selector = new Select($this->orm, Employee::class);
         [$first, $second] = $selector->orderBy('id')->fetchAll();
 
-        $this->assertInstanceOf(Manager::class, $first);
-        $this->assertInstanceOf(Employee::class, $second);
-        $this->assertNotInstanceOf(Manager::class, $second);
+        \Testo\Assert::instanceOf($first, Manager::class);
+        \Testo\Assert::instanceOf($second, Employee::class);
+        \Testo\Assert::false($second instanceof Manager);
     }
 
+    #[\Testo\Test]
     public function testFetchedDataExposesEnumCaseAtDiscriminatorColumn(): void
     {
         $rows = (new Select($this->orm, Employee::class))->orderBy('id')->fetchData();
 
-        $this->assertSame(EmployeeType::Manager, $rows[0]['_type']);
-        $this->assertSame(EmployeeType::Employee, $rows[1]['_type']);
+        \Testo\Assert::same($rows[0]['_type'], EmployeeType::Manager);
+        \Testo\Assert::same($rows[1]['_type'], EmployeeType::Employee);
     }
 
+    #[\Testo\Test]
     public function testPersistedChildWritesScalarToDatabase(): void
     {
         $manager = new Manager();
@@ -53,9 +56,10 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
             ->where('id', $manager->id)
             ->fetchAll()[0];
 
-        $this->assertSame('manager', $row[static::$discriminator]);
+        \Testo\Assert::same($row[static::$discriminator], 'manager');
     }
 
+    #[\Testo\Test]
     public function testRoundTripChildEntity(): void
     {
         $manager = new Manager();
@@ -69,9 +73,10 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
             ->wherePK($manager->id)
             ->fetchOne();
 
-        $this->assertInstanceOf(Manager::class, $loaded);
+        \Testo\Assert::instanceOf($loaded, Manager::class);
     }
 
+    #[\Testo\Test]
     public function testMakeResolvesChildClassFromEnumInputData(): void
     {
         // Defensive: explicit BackedEnum passed as discriminator value should still resolve.
@@ -82,25 +87,27 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
             'age' => 12,
         ]);
 
-        $this->assertInstanceOf(Manager::class, $entity);
+        \Testo\Assert::instanceOf($entity, Manager::class);
     }
 
+    #[\Testo\Test]
     public function testNoExtraWritesAfterLoadAndResave(): void
     {
         /** @var Manager $manager */
         $manager = (new Select($this->orm, Employee::class))->orderBy('id')->fetchOne();
-        $this->assertInstanceOf(Manager::class, $manager);
+        \Testo\Assert::instanceOf($manager, Manager::class);
 
         $this->captureWriteQueries();
         $this->save($manager);
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testUpdateChildEntityKeepsScalarDiscriminatorInDatabase(): void
     {
         /** @var Manager $manager */
         $manager = (new Select($this->orm, Employee::class))->orderBy('id')->fetchOne();
-        $this->assertInstanceOf(Manager::class, $manager);
+        \Testo\Assert::instanceOf($manager, Manager::class);
 
         $manager->name = 'Renamed';
         $this->save($manager);
@@ -111,10 +118,11 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
             ->where('id', $manager->id)
             ->fetchAll()[0];
 
-        $this->assertSame('manager', $row[static::$discriminator]);
-        $this->assertSame('Renamed', $row['name']);
+        \Testo\Assert::same($row[static::$discriminator], 'manager');
+        \Testo\Assert::same($row['name'], 'Renamed');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

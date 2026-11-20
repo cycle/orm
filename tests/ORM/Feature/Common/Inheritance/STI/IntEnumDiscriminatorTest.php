@@ -18,15 +18,17 @@ abstract class IntEnumDiscriminatorTest extends StiBaseTest
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';
 
+    #[\Testo\Test]
     public function testChildClassResolvedFromIntScalarInDatabase(): void
     {
         [$first, $second] = (new Select($this->orm, Employee::class))->orderBy('id')->fetchAll();
 
-        $this->assertInstanceOf(Manager::class, $first);
-        $this->assertInstanceOf(Employee::class, $second);
-        $this->assertNotInstanceOf(Manager::class, $second);
+        \Testo\Assert::instanceOf($first, Manager::class);
+        \Testo\Assert::instanceOf($second, Employee::class);
+        \Testo\Assert::false($second instanceof Manager);
     }
 
+    #[\Testo\Test]
     public function testPersistedChildWritesIntScalar(): void
     {
         $manager = new Manager();
@@ -41,9 +43,10 @@ abstract class IntEnumDiscriminatorTest extends StiBaseTest
             ->where('id', $manager->id)
             ->fetchAll()[0];
 
-        $this->assertSame(EmployeeKind::Manager->value, (int) $row['kind']);
+        \Testo\Assert::same((int) $row['kind'], EmployeeKind::Manager->value);
     }
 
+    #[\Testo\Test]
     public function testMakeResolvesChildClassFromIntEnumInputData(): void
     {
         $entity = $this->orm->make(static::BASE_ROLE, [
@@ -53,9 +56,10 @@ abstract class IntEnumDiscriminatorTest extends StiBaseTest
             'age' => 12,
         ]);
 
-        $this->assertInstanceOf(Manager::class, $entity);
+        \Testo\Assert::instanceOf($entity, Manager::class);
     }
 
+    #[\Testo\Test]
     public function testRoundTripChildEntity(): void
     {
         $manager = new Manager();
@@ -68,9 +72,10 @@ abstract class IntEnumDiscriminatorTest extends StiBaseTest
             ->wherePK($manager->id)
             ->fetchOne();
 
-        $this->assertInstanceOf(Manager::class, $loaded);
+        \Testo\Assert::instanceOf($loaded, Manager::class);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

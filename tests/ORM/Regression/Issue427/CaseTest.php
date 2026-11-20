@@ -19,17 +19,18 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         $buyer = (new Select($this->orm, Buyer::class))
             ->wherePK(4)
             ->fetchOne();
 
-        $this->assertInstanceOf(Buyer::class, $buyer);
-        $this->assertSame(4, $buyer->id);
-        $this->assertSame('foo', $buyer->address);
+        \Testo\Assert::instanceOf($buyer, Buyer::class);
+        \Testo\Assert::same($buyer->id, 4);
+        \Testo\Assert::same($buyer->address, 'foo');
 
-        $this->assertCount(2, $buyer->partners);
+        \Testo\Assert::count($buyer->partners, 2);
 
         $user1 = $buyer->partners[0];
         $user2 = $buyer->partners[1];
@@ -37,12 +38,13 @@ abstract class CaseTest extends BaseTest
         \assert($user1 instanceof User);
         \assert($user2 instanceof User);
 
-        $this->assertSame('00000000-0000-0000-0000-000000000001', $user1->id->toString());
-        $this->assertSame('00000000-0000-0000-0000-000000000002', $user2->id->toString());
-        $this->assertSame('John', $user1->name);
-        $this->assertSame('Sam', $user2->name);
+        \Testo\Assert::same($user1->id->toString(), '00000000-0000-0000-0000-000000000001');
+        \Testo\Assert::same($user2->id->toString(), '00000000-0000-0000-0000-000000000002');
+        \Testo\Assert::same($user1->name, 'John');
+        \Testo\Assert::same($user2->name, 'Sam');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

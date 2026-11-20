@@ -23,13 +23,15 @@ abstract class FactoryTest extends BaseTest
      */
     private $factory;
 
+    #[\Testo\Test]
     public function testShouldMakeDefaultMapper(): void
     {
         $mapper = $this->factory->mapper($this->orm, 'user');
 
-        $this->assertInstanceOf(Mapper::class, $mapper);
+        \Testo\Assert::instanceOf($mapper, Mapper::class);
     }
 
+    #[\Testo\Test]
     public function testShouldChangeDefaultMapperClass(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
@@ -38,20 +40,22 @@ abstract class FactoryTest extends BaseTest
 
         $mapper = $this->factory->mapper($this->orm, 'user');
 
-        $this->assertInstanceOf(TimestampedMapper::class, $mapper);
+        \Testo\Assert::instanceOf($mapper, TimestampedMapper::class);
     }
 
+    #[\Testo\Test]
     public function testShouldThrowExceptionIfDefaultMapperClassNotImplementMapperInterface(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::MAPPER => User::class,
         ]);
 
-        $this->expectException(TypecastException::class);
+        \Testo\Expect::exception(TypecastException::class);
 
         $this->factory->mapper($this->orm, 'user');
     }
 
+    #[\Testo\Test]
     public function testShouldMakeDefaultRepository(): void
     {
         $result = $this->factory->repository(
@@ -61,9 +65,10 @@ abstract class FactoryTest extends BaseTest
             new Select($this->orm, 'user'),
         );
 
-        $this->assertInstanceOf(Repository::class, $result);
+        \Testo\Assert::instanceOf($result, Repository::class);
     }
 
+    #[\Testo\Test]
     public function testShouldChangeDefaultRepositoryClass(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
@@ -77,27 +82,30 @@ abstract class FactoryTest extends BaseTest
             new Select($this->orm, 'user'),
         );
 
-        $this->assertInstanceOf(UserRepository::class, $result);
+        \Testo\Assert::instanceOf($result, UserRepository::class);
     }
 
+    #[\Testo\Test]
     public function testShouldThrowExceptionIfDefaultRepositoryClassNotImplementRepositoryInterface(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::REPOSITORY => User::class,
         ]);
 
-        $this->expectException(TypecastException::class);
+        \Testo\Expect::exception(TypecastException::class);
 
         $this->factory->repository($this->orm, $this->orm->getSchema(), 'user', new Select($this->orm, 'user'));
     }
 
+    #[\Testo\Test]
     public function testShouldMakeDefaultSource(): void
     {
         $result = $this->factory->source($this->orm->getSchema(), 'user');
 
-        $this->assertInstanceOf(Source::class, $result);
+        \Testo\Assert::instanceOf($result, Source::class);
     }
 
+    #[\Testo\Test]
     public function testShouldChangeDefaultSourceClass(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
@@ -106,20 +114,22 @@ abstract class FactoryTest extends BaseTest
 
         $result = $this->factory->source($this->orm->getSchema(), 'user');
 
-        $this->assertInstanceOf(DifferentSource::class, $result);
+        \Testo\Assert::instanceOf($result, DifferentSource::class);
     }
 
+    #[\Testo\Test]
     public function testShouldThrowExceptionIfDefaultSourceClassNotImplementSourceInterface(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::SOURCE => User::class,
         ]);
 
-        $this->expectException(TypecastException::class);
+        \Testo\Expect::exception(TypecastException::class);
 
         $this->factory->source($this->orm->getSchema(), 'user');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

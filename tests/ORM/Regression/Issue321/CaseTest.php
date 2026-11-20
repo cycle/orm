@@ -13,6 +13,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function test1(): void
     {
         $user = new Entity\User1();
@@ -25,6 +26,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Test]
     public function test2(): void
     {
         $user = new Entity\User2();
@@ -37,6 +39,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Test]
     public function test3(): void
     {
         $user = new Entity\User3();
@@ -49,6 +52,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function test4(): void
     {
         $user = new Entity\User4();
@@ -60,6 +64,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

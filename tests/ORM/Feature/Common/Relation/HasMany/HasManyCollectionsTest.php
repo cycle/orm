@@ -31,9 +31,8 @@ abstract class HasManyCollectionsTest extends BaseTest
      */
     private array $collectionFactory = [];
 
-    /**
-     * @dataProvider collectionTypesProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('collectionTypesProvider')]
     public function testCustomCollectionLoad(?string $factory, bool $lazy, string $class): void
     {
         $this->orm = $this->createOrm()->withSchema(
@@ -46,12 +45,11 @@ abstract class HasManyCollectionsTest extends BaseTest
         }
         $res = $select->wherePK(1)->fetchOne();
 
-        $this->assertInstanceOf($class, $res->comments);
+        \Testo\Assert::instanceOf($res->comments, $class);
     }
 
-    /**
-     * @dataProvider collectionFactoryProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('collectionFactoryProvider')]
     public function testCustomCollectionPersist(string $factory, string $type): void
     {
         $this->orm = $this->createOrm()->withSchema(
@@ -114,6 +112,7 @@ abstract class HasManyCollectionsTest extends BaseTest
         ];
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

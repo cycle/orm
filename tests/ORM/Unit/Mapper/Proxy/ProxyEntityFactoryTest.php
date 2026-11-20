@@ -17,38 +17,36 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\User;
 use PHPUnit\Framework\TestCase;
 
-class ProxyEntityFactoryTest extends TestCase
+class ProxyEntityFactoryTest
 {
     private ProxyEntityFactory $factory;
     private ORM $orm;
 
+    #[\Testo\Test]
     public function testCreatesObject()
     {
         $user = $this->factory->create(RelationMap::build($this->orm, 'user'), User::class);
 
-        $this->assertInstanceOf(EntityProxyInterface::class, $user);
+        \Testo\Assert::instanceOf($user, EntityProxyInterface::class);
     }
 
+    #[\Testo\Test]
     public function testCreatesNonExistingObjectShouldThrowException()
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage(
-            'The entity `hello-world` class does not exist. Proxy factory can not create classless entities.',
-        );
+        \Testo\Expect::exception(\RuntimeException::class)->withMessageContaining('The entity `hello-world` class does not exist. Proxy factory can not create classless entities.');
 
         $this->factory->create(RelationMap::build($this->orm, 'user'), 'hello-world');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->factory = new ProxyEntityFactory(
             new ClosureHydrator(),
             new ClassPropertiesExtractor(),
         );
 
-        $factory = $this->createMock(FactoryInterface::class);
+        $factory = \Mockery::mock(FactoryInterface::class)->shouldIgnoreMissing();
 
         $this->orm = new ORM(
             $factory,

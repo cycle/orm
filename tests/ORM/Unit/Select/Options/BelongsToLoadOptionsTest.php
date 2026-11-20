@@ -10,43 +10,48 @@ use Cycle\ORM\Select\Options\LoadMethod;
 use Cycle\ORM\Select\Options\LoadOptions;
 use PHPUnit\Framework\TestCase;
 
-final class BelongsToLoadOptionsTest extends TestCase
+final class BelongsToLoadOptionsTest
 {
+    #[\Testo\Test]
     public function testDefaults(): void
     {
         $options = new BelongsToLoadOptions();
 
-        $this->assertSame(LoadMethod::OuterQuery, $options->method);
-        $this->assertTrue($options->scope);
-        $this->assertTrue($options->minify);
-        $this->assertNull($options->as);
-        $this->assertNull($options->using);
-        $this->assertNull($options->where);
+        \Testo\Assert::same($options->method, LoadMethod::OuterQuery);
+        \Testo\Assert::true($options->scope);
+        \Testo\Assert::true($options->minify);
+        \Testo\Assert::null($options->as);
+        \Testo\Assert::null($options->using);
+        \Testo\Assert::null($options->where);
     }
 
+    #[\Testo\Test]
     public function testInheritance(): void
     {
         $options = new BelongsToLoadOptions();
 
-        $this->assertInstanceOf(JoinableLoadOptions::class, $options);
-        $this->assertInstanceOf(LoadOptions::class, $options);
+        \Testo\Assert::instanceOf($options, JoinableLoadOptions::class);
+        \Testo\Assert::instanceOf($options, LoadOptions::class);
     }
 
+    #[\Testo\Test]
     public function testWithWhere(): void
     {
         $where = ['{@}.active' => true];
         $options = new BelongsToLoadOptions(where: $where);
 
-        $this->assertSame($where, $options->where);
+        \Testo\Assert::same($options->where, $where);
     }
 
+    #[\Testo\Test]
     public function testDoesNotHaveOrderBy(): void
     {
         $options = new BelongsToLoadOptions();
 
-        $this->assertFalse(property_exists($options, 'orderBy'));
+        \Testo\Assert::false(property_exists($options, 'orderBy'));
     }
 
+    #[\Testo\Test]
     public function testAllParameters(): void
     {
         $where = ['{@}.status' => 'published'];
@@ -59,25 +64,27 @@ final class BelongsToLoadOptionsTest extends TestCase
             where: $where,
         );
 
-        $this->assertSame(LoadMethod::SingleQuery, $options->method);
-        $this->assertFalse($options->scope);
-        $this->assertFalse($options->minify);
-        $this->assertSame('alias', $options->as);
-        $this->assertSame('other', $options->using);
-        $this->assertSame($where, $options->where);
+        \Testo\Assert::same($options->method, LoadMethod::SingleQuery);
+        \Testo\Assert::false($options->scope);
+        \Testo\Assert::false($options->minify);
+        \Testo\Assert::same($options->as, 'alias');
+        \Testo\Assert::same($options->using, 'other');
+        \Testo\Assert::same($options->where, $where);
     }
 
+    #[\Testo\Test]
     public function testToArrayDefaults(): void
     {
         $options = new BelongsToLoadOptions();
 
-        $this->assertEquals([
+        \Testo\Assert::equals($options->toArray(), [
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,
-        ], $options->toArray());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testToArrayCustom(): void
     {
         $where = ['{@}.active' => true];
@@ -89,18 +96,19 @@ final class BelongsToLoadOptionsTest extends TestCase
 
         $result = $options->toArray();
 
-        $this->assertSame($where, $result['where']);
-        $this->assertSame(LoadMethod::SingleQuery->value, $result['method']);
-        $this->assertFalse($result['scope']);
+        \Testo\Assert::same($result['where'], $where);
+        \Testo\Assert::same($result['method'], LoadMethod::SingleQuery->value);
+        \Testo\Assert::false($result['scope']);
     }
 
+    #[\Testo\Test]
     public function testToArrayWithEmptyWhere(): void
     {
         $options = new BelongsToLoadOptions(where: []);
 
         $result = $options->toArray();
 
-        $this->assertArrayHasKey('where', $result);
-        $this->assertSame([], $result['where']);
+        \Testo\Assert::array($result)->hasKeys('where');
+        \Testo\Assert::same($result['where'], []);
     }
 }

@@ -17,6 +17,7 @@ abstract class SelectorTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testStableStatement(): void
     {
         $s = new Select($this->orm, User::class);
@@ -28,6 +29,7 @@ abstract class SelectorTest extends BaseTest
         $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());
     }
 
+    #[\Testo\Test]
     public function testSelectCustomSQL(): void
     {
         $s = new Select($this->orm, User::class);
@@ -41,7 +43,7 @@ abstract class SelectorTest extends BaseTest
 
         $result = $query->fetchAll();
 
-        $this->assertEquals([
+        \Testo\Assert::equals($result, [
             [
                 'id' => 1,
                 'balance' => 400.0,
@@ -52,9 +54,10 @@ abstract class SelectorTest extends BaseTest
                 'balance' => 600.0,
                 'count_comments' => 3,
             ],
-        ], $result);
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

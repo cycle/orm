@@ -19,6 +19,7 @@ abstract class OptimisticLockTest extends BaseTest
     /**
      * Check the mapper works fine in a normal create and update cases
      */
+    #[\Testo\Test]
     public function testCreateAndUpdate(): void
     {
         $entity = new Post();
@@ -36,9 +37,10 @@ abstract class OptimisticLockTest extends BaseTest
         $this->save($entity);
         $this->assertNumWrites(1);
 
-        $this->assertNotSame($oldLock, $entity->lock);
+        \Testo\Assert::notSame($entity->lock, $oldLock);
     }
 
+    #[\Testo\Test]
     public function testUpdateLocked(): void
     {
         $entity = new Post();
@@ -49,8 +51,7 @@ abstract class OptimisticLockTest extends BaseTest
 
         $this->getDatabase()->update('post', ['lock' => microtime()], ['id' => $entity->id])->run();
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('The `post` record is locked.');
+        \Testo\Expect::exception(\RuntimeException::class)->withMessageContaining('The `post` record is locked.');
 
         try {
             $entity->title = 'new title';
@@ -63,6 +64,7 @@ abstract class OptimisticLockTest extends BaseTest
     /**
      * Check the mapper works fine in a normal delete case
      */
+    #[\Testo\Test]
     public function testCreateAndDelete(): void
     {
         $entity = new Post();
@@ -76,6 +78,7 @@ abstract class OptimisticLockTest extends BaseTest
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Test]
     public function testCreateAndDeleteLocked(): void
     {
         $entity = new Post();
@@ -86,8 +89,7 @@ abstract class OptimisticLockTest extends BaseTest
 
         $this->getDatabase()->update('post', ['lock' => microtime()], ['id' => $entity->id])->run();
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('The `post` record is locked.');
+        \Testo\Expect::exception(\RuntimeException::class)->withMessageContaining('The `post` record is locked.');
 
         try {
             (new Transaction($this->orm))->delete($entity)->run();
@@ -96,6 +98,7 @@ abstract class OptimisticLockTest extends BaseTest
         }
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

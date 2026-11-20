@@ -24,6 +24,7 @@ abstract class ManyToManyLoadingTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadSortedByPivot(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -33,7 +34,7 @@ abstract class ManyToManyLoadingTest extends BaseTest
             },
         ])->orderBy('id', 'ASC');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -78,9 +79,10 @@ abstract class ManyToManyLoadingTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadSortedByPivotInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -91,7 +93,7 @@ abstract class ManyToManyLoadingTest extends BaseTest
             },
         ])->orderBy('id', 'ASC');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -136,9 +138,10 @@ abstract class ManyToManyLoadingTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testUpdateRelationSortedByPivot(): void
     {
         $this->captureReadQueries();
@@ -158,19 +161,17 @@ abstract class ManyToManyLoadingTest extends BaseTest
 
         $this->captureReadQueries();
         foreach ($users as $user) {
-            $this->assertIsIterable($user->tags);
+            \Testo\Assert::iterable($user->tags);
             $this->assertNotEmpty($user->tags);
             // Check order
             if (\count($user->tags) > 1) {
-                self::assertGreaterThan(
-                    $user->tags->offsetGet(1)->id,
-                    $user->tags->offsetGet(0)->id,
-                );
+                \Testo\Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan($user->tags->offsetGet(1)->id);
             }
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

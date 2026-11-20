@@ -57,9 +57,8 @@ abstract class MemoryTest extends BaseTest
         ];
     }
 
-    /**
-     * @dataProvider configProvider()
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('configProvider')]
     public function testOrm(string $action, bool $garbage, bool $warmupOrm, bool $loadLinks, bool $loadRoles): void
     {
         // Create ORM
@@ -84,11 +83,12 @@ abstract class MemoryTest extends BaseTest
         // Collect cyclic references
         $garbage and \gc_collect_cycles();
         // check weak references
-        $loadLinks and $this->assertCount(0, $map);
+        $loadLinks and \Testo\Assert::count($map, 0);
         // Check main orm reference
-        $this->assertTrue($link->get() === null);
+        \Testo\Assert::true($link->get() === null);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -22,6 +22,7 @@ abstract class HasOneLoadOptionsTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -30,10 +31,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -42,10 +44,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             method: LoadMethod::OuterQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -57,10 +60,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             where: ['@.level' => 1],
         ))->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomWhereAndSingleQuery(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -73,10 +77,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             where: ['@.level' => 1],
         ))->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithOrderBy(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -89,10 +94,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             orderBy: ['@.level' => 'ASC'],
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithScopeDisabled(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -103,10 +109,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             scope: false,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomScope(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -115,10 +122,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             scope: new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']),
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryAndScopeAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -136,13 +144,14 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id', 'DESC')->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame($expected[0]->email, $res[0]->email);
-        $this->assertSame($expected[1]->email, $res[1]->email);
-        $this->assertSame($expected[0]->firstComment->message, $res[0]->firstComment->message);
-        $this->assertSame($expected[1]->firstComment->message, $res[1]->firstComment->message);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[0]->email, $expected[0]->email);
+        \Testo\Assert::same($res[1]->email, $expected[1]->email);
+        \Testo\Assert::same($res[0]->firstComment->message, $expected[0]->firstComment->message);
+        \Testo\Assert::same($res[1]->firstComment->message, $expected[1]->firstComment->message);
     }
 
+    #[\Testo\Test]
     public function testLoadWithDefaultOptions(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -150,10 +159,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment', new HasOneLoadOptions())
             ->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('comment_archive', [
@@ -177,10 +187,11 @@ abstract class HasOneLoadOptionsTest extends BaseTest
             table: 'comment_archive',
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('archived 1', $a->firstComment->message);
-        $this->assertSame('archived 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'archived 1');
+        \Testo\Assert::same($b->firstComment->message, 'archived 2.1');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

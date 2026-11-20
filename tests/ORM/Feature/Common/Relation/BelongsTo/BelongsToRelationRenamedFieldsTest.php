@@ -14,6 +14,7 @@ use Cycle\ORM\Tests\Feature\Common\BaseTest;
 
 abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
 {
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         BaseTest::setUp();

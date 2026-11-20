@@ -18,6 +18,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelectOne(): void
     {
         // Eager load morphed relation
@@ -30,10 +31,11 @@ abstract class CaseTest extends BaseTest
 
         // Check result
         $this->captureReadQueries();
-        $this->assertInstanceOf(Entity\LogRecord::class, $log);
+        \Testo\Assert::instanceOf($log, Entity\LogRecord::class);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testUpdateOne(): void
     {
         // Eager load morphed relation
@@ -52,10 +54,11 @@ abstract class CaseTest extends BaseTest
 
         // Check result
         $this->captureReadQueries();
-        $this->assertInstanceOf(Entity\Actor::class, $log->actor);
+        \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testSelectAll(): void
     {
         // Eager load morphed relation for multiple entities
@@ -68,14 +71,15 @@ abstract class CaseTest extends BaseTest
         // Check result
         $this->captureReadQueries();
         foreach ($logs as $log) {
-            $this->assertInstanceOf(Entity\LogRecord::class, $log);
+            \Testo\Assert::instanceOf($log, Entity\LogRecord::class);
             \in_array($log->lid, [9], true)
-                ? self::assertNull($log->actor)
-                : self::assertInstanceOf(Entity\Actor::class, $log->actor);
+                ? \Testo\Assert::null($log->actor)
+                : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testUpdateMany(): void
     {
         // Eager load morphed relation
@@ -97,12 +101,13 @@ abstract class CaseTest extends BaseTest
         $this->captureReadQueries();
         foreach ($logs as $log) {
             \in_array($log->lid, [9], true)
-                ? self::assertNull($log->actor)
-                : self::assertInstanceOf(Entity\Actor::class, $log->actor);
+                ? \Testo\Assert::null($log->actor)
+                : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testScoped(): void
     {
         // Eager load morphed relation
@@ -115,15 +120,16 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
         $this->assertNumReads(3);
 
-        $this->assertCount(2, $logs);
+        \Testo\Assert::count($logs, 2);
 
         // Check result
         $this->captureReadQueries();
-        self::assertNull($logs[0]->actor);
-        self::assertInstanceOf(Entity\Tenant::class, $logs[1]->actor);
+        \Testo\Assert::null($logs[0]->actor);
+        \Testo\Assert::instanceOf($logs[1]->actor, Entity\Tenant::class);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

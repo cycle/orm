@@ -11,72 +11,81 @@ use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\ScopeInterface;
 use PHPUnit\Framework\TestCase;
 
-final class JoinableLoadOptionsTest extends TestCase
+final class JoinableLoadOptionsTest
 {
+    #[\Testo\Test]
     public function testDefaults(): void
     {
         $options = new JoinableLoadOptions();
 
-        $this->assertNull($options->method);
-        $this->assertTrue($options->scope);
-        $this->assertTrue($options->minify);
-        $this->assertNull($options->as);
-        $this->assertNull($options->using);
+        \Testo\Assert::null($options->method);
+        \Testo\Assert::true($options->scope);
+        \Testo\Assert::true($options->minify);
+        \Testo\Assert::null($options->as);
+        \Testo\Assert::null($options->using);
     }
 
+    #[\Testo\Test]
     public function testExtendsLoadOptions(): void
     {
         $options = new JoinableLoadOptions();
 
-        $this->assertInstanceOf(LoadOptions::class, $options);
+        \Testo\Assert::instanceOf($options, LoadOptions::class);
     }
 
+    #[\Testo\Test]
     public function testWithLoadMethod(): void
     {
         $options = new JoinableLoadOptions(method: LoadMethod::SingleQuery);
 
-        $this->assertSame(LoadMethod::SingleQuery, $options->method);
+        \Testo\Assert::same($options->method, LoadMethod::SingleQuery);
     }
 
+    #[\Testo\Test]
     public function testWithJoinMethod(): void
     {
         $options = new JoinableLoadOptions(method: JoinMethod::InnerJoin);
 
-        $this->assertSame(JoinMethod::InnerJoin, $options->method);
+        \Testo\Assert::same($options->method, JoinMethod::InnerJoin);
     }
 
+    #[\Testo\Test]
     public function testWithLeftJoinMethod(): void
     {
         $options = new JoinableLoadOptions(method: JoinMethod::LeftJoin);
 
-        $this->assertSame(JoinMethod::LeftJoin, $options->method);
+        \Testo\Assert::same($options->method, JoinMethod::LeftJoin);
     }
 
+    #[\Testo\Test]
     public function testCustomAlias(): void
     {
         $options = new JoinableLoadOptions(as: 'my_alias');
 
-        $this->assertSame('my_alias', $options->as);
+        \Testo\Assert::same($options->as, 'my_alias');
     }
 
+    #[\Testo\Test]
     public function testUsing(): void
     {
         $options = new JoinableLoadOptions(using: 'other_relation');
 
-        $this->assertSame('other_relation', $options->using);
+        \Testo\Assert::same($options->using, 'other_relation');
     }
 
+    #[\Testo\Test]
     public function testCustomScope(): void
     {
-        $scope = $this->createMock(ScopeInterface::class);
+        $scope = \Mockery::mock(ScopeInterface::class)->shouldIgnoreMissing();
         $options = new JoinableLoadOptions(scope: $scope);
 
-        $this->assertSame($scope, $options->scope);
+        \Testo\Assert::same($options->scope, $scope);
     }
 
+    #[\Testo\Test]
     public function testAllParameters(): void
     {
-        $scope = $this->createMock(ScopeInterface::class);
+        $scope = \Mockery::mock(ScopeInterface::class)->shouldIgnoreMissing();
         $options = new JoinableLoadOptions(
             method: LoadMethod::OuterQuery,
             scope: $scope,
@@ -85,13 +94,14 @@ final class JoinableLoadOptionsTest extends TestCase
             using: 'other',
         );
 
-        $this->assertSame(LoadMethod::OuterQuery, $options->method);
-        $this->assertSame($scope, $options->scope);
-        $this->assertFalse($options->minify);
-        $this->assertSame('alias', $options->as);
-        $this->assertSame('other', $options->using);
+        \Testo\Assert::same($options->method, LoadMethod::OuterQuery);
+        \Testo\Assert::same($options->scope, $scope);
+        \Testo\Assert::false($options->minify);
+        \Testo\Assert::same($options->as, 'alias');
+        \Testo\Assert::same($options->using, 'other');
     }
 
+    #[\Testo\Test]
     public function testToArrayWithLoadMethod(): void
     {
         $options = new JoinableLoadOptions(
@@ -102,30 +112,32 @@ final class JoinableLoadOptionsTest extends TestCase
             using: 'other',
         );
 
-        $this->assertEquals([
+        \Testo\Assert::equals($options->toArray(), [
             'method' => LoadMethod::SingleQuery->value,
             'as' => 'my_alias',
             'using' => 'other',
             'scope' => false,
             'minify' => false,
-        ], $options->toArray());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testToArrayWithJoinMethod(): void
     {
         $options = new JoinableLoadOptions(method: JoinMethod::LeftJoin);
 
-        $this->assertSame(JoinMethod::LeftJoin->value, $options->toArray()['method']);
+        \Testo\Assert::same($options->toArray()['method'], JoinMethod::LeftJoin->value);
     }
 
+    #[\Testo\Test]
     public function testToArrayDefaults(): void
     {
         $options = new JoinableLoadOptions(method: LoadMethod::OuterQuery);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($options->toArray(), [
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,
-        ], $options->toArray());
+        ]);
     }
 }

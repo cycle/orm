@@ -7,10 +7,7 @@ namespace Cycle\ORM\Tests\Regression\Postgres\Issue482;
 // phpcs:ignore
 use Cycle\ORM\Tests\Regression\Issue482\AbstractTestCase;
 
-/**
- * @group driver
- * @group driver-postgres
- */
+#[\Testo\Filter\Group('driver', 'driver-postgres')]
 class CaseTest extends AbstractTestCase
 {
     public const DRIVER = 'postgres';

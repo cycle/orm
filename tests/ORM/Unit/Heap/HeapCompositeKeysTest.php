@@ -45,6 +45,7 @@ final class HeapCompositeKeysTest extends HeapTest
         self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
     ];
 
+    #[\Testo\Test]
     public function testFindByShuffledCriteria(): void
     {
         $heap = $this->createHeap();
@@ -52,9 +53,10 @@ final class HeapCompositeKeysTest extends HeapTest
         $entity = new User();
         $heap->attach($entity, $node, [self::INDEX_FIELDS_1]);
 
-        $this->assertSame($entity, $heap->find('user', array_reverse(self::INDEX_FIND_1_1, true)), 'Found');
+        \Testo\Assert::same($heap->find('user', array_reverse(self::INDEX_FIND_1_1, true)), $entity, 'Found');
     }
 
+    #[\Testo\Test]
     public function testDetachSomeFromMultipleWithSamePartPK(): void
     {
         [
@@ -75,15 +77,16 @@ final class HeapCompositeKeysTest extends HeapTest
         // Check
         foreach ($values as $i => $value) {
             if ($i % 2 === 0) {
-                $this->assertTrue($heap->has($entities[$i]));
-                $this->assertSame($entities[$i], $heap->find('user', $value), "Item {$i} found.");
+                \Testo\Assert::true($heap->has($entities[$i]));
+                \Testo\Assert::same($heap->find('user', $value), $entities[$i], "Item {$i} found.");
             } else {
-                $this->assertFalse($heap->has($entities[$i]));
-                $this->assertNull($heap->find('user', $value), "Item {$i} removed.");
+                \Testo\Assert::false($heap->has($entities[$i]));
+                \Testo\Assert::null($heap->find('user', $value), "Item {$i} removed.");
             }
         }
     }
 
+    #[\Testo\Test]
     public function testDetachMultipleWithSamePartPK(): void
     {
         [
@@ -95,13 +98,13 @@ final class HeapCompositeKeysTest extends HeapTest
 
         // Now detach it
         foreach ($values as $i => $value) {
-            $this->assertTrue($heap->has($entities[$i]));
-            $this->assertSame($entities[$i], $heap->find('user', $value), "Item {$i} exists.");
+            \Testo\Assert::true($heap->has($entities[$i]));
+            \Testo\Assert::same($heap->find('user', $value), $entities[$i], "Item {$i} exists.");
 
             $heap->detach($entities[$i]);
 
-            $this->assertFalse($heap->has($entities[$i]));
-            $this->assertNull($heap->find('user', $value), "Item {$i} removed.");
+            \Testo\Assert::false($heap->has($entities[$i]));
+            \Testo\Assert::null($heap->find('user', $value), "Item {$i} removed.");
         }
     }
 
@@ -134,8 +137,8 @@ final class HeapCompositeKeysTest extends HeapTest
 
         // Check
         foreach ($values as $i => $value) {
-            $this->assertTrue($heap->has($entities[$i]));
-            $this->assertSame($entities[$i], $heap->find('user', $value), "Item {$i} found.");
+            \Testo\Assert::true($heap->has($entities[$i]));
+            \Testo\Assert::same($heap->find('user', $value), $entities[$i], "Item {$i} found.");
         }
 
         return ['heap' => $heap, 'values' => $values, 'entities' => $entities, 'nodes' => $nodes];

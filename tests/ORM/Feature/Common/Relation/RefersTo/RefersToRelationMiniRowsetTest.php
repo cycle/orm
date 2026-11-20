@@ -19,6 +19,7 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateEmptyComment(): void
     {
         $c = new Comment();
@@ -34,9 +35,10 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
         $s = new Select($this->orm->withHeap(new Heap()), Comment::class);
         $cd = $s->fetchData();
 
-        $this->assertSame(['id' => 1], $cd[0]);
+        \Testo\Assert::same($cd[0], ['id' => 1]);
     }
 
+    #[\Testo\Test]
     public function testCreateEmptyCommentMultiple(): void
     {
         $c1 = new Comment();
@@ -55,11 +57,12 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
         $cd = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
 
-        $this->assertSame(['id' => 1], $cd[0]);
-        $this->assertSame(['id' => 2], $cd[1]);
-        $this->assertSame(['id' => 3], $cd[2]);
+        \Testo\Assert::same($cd[0], ['id' => 1]);
+        \Testo\Assert::same($cd[1], ['id' => 2]);
+        \Testo\Assert::same($cd[2], ['id' => 3]);
     }
 
+    #[\Testo\Test]
     public function testCreateEmptyUser(): void
     {
         $u = new User();
@@ -74,9 +77,10 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
 
-        $this->assertSame(['id' => 1, 'comment_id' => null], $userData[0]);
+        \Testo\Assert::same($userData[0], ['id' => 1, 'comment_id' => null]);
     }
 
+    #[\Testo\Test]
     public function testCreateUserWithComment(): void
     {
         $c = new Comment();
@@ -90,10 +94,11 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
         $commentData = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
 
-        $this->assertSame(['id' => 1, 'comment_id' => 1], $userData[0]);
-        $this->assertSame(['id' => 1], $commentData[0]);
+        \Testo\Assert::same($userData[0], ['id' => 1, 'comment_id' => 1]);
+        \Testo\Assert::same($commentData[0], ['id' => 1]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

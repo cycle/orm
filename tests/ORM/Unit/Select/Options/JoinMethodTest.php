@@ -8,26 +8,30 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Options\JoinMethod;
 use PHPUnit\Framework\TestCase;
 
-final class JoinMethodTest extends TestCase
+final class JoinMethodTest
 {
+    #[\Testo\Test]
     public function testInnerJoinValue(): void
     {
-        $this->assertSame(JoinableLoader::JOIN, JoinMethod::InnerJoin->value);
+        \Testo\Assert::same(JoinMethod::InnerJoin->value, JoinableLoader::JOIN);
     }
 
+    #[\Testo\Test]
     public function testLeftJoinValue(): void
     {
-        $this->assertSame(JoinableLoader::LEFT_JOIN, JoinMethod::LeftJoin->value);
+        \Testo\Assert::same(JoinMethod::LeftJoin->value, JoinableLoader::LEFT_JOIN);
     }
 
+    #[\Testo\Test]
     public function testCaseCount(): void
     {
-        $this->assertCount(2, JoinMethod::cases());
+        \Testo\Assert::count(JoinMethod::cases(), 2);
     }
 
+    #[\Testo\Test]
     public function testFromValue(): void
     {
-        $this->assertSame(JoinMethod::InnerJoin, JoinMethod::from(JoinableLoader::JOIN));
-        $this->assertSame(JoinMethod::LeftJoin, JoinMethod::from(JoinableLoader::LEFT_JOIN));
+        \Testo\Assert::same(JoinMethod::from(JoinableLoader::JOIN), JoinMethod::InnerJoin);
+        \Testo\Assert::same(JoinMethod::from(JoinableLoader::LEFT_JOIN), JoinMethod::LeftJoin);
     }
 }

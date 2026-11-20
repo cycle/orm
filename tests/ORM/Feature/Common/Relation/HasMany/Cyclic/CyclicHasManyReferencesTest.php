@@ -19,6 +19,7 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $u = new User();
@@ -50,14 +51,15 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
 
         $p1 = $selector->wherePK(1)->fetchOne();
 
-        $this->assertEquals($p->id, $p1->id);
-        $this->assertEquals($p->lastComment->id, $p1->lastComment->id);
+        \Testo\Assert::equals($p1->id, $p->id);
+        \Testo\Assert::equals($p1->lastComment->id, $p->lastComment->id);
 
-        $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
-        $this->assertEquals($p->comments[0]->id, $p1->comments[0]->id);
-        $this->assertEquals($p1->id, $p1->comments[0]->post_id);
+        \Testo\Assert::equals($p1->lastComment->user->id, $p->lastComment->user->id);
+        \Testo\Assert::equals($p1->comments[0]->id, $p->comments[0]->id);
+        \Testo\Assert::equals($p1->comments[0]->post_id, $p1->id);
     }
 
+    #[\Testo\Test]
     public function testReferenceUpdate(): void
     {
         $u1 = new User();
@@ -108,12 +110,13 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         sort($pCommentIds);
         sort($p1CommentIds);
 
-        $this->assertEquals($p1->lastComment->id, $c3->id);
-        $this->assertEquals($p->lastComment->user->id, $p1->lastComment->user->id);
-        $this->assertEquals($pCommentIds, $p1CommentIds);
-        $this->assertEquals($p1->id, $p1->comments[0]->post_id);
+        \Testo\Assert::equals($c3->id, $p1->lastComment->id);
+        \Testo\Assert::equals($p1->lastComment->user->id, $p->lastComment->user->id);
+        \Testo\Assert::equals($p1CommentIds, $pCommentIds);
+        \Testo\Assert::equals($p1->comments[0]->post_id, $p1->id);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

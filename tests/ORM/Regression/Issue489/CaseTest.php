@@ -14,14 +14,16 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
+    #[\Testo\Skip('todo: fix later')]
     public function testSave(): void
     {
-        $this->markTestSkipped('todo: fix later');
         $this->captureWriteQueries();
         $this->save(new User());
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

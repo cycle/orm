@@ -7,10 +7,7 @@ namespace Cycle\ORM\Tests\Feature\SQLServer\Typecast;
 // phpcs:ignore
 use Cycle\ORM\Tests\Feature\Common\Typecast\JsonTest as CommonClass;
 
-/**
- * @group driver
- * @group driver-sqlserver
- */
+#[\Testo\Filter\Group('driver', 'driver-sqlserver')]
 final class JsonTest extends CommonClass
 {
     public const DRIVER = 'sqlserver';

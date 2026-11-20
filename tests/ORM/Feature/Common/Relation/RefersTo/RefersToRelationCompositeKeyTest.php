@@ -23,6 +23,7 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
     protected const CHILD_CONTAINER = 'child_entity';
     protected const CHILDREN_CONTAINER = 'children';
 
+    #[\Testo\Test]
     public function testCreateParentWithDoubleReference(): void
     {
         $u = new CompositePK();
@@ -49,12 +50,13 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->fetchOne();
 
         /** @var CompositePK $u */
-        $this->assertSame($u->child_key1, $c->key1);
-        $this->assertSame($u->child_key2, $c->key2);
-        $this->assertNotNull($u->child_entity);
-        $this->assertSame($u->child_entity, $u->children[0]);
+        \Testo\Assert::same($c->key1, $u->child_key1);
+        \Testo\Assert::same($c->key2, $u->child_key2);
+        \Testo\Assert::notNull($u->child_entity);
+        \Testo\Assert::same($u->children[0], $u->child_entity);
     }
 
+    #[\Testo\Test]
     public function testUpdateParentPKWithDoubleReference(): void
     {
         $p = new CompositePK();
@@ -90,13 +92,14 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->load(self::CHILDREN_CONTAINER)
             ->fetchAll();
 
-        $this->assertCount(1, $data);
-        $this->assertSame($data[0]->child_key1, $c->key1);
-        $this->assertSame($data[0]->child_key2, $c->key2);
-        $this->assertNotNull($data[0]->child_entity);
-        $this->assertSame($data[0]->child_entity, $data[0]->children[0]);
+        \Testo\Assert::count($data, 1);
+        \Testo\Assert::same($c->key1, $data[0]->child_key1);
+        \Testo\Assert::same($c->key2, $data[0]->child_key2);
+        \Testo\Assert::notNull($data[0]->child_entity);
+        \Testo\Assert::same($data[0]->children[0], $data[0]->child_entity);
     }
 
+    #[\Testo\Test]
     public function testCreateParentToExistedReference(): void
     {
         $u = new CompositePK();
@@ -140,11 +143,12 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->wherePK([300, 301])
             ->fetchOne();
 
-        $this->assertNotNull($u3->child_entity);
-        $this->assertEquals($u3->child_entity->key1, $u->children[0]->key1);
-        $this->assertEquals($u3->child_entity->key2, $u->children[0]->key2);
+        \Testo\Assert::notNull($u3->child_entity);
+        \Testo\Assert::equals($u->children[0]->key1, $u3->child_entity->key1);
+        \Testo\Assert::equals($u->children[0]->key2, $u3->child_entity->key2);
     }
 
+    #[\Testo\Test]
     public function testCreateWhenParentExists(): void
     {
         $u = new CompositePK();
@@ -174,13 +178,14 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->wherePK([900, 901])
             ->fetchOne();
 
-        $this->assertNotNull($u->child_entity);
-        $this->assertSame($u->child_entity, $u->children[0]);
+        \Testo\Assert::notNull($u->child_entity);
+        \Testo\Assert::same($u->children[0], $u->child_entity);
     }
 
+    #[\Testo\Test]
     public function testCreateWithoutProperDependency(): void
     {
-        $this->expectException(TransactionException::class);
+        \Testo\Expect::exception(TransactionException::class);
 
         $u = new CompositePK();
         $u->key1 = 900;
@@ -202,6 +207,7 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
         }
     }
 
+    #[\Testo\Test]
     public function testAssignParentAsUpdate(): void
     {
         $u = new CompositePK();
@@ -224,8 +230,8 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->wherePK([900, 901])
             ->fetchOne();
 
-        $this->assertNull($u->child_entity);
-        $this->assertCount(1, $u->children);
+        \Testo\Assert::null($u->child_entity);
+        \Testo\Assert::count($u->children, 1);
 
         $u->child_entity = $u->children[0];
 
@@ -237,11 +243,12 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->wherePK([900, 901])
             ->fetchOne();
 
-        $this->assertNotNull($u->child_entity);
-        $this->assertCount(1, $u->children);
-        $this->assertSame($u->child_entity, $u->children[0]);
+        \Testo\Assert::notNull($u->child_entity);
+        \Testo\Assert::count($u->children, 1);
+        \Testo\Assert::same($u->children[0], $u->child_entity);
     }
 
+    #[\Testo\Test]
     public function testSetNull(): void
     {
         $u = new CompositePK();
@@ -268,9 +275,9 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->wherePK([900, 901])
             ->fetchOne();
 
-        $this->assertNotNull($u->child_entity);
-        $this->assertCount(1, $u->children);
-        $this->assertSame($u->child_entity, $u->children[0]);
+        \Testo\Assert::notNull($u->child_entity);
+        \Testo\Assert::count($u->children, 1);
+        \Testo\Assert::same($u->children[0], $u->child_entity);
 
         $u->child_entity = null;
 
@@ -286,10 +293,11 @@ abstract class RefersToRelationCompositeKeyTest extends BaseTest
             ->wherePK([900, 901])
             ->fetchOne();
 
-        $this->assertNull($u->child_entity);
-        $this->assertCount(1, $u->children);
+        \Testo\Assert::null($u->child_entity);
+        \Testo\Assert::count($u->children, 1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -17,12 +17,13 @@ abstract class HasManyLoadingTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -51,9 +52,10 @@ abstract class HasManyLoadingTest extends BaseTest
                 'balance' => 200.0,
                 'comments' => [],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchRelationLoaded(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -63,7 +65,7 @@ abstract class HasManyLoadingTest extends BaseTest
             },
         ])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -92,9 +94,10 @@ abstract class HasManyLoadingTest extends BaseTest
                 'balance' => 200.0,
                 'comments' => [],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchRelationLoadedInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -105,7 +108,7 @@ abstract class HasManyLoadingTest extends BaseTest
             },
         ])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -134,9 +137,10 @@ abstract class HasManyLoadingTest extends BaseTest
                 'balance' => 200.0,
                 'comments' => [],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testUpdateRelationSortedById(): void
     {
         $this->captureReadQueries();
@@ -154,21 +158,19 @@ abstract class HasManyLoadingTest extends BaseTest
         $this->captureReadQueries();
         $checked = false;
         foreach ($users as $user) {
-            $this->assertIsIterable($user->comments);
+            \Testo\Assert::iterable($user->comments);
             // Check order
             if (\count($user->comments) > 1) {
-                self::assertGreaterThan(
-                    $user->comments->offsetGet(1)->id,
-                    $user->comments->offsetGet(0)->id,
-                );
+                \Testo\Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
                 $checked = true;
             }
         }
 
-        $this->assertTrue($checked, 'No comments to check order.');
+        \Testo\Assert::true($checked, 'No comments to check order.');
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

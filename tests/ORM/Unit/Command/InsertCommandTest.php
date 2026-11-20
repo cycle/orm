@@ -18,23 +18,26 @@ use Cycle\ORM\Tests\Fixtures\TestInsertCommandWithReturning;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
-class InsertCommandTest extends TestCase
+class InsertCommandTest
 {
     private Insert $cmd;
     private m\LegacyMockInterface|m\MockInterface|DatabaseInterface $db;
     private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
     private State $state;
 
+    #[\Testo\Test]
     public function testDatabase(): void
     {
-        $this->assertSame($this->db, $this->cmd->getDatabase());
+        \Testo\Assert::same($this->cmd->getDatabase(), $this->db);
     }
 
+    #[\Testo\Test]
     public function testIsReady(): void
     {
-        $this->assertTrue($this->cmd->isReady());
+        \Testo\Assert::true($this->cmd->isReady());
     }
 
+    #[\Testo\Test]
     public function testCommandWithoutReturningInterfaceShouldNotUseIt(): void
     {
         $table = 'table';
@@ -73,9 +76,10 @@ class InsertCommandTest extends TestCase
         $this->db->shouldReceive('insert')->once()->with($table)->andReturn($insertQuery);
         $this->cmd->execute();
 
-        $this->assertSame(234, $this->state->getValue('id'));
+        \Testo\Assert::same($this->state->getValue('id'), 234);
     }
 
+    #[\Testo\Test]
     public function testCommandWithReturningInterfaceWithoutPkColumnShouldNotUseIt()
     {
         $class = new \ReflectionClass($this->cmd);
@@ -109,9 +113,10 @@ class InsertCommandTest extends TestCase
         $insertQuery->shouldReceive('run')->once()->andReturn(345);
         $this->cmd->execute();
 
-        $this->assertSame(234, $this->state->getValue('id'));
+        \Testo\Assert::same($this->state->getValue('id'), 234);
     }
 
+    #[\Testo\Test]
     public function testCommandWithReturningInterfaceShouldUseIt()
     {
         $table = 'table';
@@ -147,13 +152,12 @@ class InsertCommandTest extends TestCase
 
         $this->cmd->execute();
 
-        $this->assertSame(324, $this->state->getValue('id'));
+        \Testo\Assert::same($this->state->getValue('id'), 324);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->mapper = m::mock(MapperInterface::class);
 
         $this->cmd = new Insert(

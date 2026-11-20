@@ -28,6 +28,7 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
     /**
      * Parent's relation should be initialized
      */
+    #[\Testo\Test]
     public function testInsertToEmbeddedFieldsForJtiChildEntity(): void
     {
         /** @var ManagerWithCredentials $entity */
@@ -46,19 +47,17 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertSame('roquie', $entity->credentials->username);
-        $this->assertSame('secret', $entity->credentials->password);
+        \Testo\Assert::same($entity->credentials->username, 'roquie');
+        \Testo\Assert::same($entity->credentials->password, 'secret');
     }
 
     /**
      * Parent's relation should be initialized
      */
+    #[\Testo\Test]
+    #[\Testo\Skip('TODO: Must be fixed. When we create new embedded object, we should update entity\'s node in heap')]
     public function testInsertToCreatingNewEmbeddedObjectForJtiChildEntity(): void
     {
-        $this->markTestSkipped(
-            'TODO: Must be fixed. When we create new embedded object, we should update entity\'s node in heap',
-        );
-
         /** @var ManagerWithCredentials $entity */
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
             ->wherePK(1)
@@ -79,10 +78,11 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
             ->fetchOne();
 
 
-        $this->assertSame('roquie', $entity->credentials->username);
-        $this->assertSame('secret', $entity->credentials->password);
+        \Testo\Assert::same($entity->credentials->username, 'roquie');
+        \Testo\Assert::same($entity->credentials->password, 'secret');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

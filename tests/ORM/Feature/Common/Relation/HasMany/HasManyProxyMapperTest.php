@@ -21,12 +21,13 @@ abstract class HasManyProxyMapperTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -55,22 +56,24 @@ abstract class HasManyProxyMapperTest extends BaseTest
                 'balance' => 200.0,
                 'comments' => [],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testPromised(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
         $uData = $this->extractEntity($u);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $uData['comments']);
+        \Testo\Assert::instanceOf($uData['comments'], ReferenceInterface::class);
         $this->captureReadQueries();
-        $this->assertCount(3, $u->comments);
-        $this->assertInstanceOf(Comment::class, $u->comments[0]);
+        \Testo\Assert::count($u->comments, 3);
+        \Testo\Assert::instanceOf($u->comments[0], Comment::class);
         $this->assertNumReads(1);
     }
 
+    #[\Testo\Test]
     public function testHasManyPromiseLoaded(): void
     {
         /** @var User $u */
@@ -79,15 +82,16 @@ abstract class HasManyProxyMapperTest extends BaseTest
         $r = $uData['comments'];
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(ReferenceInterface::class, $r);
+        \Testo\Assert::instanceOf($r, ReferenceInterface::class);
         $this->assertNumReads(0);
 
-        $this->assertFalse($r->hasValue());
-        $this->assertIsIterable($u->comments);
+        \Testo\Assert::false($r->hasValue());
+        \Testo\Assert::iterable($u->comments);
         $this->assertNumReads(1);
-        $this->assertTrue($r->hasValue());
+        \Testo\Assert::true($r->hasValue());
     }
 
+    #[\Testo\Test]
     public function testHasManyPromiseRole(): void
     {
         /** @var User $u */
@@ -96,12 +100,13 @@ abstract class HasManyProxyMapperTest extends BaseTest
         $r = $uData['comments'];
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(ReferenceInterface::class, $r);
+        \Testo\Assert::instanceOf($r, ReferenceInterface::class);
         $this->assertNumReads(0);
 
-        $this->assertSame('comment', $r->getRole());
+        \Testo\Assert::same($r->getRole(), 'comment');
     }
 
+    #[\Testo\Test]
     public function testHasManyPromiseScope(): void
     {
         /** @var User $u */
@@ -110,14 +115,15 @@ abstract class HasManyProxyMapperTest extends BaseTest
         $r = $uData['comments'];
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(ReferenceInterface::class, $r);
+        \Testo\Assert::instanceOf($r, ReferenceInterface::class);
         $this->assertNumReads(0);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($r->getScope(), [
             'user_id' => 1,
-        ], $r->getScope());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testPromisedEmpty(): void
     {
         /** @var User $u */
@@ -126,11 +132,12 @@ abstract class HasManyProxyMapperTest extends BaseTest
         $r = $uData['comments'];
 
         $this->captureReadQueries();
-        $this->assertInstanceOf(ReferenceInterface::class, $r);
-        $this->assertCount(0, $u->comments);
+        \Testo\Assert::instanceOf($r, ReferenceInterface::class);
+        \Testo\Assert::count($u->comments, 0);
         $this->assertNumReads(1);
     }
 
+    #[\Testo\Test]
     public function testNoChanges(): void
     {
         /** @var User $u */
@@ -144,6 +151,7 @@ abstract class HasManyProxyMapperTest extends BaseTest
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testNoChangesWithNoChildren(): void
     {
         $u = (new Select($this->orm, User::class))
@@ -157,6 +165,7 @@ abstract class HasManyProxyMapperTest extends BaseTest
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -171,12 +180,13 @@ abstract class HasManyProxyMapperTest extends BaseTest
         /** @var User $e */
         $e = (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne();
 
-        $this->assertCount(2, $e->comments);
+        \Testo\Assert::count($e->comments, 2);
 
-        $this->assertSame('msg 1', $e->comments[0]->message);
-        $this->assertSame('msg 3', $e->comments[1]->message);
+        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
     }
 
+    #[\Testo\Test]
     public function testAddAndRemoveChildren(): void
     {
         /** @var User $e */
@@ -194,13 +204,14 @@ abstract class HasManyProxyMapperTest extends BaseTest
         /** @var User $e */
         $e = (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne();
 
-        $this->assertCount(3, $e->comments);
+        \Testo\Assert::count($e->comments, 3);
 
-        $this->assertSame('msg 1', $e->comments[0]->message);
-        $this->assertSame('msg 3', $e->comments[1]->message);
-        $this->assertSame('msg 4', $e->comments[2]->message);
+        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($e->comments[2]->message, 'msg 4');
     }
 
+    #[\Testo\Test]
     public function testSliceAndSaveToAnotherParent(): void
     {
         /**
@@ -209,8 +220,8 @@ abstract class HasManyProxyMapperTest extends BaseTest
          */
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 0);
 
         $b->comments = $a->comments->slice(0, 2);
         foreach ($b->comments as $c) {
@@ -219,8 +230,8 @@ abstract class HasManyProxyMapperTest extends BaseTest
 
         $b->comments[0]->message = 'new b';
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 2);
 
         $this->captureWriteQueries();
         $this->save($a, $b);
@@ -241,16 +252,17 @@ abstract class HasManyProxyMapperTest extends BaseTest
                 'as' => 'comment',
             ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertEquals(3, $a->comments[0]->id);
-        $this->assertEquals(1, $b->comments[0]->id);
-        $this->assertEquals(2, $b->comments[1]->id);
+        \Testo\Assert::equals($a->comments[0]->id, 3);
+        \Testo\Assert::equals($b->comments[0]->id, 1);
+        \Testo\Assert::equals($b->comments[1]->id, 2);
 
-        $this->assertEquals('new b', $b->comments[0]->message);
+        \Testo\Assert::equals($b->comments[0]->message, 'new b');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

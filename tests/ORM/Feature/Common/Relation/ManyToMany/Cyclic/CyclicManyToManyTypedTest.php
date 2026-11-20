@@ -18,6 +18,7 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateCyclicWithExisting(): void
     {
         $u = new User();
@@ -35,10 +36,11 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
         $t->run();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         if (!version_compare(PHP_VERSION, '7.4', '>=')) {
-            $this->markTestSkipped('PHP7.4 required');
+            throw new \Testo\Core\Exception\SkipTest('PHP7.4 required');
             return;
         }
 

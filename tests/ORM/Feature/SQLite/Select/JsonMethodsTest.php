@@ -8,59 +8,64 @@ namespace Cycle\ORM\Tests\Feature\SQLite\Select;
 use Cycle\Database\Exception\DriverException;
 use Cycle\ORM\Tests\Feature\Common\Select\JsonMethodsTest as CommonClass;
 
-/**
- * @group driver
- * @group driver-sqlite
- */
+#[\Testo\Filter\Group('driver', 'driver-sqlite')]
 class JsonMethodsTest extends CommonClass
 {
     public const DRIVER = 'sqlite';
 
+    #[\Testo\Test]
     public function testWhereJsonContains(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testWhereJsonContains();
     }
 
+    #[\Testo\Test]
     public function testWhereJsonContainsWithRelation(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testWhereJsonContainsWithRelation();
     }
 
+    #[\Testo\Test]
     public function testOrWhereJsonContains(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testOrWhereJsonContains();
     }
 
+    #[\Testo\Test]
     public function testOrWhereJsonContainsWithRelation(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testOrWhereJsonContainsWithRelation();
     }
 
+    #[\Testo\Test]
     public function testWhereJsonDoesntContain(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testWhereJsonDoesntContain();
     }
 
+    #[\Testo\Test]
     public function testWhereJsonDoesntContainWithRelation(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testWhereJsonDoesntContainWithRelation();
     }
 
+    #[\Testo\Test]
     public function testOrWhereJsonDoesntContain(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testOrWhereJsonDoesntContain();
     }
 
+    #[\Testo\Test]
     public function testOrWhereJsonDoesntContainWithRelation(): void
     {
-        $this->expectException(DriverException::class);
+        \Testo\Expect::exception(DriverException::class);
         parent::testOrWhereJsonDoesntContainWithRelation();
     }
 }

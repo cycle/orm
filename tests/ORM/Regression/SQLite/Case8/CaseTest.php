@@ -25,10 +25,8 @@ use Cycle\ORM\Tests\Regression\Case8\CaseTest as CommonClass;
  *     {@see \Cycle\ORM\Command\Database\Insert::execute()} is unavailable. SQLite supports
  *     `RETURNING` since 3.35.0, and `Cycle\Database\Driver\SQLite\Query\SQLiteInsertQuery`
  *     implements {@see \Cycle\Database\Query\ReturningInterface}.
- *
- * @group driver
- * @group driver-sqlite
  */
+#[\Testo\Filter\Group('driver', 'driver-sqlite')]
 class CaseTest extends CommonClass
 {
     public const DRIVER = 'sqlite';

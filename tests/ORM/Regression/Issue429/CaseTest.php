@@ -17,6 +17,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         // Order 1
@@ -26,8 +27,8 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         // Check result
-        $this->assertInstanceOf(Order::class, $order);
-        $this->assertCount(2, $order->items);
+        \Testo\Assert::instanceOf($order, Order::class);
+        \Testo\Assert::count($order->items, 2);
 
         // Order 2
         $order = (new Select($this->orm, Order::class))
@@ -36,10 +37,11 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         // Check result
-        $this->assertInstanceOf(Order::class, $order);
-        $this->assertCount(1, $order->items);
+        \Testo\Assert::instanceOf($order, Order::class);
+        \Testo\Assert::count($order->items, 1);
     }
 
+    #[\Testo\Test]
     public function testSave(): void
     {
         /** @var Order $order */
@@ -62,6 +64,7 @@ abstract class CaseTest extends BaseTest
         $this->save($purchaseOrder, ...$orderItems);
     }
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $order = new Order('O0101');
@@ -79,6 +82,7 @@ abstract class CaseTest extends BaseTest
         $this->save($order, $purchaseOrder, ...$orderItems);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

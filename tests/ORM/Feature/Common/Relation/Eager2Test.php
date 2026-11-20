@@ -18,11 +18,12 @@ abstract class Eager2Test extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchEager(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -33,25 +34,27 @@ abstract class Eager2Test extends BaseTest
                 'email' => 'another@world.com',
                 'balance' => 200.0,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchEager2(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->where('profile.id', '>', 0);
 
-        $this->assertCount(3, $selector->buildQuery()->getColumns());
+        \Testo\Assert::count($selector->buildQuery()->getColumns(), 3);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
                 'balance' => 100.0,
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

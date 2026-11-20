@@ -9,10 +9,7 @@ use Cycle\Database\Schema\AbstractColumn;
 use Cycle\ORM\Tests\Feature\Common\GeneratedColumnTest as CommonClass;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @group driver
- * @group driver-postgres
- */
+#[\Testo\Filter\Group('driver', 'driver-postgres')]
 class GeneratedColumnTest extends CommonClass
 {
     public const DRIVER = 'postgres';

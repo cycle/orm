@@ -42,13 +42,15 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
         self::CHILD_3_LOADED,
     ];
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = (new Select($this->orm, CompositePKChild::class))->load(self::PARENT_CONTAINER);
 
-        $this->assertEquals(self::CHILDREN_LOADED, $selector->fetchData());
+        \Testo\Assert::equals($selector->fetchData(), self::CHILDREN_LOADED);
     }
 
+    #[\Testo\Test]
     public function testFetchLimitAndSortByParent(): void
     {
         $e = (new Select($this->orm, CompositePKChild::class));
@@ -62,9 +64,10 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->orderBy(['parent_entity.key3' => 'ASC'])
             ->limit(1);
 
-        $this->assertEquals([self::CHILD_1_LOADED], $selector->fetchData());
+        \Testo\Assert::equals($selector->fetchData(), [self::CHILD_1_LOADED]);
     }
 
+    #[\Testo\Test]
     public function testWithNoColumns(): void
     {
         $data = (new Select($this->orm, CompositePKChild::class))
@@ -73,9 +76,10 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->fetchAll();
 
         // 2 local PK + 2 parent PK + 1 custom field
-        $this->assertCount(5, $data[0]);
+        \Testo\Assert::count($data[0], 5);
     }
 
+    #[\Testo\Test]
     public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, CompositePKChild::class);
@@ -83,9 +87,10 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->orderBy('child_entity.key1', 'ASC')
             ->orderBy('child_entity.key2', 'ASC');
 
-        $this->assertEquals(self::CHILDREN_LOADED, $selector->fetchData());
+        \Testo\Assert::equals($selector->fetchData(), self::CHILDREN_LOADED);
     }
 
+    #[\Testo\Test]
     public function testAccessEntities(): void
     {
         $result = (new Select($this->orm, CompositePKChild::class))
@@ -94,21 +99,22 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->orderBy('child_entity.key2', 'ASC')
             ->fetchAll();
 
-        $this->assertInstanceOf(CompositePKChild::class, $result[0]);
-        $this->assertInstanceOf(CompositePK::class, $result[0]->parent);
-        $this->assertSame(self::PARENT_1['key3'], $result[0]->parent->key3);
+        \Testo\Assert::instanceOf($result[0], CompositePKChild::class);
+        \Testo\Assert::instanceOf($result[0]->parent, CompositePK::class);
+        \Testo\Assert::same($result[0]->parent->key3, self::PARENT_1['key3']);
 
-        $this->assertInstanceOf(CompositePKChild::class, $result[1]);
-        $this->assertInstanceOf(CompositePK::class, $result[1]->parent);
-        $this->assertSame(self::PARENT_2['key3'], $result[1]->parent->key3);
+        \Testo\Assert::instanceOf($result[1], CompositePKChild::class);
+        \Testo\Assert::instanceOf($result[1]->parent, CompositePK::class);
+        \Testo\Assert::same($result[1]->parent->key3, self::PARENT_2['key3']);
 
-        $this->assertInstanceOf(CompositePKChild::class, $result[2]);
-        $this->assertInstanceOf(CompositePK::class, $result[2]->parent);
-        $this->assertEquals(self::PARENT_2['key3'], $result[2]->parent->key3);
+        \Testo\Assert::instanceOf($result[2], CompositePKChild::class);
+        \Testo\Assert::instanceOf($result[2]->parent, CompositePK::class);
+        \Testo\Assert::equals($result[2]->parent->key3, self::PARENT_2['key3']);
 
-        $this->assertSame($result[1]->parent, $result[2]->parent);
+        \Testo\Assert::same($result[2]->parent, $result[1]->parent);
     }
 
+    #[\Testo\Test]
     public function testCreateWithRelations(): void
     {
         $u = new CompositePK();
@@ -124,22 +130,23 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
 
         $this->save($p);
 
-        $this->assertTrue($this->orm->getHeap()->has($u));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($u)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($u));
+        \Testo\Assert::same($this->orm->getHeap()->get($u)->getStatus(), Node::MANAGED);
 
-        $this->assertTrue($this->orm->getHeap()->has($p));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($p)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($p));
+        \Testo\Assert::same($this->orm->getHeap()->get($p)->getStatus(), Node::MANAGED);
 
-        $this->assertSame($u->key1, $this->orm->getHeap()->get($p)->getData()['parent_key1']);
-        $this->assertSame($u->key2, $this->orm->getHeap()->get($p)->getData()['parent_key2']);
+        \Testo\Assert::same($this->orm->getHeap()->get($p)->getData()['parent_key1'], $u->key1);
+        \Testo\Assert::same($this->orm->getHeap()->get($p)->getData()['parent_key2'], $u->key2);
 
         $selector = (new Select($this->orm, CompositePKChild::class))
             ->load(self::PARENT_CONTAINER)
             ->wherePK([81, 82]);
 
-        $this->assertEquals($p, $selector->fetchOne());
+        \Testo\Assert::equals($selector->fetchOne(), $p);
     }
 
+    #[\Testo\Test]
     public function testNoWriteQueries(): void
     {
         $u = new CompositePK();
@@ -165,6 +172,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testSetExistedParent(): void
     {
         $s = new Select($this->orm, CompositePK::class);
@@ -178,18 +186,18 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
 
         (new Transaction($this->orm))->persist($p)->run();
 
-        $this->assertEquals([1 ,1], [$u->key1, $u->key2]);
-        $this->assertEquals([202, 202], [$p->key1, $p->key2]);
+        \Testo\Assert::equals([$u->key1, $u->key2], [1 ,1]);
+        \Testo\Assert::equals([$p->key1, $p->key2], [202, 202]);
 
-        $this->assertTrue($this->orm->getHeap()->has($p));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($p)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($p));
+        \Testo\Assert::same($this->orm->getHeap()->get($p)->getStatus(), Node::MANAGED);
 
-        $this->assertSame($u->key1, $this->orm->getHeap()->get($p)->getData()['parent_key1']);
-        $this->assertSame($u->key2, $this->orm->getHeap()->get($p)->getData()['parent_key2']);
+        \Testo\Assert::same($this->orm->getHeap()->get($p)->getData()['parent_key1'], $u->key1);
+        \Testo\Assert::same($this->orm->getHeap()->get($p)->getData()['parent_key2'], $u->key2);
 
         $selector = (new Select($this->orm, CompositePKChild::class))->load(self::PARENT_CONTAINER);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->wherePK([202, 202])->fetchData(), [
             [
                 'key1' => 202,
                 'key2' => 202,
@@ -198,9 +206,10 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
                 'parent_key2' => 1,
                 'parent' => self::PARENT_1,
             ],
-        ], $selector->wherePK([202, 202])->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testChangeParent(): void
     {
         $p = (new Select($this->orm, CompositePKChild::class))
@@ -214,17 +223,18 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
 
         (new Transaction($this->orm))->persist($p)->run();
 
-        $this->assertEquals([
+        \Testo\Assert::equals((new Select($this->orm, CompositePKChild::class))
+            ->load(self::PARENT_CONTAINER)
+            ->wherePK([1, 1])->fetchData(), [
             [
                 'parent_key1' => self::PARENT_2['key1'],
                 'parent_key2' => self::PARENT_2['key2'],
                 'parent' => self::PARENT_2,
             ] + self::CHILD_1,
-        ], (new Select($this->orm, CompositePKChild::class))
-            ->load(self::PARENT_CONTAINER)
-            ->wherePK([1, 1])->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testExchangeParents(): void
     {
         /**
@@ -256,15 +266,16 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->load(self::PARENT_CONTAINER)
             ->fetchAll();
 
-        $this->assertSame($a->parent->key1, $a2->parent->key1);
-        $this->assertSame($a->parent->key2, $a2->parent->key2);
-        $this->assertSame($b->parent->key1, $b2->parent->key1);
-        $this->assertSame($b->parent->key2, $b2->parent->key2);
+        \Testo\Assert::same($a2->parent->key1, $a->parent->key1);
+        \Testo\Assert::same($a2->parent->key2, $a->parent->key2);
+        \Testo\Assert::same($b2->parent->key1, $b->parent->key1);
+        \Testo\Assert::same($b2->parent->key2, $b->parent->key2);
     }
 
+    #[\Testo\Test]
     public function testSetNullException(): void
     {
-        $this->expectException(NullException::class);
+        \Testo\Expect::exception(NullException::class);
 
         $p = (new Select($this->orm, CompositePKChild::class))
             ->wherePK([1, 1])->load(self::PARENT_CONTAINER)->fetchOne();
@@ -280,6 +291,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
         }
     }
 
+    #[\Testo\Test]
     public function testCompositePKNested(): void
     {
         $n = new CompositePKNested();
@@ -306,10 +318,11 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->load(self::PARENT_CONTAINER . '.' . self::PARENT_CONTAINER)
             ->fetchOne();
 
-        $this->assertSame('profile', $n->parent->key3);
-        $this->assertSame(999, $n->parent->parent->key3);
+        \Testo\Assert::same($n->parent->key3, 'profile');
+        \Testo\Assert::same($n->parent->parent->key3, 999);
     }
 
+    #[\Testo\Test]
     public function testWhereCompositePKNested(): void
     {
         $n = (new Select($this->orm->withHeap(new Heap()), CompositePKNested::class))
@@ -318,9 +331,10 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->where('parent.parent.key2', self::PARENT_1['key2'])
             ->fetchOne();
 
-        $this->assertSame('foo', $n->key3);
+        \Testo\Assert::same($n->key3, 'foo');
     }
 
+    #[\Testo\Test]
     public function testWhereCompositePKNestedWithAlias(): void
     {
         $n = (new Select($this->orm->withHeap(new Heap()), CompositePKNested::class))
@@ -329,9 +343,10 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->where('u.key2', self::PARENT_1['key2'])
             ->fetchOne();
 
-        $this->assertSame('foo', $n->key3);
+        \Testo\Assert::same($n->key3, 'foo');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

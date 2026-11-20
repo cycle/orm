@@ -21,20 +21,16 @@ abstract class TypecastEnumTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $result = (new Select($this->orm, User::class))->fetchData();
 
-        $this->assertSame(
-            [TypeStringEnum::Admin, TypeStringEnum::Guest],
-            \array_column($result, 'enum_string'),
-        );
-        $this->assertSame(
-            [TypeIntEnum::Admin, TypeIntEnum::Guest],
-            \array_column($result, 'enum_int'),
-        );
+        \Testo\Assert::same(\array_column($result, 'enum_string'), [TypeStringEnum::Admin, TypeStringEnum::Guest]);
+        \Testo\Assert::same(\array_column($result, 'enum_int'), [TypeIntEnum::Admin, TypeIntEnum::Guest]);
     }
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $e = new User();
@@ -51,6 +47,7 @@ abstract class TypecastEnumTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testPushAndFetchData(): void
     {
         $e = new User();
@@ -60,15 +57,16 @@ abstract class TypecastEnumTest extends BaseTest
 
         $this->save($e);
 
-        $this->assertSame(TypeStringEnum::Admin, $e->enum_string);
-        $this->assertSame(TypeIntEnum::Admin, $e->enum_int);
+        \Testo\Assert::same($e->enum_string, TypeStringEnum::Admin);
+        \Testo\Assert::same($e->enum_int, TypeIntEnum::Admin);
         $this->orm->getHeap()->clean();
         $result = (new Select($this->orm, User::class))->wherePK($e->id)->fetchOne();
 
-        $this->assertSame(TypeStringEnum::Admin, $result->enum_string);
-        $this->assertSame(TypeIntEnum::Admin, $result->enum_int);
+        \Testo\Assert::same($result->enum_string, TypeStringEnum::Admin);
+        \Testo\Assert::same($result->enum_int, TypeIntEnum::Admin);
     }
 
+    #[\Testo\Test]
     public function testUpdate(): void
     {
         $e = new User();
@@ -82,8 +80,8 @@ abstract class TypecastEnumTest extends BaseTest
         /** @var User $result */
         $result = (new Select($this->orm, User::class))->fetchOne();
 
-        $this->assertSame(TypeStringEnum::Admin, $result->enum_string);
-        $this->assertSame(TypeIntEnum::Admin, $result->enum_int);
+        \Testo\Assert::same($result->enum_string, TypeStringEnum::Admin);
+        \Testo\Assert::same($result->enum_int, TypeIntEnum::Admin);
 
         $result->enum_string = TypeStringEnum::Guest;
         $result->enum_int = TypeIntEnum::Guest;
@@ -94,10 +92,11 @@ abstract class TypecastEnumTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $result2 = $selector->fetchOne();
 
-        $this->assertSame(TypeStringEnum::Guest, $result2->enum_string);
-        $this->assertSame(TypeIntEnum::Guest, $result2->enum_int);
+        \Testo\Assert::same($result2->enum_string, TypeStringEnum::Guest);
+        \Testo\Assert::same($result2->enum_int, TypeIntEnum::Guest);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -19,25 +19,28 @@ abstract class HasManySourceTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelectUsers(): void
     {
         $s = new Select($this->orm, User::class);
         $res = $s->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
-        $this->assertSame('another@world.com', $res[1]->email);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        \Testo\Assert::same($res[1]->email, 'another@world.com');
     }
 
+    #[\Testo\Test]
     public function testSelectUsersWithScope(): void
     {
         $s = new Select($this->orm, User::class);
         $res = $s->scope(new Select\QueryScope(['@.balance' => 100]))->fetchAll();
 
-        $this->assertCount(1, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
+        \Testo\Assert::count($res, 1);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
     }
 
+    #[\Testo\Test]
     public function testSelectUserScopeCanNotBeOverwritten(): void
     {
         $s = new Select($this->orm, User::class);
@@ -45,9 +48,10 @@ abstract class HasManySourceTest extends BaseTest
 
         $res = $s->where('user.balance', 200)->fetchAll();
 
-        $this->assertCount(0, $res);
+        \Testo\Assert::count($res, 0);
     }
 
+    #[\Testo\Test]
     public function testSelectUserScopeCanNotBeOverwritten2(): void
     {
         $s = new Select($this->orm, User::class);
@@ -55,9 +59,10 @@ abstract class HasManySourceTest extends BaseTest
 
         $res = $s->orWhere('user.balance', 200)->fetchAll();
 
-        $this->assertCount(0, $res);
+        \Testo\Assert::count($res, 0);
     }
 
+    #[\Testo\Test]
     public function testScopeWithOrderBy(): void
     {
         $s = new Select($this->orm, User::class);
@@ -65,11 +70,12 @@ abstract class HasManySourceTest extends BaseTest
 
         $res = $s->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame('another@world.com', $res[0]->email);
-        $this->assertSame('hello@world.com', $res[1]->email);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[0]->email, 'another@world.com');
+        \Testo\Assert::same($res[1]->email, 'hello@world.com');
     }
 
+    #[\Testo\Test]
     public function testRelated(): void
     {
         $s = new Select($this->orm, User::class);
@@ -80,20 +86,21 @@ abstract class HasManySourceTest extends BaseTest
         [$b, $a] = $res;
 
         $this->captureReadQueries();
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
         $this->assertNumReads(0);
 
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 3', $a->comments[2]->message);
-        $this->assertSame('msg 2', $a->comments[1]->message);
-        $this->assertSame('msg 1', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
 
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testRelatedScope(): void
     {
         $s = new Select($this->orm, User::class);
@@ -105,12 +112,13 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 0);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
     }
 
+    #[\Testo\Test]
     public function testRelatedScopeInload(): void
     {
         $s = new Select($this->orm, User::class);
@@ -123,12 +131,13 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 0);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
     }
 
+    #[\Testo\Test]
     public function testRelatedScopeOrdered(): void
     {
         $s = new Select($this->orm, User::class);
@@ -140,15 +149,16 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testRelatedScopeOrderedInload(): void
     {
         $s = new Select($this->orm, User::class);
@@ -161,15 +171,16 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeViaMapperRelation(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -212,15 +223,16 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeViaMapperRelationInload(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -265,15 +277,16 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeViaMapperRelationPromise(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -317,15 +330,16 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeViaMapperRelationPromiseShort(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -369,15 +383,16 @@ abstract class HasManySourceTest extends BaseTest
 
         [$b, $a] = $res;
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

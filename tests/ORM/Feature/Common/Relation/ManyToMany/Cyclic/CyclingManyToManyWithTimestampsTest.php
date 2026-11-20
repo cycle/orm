@@ -18,6 +18,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateCyclicWithExistingSingleTimestamp(): void
     {
         $u = new User();
@@ -36,6 +37,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
         $this->assertNumWrites(2);
     }
 
+    #[\Testo\Test]
     public function testCreateCyclicWithNewSingleTimestamp(): void
     {
         $u = new User();
@@ -53,6 +55,7 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
         $this->assertNumWrites(3);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

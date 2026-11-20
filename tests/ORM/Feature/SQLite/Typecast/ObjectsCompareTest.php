@@ -21,6 +21,7 @@ final class ObjectsCompareTest extends BaseTest
 
     public const DRIVER = 'sqlite';
 
+    #[\Testo\Test]
     public function testCompare(): void
     {
         $book = new Book();
@@ -35,13 +36,13 @@ final class ObjectsCompareTest extends BaseTest
         $this->save($book);
         $this->assertNumWrites(0);
 
-        $this->assertEquals(1, $book->id);
+        \Testo\Assert::equals($book->id, 1);
 
         $this->orm->getHeap()->clean();
         $fetched = (new Select($this->orm, Book::class))->fetchOne();
 
-        $this->assertEquals($fetched->states, $book->states);
-        $this->assertEquals($fetched->nested_states, $book->nested_states);
+        \Testo\Assert::equals($book->states, $fetched->states);
+        \Testo\Assert::equals($book->nested_states, $fetched->nested_states);
 
         $fetched->states->states = ['foo', 'bar'];
         $fetched->nested_states->states[0]->title = 'baz';
@@ -57,10 +58,11 @@ final class ObjectsCompareTest extends BaseTest
         $this->orm->getHeap()->clean();
         $changed = (new Select($this->orm, Book::class))->fetchOne();
 
-        $this->assertEquals($fetched->states, $changed->states);
-        $this->assertEquals($fetched->nested_states, $changed->nested_states);
+        \Testo\Assert::equals($changed->states, $fetched->states);
+        \Testo\Assert::equals($changed->nested_states, $fetched->nested_states);
     }
 
+    #[\Testo\Test]
     public function testCompareDateTime(): void
     {
         $book = new Book();
@@ -96,12 +98,13 @@ final class ObjectsCompareTest extends BaseTest
 
         $interval = $changed->published_at->diff($fetched->published_at);
 
-        $this->assertInstanceOf(\DateInterval::class, $interval);
-        $this->assertSame(0, $interval->y);
-        $this->assertSame(0, $interval->m);
-        $this->assertSame(0, $interval->d);
+        \Testo\Assert::instanceOf($interval, \DateInterval::class);
+        \Testo\Assert::same($interval->y, 0);
+        \Testo\Assert::same($interval->m, 0);
+        \Testo\Assert::same($interval->d, 0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

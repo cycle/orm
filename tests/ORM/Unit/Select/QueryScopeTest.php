@@ -10,8 +10,9 @@ use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\QueryScope;
 use PHPUnit\Framework\TestCase;
 
-final class QueryScopeTest extends TestCase
+final class QueryScopeTest
 {
+    #[\Testo\Test]
     public function testAppliesWhereAndOrderBy(): void
     {
         $query = new SelectQuery(['users']);
@@ -20,11 +21,12 @@ final class QueryScopeTest extends TestCase
         $scope->apply($this->makeBuilder($query));
 
         $tokens = $query->getTokens();
-        $this->assertCount(1, $tokens['where']);
-        $this->assertSame('users.status', $tokens['where'][0][1][0]);
-        $this->assertSame([['users.created_at', 'DESC']], $tokens['orderBy']);
+        \Testo\Assert::count($tokens['where'], 1);
+        \Testo\Assert::same($tokens['where'][0][1][0], 'users.status');
+        \Testo\Assert::same($tokens['orderBy'], [['users.created_at', 'DESC']]);
     }
 
+    #[\Testo\Test]
     public function testDoesNotWrapByDefault(): void
     {
         $query = (new SelectQuery(['users']))
@@ -35,11 +37,12 @@ final class QueryScopeTest extends TestCase
 
         // Flat token list: no opening-paren group inserted before the user tokens.
         $where = $query->getTokens()['where'];
-        $this->assertNotSame(['AND', '('], $where[0]);
+        \Testo\Assert::notSame($where[0], ['AND', '(']);
         // Scope condition appended at the top level.
-        $this->assertSame('users.status', $where[\count($where) - 1][1][0]);
+        \Testo\Assert::same($where[\count($where) - 1][1][0], 'users.status');
     }
 
+    #[\Testo\Test]
     public function testWrapWhereEnclosesExistingConditions(): void
     {
         $query = (new SelectQuery(['users']))
@@ -51,12 +54,13 @@ final class QueryScopeTest extends TestCase
         $where = $query->getTokens()['where'];
 
         // User conditions are now enclosed in a leading AND-group...
-        $this->assertSame(['AND', '('], $where[0]);
-        $this->assertSame(['', ')'], $where[3]);
+        \Testo\Assert::same($where[0], ['AND', '(']);
+        \Testo\Assert::same($where[3], ['', ')']);
         // ...with the scope condition appended after the group.
-        $this->assertSame('users.status', $where[4][1][0]);
+        \Testo\Assert::same($where[4][1][0], 'users.status');
     }
 
+    #[\Testo\Test]
     public function testWrapWhereWithEmptyConditionsStillProtectsUserWhere(): void
     {
         $query = (new SelectQuery(['users']))
@@ -66,24 +70,21 @@ final class QueryScopeTest extends TestCase
         // Empty $where but wrapWhere: true — should wrap user conditions, add nothing.
         (new QueryScope([], wrapWhere: true))->apply($this->makeBuilder($query));
 
-        $this->assertEquals(
-            [
-                ['AND', '('],
-                ['AND', ['id', '=', $query->getTokens()['where'][1][1][2]]],
-                ['OR', ['id', '=', $query->getTokens()['where'][2][1][2]]],
-                ['', ')'],
-            ],
-            $query->getTokens()['where'],
-        );
+        \Testo\Assert::equals($query->getTokens()['where'], [
+            ['AND', '('],
+            ['AND', ['id', '=', $query->getTokens()['where'][1][1][2]]],
+            ['OR', ['id', '=', $query->getTokens()['where'][2][1][2]]],
+            ['', ')'],
+        ]);
     }
 
     private function makeBuilder(SelectQuery $query): QueryBuilder
     {
-        $loader = $this->createMock(AbstractLoader::class);
-        $loader->method('fieldAlias')->willReturn(null);
-        $loader->method('getAlias')->willReturn('users');
-        $loader->method('getTarget')->willReturn('user');
-        $loader->method('getParentLoader')->willReturn(null);
+        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
+        $loader->shouldReceive('fieldAlias')->andReturn(null);
+        $loader->shouldReceive('getAlias')->andReturn('users');
+        $loader->shouldReceive('getTarget')->andReturn('user');
+        $loader->shouldReceive('getParentLoader')->andReturn(null);
 
         return new QueryBuilder($query, $loader);
     }

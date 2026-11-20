@@ -7,10 +7,7 @@ namespace Cycle\ORM\Tests\Regression\SQLServer\Issue482;
 // phpcs:ignore
 use Cycle\ORM\Tests\Regression\Issue482\AbstractTestCase;
 
-/**
- * @group driver
- * @group driver-sqlserver
- */
+#[\Testo\Filter\Group('driver', 'driver-sqlserver')]
 class CaseTest extends AbstractTestCase
 {
     public const DRIVER = 'sqlserver';

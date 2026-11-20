@@ -21,26 +21,28 @@ abstract class JsonTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchAll();
 
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertSame(1, $result[0]->id);
-        $this->assertSame('hello@world.com', $result[0]->email);
-        $this->assertSame(['theme' => 'dark'], $result[0]->settings);
-        $this->assertNull($result[0]->settingsNullable);
-        $this->assertNull($result[0]->jsonSerializable);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::same($result[0]->id, 1);
+        \Testo\Assert::same($result[0]->email, 'hello@world.com');
+        \Testo\Assert::same($result[0]->settings, ['theme' => 'dark']);
+        \Testo\Assert::null($result[0]->settingsNullable);
+        \Testo\Assert::null($result[0]->jsonSerializable);
 
-        $this->assertInstanceOf(User::class, $result[1]);
-        $this->assertSame(2, $result[1]->id);
-        $this->assertSame('another@world.com', $result[1]->email);
-        $this->assertSame(['grids' => ['products' => ['columns' => ['id', 'title']]]], $result[1]->settings);
-        $this->assertSame(['theme' => 'dark'], $result[1]->settingsNullable);
-        $this->assertNull($result[1]->jsonSerializable);
+        \Testo\Assert::instanceOf($result[1], User::class);
+        \Testo\Assert::same($result[1]->id, 2);
+        \Testo\Assert::same($result[1]->email, 'another@world.com');
+        \Testo\Assert::same($result[1]->settings, ['grids' => ['products' => ['columns' => ['id', 'title']]]]);
+        \Testo\Assert::same($result[1]->settingsNullable, ['theme' => 'dark']);
+        \Testo\Assert::null($result[1]->jsonSerializable);
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -51,6 +53,7 @@ abstract class JsonTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testStore(): void
     {
         $e = new User();
@@ -66,21 +69,22 @@ abstract class JsonTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(0);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $this->orm->getHeap()->clean();
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', $e->id)->fetchOne();
-        $this->assertSame('test@email.com', $result->email);
-        $this->assertSame(['theme' => 'light'], $result->settings);
-        $this->assertSame(['some' => 'data'], $result->settingsNullable);
+        \Testo\Assert::same($result->email, 'test@email.com');
+        \Testo\Assert::same($result->settings, ['theme' => 'light']);
+        \Testo\Assert::same($result->settingsNullable, ['some' => 'data']);
     }
 
     /**
      * @throws \Throwable
      */
+    #[\Testo\Test]
     public function testStoresEmptyArraySettings(): void
     {
         $e = new User();
@@ -96,18 +100,19 @@ abstract class JsonTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(0);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $this->orm->getHeap()->clean();
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', $e->id)->fetchOne();
-        $this->assertSame('test@email.com', $result->email);
-        $this->assertSame([], $result->settings);
-        $this->assertSame([], $result->settingsNullable);
+        \Testo\Assert::same($result->email, 'test@email.com');
+        \Testo\Assert::same($result->settings, []);
+        \Testo\Assert::same($result->settingsNullable, []);
     }
 
+    #[\Testo\Test]
     public function testStoresNullSettings(): void
     {
         $e = new User();
@@ -123,21 +128,22 @@ abstract class JsonTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(0);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $this->orm->getHeap()->clean();
 
         $selector = (new Select($this->orm, User::class))->where('id', $e->id);
         $result = $selector->fetchOne();
-        $this->assertSame('test@email.com', $result->email);
-        $this->assertSame([], $result->settings);
-        $this->assertSame(null, $result->settingsNullable);
+        \Testo\Assert::same($result->email, 'test@email.com');
+        \Testo\Assert::same($result->settings, []);
+        \Testo\Assert::same($result->settingsNullable, null);
 
         $result = $selector->fetchData(false)[0];
-        $this->assertNull($result['settingsNullable']);
+        \Testo\Assert::null($result['settingsNullable']);
     }
 
+    #[\Testo\Test]
     public function testStoreJsonSerializable(): void
     {
         $e = new User();
@@ -153,18 +159,16 @@ abstract class JsonTest extends BaseTest
         $this->save($e);
         $this->assertNumWrites(0);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $this->orm->getHeap()->clean();
 
         $result = $this->getDatabase()->table('users')->select()->where('id', $e->id)->fetchAll();
-        $this->assertEquals(
-            (new JsonSerializableClass())->jsonSerialize(),
-            \json_decode($result[0]['json_serializable'], true),
-        );
+        \Testo\Assert::equals(\json_decode($result[0]['json_serializable'], true), (new JsonSerializableClass())->jsonSerialize());
     }
 
+    #[\Testo\Test]
     public function testUpdate(): void
     {
         $e = $this->orm->get('user', ['id' => 1]);
@@ -182,15 +186,16 @@ abstract class JsonTest extends BaseTest
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 1)->fetchOne();
-        $this->assertSame(['theme' => 'light'], $result->settings);
+        \Testo\Assert::same($result->settings, ['theme' => 'light']);
     }
 
+    #[\Testo\Test]
     public function testOverrideTypecast(): void
     {
         $selector = new Select($this->orm, Admin::class);
         $result = $selector->fetchAll();
 
-        $this->assertSame(['json'], $result[0]->settings);
+        \Testo\Assert::same($result[0]->settings, ['json']);
 
         $e = new Admin();
         $e->email = 'test@email.com';
@@ -203,9 +208,10 @@ abstract class JsonTest extends BaseTest
         $this->orm->getHeap()->clean();
 
         $result = $this->getDatabase()->table('users')->select()->where('id', $e->id)->fetchAll();
-        $this->assertSame('uncast-json', $result[0]['settings']);
+        \Testo\Assert::same($result[0]['settings'], 'uncast-json');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -10,8 +10,9 @@ use Cycle\ORM\Parser\RootNode;
 use Cycle\ORM\Parser\SingularNode;
 use PHPUnit\Framework\TestCase;
 
-class NodeTest extends TestCase
+class NodeTest
 {
+    #[\Testo\Test]
     public function testRoot(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
@@ -25,7 +26,7 @@ class NodeTest extends TestCase
             $node->parseRow(0, $row);
         }
 
-        $this->assertSame([
+        \Testo\Assert::same($node->getResult(), [
             [
                 'id' => 1,
                 'email' => 'email@gmail.com',
@@ -34,9 +35,10 @@ class NodeTest extends TestCase
                 'id' => 2,
                 'email' => 'other@gmail.com',
             ],
-        ], $node->getResult());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testRootDuplicate(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
@@ -52,7 +54,7 @@ class NodeTest extends TestCase
             $node->parseRow(0, $row);
         }
 
-        $this->assertSame([
+        \Testo\Assert::same($node->getResult(), [
             [
                 'id' => 1,
                 'email' => 'email@gmail.com',
@@ -61,9 +63,10 @@ class NodeTest extends TestCase
                 'id' => 2,
                 'email' => 'other@gmail.com',
             ],
-        ], $node->getResult());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testSingular(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
@@ -79,7 +82,7 @@ class NodeTest extends TestCase
             $node->parseRow(0, $row);
         }
 
-        $this->assertSame([
+        \Testo\Assert::same($node->getResult(), [
             [
                 'id' => 1,
                 'email' => 'email@gmail.com',
@@ -103,9 +106,10 @@ class NodeTest extends TestCase
                 'email' => 'third@gmail.com',
                 'balance' => null,
             ],
-        ], $node->getResult());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testGetReferences(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
@@ -121,18 +125,20 @@ class NodeTest extends TestCase
             $node->parseRow(0, $row);
         }
 
-        $this->assertSame([['id' => 1], ['id' => 2], ['id' => 3]], $child->getReferenceValues());
+        \Testo\Assert::same($child->getReferenceValues(), [['id' => 1], ['id' => 2], ['id' => 3]]);
     }
 
+    #[\Testo\Test]
     public function testGetReferencesWithoutParent(): void
     {
-        $this->expectException(ParserException::class);
+        \Testo\Expect::exception(ParserException::class);
 
         $child = $this->createSingularNode();
 
         $child->getReferenceValues();
     }
 
+    #[\Testo\Test]
     public function testSingularOverExternal(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
@@ -157,7 +163,7 @@ class NodeTest extends TestCase
             $child->parseRow(0, $row);
         }
 
-        $this->assertSame([
+        \Testo\Assert::same($node->getResult(), [
             [
                 'id' => 1,
                 'email' => 'email@gmail.com',
@@ -181,12 +187,13 @@ class NodeTest extends TestCase
                 'email' => 'third@gmail.com',
                 'balance' => null,
             ],
-        ], $node->getResult());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testSingularInvalidReference(): void
     {
-        $this->expectException(ParserException::class);
+        \Testo\Expect::exception(ParserException::class);
 
         $node = new RootNode(['id', 'email'], ['id']);
         $node->linkNode('balance', $child = $this->createSingularNode());
@@ -211,9 +218,10 @@ class NodeTest extends TestCase
         }
     }
 
+    #[\Testo\Test]
     public function testInvalidColumnCount(): void
     {
-        $this->expectException(ParserException::class);
+        \Testo\Expect::exception(ParserException::class);
 
         $node = new RootNode(['id', 'email'], ['id']);
         $node->joinNode('balance', $this->createSingularNode());
@@ -229,31 +237,35 @@ class NodeTest extends TestCase
         }
     }
 
+    #[\Testo\Test]
     public function testGetNode(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
         $node->joinNode('balance', $child = $this->createSingularNode());
 
-        $this->assertInstanceOf(SingularNode::class, $node->getNode('balance'));
+        \Testo\Assert::instanceOf($node->getNode('balance'), SingularNode::class);
     }
 
+    #[\Testo\Test]
     public function testGetUndefinedNode(): void
     {
-        $this->expectException(ParserException::class);
+        \Testo\Expect::exception(ParserException::class);
 
         $node = new RootNode(['id', 'email'], ['id']);
         $node->getNode('balance');
     }
 
+    #[\Testo\Test]
     public function testSingularParseWithoutParent(): void
     {
-        $this->expectException(ParserException::class);
+        \Testo\Expect::exception(ParserException::class);
 
         $node = $this->createSingularNode();
 
         $node->parseRow(0, [1, 10, 10]);
     }
 
+    #[\Testo\Test]
     public function testArray(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
@@ -271,7 +283,7 @@ class NodeTest extends TestCase
             $node->parseRow(0, $row);
         }
 
-        $this->assertSame([
+        \Testo\Assert::same($node->getResult(), [
             [
                 'id' => 1,
                 'email' => 'email@gmail.com',
@@ -304,9 +316,10 @@ class NodeTest extends TestCase
                 'email' => 'third@gmail.com',
                 'lines' => [],
             ],
-        ], $node->getResult());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testArrayInvalidReference(): void
     {
         $node = new RootNode(['id', 'email'], ['id']);
@@ -327,16 +340,17 @@ class NodeTest extends TestCase
             [2, -1, 200],
         ];
 
-        $this->expectException(ParserException::class);
+        \Testo\Expect::exception(ParserException::class);
 
         foreach ($childData as $row) {
             $child->parseRow(0, $row);
         }
     }
 
+    #[\Testo\Test]
     public function testArrayWithoutParent(): void
     {
-        $this->expectException(ParserException::class);
+        \Testo\Expect::exception(ParserException::class);
 
         $node = new ArrayNode(['id', 'user_id', 'balance'], ['id'], ['user_id'], ['id']);
 

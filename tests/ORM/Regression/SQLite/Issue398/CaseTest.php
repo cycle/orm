@@ -7,21 +7,20 @@ namespace Cycle\ORM\Tests\Regression\SQLite\Issue398;
 // phpcs:ignore
 use Cycle\ORM\Tests\Regression\Issue398\CaseTest as CommonClass;
 
-/**
- * @group driver
- * @group driver-sqlite
- */
+#[\Testo\Filter\Group('driver', 'driver-sqlite')]
 class CaseTest extends CommonClass
 {
     public const DRIVER = 'sqlite';
 
+    #[\Testo\Test]
+    #[\Testo\Skip('SQLite does not support FULL JOIN')]
     public function testSelectWithFullJoin(): void
     {
-        $this->markTestSkipped('SQLite does not support FULL JOIN');
     }
 
+    #[\Testo\Test]
+    #[\Testo\Skip('SQLite does not support RIGHT JOIN')]
     public function testSelectWithRightJoin(): void
     {
-        $this->markTestSkipped('SQLite does not support RIGHT JOIN');
     }
 }

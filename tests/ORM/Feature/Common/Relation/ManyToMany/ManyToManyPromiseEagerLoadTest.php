@@ -16,12 +16,13 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, 'distribution');
         $selector->load('versions');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'name' => 'production',
@@ -119,15 +120,16 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchDataSingleQuery(): void
     {
         $selector = new Select($this->orm, 'distribution');
         $selector->load('versions', ['method' => Select::SINGLE_QUERY]);
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'name' => 'production',
@@ -225,9 +227,10 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadEagerAfterPreload(): void
     {
         $selector = new Select($this->orm, 'distribution');
@@ -237,10 +240,11 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
             ->fetchOne();
 
         foreach ($d->versions as $version) {
-            $this->assertNotNull($version->module);
+            \Testo\Assert::notNull($version->module);
         }
     }
 
+    #[\Testo\Test]
     public function testLoadPromised(): void
     {
         $selector = new Select($this->orm, 'distribution');
@@ -249,10 +253,11 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
             ->fetchOne();
 
         foreach ($d->versions as $version) {
-            $this->assertNotNull($version->module);
+            \Testo\Assert::notNull($version->module);
         }
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

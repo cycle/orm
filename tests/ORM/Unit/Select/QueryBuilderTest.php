@@ -19,8 +19,9 @@ use PHPUnit\Framework\TestCase;
  * `[$this->query, $call]` — a value that PHP's stricter return-type validation
  * no longer accepts as `callable` without further checks.
  */
-final class QueryBuilderTest extends TestCase
+final class QueryBuilderTest
 {
+    #[\Testo\Test]
     public function testTargetFuncReturnTypeAcceptsArrayCallable(): void
     {
         $builder = $this->makeBuilder();
@@ -31,9 +32,10 @@ final class QueryBuilderTest extends TestCase
         // so the TypeError (if any) is thrown by this invocation itself.
         $callable = $method->invoke($builder, 'where');
 
-        $this->assertIsCallable($callable);
+        \Testo\Assert::callable($callable);
     }
 
+    #[\Testo\Test]
     public function testWhereCallDoesNotThrowTypeError(): void
     {
         $builder = $this->makeBuilder();
@@ -45,6 +47,7 @@ final class QueryBuilderTest extends TestCase
         $this->assertNotEmpty($builder->getQuery()->getTokens()['where']);
     }
 
+    #[\Testo\Test]
     public function testWrapWhereForwardsToWrapOnWhereInJoinedMode(): void
     {
         // A scope attached to a joined loader gets a QueryBuilder with forward='onWhere'.
@@ -61,11 +64,11 @@ final class QueryBuilderTest extends TestCase
         // does NOT touch it under the forwarded routing.
         $query->where('users.active', true);
 
-        $loader = $this->createMock(AbstractLoader::class);
-        $loader->method('fieldAlias')->willReturn(null);
-        $loader->method('getAlias')->willReturn('users');
-        $loader->method('getTarget')->willReturn('user');
-        $loader->method('getParentLoader')->willReturn(null);
+        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
+        $loader->shouldReceive('fieldAlias')->andReturn(null);
+        $loader->shouldReceive('getAlias')->andReturn('users');
+        $loader->shouldReceive('getTarget')->andReturn('user');
+        $loader->shouldReceive('getParentLoader')->andReturn(null);
 
         $builder = (new QueryBuilder($query, $loader))->withForward('onWhere');
 
@@ -75,16 +78,17 @@ final class QueryBuilderTest extends TestCase
 
         // JOIN's ON tokens are now a single wrapped group.
         $onTokens = $tokens['join'][1]['on'];
-        $this->assertSame(['AND', '('], $onTokens[0]);
-        $this->assertSame(['', ')'], $onTokens[\count($onTokens) - 1]);
+        \Testo\Assert::same($onTokens[0], ['AND', '(']);
+        \Testo\Assert::same($onTokens[\count($onTokens) - 1], ['', ')']);
 
         // Top-level WHERE is untouched — no extra parenthesizing on the user's clause.
         $whereTokens = $tokens['where'];
-        $this->assertCount(1, $whereTokens);
-        $this->assertSame('AND', $whereTokens[0][0]);
-        $this->assertSame('users.active', $whereTokens[0][1][0]);
+        \Testo\Assert::count($whereTokens, 1);
+        \Testo\Assert::same($whereTokens[0][0], 'AND');
+        \Testo\Assert::same($whereTokens[0][1][0], 'users.active');
     }
 
+    #[\Testo\Test]
     public function testWrapWhereWithoutForwardTargetsRootWhere(): void
     {
         // Counter-case: without forwarding (root scope), wrapWhere wraps the
@@ -95,11 +99,11 @@ final class QueryBuilderTest extends TestCase
             ->orWhere('users.id', 2)
             ->leftJoin('posts')->on('posts.user_id', 'users.id')->onWhere('posts.published', true);
 
-        $loader = $this->createMock(AbstractLoader::class);
-        $loader->method('fieldAlias')->willReturn(null);
-        $loader->method('getAlias')->willReturn('users');
-        $loader->method('getTarget')->willReturn('user');
-        $loader->method('getParentLoader')->willReturn(null);
+        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
+        $loader->shouldReceive('fieldAlias')->andReturn(null);
+        $loader->shouldReceive('getAlias')->andReturn('users');
+        $loader->shouldReceive('getTarget')->andReturn('user');
+        $loader->shouldReceive('getParentLoader')->andReturn(null);
 
         $builder = new QueryBuilder($query, $loader); // no forward
 
@@ -109,25 +113,25 @@ final class QueryBuilderTest extends TestCase
 
         // WHERE tokens are wrapped.
         $whereTokens = $tokens['where'];
-        $this->assertSame(['AND', '('], $whereTokens[0]);
-        $this->assertSame(['', ')'], $whereTokens[\count($whereTokens) - 1]);
+        \Testo\Assert::same($whereTokens[0], ['AND', '(']);
+        \Testo\Assert::same($whereTokens[\count($whereTokens) - 1], ['', ')']);
 
         // JOIN ON tokens are NOT wrapped — they still start with the plain join key.
         $onTokens = $tokens['join'][1]['on'];
-        $this->assertSame('AND', $onTokens[0][0]);
+        \Testo\Assert::same($onTokens[0][0], 'AND');
         // First token's payload is the [column, operator, value] triplet, not the opening paren.
-        $this->assertIsArray($onTokens[0][1]);
+        \Testo\Assert::array($onTokens[0][1]);
     }
 
     private function makeBuilder(): QueryBuilder
     {
         $query = new SelectQuery(['users']);
 
-        $loader = $this->createMock(AbstractLoader::class);
-        $loader->method('fieldAlias')->willReturn(null);
-        $loader->method('getAlias')->willReturn('users');
-        $loader->method('getTarget')->willReturn('user');
-        $loader->method('getParentLoader')->willReturn(null);
+        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
+        $loader->shouldReceive('fieldAlias')->andReturn(null);
+        $loader->shouldReceive('getAlias')->andReturn('users');
+        $loader->shouldReceive('getTarget')->andReturn('user');
+        $loader->shouldReceive('getParentLoader')->andReturn(null);
 
         return new QueryBuilder($query, $loader);
     }

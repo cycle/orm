@@ -28,6 +28,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $user = new User();
@@ -48,8 +49,8 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $collection = $post->comments;
         $this->save($post);
         // $this->assertSame($this->orm->getHeap()->get($post)->getRelation('comments'), $post->comments);
-        $this->assertInstanceOf(ArrayCollection::class, $post->comments);
-        $this->assertSame($collection, $post->comments);
+        \Testo\Assert::instanceOf($post->comments, ArrayCollection::class);
+        \Testo\Assert::same($post->comments, $collection);
 
         $postId = $post->id;
 
@@ -58,10 +59,11 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $p = (new Select($this->orm, Post::class))
             ->wherePK($postId)->fetchOne();
 
-        $this->assertSame('name 1', $p->comments[0]->name);
-        $this->assertSame('name 2', $p->comments[1]->name);
+        \Testo\Assert::same($p->comments[0]->name, 'name 1');
+        \Testo\Assert::same($p->comments[1]->name, 'name 2');
     }
 
+    #[\Testo\Test]
     public function testUpdate(): void
     {
         $user = new User();
@@ -87,7 +89,7 @@ abstract class ManyToManyBelongsToTest extends BaseTest
         $post->comments[0]->name = 'new name';
 
         $this->save($post);
-        $this->assertInstanceOf(Collection::class, $post->comments);
+        \Testo\Assert::instanceOf($post->comments, Collection::class);
 
         $this->orm->getHeap()->clean();
         /** @var Post $p */
@@ -95,11 +97,12 @@ abstract class ManyToManyBelongsToTest extends BaseTest
             ->load('user', ['method' => Select\AbstractLoader::INLOAD])
             ->wherePK($postId)->fetchOne();
 
-        $this->assertSame('new-email', $p->user->email);
-        $this->assertSame('new title', $p->title);
-        $this->assertSame('new name', $p->comments[0]->name);
+        \Testo\Assert::same($p->user->email, 'new-email');
+        \Testo\Assert::same($p->title, 'new title');
+        \Testo\Assert::same($p->comments[0]->name, 'new name');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

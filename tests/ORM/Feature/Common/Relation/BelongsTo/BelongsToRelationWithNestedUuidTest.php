@@ -19,6 +19,7 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testNestedWithUuidPK(): void
     {
         $uuid = Uuid::uuid4();
@@ -44,19 +45,17 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
         $first = $this->orm->getRepository(Comment::class)->findOne(['message' => 'foo']);
         $second = $this->orm->getRepository(Comment::class)->findOne(['message' => 'bar']);
 
-        $this->assertInstanceOf(
-            UserWithUUIDPrimaryKey::class,
-            $this->orm->getRepository(UserWithUUIDPrimaryKey::class)->findOne(),
-        );
+        \Testo\Assert::instanceOf($this->orm->getRepository(UserWithUUIDPrimaryKey::class)->findOne(), UserWithUUIDPrimaryKey::class);
 
-        $this->assertInstanceOf(Comment::class, $first);
-        $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $first->userWithUuid);
-        $this->assertNull($first->parent);
-        $this->assertInstanceOf(Comment::class, $second);
-        $this->assertInstanceOf(UserWithUUIDPrimaryKey::class, $second->userWithUuid);
-        $this->assertInstanceOf(Comment::class, $second->parent);
+        \Testo\Assert::instanceOf($first, Comment::class);
+        \Testo\Assert::instanceOf($first->userWithUuid, UserWithUUIDPrimaryKey::class);
+        \Testo\Assert::null($first->parent);
+        \Testo\Assert::instanceOf($second, Comment::class);
+        \Testo\Assert::instanceOf($second->userWithUuid, UserWithUUIDPrimaryKey::class);
+        \Testo\Assert::instanceOf($second->parent, Comment::class);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

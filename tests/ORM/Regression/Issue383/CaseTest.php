@@ -13,6 +13,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function test1WithClean(): void
     {
         $user = new Entity\User('test', 'test');
@@ -21,9 +22,10 @@ abstract class CaseTest extends BaseTest
         $this->orm->getHeap()->clean();
         $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
 
-        $this->assertEquals($user->id, $get_user->id);
+        \Testo\Assert::equals($get_user->id, $user->id);
     }
 
+    #[\Testo\Test]
     public function test2WithoutClean(): void
     {
         $user = new Entity\User('test', 'test');
@@ -31,9 +33,10 @@ abstract class CaseTest extends BaseTest
 
         $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
 
-        $this->assertEquals($user->id, $get_user->id);
+        \Testo\Assert::equals($get_user->id, $user->id);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => true]);
@@ -47,6 +50,7 @@ abstract class CaseTest extends BaseTest
         $this->loadSchema(__DIR__ . '/schema.php');
     }
 
+    #[\Testo\Lifecycle\AfterTest]
     public function tearDown(): void
     {
         parent::tearDown();

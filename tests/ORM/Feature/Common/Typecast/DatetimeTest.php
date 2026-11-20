@@ -34,30 +34,32 @@ abstract class DatetimeTest extends BaseTest
      */
     protected $b;
 
+    #[\Testo\Test]
     public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchAll();
 
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertSame(1, $result[0]->id);
-        $this->assertSame('hello@world.com', $result[0]->email);
-        $this->assertSame(100.0, $result[0]->balance);
-        $this->assertInstanceOf(\DateTimeInterface::class, $result[0]->time_created);
-        $this->assertSame('UTC', $result[0]->time_created->getTimezone()->getName());
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::same($result[0]->id, 1);
+        \Testo\Assert::same($result[0]->email, 'hello@world.com');
+        \Testo\Assert::same($result[0]->balance, 100.0);
+        \Testo\Assert::instanceOf($result[0]->time_created, \DateTimeInterface::class);
+        \Testo\Assert::same($result[0]->time_created->getTimezone()->getName(), 'UTC');
 
         $this->assertSameTimestamp($this->a, $result[0]->time_created, 0);
 
-        $this->assertInstanceOf(User::class, $result[1]);
-        $this->assertSame(2, $result[1]->id);
-        $this->assertSame('another@world.com', $result[1]->email);
-        $this->assertSame(200.0, $result[1]->balance);
-        $this->assertInstanceOf(\DateTimeInterface::class, $result[1]->time_created);
-        $this->assertSame('UTC', $result[1]->time_created->getTimezone()->getName());
+        \Testo\Assert::instanceOf($result[1], User::class);
+        \Testo\Assert::same($result[1]->id, 2);
+        \Testo\Assert::same($result[1]->email, 'another@world.com');
+        \Testo\Assert::same($result[1]->balance, 200.0);
+        \Testo\Assert::instanceOf($result[1]->time_created, \DateTimeInterface::class);
+        \Testo\Assert::same($result[1]->time_created->getTimezone()->getName(), 'UTC');
 
         $this->assertSameTimestamp($this->b, $result[1]->time_created, 0);
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -71,6 +73,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testStore(): void
     {
         $e = new User();
@@ -90,19 +93,20 @@ abstract class DatetimeTest extends BaseTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->assertEquals(3, $e->id);
+        \Testo\Assert::equals($e->id, 3);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
-        $this->assertEquals(300, $result->balance);
+        \Testo\Assert::equals($result->balance, 300);
         $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
     }
 
+    #[\Testo\Test]
     public function testUpdate(): void
     {
         $e = $this->orm->get('user', ['id' => 1]);
@@ -127,6 +131,7 @@ abstract class DatetimeTest extends BaseTest
         $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();
@@ -167,9 +172,10 @@ abstract class DatetimeTest extends BaseTest
         ]));
     }
 
+    #[\Testo\Common\Attribute\AssertMethod]
     protected function assertSameTimestamp(\DateTimeInterface $a, \DateTimeInterface $b, int $max): void
     {
         $diff = abs($a->getTimestamp() - $b->getTimestamp());
-        $this->assertTrue($diff <= $max, 'Invalid time internal');
+        \Testo\Assert::true($diff <= $max, 'Invalid time internal');
     }
 }

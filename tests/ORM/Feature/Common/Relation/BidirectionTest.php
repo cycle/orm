@@ -19,12 +19,13 @@ abstract class BidirectionTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -48,31 +49,33 @@ abstract class BidirectionTest extends BaseTest
                 'balance' => 200.0,
                 'comments' => [],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testRemoveCommentFromUser(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))
             ->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertCount(2, $u->comments);
+        \Testo\Assert::count($u->comments, 2);
 
         $comment = $u->comments[0];
         $u->comments->removeElement($comment);
 
         $this->save($u);
-        $this->assertSame($u, $comment->user);
+        \Testo\Assert::same($comment->user, $u);
 
         /** @var User $u2 */
         $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertCount(1, $u2->comments);
+        \Testo\Assert::count($u2->comments, 1);
         $this->orm->getHeap()->clean();
     }
 
+    #[\Testo\Test]
     public function testRemoveFromCommentEnd(): void
     {
         $u = (new Select($this->orm, User::class))
@@ -80,7 +83,7 @@ abstract class BidirectionTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertCount(2, $u->comments);
+        \Testo\Assert::count($u->comments, 2);
 
         $u->comments[0]->user = null;
 
@@ -94,9 +97,10 @@ abstract class BidirectionTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertCount(1, $u->comments);
+        \Testo\Assert::count($u->comments, 1);
     }
 
+    #[\Testo\Test]
     public function testRemoveFromCommentEndDoublePersist(): void
     {
         $u = (new Select($this->orm, User::class))
@@ -104,7 +108,7 @@ abstract class BidirectionTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertCount(2, $u->comments);
+        \Testo\Assert::count($u->comments, 2);
 
         $u->comments[0]->user = null;
 
@@ -115,15 +119,16 @@ abstract class BidirectionTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertCount(1, $u->comments);
+        \Testo\Assert::count($u->comments, 1);
     }
 
+    #[\Testo\Test]
     public function testDoubleRemoval(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertCount(2, $u->comments);
+        \Testo\Assert::count($u->comments, 2);
 
         $c = $u->comments[0];
         $c->user = null;
@@ -139,9 +144,10 @@ abstract class BidirectionTest extends BaseTest
         $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertCount(1, $u->comments);
+        \Testo\Assert::count($u->comments, 1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

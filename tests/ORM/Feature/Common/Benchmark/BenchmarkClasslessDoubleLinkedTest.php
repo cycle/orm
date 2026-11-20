@@ -18,6 +18,7 @@ abstract class BenchmarkClasslessDoubleLinkedTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testMemoryUsage(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -35,6 +36,7 @@ abstract class BenchmarkClasslessDoubleLinkedTest extends BaseTest
         $tr->run();
     }
 
+    #[\Testo\Test]
     public function testMemoryUsageOther(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -52,6 +54,7 @@ abstract class BenchmarkClasslessDoubleLinkedTest extends BaseTest
         $tr->run();
     }
 
+    #[\Testo\Test]
     public function testMemoryUsageDouble(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -71,10 +74,11 @@ abstract class BenchmarkClasslessDoubleLinkedTest extends BaseTest
         $tr->run();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         if (!BaseTest::$config['benchmark']) {
-            $this->markTestSkipped();
+            throw new \Testo\Core\Exception\SkipTest();
             return;
         }
 

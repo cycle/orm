@@ -10,90 +10,101 @@ use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\ScopeInterface;
 use PHPUnit\Framework\TestCase;
 
-final class BelongsToMorphedLoadOptionsTest extends TestCase
+final class BelongsToMorphedLoadOptionsTest
 {
+    #[\Testo\Test]
     public function testDefaults(): void
     {
         $options = new BelongsToMorphedLoadOptions();
 
-        $this->assertTrue($options->scope);
-        $this->assertTrue($options->minify);
+        \Testo\Assert::true($options->scope);
+        \Testo\Assert::true($options->minify);
     }
 
+    #[\Testo\Test]
     public function testExtendsLoadOptions(): void
     {
         $options = new BelongsToMorphedLoadOptions();
 
-        $this->assertInstanceOf(LoadOptions::class, $options);
+        \Testo\Assert::instanceOf($options, LoadOptions::class);
     }
 
+    #[\Testo\Test]
     public function testDoesNotExtendJoinableLoadOptions(): void
     {
         $options = new BelongsToMorphedLoadOptions();
 
-        $this->assertNotInstanceOf(JoinableLoadOptions::class, $options);
+        \Testo\Assert::false($options instanceof JoinableLoadOptions);
     }
 
+    #[\Testo\Test]
     public function testDoesNotHaveMethodProperty(): void
     {
         $options = new BelongsToMorphedLoadOptions();
 
-        $this->assertFalse(property_exists($options, 'method'));
+        \Testo\Assert::false(property_exists($options, 'method'));
     }
 
+    #[\Testo\Test]
     public function testDoesNotHaveAsProperty(): void
     {
         $options = new BelongsToMorphedLoadOptions();
 
-        $this->assertFalse(property_exists($options, 'as'));
+        \Testo\Assert::false(property_exists($options, 'as'));
     }
 
+    #[\Testo\Test]
     public function testDoesNotHaveUsingProperty(): void
     {
         $options = new BelongsToMorphedLoadOptions();
 
-        $this->assertFalse(property_exists($options, 'using'));
+        \Testo\Assert::false(property_exists($options, 'using'));
     }
 
+    #[\Testo\Test]
     public function testCustomScope(): void
     {
-        $scope = $this->createMock(ScopeInterface::class);
+        $scope = \Mockery::mock(ScopeInterface::class)->shouldIgnoreMissing();
         $options = new BelongsToMorphedLoadOptions(scope: $scope);
 
-        $this->assertSame($scope, $options->scope);
+        \Testo\Assert::same($options->scope, $scope);
     }
 
+    #[\Testo\Test]
     public function testScopeDisabled(): void
     {
         $options = new BelongsToMorphedLoadOptions(scope: false);
 
-        $this->assertFalse($options->scope);
+        \Testo\Assert::false($options->scope);
     }
 
+    #[\Testo\Test]
     public function testMinifyDisabled(): void
     {
         $options = new BelongsToMorphedLoadOptions(minify: false);
 
-        $this->assertFalse($options->minify);
+        \Testo\Assert::false($options->minify);
     }
 
+    #[\Testo\Test]
     public function testToArrayDefaults(): void
     {
         $options = new BelongsToMorphedLoadOptions();
 
-        $this->assertSame([
+        \Testo\Assert::same($options->toArray(), [
             'scope' => true,
             'minify' => true,
-        ], $options->toArray());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testToArrayCustom(): void
     {
         $options = new BelongsToMorphedLoadOptions(scope: false, minify: false);
 
-        $this->assertSame([
+        \Testo\Assert::same($options->toArray(), [
             'scope' => false,
             'minify' => false,
-        ], $options->toArray());
+        ]);
     }
 }

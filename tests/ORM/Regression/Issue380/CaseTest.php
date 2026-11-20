@@ -16,6 +16,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testInsertOnce(): void
     {
         /** @var User $user */
@@ -37,32 +38,28 @@ abstract class CaseTest extends BaseTest
 
         $em->run();
 
-        self::assertSame(
-            [
-                'alias' => [
-                    ['id' => 1, 'value' => '1'],
-                    ['id' => 2, 'value' => '2'],
-                ],
-                'email' => [
-                    ['id' => 1, 'value' => '3'],
-                    ['id' => 2, 'value' => '4'],
-                ],
-                'phone' => [
-                    ['id' => 1, 'value' => '5'],
-                    ['id' => 2, 'value' => '6'],
-                ],
+        \Testo\Assert::same([
+            'alias' => $this->fetchFromTable('user_alias'),
+            'email' => $this->fetchFromTable('user_email'),
+            'phone' => $this->fetchFromTable('user_phone'),
+        ], [
+            'alias' => [
+                ['id' => 1, 'value' => '1'],
+                ['id' => 2, 'value' => '2'],
             ],
-            [
-                'alias' => $this->fetchFromTable('user_alias'),
-                'email' => $this->fetchFromTable('user_email'),
-                'phone' => $this->fetchFromTable('user_phone'),
+            'email' => [
+                ['id' => 1, 'value' => '3'],
+                ['id' => 2, 'value' => '4'],
             ],
-        );
+            'phone' => [
+                ['id' => 1, 'value' => '5'],
+                ['id' => 2, 'value' => '6'],
+            ],
+        ]);
     }
 
-    /**
-     * @dataProvider dataMatrix
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('dataMatrix')]
     public function testInsertMatrix(int $cnt1, int $cnt2, int $cnt3): void
     {
         /** @var User $user */
@@ -90,14 +87,11 @@ abstract class CaseTest extends BaseTest
         }
         $em->run();
 
-        self::assertSame(
-            $expected,
-            [
-                'alias' => $this->fetchFromTable('user_alias'),
-                'email' => $this->fetchFromTable('user_email'),
-                'phone' => $this->fetchFromTable('user_phone'),
-            ],
-        );
+        \Testo\Assert::same([
+            'alias' => $this->fetchFromTable('user_alias'),
+            'email' => $this->fetchFromTable('user_email'),
+            'phone' => $this->fetchFromTable('user_phone'),
+        ], $expected);
     }
 
     public function dataMatrix(): iterable
@@ -107,9 +101,10 @@ abstract class CaseTest extends BaseTest
         yield [1, 7, 4];
     }
 
+    #[\Testo\Test]
     public function testFailOnInsertUniqueDuplicate(): void
     {
-        self::expectException(ConstrainException::class);
+        \Testo\Expect::exception(ConstrainException::class);
 
         /** @var User $user */
         $user = $this->orm->getRepository(User::class)->findOne(['id' => 1]);
@@ -123,6 +118,7 @@ abstract class CaseTest extends BaseTest
             ->run();
     }
 
+    #[\Testo\Test]
     public function testDeleteAndInsertFainOnDuplicateUniqueKey(): void
     {
         /** @var User $user */
@@ -142,9 +138,9 @@ abstract class CaseTest extends BaseTest
             ->persist($p1 = new User\Phone($user, '2'));
         $em->run();
 
-        self::assertCount(2, \array_intersect([1, 2], [$a0->id, $a1->id]));
-        self::assertCount(2, \array_intersect([1, 2], [$e0->id, $e1->id]));
-        self::assertCount(2, \array_intersect([1, 2], [$p0->id, $p1->id]));
+        \Testo\Assert::count(\array_intersect([1, 2], [$a0->id, $a1->id]), 2);
+        \Testo\Assert::count(\array_intersect([1, 2], [$e0->id, $e1->id]), 2);
+        \Testo\Assert::count(\array_intersect([1, 2], [$p0->id, $p1->id]), 2);
         unset($a0, $a1, $e0, $e1, $p0, $p1);
 
         $this->orm->getHeap()->clean();
@@ -187,9 +183,10 @@ abstract class CaseTest extends BaseTest
 
         $em->run();
 
-        self::assertTrue(true);
+        \Testo\Assert::true(true);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

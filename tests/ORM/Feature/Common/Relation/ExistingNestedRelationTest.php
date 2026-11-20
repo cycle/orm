@@ -20,6 +20,7 @@ abstract class ExistingNestedRelationTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateForExisting(): void
     {
         $u = new User();
@@ -53,6 +54,7 @@ abstract class ExistingNestedRelationTest extends BaseTest
         $this->assertNumWrites(1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

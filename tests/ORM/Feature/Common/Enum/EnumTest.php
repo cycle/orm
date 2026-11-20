@@ -23,64 +23,61 @@ abstract class EnumTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRawData(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        $this->assertEquals(
+        \Testo\Assert::equals($selector->fetchData(typecast: false), [
             [
-                [
-                    'id' => '1',
-                    'balance' => 56,
-                    'type_str' => 'guest',
-                    'type_int' => 0,
-                ],
-                [
-                    'id' => '2',
-                    'balance' => 42,
-                    'type_str' => 'user',
-                    'type_int' => 1,
-                ],
-                [
-                    'id' => '3',
-                    'balance' => 69,
-                    'type_str' => 'admin',
-                    'type_int' => 2,
-                ],
+                'id' => '1',
+                'balance' => 56,
+                'type_str' => 'guest',
+                'type_int' => 0,
             ],
-            $selector->fetchData(typecast: false),
-        );
+            [
+                'id' => '2',
+                'balance' => 42,
+                'type_str' => 'user',
+                'type_int' => 1,
+            ],
+            [
+                'id' => '3',
+                'balance' => 69,
+                'type_str' => 'admin',
+                'type_int' => 2,
+            ],
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        $this->assertEquals(
+        \Testo\Assert::equals($selector->fetchData(), [
             [
-                [
-                    'id' => 1,
-                    'balance' => 56,
-                    'type_str' => TypeStringEnum::Guest,
-                    'type_int' => TypeIntEnum::Guest,
-                ],
-                [
-                    'id' => 2,
-                    'balance' => 42,
-                    'type_str' => TypeStringEnum::User,
-                    'type_int' => TypeIntEnum::User,
-                ],
-                [
-                    'id' => 3,
-                    'balance' => 69,
-                    'type_str' => TypeStringEnum::Admin,
-                    'type_int' => TypeIntEnum::Admin,
-                ],
+                'id' => 1,
+                'balance' => 56,
+                'type_str' => TypeStringEnum::Guest,
+                'type_int' => TypeIntEnum::Guest,
             ],
-            $selector->fetchData(),
-        );
+            [
+                'id' => 2,
+                'balance' => 42,
+                'type_str' => TypeStringEnum::User,
+                'type_int' => TypeIntEnum::User,
+            ],
+            [
+                'id' => 3,
+                'balance' => 69,
+                'type_str' => TypeStringEnum::Admin,
+                'type_int' => TypeIntEnum::Admin,
+            ],
+        ]);
     }
 
+    #[\Testo\Test]
     public function testStoreData(): void
     {
         try {
@@ -97,10 +94,11 @@ abstract class EnumTest extends BaseTest
             $this->save($user);
             $this->assertNumWrites(1);
         } catch (\Throwable) {
-            $this->markTestSkipped("Can't save a Enum value because it is not supported yet.");
+            throw new \Testo\Core\Exception\SkipTest("Can't save a Enum value because it is not supported yet.");
         }
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

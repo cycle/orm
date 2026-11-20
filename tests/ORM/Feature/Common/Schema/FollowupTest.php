@@ -14,6 +14,7 @@ abstract class FollowupTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSnapUser(): void
     {
         $u = new User();
@@ -25,10 +26,11 @@ abstract class FollowupTest extends BaseTest
         $this->assertNumWrites(2);
 
         $snap = $this->getSnap($u);
-        $this->assertSame('create', $snap['action']);
-        $this->assertSame('email', $snap['email']);
+        \Testo\Assert::same($snap['action'], 'create');
+        \Testo\Assert::same($snap['email'], 'email');
     }
 
+    #[\Testo\Test]
     public function testSnapAgain(): void
     {
         $u = new User();
@@ -40,8 +42,8 @@ abstract class FollowupTest extends BaseTest
         $this->assertNumWrites(2);
 
         $snap = $this->getSnap($u);
-        $this->assertSame('create', $snap['action']);
-        $this->assertSame('email', $snap['email']);
+        \Testo\Assert::same($snap['action'], 'create');
+        \Testo\Assert::same($snap['email'], 'email');
 
         $u->email = 'new-email';
 
@@ -50,10 +52,11 @@ abstract class FollowupTest extends BaseTest
         $this->assertNumWrites(2);
 
         $snap = $this->getSnap($u);
-        $this->assertSame('update', $snap['action']);
-        $this->assertSame('new-email', $snap['email']);
+        \Testo\Assert::same($snap['action'], 'update');
+        \Testo\Assert::same($snap['email'], 'new-email');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

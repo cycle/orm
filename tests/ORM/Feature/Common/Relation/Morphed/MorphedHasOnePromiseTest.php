@@ -20,6 +20,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -28,15 +29,16 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['image']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['image']);
+        \Testo\Assert::instanceOf($aData['image'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['image'], ReferenceInterface::class);
 
         $this->captureReadQueries();
-        $this->assertSame('user-image.png', $a->image->url);
-        $this->assertSame('user-2-image.png', $b->image->url);
+        \Testo\Assert::same($a->image->url, 'user-image.png');
+        \Testo\Assert::same($b->image->url, 'user-2-image.png');
         $this->assertNumReads(2);
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -48,6 +50,7 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testSetNull(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -72,11 +75,12 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $aData['image']);
-        $this->assertInstanceOf(ReferenceInterface::class, $bData['image']);
-        $this->assertSame('user-2-image.png', $b->image->url);
+        \Testo\Assert::instanceOf($aData['image'], ReferenceInterface::class);
+        \Testo\Assert::instanceOf($bData['image'], ReferenceInterface::class);
+        \Testo\Assert::same($b->image->url, 'user-2-image.png');
     }
 
+    #[\Testo\Test]
     public function testExchangeParentsSameTypeUsingReferences(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -106,10 +110,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        $this->assertSame('user-image.png', $b->image->url);
-        $this->assertSame('user-2-image.png', $a->image->url);
+        \Testo\Assert::same($b->image->url, 'user-image.png');
+        \Testo\Assert::same($a->image->url, 'user-2-image.png');
     }
 
+    #[\Testo\Test]
     public function testExchangeParentsSameType(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -132,10 +137,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('user-image.png', $b->image->url);
-        $this->assertSame('user-2-image.png', $a->image->url);
+        \Testo\Assert::same($b->image->url, 'user-image.png');
+        \Testo\Assert::same($a->image->url, 'user-2-image.png');
     }
 
+    #[\Testo\Test]
     public function testReplaceExisted(): void
     {
         $count = (new Select($this->orm, Image::class))->count();
@@ -159,10 +165,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
-        $this->assertSame('new.png', $u->image->url);
-        $this->assertSame($count, (new Select($this->orm, Image::class))->count());
+        \Testo\Assert::same($u->image->url, 'new.png');
+        \Testo\Assert::same((new Select($this->orm, Image::class))->count(), $count);
     }
 
+    #[\Testo\Test]
     public function testCreateWithRelated(): void
     {
         $schemaArray = $this->getSchemaArray();
@@ -189,10 +196,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $p = (new Select($this->orm, Post::class))
             ->wherePK(5)->fetchOne();
 
-        $this->assertSame('post title', $p->title);
-        $this->assertSame('new-post.png', $p->image->url);
+        \Testo\Assert::same($p->title, 'post title');
+        \Testo\Assert::same($p->image->url, 'new-post.png');
     }
 
+    #[\Testo\Test]
     public function testMoveToAnotherParent(): void
     {
         /** @var User $u */
@@ -224,10 +232,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
 
-        $this->assertSame('post-image.png', $u->image->url);
-        $this->assertNull($p->image);
+        \Testo\Assert::same($u->image->url, 'post-image.png');
+        \Testo\Assert::null($p->image);
     }
 
+    #[\Testo\Test]
     public function testChangeParentsUsingReferences(): void
     {
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
@@ -258,10 +267,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
-        $this->assertSame('post-2-image.png', $u->image->url);
-        $this->assertSame('user-image.png', $p->image->url);
+        \Testo\Assert::same($u->image->url, 'post-2-image.png');
+        \Testo\Assert::same($p->image->url, 'user-image.png');
     }
 
+    #[\Testo\Test]
     public function testChangeParents(): void
     {
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
@@ -287,10 +297,11 @@ abstract class MorphedHasOnePromiseTest extends BaseTest
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
-        $this->assertSame('post-2-image.png', $u->image->url);
-        $this->assertSame('user-image.png', $p->image->url);
+        \Testo\Assert::same($u->image->url, 'post-2-image.png');
+        \Testo\Assert::same($p->image->url, 'user-image.png');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -10,8 +10,9 @@ use Cycle\ORM\Transaction\Tuple;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
-class PoolTest extends TestCase
+class PoolTest
 {
+    #[\Testo\Test]
     public function testDoubleAttachSameEntityWithNullNode(): void
     {
         $orm = m::mock(ORMInterface::class);
@@ -22,6 +23,6 @@ class PoolTest extends TestCase
         $pool->attach($entity, Tuple::TASK_DELETE, false);
 
         // There is no exception here
-        $this->assertTrue(true);
+        \Testo\Assert::true(true);
     }
 }

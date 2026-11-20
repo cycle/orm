@@ -43,9 +43,8 @@ abstract class CaseTest extends BaseTest
         yield 'POSTLOAD' => [JoinableLoader::POSTLOAD, $all];
     }
 
-    /**
-     * @dataProvider loadMethodProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('loadMethodProvider')]
     public function testFetchData(int $method, array $expected): void
     {
         $data = $this->select($method)->fetchData();
@@ -58,12 +57,11 @@ abstract class CaseTest extends BaseTest
             }
         }
 
-        $this->assertSame($expected, $this->normalize($result));
+        \Testo\Assert::same($this->normalize($result), $expected);
     }
 
-    /**
-     * @dataProvider loadMethodProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('loadMethodProvider')]
     public function testFetchAll(int $method, array $expected): void
     {
         $tags = $this->select($method)->fetchAll();
@@ -78,9 +76,10 @@ abstract class CaseTest extends BaseTest
             }
         }
 
-        $this->assertSame($expected, $this->normalize($result));
+        \Testo\Assert::same($this->normalize($result), $expected);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

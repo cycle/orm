@@ -21,6 +21,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
     public const DRIVER = 'sqlite';
 
+    #[\Testo\Test]
     public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $this->orm = $this->orm->with(
@@ -31,11 +32,12 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $profile->user_id = 1;
 
         $this->save($profile);
-        $this->assertEquals(1, $profile->getUser()->id);
+        \Testo\Assert::equals($profile->getUser()->id, 1);
         // todo should be check?
         // $this->assertInstanceOf(ReferenceInterface::class, $profile->getRefersUser());
     }
 
+    #[\Testo\Test]
     public function testRelationWithMixedTypeShouldBeFilledAsReference(): void
     {
         $this->orm = $this->orm->with(
@@ -48,9 +50,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         $this->save($user);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $user->friend);
+        \Testo\Assert::instanceOf($user->friend, ReferenceInterface::class);
     }
 
+    #[\Testo\Test]
     public function testRelationExistedInHeapMustFilledAsEntity(): void
     {
         $this->orm = $this->orm->with(
@@ -64,9 +67,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->orm->getRepository(EntityWithMixedTypeRelation::class)->findByPK(1);
 
         $this->save($user);
-        $this->assertInstanceOf(EntityWithMixedTypeRelation::class, $user->friend);
+        \Testo\Assert::instanceOf($user->friend, EntityWithMixedTypeRelation::class);
     }
 
+    #[\Testo\Test]
     public function testPrivateHasManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $this->orm = $this->orm->with(
@@ -79,9 +83,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         $this->save($user);
 
-        $this->assertSame($user, $profile->getUser());
+        \Testo\Assert::same($profile->getUser(), $user);
     }
 
+    #[\Testo\Test]
     public function testPrivateManyToManyRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $this->orm = $this->orm->with(
@@ -94,13 +99,14 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         $this->save($tagContext);
 
-        $this->assertInstanceOf(ReferenceInterface::class, $tagContext->getTag());
-        $this->assertInstanceOf(ReferenceInterface::class, $tagContext->getUser());
+        \Testo\Assert::instanceOf($tagContext->getTag(), ReferenceInterface::class);
+        \Testo\Assert::instanceOf($tagContext->getUser(), ReferenceInterface::class);
     }
 
     /**
      * TODO: error with shadow belongs to
      */
+    #[\Testo\Test]
     public function testPrivateMorphBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
     {
         $profile = new EntityWithRelationHydrationProfile('test');
@@ -113,6 +119,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $this->save($avatar);
     }
 
+    #[\Testo\Test]
     public function testPrivateRelationPropertyShouldBeFilled(): void
     {
         $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
@@ -121,11 +128,12 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
             ->load('user.profile')
             ->fetchOne();
 
-        $this->assertEquals('1', $profile->getUser()->id);
-        $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
-        $this->assertSame($profile, $profile->getUser()->getProfile());
+        \Testo\Assert::equals($profile->getUser()->id, '1');
+        \Testo\Assert::equals($profile->getUser()->getEmail(), 'hello@world.com');
+        \Testo\Assert::same($profile->getUser()->getProfile(), $profile);
     }
 
+    #[\Testo\Test]
     public function testLazyLoad(): void
     {
         $selector = new Select($this->orm, EntityWithRelationHydrationProfile::class);
@@ -133,11 +141,12 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         $profile = $selector
             ->fetchOne();
 
-        $this->assertEquals('1', $profile->getUser()->id);
-        $this->assertEquals('hello@world.com', $profile->getUser()->getEmail());
-        $this->assertSame($profile, $profile->getUser()->getProfile());
+        \Testo\Assert::equals($profile->getUser()->id, '1');
+        \Testo\Assert::equals($profile->getUser()->getEmail(), 'hello@world.com');
+        \Testo\Assert::same($profile->getUser()->getProfile(), $profile);
     }
 
+    #[\Testo\Test]
     public function testChangeLazyOverloadedArray(): void
     {
         $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
@@ -145,7 +154,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         try {
             $user->profiles[] = 'test-value';
-            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
+            \Testo\Assert::fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
         } catch (AssertionFailedError $e) {
             throw $e;
         } catch (\Exception $e) {
@@ -155,9 +164,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         // $user->profile now loaded
         $user->profiles[] = 'test-value';
-        $this->assertContains('test-value', $user->profiles);
+        \Testo\Assert::contains($user->profiles, 'test-value');
     }
 
+    #[\Testo\Test]
     public function testGetLinkValueFromLazyOverloadedRelation(): void
     {
         $user = (new Select($this->orm, EntityWithRelationHydrationUser::class))
@@ -165,7 +175,7 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
 
         try {
             $collection = &$user->profiles;
-            $this->fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
+            \Testo\Assert::fail('There should be error (notice) thrown "Indirect modification of overloaded property"');
         } catch (AssertionFailedError $e) {
             throw $e;
         } catch (\Exception $e) {
@@ -175,9 +185,10 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
         // $user->profile now loaded
         $collection = &$user->profiles;
         $collection[] = 'test-value';
-        $this->assertContains('test-value', $user->profiles);
+        \Testo\Assert::contains($user->profiles, 'test-value');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

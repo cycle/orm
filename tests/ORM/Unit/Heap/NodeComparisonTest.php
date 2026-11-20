@@ -9,7 +9,7 @@ use Cycle\ORM\Heap\Node;
 use DateTime;
 use PHPUnit\Framework\TestCase;
 
-class NodeComparisonTest extends TestCase
+class NodeComparisonTest
 {
     public function equalValuesProvider(): iterable
     {
@@ -123,20 +123,18 @@ class NodeComparisonTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider notEqualValuesProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('notEqualValuesProvider')]
     public function testCompareNotEqual(mixed $a, mixed $b): void
     {
-        $this->assertNotSame(0, Node::compare($a, $b), 'Shouldn\'t be same: ' . $this->exportVars($a, $b));
+        \Testo\Assert::notSame(Node::compare($a, $b), 0, 'Shouldn\'t be same: ' . $this->exportVars($a, $b));
     }
 
-    /**
-     * @dataProvider equalValuesProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('equalValuesProvider')]
     public function testCompareEqual(mixed $a, mixed $b): void
     {
-        $this->assertSame(0, Node::compare($a, $b), 'Should be same: ' . $this->exportVars($a, $b));
+        \Testo\Assert::same(Node::compare($a, $b), 0, 'Should be same: ' . $this->exportVars($a, $b));
     }
 
     private function exportVars(mixed $a, mixed $b): string

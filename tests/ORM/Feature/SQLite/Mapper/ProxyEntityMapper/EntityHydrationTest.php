@@ -14,42 +14,45 @@ class EntityHydrationTest extends BaseMapperTest
 {
     public const DRIVER = 'sqlite';
 
+    #[\Testo\Test]
     public function testDataForBaseClassShouldBeExtracted(): void
     {
         $user = new EntityHydrationUser(123, 'guest', 'guest@site.com');
 
         $mapper = $this->orm->getMapper($user);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($mapper->extract($user), [
             'id' => 123,
             'username' => 'guest',
             'email' => 'guest@site.com',
             'attributes' => [],
-        ], $mapper->extract($user));
+        ]);
     }
 
+    #[\Testo\Test]
     public function testDataForExtendedClassShouldBeExtracted(): void
     {
         $user = new ExtendedEntityHydrationUser(123, 'guest', 'guest@site.com', true, 234);
 
         $mapper = $this->orm->getMapper($user);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($mapper->extract($user), [
             'id' => 123,
             'username' => 'guest',
             'email' => 'guest@site.com',
             'isVerified' => true,
             'profileId' => 234,
             'attributes' => [],
-        ], $mapper->extract($user));
+        ]);
     }
 
+    #[\Testo\Test]
     public function testDataShouldBeHydratedToBaseClass(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
 
         $emptyObject = $mapper->init([]);
-        $this->assertInstanceOf(EntityHydrationUser::class, $emptyObject);
+        \Testo\Assert::instanceOf($emptyObject, EntityHydrationUser::class);
 
         $user = $mapper->hydrate($emptyObject, [
             'id' => 123,
@@ -57,17 +60,18 @@ class EntityHydrationTest extends BaseMapperTest
             'email' => 'guest@site.com',
         ]);
 
-        $this->assertSame(123, $user->getId());
-        $this->assertSame('guest', $user->getUsername());
-        $this->assertSame('guest@site.com', $user->getEmail());
+        \Testo\Assert::same($user->getId(), 123);
+        \Testo\Assert::same($user->getUsername(), 'guest');
+        \Testo\Assert::same($user->getEmail(), 'guest@site.com');
     }
 
+    #[\Testo\Test]
     public function testDataShouldBeHydratedToExtendedClass(): void
     {
         $mapper = $this->orm->getMapper(ExtendedEntityHydrationUser::class);
 
         $emptyObject = $mapper->init([]);
-        $this->assertInstanceOf(ExtendedEntityHydrationUser::class, $emptyObject);
+        \Testo\Assert::instanceOf($emptyObject, ExtendedEntityHydrationUser::class);
 
         $user = $mapper->hydrate($emptyObject, [
             'id' => 123,
@@ -77,13 +81,14 @@ class EntityHydrationTest extends BaseMapperTest
             'profileId' => 234,
         ]);
 
-        $this->assertSame(123, $user->getId());
-        $this->assertSame('guest', $user->getUsername());
-        $this->assertSame('guest@site.com', $user->getEmail());
-        $this->assertSame(true, $user->isVerified());
-        $this->assertSame(234, $user->getProfileId());
+        \Testo\Assert::same($user->getId(), 123);
+        \Testo\Assert::same($user->getUsername(), 'guest');
+        \Testo\Assert::same($user->getEmail(), 'guest@site.com');
+        \Testo\Assert::same($user->isVerified(), true);
+        \Testo\Assert::same($user->getProfileId(), 234);
     }
 
+    #[\Testo\Test]
     public function testUndefinedPropertiesShouldBePassedThroughSetter(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
@@ -97,9 +102,10 @@ class EntityHydrationTest extends BaseMapperTest
             'email' => 'guest@site.com',
         ]);
 
-        $this->assertEquals(['tag' => 'test'], $user->getAttributes());
+        \Testo\Assert::equals($user->getAttributes(), ['tag' => 'test']);
     }
 
+    #[\Testo\Test]
     public function testRequestedUndefinedPropertiesShouldBePassedThroughGetter(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationUser::class);
@@ -113,9 +119,10 @@ class EntityHydrationTest extends BaseMapperTest
             'email' => 'guest@site.com',
         ]);
 
-        $this->assertEquals('test', $user->tag);
+        \Testo\Assert::equals($user->tag, 'test');
     }
 
+    #[\Testo\Test]
     public function testWriteDynamicProperty(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationIdentityUser::class);
@@ -124,25 +131,26 @@ class EntityHydrationTest extends BaseMapperTest
         $mapper->hydrate($emptyObject, ['id' => 123, 'value' => 'test']);
 
         // self::assertSame(['id' => 123], $mapper->fetchFields($emptyObject));
-        self::assertTrue(true, 'No exception thrown');
+        \Testo\Assert::true(true, 'No exception thrown');
     }
 
+    #[\Testo\Test]
     public function testHydrateBadType(): void
     {
         $mapper = $this->orm->getMapper(EntityHydrationIdentityUser::class);
         $emptyObject = new EntityHydrationIdentityUser();
 
-        $this->expectException(MapperException::class);
-        $this->expectExceptionMessage("Can't hydrate an entity because property and value types are incompatible.");
+        \Testo\Expect::exception(MapperException::class)->withMessageContaining("Can't hydrate an entity because property and value types are incompatible.");
 
         try {
             $mapper->hydrate($emptyObject, ['id' => 'string value']);
         } catch (\Throwable $e) {
-            $this->assertInstanceOf(\TypeError::class, $e->getPrevious());
+            \Testo\Assert::instanceOf($e->getPrevious(), \TypeError::class);
             throw $e;
         }
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

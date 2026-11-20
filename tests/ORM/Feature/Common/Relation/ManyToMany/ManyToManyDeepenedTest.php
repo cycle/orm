@@ -29,12 +29,13 @@ abstract class ManyToManyDeepenedTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags.@.image')->orderBy('id', 'ASC');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(typecast: true), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -90,9 +91,10 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData(typecast: true));
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -101,7 +103,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
             ->load('tags.@.image')
             ->orderBy('id', 'ASC');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -157,9 +159,10 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadRelationPostload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -168,7 +171,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
             ->load('tags.@.image', ['method' => Select\AbstractLoader::POSTLOAD])
             ->orderBy('id', 'ASC');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -224,9 +227,10 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testAccessLoadedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -238,33 +242,34 @@ abstract class ManyToManyDeepenedTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(1, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 1);
 
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
+        \Testo\Assert::instanceOf($a->tags, PivotedCollectionInterface::class);
+        \Testo\Assert::instanceOf($b->tags, PivotedCollectionInterface::class);
 
-        $this->assertTrue($a->tags->hasPivot($a->tags[0]));
-        $this->assertTrue($a->tags->hasPivot($a->tags[1]));
-        $this->assertTrue($b->tags->hasPivot($b->tags[0]));
+        \Testo\Assert::true($a->tags->hasPivot($a->tags[0]));
+        \Testo\Assert::true($a->tags->hasPivot($a->tags[1]));
+        \Testo\Assert::true($b->tags->hasPivot($b->tags[0]));
 
-        $this->assertFalse($b->tags->hasPivot($a->tags[0]));
-        $this->assertFalse($b->tags->hasPivot($a->tags[1]));
-        $this->assertFalse($a->tags->hasPivot($b->tags[0]));
+        \Testo\Assert::false($b->tags->hasPivot($a->tags[0]));
+        \Testo\Assert::false($b->tags->hasPivot($a->tags[1]));
+        \Testo\Assert::false($a->tags->hasPivot($b->tags[0]));
 
-        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[0]));
-        $this->assertInstanceOf(TagContext::class, $a->tags->getPivot($a->tags[1]));
-        $this->assertInstanceOf(TagContext::class, $b->tags->getPivot($b->tags[0]));
+        \Testo\Assert::instanceOf($a->tags->getPivot($a->tags[0]), TagContext::class);
+        \Testo\Assert::instanceOf($a->tags->getPivot($a->tags[1]), TagContext::class);
+        \Testo\Assert::instanceOf($b->tags->getPivot($b->tags[0]), TagContext::class);
 
-        $this->assertEquals('primary', $a->tags->getPivot($a->tags[0])->as);
-        $this->assertEquals('secondary', $a->tags->getPivot($a->tags[1])->as);
-        $this->assertEquals('primary', $b->tags->getPivot($b->tags[0])->as);
+        \Testo\Assert::equals($a->tags->getPivot($a->tags[0])->as, 'primary');
+        \Testo\Assert::equals($a->tags->getPivot($a->tags[1])->as, 'secondary');
+        \Testo\Assert::equals($b->tags->getPivot($b->tags[0])->as, 'primary');
 
-        $this->assertEquals('first.jpg', $a->tags->getPivot($a->tags[0])->image->url);
-        $this->assertNull($a->tags->getPivot($a->tags[1])->image);
-        $this->assertEquals('second.png', $b->tags->getPivot($b->tags[0])->image->url);
+        \Testo\Assert::equals($a->tags->getPivot($a->tags[0])->image->url, 'first.jpg');
+        \Testo\Assert::null($a->tags->getPivot($a->tags[1])->image);
+        \Testo\Assert::equals($b->tags->getPivot($b->tags[0])->image->url, 'second.png');
     }
 
+    #[\Testo\Test]
     public function testUpdateLoadedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -276,11 +281,11 @@ abstract class ManyToManyDeepenedTest extends BaseTest
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        $this->assertCount(2, $a->tags);
-        $this->assertCount(1, $b->tags);
+        \Testo\Assert::count($a->tags, 2);
+        \Testo\Assert::count($b->tags, 1);
 
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->tags);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->tags);
+        \Testo\Assert::instanceOf($a->tags, PivotedCollectionInterface::class);
+        \Testo\Assert::instanceOf($b->tags, PivotedCollectionInterface::class);
 
         $b->tags->getPivot($b->tags[0])->image->url = 'new.gif';
 
@@ -298,9 +303,10 @@ abstract class ManyToManyDeepenedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
-        $this->assertSame('new.gif', $b->tags->getPivot($b->tags[0])->image->url);
+        \Testo\Assert::same($b->tags->getPivot($b->tags[0])->image->url, 'new.gif');
     }
 
+    #[\Testo\Test]
     public function testFilterByPivotedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -309,7 +315,7 @@ abstract class ManyToManyDeepenedTest extends BaseTest
             ->where('tags.@.image.url', 'second.png')
             ->orderBy('id', 'ASC');
 
-        $this->assertSame([
+        \Testo\Assert::same($selector->fetchData(), [
             [
                 'id' => 2,
                 'email' => 'another@world.com',
@@ -332,9 +338,10 @@ abstract class ManyToManyDeepenedTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

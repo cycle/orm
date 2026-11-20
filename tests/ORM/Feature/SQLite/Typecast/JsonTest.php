@@ -7,10 +7,7 @@ namespace Cycle\ORM\Tests\Feature\SQLite\Typecast;
 // phpcs:ignore
 use Cycle\ORM\Tests\Feature\Common\Typecast\JsonTest as CommonClass;
 
-/**
- * @group driver
- * @group driver-sqlite
- */
+#[\Testo\Filter\Group('driver', 'driver-sqlite')]
 final class JsonTest extends CommonClass
 {
     public const DRIVER = 'sqlite';

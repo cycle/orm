@@ -20,13 +20,14 @@ abstract class InverseRelationTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = (new Select($this->orm, User::class))
             ->load('profile.user')
             ->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -57,9 +58,10 @@ abstract class InverseRelationTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testSelfReferenceEntity(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -67,10 +69,11 @@ abstract class InverseRelationTest extends BaseTest
 
         [$a, $b] = $selector->fetchAll();
 
-        $this->assertSame($a, $a->profile->user);
-        $this->assertSame($b, $b->profile->user);
+        \Testo\Assert::same($a->profile->user, $a);
+        \Testo\Assert::same($b->profile->user, $b);
     }
 
+    #[\Testo\Test]
     public function testCyclicThoughtInverse(): void
     {
         $u = new User();
@@ -90,17 +93,18 @@ abstract class InverseRelationTest extends BaseTest
 
         $this->assertNumWrites(2);
 
-        $this->assertEquals(3, $u->id);
-        $this->assertEquals(4, $u->profile->id);
+        \Testo\Assert::equals($u->id, 3);
+        \Testo\Assert::equals($u->profile->id, 4);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
 
-        $this->assertSame($u, $u->profile->user);
+        \Testo\Assert::same($u->profile->user, $u);
 
         $this->orm = $this->orm->withHeap(new Heap());
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

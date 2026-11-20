@@ -17,6 +17,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         $groupUuid = Uuid::uuid4();
@@ -39,9 +40,10 @@ abstract class CaseTest extends BaseTest
             ->findByPK($userUuid);
         $groups = $user->groups;
 
-        $this->assertEquals($groupUuid, $groups[0]->uuid);
+        \Testo\Assert::equals($groups[0]->uuid, $groupUuid);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

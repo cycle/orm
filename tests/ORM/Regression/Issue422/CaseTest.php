@@ -16,6 +16,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         /** @var User $user */
@@ -23,17 +24,18 @@ abstract class CaseTest extends BaseTest
             ->load('billing')
             ->wherePK(1)
             ->fetchOne();
-        $this->assertInstanceOf(Billing::class, $user->billing);
+        \Testo\Assert::instanceOf($user->billing, Billing::class);
 
         /** @var User $user */
         $user = (new Select($this->orm, User::class))
             ->load('billing')
             ->wherePK(2)
             ->fetchOne();
-        $this->assertNull($user->billing);
-        $this->assertSame(200, $user->otherEmbedded->propertyInt);
+        \Testo\Assert::null($user->billing);
+        \Testo\Assert::same($user->otherEmbedded->propertyInt, 200);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

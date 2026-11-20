@@ -9,14 +9,12 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\STI\SimpleTest;
 
-/**
- * @group driver
- * @group driver-postgres
- */
+#[\Testo\Filter\Group('driver', 'driver-postgres')]
 class CursorTest extends SimpleTest
 {
     public const DRIVER = 'postgres';
 
+    #[\Testo\Test]
     public function testCursorReturnsCorrectSubclassInstances(): void
     {
         $entities = $this->getDatabase()->transaction(function (): array {
@@ -27,18 +25,18 @@ class CursorTest extends SimpleTest
             return $out;
         });
 
-        $this->assertCount(4, $entities);
+        \Testo\Assert::count($entities, 4);
 
-        $this->assertInstanceOf(Manager::class, $entities[0]);
+        \Testo\Assert::instanceOf($entities[0], Manager::class);
 
-        $this->assertInstanceOf(Employee::class, $entities[1]);
-        $this->assertNotInstanceOf(Manager::class, $entities[1]);
+        \Testo\Assert::instanceOf($entities[1], Employee::class);
+        \Testo\Assert::false($entities[1] instanceof Manager);
 
-        $this->assertInstanceOf(Manager::class, $entities[2]);
+        \Testo\Assert::instanceOf($entities[2], Manager::class);
 
-        $this->assertInstanceOf(Employee::class, $entities[3]);
-        $this->assertNotInstanceOf(Manager::class, $entities[3]);
+        \Testo\Assert::instanceOf($entities[3], Employee::class);
+        \Testo\Assert::false($entities[3] instanceof Manager);
 
-        $this->assertSame([1, 2, 3, 4], \array_map(fn($e) => $e->id, $entities));
+        \Testo\Assert::same(\array_map(fn($e) => $e->id, $entities), [1, 2, 3, 4]);
     }
 }

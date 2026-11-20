@@ -15,6 +15,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSave(): void
     {
         // Get entity
@@ -34,9 +35,10 @@ abstract class CaseTest extends BaseTest
         $user = (new Select($this->orm, Entity\User::class))
             ->wherePK(1)
             ->fetchOne();
-        $this->assertSame('eur', $user->currency->code);
+        \Testo\Assert::same($user->currency->code, 'eur');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

@@ -19,6 +19,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreatePostEntity(): void
     {
         // Create and save post
@@ -47,7 +48,7 @@ abstract class CaseTest extends BaseTest
 
         // Get tag
         $tag = $this->orm->get(Tag::class, ['id' => 1]);
-        self::assertSame('foo', $tag->label);
+        \Testo\Assert::same($tag->label, 'foo');
 
         // Save PostTag
         $pt1 = $this->orm->make(PostTag::class);
@@ -66,9 +67,10 @@ abstract class CaseTest extends BaseTest
          * @since ORM 2.10.0 EntityManager can fill only unresolved relations
          */
         $post = $this->orm->getRepository(Post::class)->findByPK($id);
-        self::assertCount(1, $post->postTags);
+        \Testo\Assert::count($post->postTags, 1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

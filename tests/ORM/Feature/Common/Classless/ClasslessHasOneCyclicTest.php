@@ -17,12 +17,13 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchCyclic(): void
     {
         $selector = new Select($this->orm, 'cyclic');
         $selector->load('cyclic')->orderBy('cyclic.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => '1',
                 'parent_id' => null,
@@ -49,24 +50,26 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
                     'name' => 'self-reference',
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testFetchCyclicRelation(): void
     {
         $selector = new Select($this->orm, 'cyclic');
         [$a, $b, $c] = $selector->load('cyclic')->orderBy('cyclic.id')->fetchAll();
 
-        $this->assertSame($b, $a->cyclic);
-        $this->assertSame(null, $b->cyclic);
-        $this->assertSame($c, $c->cyclic);
+        \Testo\Assert::same($a->cyclic, $b);
+        \Testo\Assert::same($b->cyclic, null);
+        \Testo\Assert::same($c->cyclic, $c);
     }
 
+    #[\Testo\Test]
     public function testUpdateCyclic(): void
     {
         $selector = new Select($this->orm, 'cyclic');
         $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
-        $this->assertEquals('self-reference', $c->name);
+        \Testo\Assert::equals($c->name, 'self-reference');
 
         $c->name = 'updated';
 
@@ -77,17 +80,19 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');
         $c = $selector->load('cyclic')->wherePK(3)->fetchOne();
 
-        $this->assertEquals('updated', $c->name);
-        $this->assertSame($c, $c->cyclic);
+        \Testo\Assert::equals($c->name, 'updated');
+        \Testo\Assert::same($c->cyclic, $c);
     }
 
+    #[\Testo\Test]
     public function testCyclicWithoutLoad(): void
     {
         $c = (new Select($this->orm, 'cyclic'))->wherePK(3)->fetchOne();
-        $this->assertEquals('self-reference', $c->name);
-        $this->assertSame($c, $c->cyclic);
+        \Testo\Assert::equals($c->name, 'self-reference');
+        \Testo\Assert::same($c->cyclic, $c);
     }
 
+    #[\Testo\Test]
     public function testCreateCyclic(): void
     {
         $c = $this->orm->make('cyclic');
@@ -104,10 +109,11 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');
         $c = $selector->load('cyclic')->wherePK($c->id)->fetchOne();
-        $this->assertEquals('new', $c->name);
-        $this->assertSame($c, $c->cyclic);
+        \Testo\Assert::equals($c->name, 'new');
+        \Testo\Assert::same($c->cyclic, $c);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

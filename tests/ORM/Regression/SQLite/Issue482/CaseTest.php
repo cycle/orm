@@ -7,10 +7,7 @@ namespace Cycle\ORM\Tests\Regression\SQLite\Issue482;
 // phpcs:ignore
 use Cycle\ORM\Tests\Regression\Issue482\AbstractTestCase;
 
-/**
- * @group driver
- * @group driver-sqlite
- */
+#[\Testo\Filter\Group('driver', 'driver-sqlite')]
 class CaseTest extends AbstractTestCase
 {
     public const DRIVER = 'sqlite';

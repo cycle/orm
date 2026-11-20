@@ -30,13 +30,14 @@ abstract class CaseTest extends BaseTest
     private const COMMENT_2 = '770e8400-e29b-41d4-a716-446655440002';
     private const COMMENT_3 = '770e8400-e29b-41d4-a716-446655440003';
 
+    #[\Testo\Test]
     public function testBulkLoadHasMany(): void
     {
         $users = (new Select($this->orm, Entity\User::class))
             ->orderBy('login')
             ->fetchAll();
 
-        $this->assertCount(3, $users);
+        \Testo\Assert::count($users, 3);
 
         // Bulk load posts for all users — single query
         $this->captureReadQueries();
@@ -54,18 +55,19 @@ abstract class CaseTest extends BaseTest
         }
         $this->assertNumReads(0);
 
-        $this->assertSame(1, $postCounts[self::USER_1]);
-        $this->assertSame(2, $postCounts[self::USER_2]);
-        $this->assertSame(1, $postCounts[self::USER_3]);
+        \Testo\Assert::same($postCounts[self::USER_1], 1);
+        \Testo\Assert::same($postCounts[self::USER_2], 2);
+        \Testo\Assert::same($postCounts[self::USER_3], 1);
     }
 
+    #[\Testo\Test]
     public function testBulkLoadBelongsTo(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->orderBy('title')
             ->fetchAll();
 
-        $this->assertCount(4, $posts);
+        \Testo\Assert::count($posts, 4);
 
         // Bulk load user for all posts — single query
         $this->captureReadQueries();
@@ -78,8 +80,8 @@ abstract class CaseTest extends BaseTest
         // Verify users are loaded without additional queries
         $this->captureReadQueries();
         foreach ($posts as $post) {
-            $this->assertInstanceOf(Entity\User::class, $post->user);
-            $this->assertInstanceOf(UuidInterface::class, $post->user->uuid);
+            \Testo\Assert::instanceOf($post->user, Entity\User::class);
+            \Testo\Assert::instanceOf($post->user->uuid, UuidInterface::class);
         }
         $this->assertNumReads(0);
 
@@ -88,18 +90,19 @@ abstract class CaseTest extends BaseTest
         foreach ($posts as $post) {
             $postsByUuid[$post->uuid->toString()] = $post;
         }
-        $this->assertSame(self::USER_1, $postsByUuid[self::POST_1]->user->uuid->toString());
-        $this->assertSame(self::USER_2, $postsByUuid[self::POST_2]->user->uuid->toString());
-        $this->assertSame(self::USER_2, $postsByUuid[self::POST_3]->user->uuid->toString());
-        $this->assertSame(self::USER_3, $postsByUuid[self::POST_4]->user->uuid->toString());
+        \Testo\Assert::same($postsByUuid[self::POST_1]->user->uuid->toString(), self::USER_1);
+        \Testo\Assert::same($postsByUuid[self::POST_2]->user->uuid->toString(), self::USER_2);
+        \Testo\Assert::same($postsByUuid[self::POST_3]->user->uuid->toString(), self::USER_2);
+        \Testo\Assert::same($postsByUuid[self::POST_4]->user->uuid->toString(), self::USER_3);
     }
 
+    #[\Testo\Test]
     public function testBulkLoadMultipleRelations(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->fetchAll();
 
-        $this->assertCount(4, $posts);
+        \Testo\Assert::count($posts, 4);
 
         // Load both user and comments in one BulkLoader call
         $this->captureReadQueries();
@@ -113,19 +116,20 @@ abstract class CaseTest extends BaseTest
         // Verify all relations loaded without queries
         $this->captureReadQueries();
         foreach ($posts as $post) {
-            $this->assertInstanceOf(Entity\User::class, $post->user);
-            $this->assertIsArray($post->comments);
+            \Testo\Assert::instanceOf($post->user, Entity\User::class);
+            \Testo\Assert::array($post->comments);
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testBulkLoadForSingleEntity(): void
     {
         $user = (new Select($this->orm, Entity\User::class))
             ->where('login', 'user-2')
             ->fetchOne();
 
-        $this->assertInstanceOf(Entity\User::class, $user);
+        \Testo\Assert::instanceOf($user, Entity\User::class);
 
         $this->captureReadQueries();
         (new BulkLoader($this->orm))
@@ -135,17 +139,18 @@ abstract class CaseTest extends BaseTest
         $this->assertNumReads(1);
 
         $this->captureReadQueries();
-        $this->assertCount(2, $user->posts);
+        \Testo\Assert::count($user->posts, 2);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testBulkLoadBelongsToOnComments(): void
     {
         // Comment has eager-loaded user and promise-loaded post
         $comments = (new Select($this->orm, Entity\Comment::class))
             ->fetchAll();
 
-        $this->assertCount(3, $comments);
+        \Testo\Assert::count($comments, 3);
 
         // Bulk load the lazy post relation
         $this->captureReadQueries();
@@ -157,12 +162,13 @@ abstract class CaseTest extends BaseTest
 
         $this->captureReadQueries();
         foreach ($comments as $comment) {
-            $this->assertInstanceOf(Entity\Post::class, $comment->post);
-            $this->assertInstanceOf(UuidInterface::class, $comment->post->uuid);
+            \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
+            \Testo\Assert::instanceOf($comment->post->uuid, UuidInterface::class);
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -21,23 +21,25 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        $this->assertInstanceOf(Collection::class, $a->comments);
-        $this->assertInstanceOf(Collection::class, $b->comments);
+        \Testo\Assert::instanceOf($a->comments, Collection::class);
+        \Testo\Assert::instanceOf($b->comments, Collection::class);
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 0);
 
-        $this->assertSame('first comment', $a->comments[0]->message);
-        $this->assertSame('second comment', $a->comments[1]->message);
-        $this->assertSame('third comment', $a->comments[2]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'first comment');
+        \Testo\Assert::same($a->comments[1]->message, 'second comment');
+        \Testo\Assert::same($a->comments[2]->message, 'third comment');
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -52,6 +54,7 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testDeleteComment(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -80,10 +83,11 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 0);
     }
 
+    #[\Testo\Test]
     public function testMoveToAnotherParent(): void
     {
         /**
@@ -119,14 +123,15 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('first comment', $b->comments[0]->message);
-        $this->assertSame('second comment', $a->comments[0]->message);
-        $this->assertSame('third comment', $a->comments[1]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'first comment');
+        \Testo\Assert::same($a->comments[0]->message, 'second comment');
+        \Testo\Assert::same($a->comments[1]->message, 'third comment');
     }
 
+    #[\Testo\Test]
     public function testMoveToAnother(): void
     {
         /**
@@ -158,31 +163,32 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $a = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
         $b = (new Select($this->orm, Post::class))->wherePK(1)->fetchOne();
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 3);
 
 
-        $this->assertTrue($a->comments->exists(function ($i, $c) {
+        \Testo\Assert::true($a->comments->exists(function ($i, $c) {
             return $c->message == 'third comment';
         }));
 
-        $this->assertTrue($a->comments->exists(function ($i, $c) {
+        \Testo\Assert::true($a->comments->exists(function ($i, $c) {
             return $c->message == 'second comment';
         }));
 
-        $this->assertTrue($b->comments->exists(function ($i, $c) {
+        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'first comment';
         }));
 
-        $this->assertTrue($b->comments->exists(function ($i, $c) {
+        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'post 1 comment';
         }));
 
-        $this->assertTrue($b->comments->exists(function ($i, $c) {
+        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'post 1.1 comment';
         }));
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

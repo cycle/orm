@@ -17,52 +17,58 @@ abstract class SelectFromTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFromOverridesSchemaTable(): void
     {
         $select = new Select($this->orm, User::class);
         $select->from('user_archive');
 
-        $this->assertStringContainsString('user_archive', $select->sqlStatement());
+        \Testo\Assert::string($select->sqlStatement())->contains('user_archive');
     }
 
+    #[\Testo\Test]
     public function testFromFetchesDataFromAnotherTable(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->from('user_archive')->orderBy('id')->fetchAll();
 
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(User::class, $result[0]);
-        $this->assertSame('archived@world.com', $result[0]->email);
+        \Testo\Assert::count($result, 1);
+        \Testo\Assert::instanceOf($result[0], User::class);
+        \Testo\Assert::same($result[0]->email, 'archived@world.com');
     }
 
+    #[\Testo\Test]
     public function testFromWithWhere(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->from('user_archive')->where('id', 1)->fetchAll();
 
-        $this->assertCount(1, $result);
-        $this->assertSame(1, $result[0]->id);
-        $this->assertSame('archived@world.com', $result[0]->email);
+        \Testo\Assert::count($result, 1);
+        \Testo\Assert::same($result[0]->id, 1);
+        \Testo\Assert::same($result[0]->email, 'archived@world.com');
     }
 
+    #[\Testo\Test]
     public function testFromDoesNotAffectOriginalTable(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->orderBy('id')->fetchAll();
 
-        $this->assertCount(2, $result);
-        $this->assertSame('hello@world.com', $result[0]->email);
-        $this->assertSame('another@world.com', $result[1]->email);
+        \Testo\Assert::count($result, 2);
+        \Testo\Assert::same($result[0]->email, 'hello@world.com');
+        \Testo\Assert::same($result[1]->email, 'another@world.com');
     }
 
+    #[\Testo\Test]
     public function testFromReturnsFluent(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->from('user_archive');
 
-        $this->assertSame($select, $result);
+        \Testo\Assert::same($result, $select);
     }
 
+    #[\Testo\Test]
     public function testFromWithLoadRelation(): void
     {
         $select = new Select($this->orm, User::class);
@@ -72,32 +78,34 @@ abstract class SelectFromTest extends BaseTest
             ->orderBy('id')
             ->fetchAll();
 
-        $this->assertCount(1, $result);
-        $this->assertSame('archived@world.com', $result[0]->email);
+        \Testo\Assert::count($result, 1);
+        \Testo\Assert::same($result[0]->email, 'archived@world.com');
         // Comments are loaded from the regular 'comment' table via user_id FK
-        $this->assertCount(2, $result[0]->comments);
-        $this->assertSame('msg 1', $result[0]->comments[0]->message);
-        $this->assertSame('msg 2', $result[0]->comments[1]->message);
+        \Testo\Assert::count($result[0]->comments, 2);
+        \Testo\Assert::same($result[0]->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($result[0]->comments[1]->message, 'msg 2');
     }
 
+    #[\Testo\Test]
     public function testFromPreservesAlias(): void
     {
         $select = new Select($this->orm, User::class);
         $sql = $select->from('user_archive')->sqlStatement();
 
         // The alias should remain the entity role ('user') so that column references still work
-        $this->assertStringContainsString('user_archive', $sql);
-        $this->assertStringNotContainsString('"user"."user"', $sql);
+        \Testo\Assert::string($sql)->contains('user_archive')->notContains('"user"."user"');
     }
 
+    #[\Testo\Test]
     public function testFromWithCount(): void
     {
         $select = new Select($this->orm, User::class);
         $count = $select->from('user_archive')->count();
 
-        $this->assertSame(1, $count);
+        \Testo\Assert::same($count, 1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

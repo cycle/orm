@@ -17,74 +17,78 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
-        $this->assertEquals(
+        \Testo\Assert::equals((new Select($this->orm, 'user'))->fetchData(), [
             [
-                [
-                    'id' => 1,
-                    'email' => 'hello@world.com',
-                    'balance' => 100.0,
-                ],
-                [
-                    'id' => 2,
-                    'email' => 'another@world.com',
-                    'balance' => 200.0,
-                ],
+                'id' => 1,
+                'email' => 'hello@world.com',
+                'balance' => 100.0,
             ],
-            (new Select($this->orm, 'user'))->fetchData(),
-        );
+            [
+                'id' => 2,
+                'email' => 'another@world.com',
+                'balance' => 200.0,
+            ],
+        ]);
     }
 
+    #[\Testo\Test]
     public function testAssertRole(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
 
-        $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
+        \Testo\Assert::same($this->orm->getHeap()->get($result)->getRole(), 'user');
     }
 
+    #[\Testo\Test]
     public function testMakeByRole(): void
     {
         $user = $this->orm->make('user');
-        $this->assertIsObject($user);
-        $this->assertSame('user', $this->orm->resolveRole($user));
+        \Testo\Assert::object($user);
+        \Testo\Assert::same($this->orm->resolveRole($user), 'user');
     }
 
+    #[\Testo\Test]
     public function testAssertRoleViaClass(): void
     {
         $result = (new Select($this->orm, 'user'))->fetchOne();
 
-        $this->assertSame('user', $this->orm->getHeap()->get($result)->getRole());
+        \Testo\Assert::same($this->orm->getHeap()->get($result)->getRole(), 'user');
     }
 
+    #[\Testo\Test]
     public function testFetchAll(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchAll();
 
-        $this->assertIsObject($result[0]);
-        $this->assertEquals(1, $result[0]->id);
-        $this->assertEquals('hello@world.com', $result[0]->email);
-        $this->assertEquals(100.0, $result[0]->balance);
+        \Testo\Assert::object($result[0]);
+        \Testo\Assert::equals($result[0]->id, 1);
+        \Testo\Assert::equals($result[0]->email, 'hello@world.com');
+        \Testo\Assert::equals($result[0]->balance, 100.0);
 
-        $this->assertIsObject($result[1]);
-        $this->assertEquals(2, $result[1]->id);
-        $this->assertEquals('another@world.com', $result[1]->email);
-        $this->assertEquals(200.0, $result[1]->balance);
+        \Testo\Assert::object($result[1]);
+        \Testo\Assert::equals($result[1]->id, 2);
+        \Testo\Assert::equals($result[1]->email, 'another@world.com');
+        \Testo\Assert::equals($result[1]->balance, 200.0);
     }
 
+    #[\Testo\Test]
     public function testFetchOne(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
 
-        $this->assertIsObject($result);
-        $this->assertEquals(1, $result->id);
-        $this->assertEquals('hello@world.com', $result->email);
-        $this->assertEquals(100.0, $result->balance);
+        \Testo\Assert::object($result);
+        \Testo\Assert::equals($result->id, 1);
+        \Testo\Assert::equals($result->email, 'hello@world.com');
+        \Testo\Assert::equals($result->balance, 100.0);
     }
 
+    #[\Testo\Test]
     public function testFetchSame(): void
     {
         $u = $this->orm->make('user');
@@ -97,14 +101,15 @@ abstract class ClasslessMapperTest extends BaseMapperTest
             ->orderBy('id', 'DESC')
             ->fetchOne();
 
-        $this->assertIsObject($result);
-        $this->assertEquals($u->id, $result->id);
-        $this->assertEquals($u->email, $result->email);
-        $this->assertEquals($u->balance, $result->balance);
+        \Testo\Assert::object($result);
+        \Testo\Assert::equals($result->id, $u->id);
+        \Testo\Assert::equals($result->email, $u->email);
+        \Testo\Assert::equals($result->balance, $u->balance);
 
-        $this->assertSame($u, $result);
+        \Testo\Assert::same($result, $u);
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, 'user');
@@ -118,17 +123,19 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testWhere(): void
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->where('id', 2)->fetchOne();
 
-        $this->assertIsObject($result);
-        $this->assertEquals(2, $result->id);
-        $this->assertEquals('another@world.com', $result->email);
-        $this->assertEquals(200.0, $result->balance);
+        \Testo\Assert::object($result);
+        \Testo\Assert::equals($result->id, 2);
+        \Testo\Assert::equals($result->email, 'another@world.com');
+        \Testo\Assert::equals($result->balance, 200.0);
     }
 
+    #[\Testo\Test]
     public function testDelete(): void
     {
         $selector = new Select($this->orm, 'user');
@@ -139,33 +146,32 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $tr->run();
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'user');
-        $this->assertNull($selector->where('id', 2)->fetchOne());
+        \Testo\Assert::null($selector->where('id', 2)->fetchOne());
 
         $selector = new Select($this->orm, 'user');
-        $this->assertNull($selector->where('id', 2)->fetchOne());
+        \Testo\Assert::null($selector->where('id', 2)->fetchOne());
 
-        $this->assertFalse($this->orm->getHeap()->has($result));
+        \Testo\Assert::false($this->orm->getHeap()->has($result));
     }
 
+    #[\Testo\Test]
     public function testHeap(): void
     {
         $result = (new Select($this->orm, 'user'))->fetchOne();
 
-        $this->assertEquals(1, $result->id);
+        \Testo\Assert::equals($result->id, 1);
 
-        $this->assertTrue($this->orm->getHeap()->has($result));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($result)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($result));
+        \Testo\Assert::same($this->orm->getHeap()->get($result)->getStatus(), Node::MANAGED);
 
-        $this->assertEquals(
-            [
-                'id' => 1,
-                'email' => 'hello@world.com',
-                'balance' => 100.0,
-            ],
-            $this->orm->getHeap()->get($result)->getData(),
-        );
+        \Testo\Assert::equals($this->orm->getHeap()->get($result)->getData(), [
+            'id' => 1,
+            'email' => 'hello@world.com',
+            'balance' => 100.0,
+        ]);
     }
 
+    #[\Testo\Test]
     public function testStore(): void
     {
         $e = $this->orm->make('user');
@@ -185,12 +191,13 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $tr->run();
         $this->assertNumWrites(0);
 
-        $this->assertEquals(3, $e->id);
+        \Testo\Assert::equals($e->id, 3);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
     }
 
+    #[\Testo\Test]
     public function testStoreWithUpdate(): void
     {
         $e = $this->orm->make('user');
@@ -208,67 +215,71 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 
         $this->assertNumWrites(1);
 
-        $this->assertEquals(3, $e->id);
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::equals($e->id, 3);
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, 'user');
         $result = $selector->where('id', 3)->fetchOne();
-        $this->assertEquals(400, $result->balance);
+        \Testo\Assert::equals($result->balance, 400);
     }
 
+    #[\Testo\Test]
     public function testRepositoryFindAll(): void
     {
         $r = $this->orm->getRepository('user');
         $result = $r->findAll();
 
-        $this->assertIsObject($result[0]);
-        $this->assertEquals(1, $result[0]->id);
-        $this->assertEquals('hello@world.com', $result[0]->email);
-        $this->assertEquals(100.0, $result[0]->balance);
+        \Testo\Assert::object($result[0]);
+        \Testo\Assert::equals($result[0]->id, 1);
+        \Testo\Assert::equals($result[0]->email, 'hello@world.com');
+        \Testo\Assert::equals($result[0]->balance, 100.0);
 
-        $this->assertIsObject($result[1]);
-        $this->assertEquals(2, $result[1]->id);
-        $this->assertEquals('another@world.com', $result[1]->email);
-        $this->assertEquals(200.0, $result[1]->balance);
+        \Testo\Assert::object($result[1]);
+        \Testo\Assert::equals($result[1]->id, 2);
+        \Testo\Assert::equals($result[1]->email, 'another@world.com');
+        \Testo\Assert::equals($result[1]->balance, 200.0);
     }
 
+    #[\Testo\Test]
     public function testRepositoryFindOne(): void
     {
         $r = $this->orm->getRepository('user');
         $result = $r->findOne();
 
-        $this->assertIsObject($result);
-        $this->assertEquals(1, $result->id);
-        $this->assertEquals('hello@world.com', $result->email);
-        $this->assertEquals(100.0, $result->balance);
+        \Testo\Assert::object($result);
+        \Testo\Assert::equals($result->id, 1);
+        \Testo\Assert::equals($result->email, 'hello@world.com');
+        \Testo\Assert::equals($result->balance, 100.0);
     }
 
+    #[\Testo\Test]
     public function testRepositoryFindOneWithWhere(): void
     {
         $r = $this->orm->getRepository('user');
         $result = $r->findOne(['id' => 2]);
 
-        $this->assertIsObject($result);
-        $this->assertEquals(2, $result->id);
-        $this->assertEquals('another@world.com', $result->email);
-        $this->assertEquals(200.0, $result->balance);
+        \Testo\Assert::object($result);
+        \Testo\Assert::equals($result->id, 2);
+        \Testo\Assert::equals($result->email, 'another@world.com');
+        \Testo\Assert::equals($result->balance, 200.0);
     }
 
+    #[\Testo\Test]
     public function testLoadOverwriteValues(): void
     {
         $u = $this->orm->getRepository('user')->findByPK(1);
-        $this->assertSame('hello@world.com', $u->email);
+        \Testo\Assert::same($u->email, 'hello@world.com');
         $u->email = 'test@email.com';
-        $this->assertSame('test@email.com', $u->email);
+        \Testo\Assert::same($u->email, 'test@email.com');
 
         $u2 = $this->orm->getRepository('user')->findByPK(1);
-        self::assertSame($u, $u2);
-        $this->assertSame('test@email.com', $u2->email);
+        \Testo\Assert::same($u2, $u);
+        \Testo\Assert::same($u2->email, 'test@email.com');
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
-        $this->assertSame('hello@world.com', $u3->email);
+        \Testo\Assert::same($u3->email, 'hello@world.com');
 
         $this->captureWriteQueries();
         $t = new Transaction($this->orm);
@@ -277,13 +288,14 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $this->assertNumWrites(1);
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
-        $this->assertSame('test@email.com', $u4->email);
+        \Testo\Assert::same($u4->email, 'test@email.com');
     }
 
+    #[\Testo\Test]
     public function testNullableValuesInASndOut(): void
     {
         $u = $this->orm->getRepository('user')->findByPK(1);
-        $this->assertEquals(100.0, (float) $u->balance);
+        \Testo\Assert::equals((float) $u->balance, 100.0);
         $u->balance = 0.0;
 
         $this->captureWriteQueries();
@@ -294,7 +306,7 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository('user')->findByPK(1);
-        $this->assertEquals(0.0, (float) $u->balance);
+        \Testo\Assert::equals((float) $u->balance, 0.0);
 
         $u->balance = null;
 
@@ -306,9 +318,10 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository('user')->findByPK(1);
-        $this->assertNull($u->balance);
+        \Testo\Assert::null($u->balance);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

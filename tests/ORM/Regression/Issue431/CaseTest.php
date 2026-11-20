@@ -37,13 +37,14 @@ abstract class CaseTest extends BaseTest
     // Stringable PK tests (User entity, StringableUuid)
     // =============================================
 
+    #[\Testo\Test]
     public function testStringablePk_HasMany(): void
     {
         $users = (new Select($this->orm, Entity\User::class))
             ->orderBy('login')
             ->fetchAll();
 
-        $this->assertCount(3, $users);
+        \Testo\Assert::count($users, 3);
 
         $this->captureReadQueries();
         (new BulkLoader($this->orm))
@@ -55,23 +56,24 @@ abstract class CaseTest extends BaseTest
         $this->captureReadQueries();
         $postCounts = [];
         foreach ($users as $user) {
-            $this->assertInstanceOf(Typecast\StringableUuid::class, $user->id);
+            \Testo\Assert::instanceOf($user->id, Typecast\StringableUuid::class);
             $postCounts[$user->id->toString()] = \count($user->posts);
         }
         $this->assertNumReads(0);
 
-        $this->assertSame(1, $postCounts[self::USER_1]);
-        $this->assertSame(2, $postCounts[self::USER_2]);
-        $this->assertSame(1, $postCounts[self::USER_3]);
+        \Testo\Assert::same($postCounts[self::USER_1], 1);
+        \Testo\Assert::same($postCounts[self::USER_2], 2);
+        \Testo\Assert::same($postCounts[self::USER_3], 1);
     }
 
+    #[\Testo\Test]
     public function testStringablePk_SingleEntity(): void
     {
         $user = (new Select($this->orm, Entity\User::class))
             ->where('login', 'user-2')
             ->fetchOne();
 
-        $this->assertInstanceOf(Entity\User::class, $user);
+        \Testo\Assert::instanceOf($user, Entity\User::class);
 
         $this->captureReadQueries();
         (new BulkLoader($this->orm))
@@ -81,7 +83,7 @@ abstract class CaseTest extends BaseTest
         $this->assertNumReads(1);
 
         $this->captureReadQueries();
-        $this->assertCount(2, $user->posts);
+        \Testo\Assert::count($user->posts, 2);
         $this->assertNumReads(0);
     }
 
@@ -91,15 +93,16 @@ abstract class CaseTest extends BaseTest
     // If BulkLoader incorrectly uses __toString(), indexing won't match DB data.
     // =============================================
 
+    #[\Testo\Test]
     public function testValueInterfacePk_HasMany(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->fetchAll();
 
-        $this->assertCount(4, $posts);
+        \Testo\Assert::count($posts, 4);
 
         foreach ($posts as $post) {
-            $this->assertInstanceOf(Typecast\ValueInterfaceUuid::class, $post->id);
+            \Testo\Assert::instanceOf($post->id, Typecast\ValueInterfaceUuid::class);
         }
 
         $this->captureReadQueries();
@@ -111,18 +114,19 @@ abstract class CaseTest extends BaseTest
 
         $this->captureReadQueries();
         foreach ($posts as $post) {
-            $this->assertIsArray($post->comments);
+            \Testo\Assert::array($post->comments);
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testValueInterfacePk_BelongsTo(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->orderBy('title')
             ->fetchAll();
 
-        $this->assertCount(4, $posts);
+        \Testo\Assert::count($posts, 4);
 
         $this->captureReadQueries();
         (new BulkLoader($this->orm))
@@ -133,17 +137,18 @@ abstract class CaseTest extends BaseTest
 
         $this->captureReadQueries();
         foreach ($posts as $post) {
-            $this->assertInstanceOf(Entity\User::class, $post->user);
+            \Testo\Assert::instanceOf($post->user, Entity\User::class);
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Test]
     public function testValueInterfacePk_MultipleRelations(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->fetchAll();
 
-        $this->assertCount(4, $posts);
+        \Testo\Assert::count($posts, 4);
 
         $this->captureReadQueries();
         (new BulkLoader($this->orm))
@@ -155,8 +160,8 @@ abstract class CaseTest extends BaseTest
 
         $this->captureReadQueries();
         foreach ($posts as $post) {
-            $this->assertInstanceOf(Entity\User::class, $post->user);
-            $this->assertIsArray($post->comments);
+            \Testo\Assert::instanceOf($post->user, Entity\User::class);
+            \Testo\Assert::array($post->comments);
         }
         $this->assertNumReads(0);
     }
@@ -165,12 +170,13 @@ abstract class CaseTest extends BaseTest
     // Cross-type: BulkLoad comments, load lazy post (ValueInterfaceUuid FK)
     // =============================================
 
+    #[\Testo\Test]
     public function testStringablePk_BelongsToValueInterfaceEntity(): void
     {
         $comments = (new Select($this->orm, Entity\Comment::class))
             ->fetchAll();
 
-        $this->assertCount(3, $comments);
+        \Testo\Assert::count($comments, 3);
 
         $this->captureReadQueries();
         (new BulkLoader($this->orm))
@@ -181,12 +187,13 @@ abstract class CaseTest extends BaseTest
 
         $this->captureReadQueries();
         foreach ($comments as $comment) {
-            $this->assertInstanceOf(Entity\Post::class, $comment->post);
-            $this->assertInstanceOf(Typecast\ValueInterfaceUuid::class, $comment->post->id);
+            \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
+            \Testo\Assert::instanceOf($comment->post->id, Typecast\ValueInterfaceUuid::class);
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

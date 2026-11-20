@@ -17,6 +17,7 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         $model = (new Select($this->orm, Entity\Node::class))
@@ -32,6 +33,7 @@ abstract class CaseTest extends BaseTest
         $this->save($model);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

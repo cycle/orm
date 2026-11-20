@@ -19,6 +19,7 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -26,7 +27,7 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
             method: LoadMethod::SingleQuery,
         ))->orderBy('profile.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -57,9 +58,10 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
                     'balance' => 200.0,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -67,7 +69,7 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
             method: LoadMethod::OuterQuery,
         ))->orderBy('profile.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -98,9 +100,10 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
                     'balance' => 200.0,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadWithUsing(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -113,7 +116,7 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
             ->orderBy('id', 'DESC')
             ->limit(1);
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 3,
                 'user_id' => 2,
@@ -124,9 +127,10 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
                     'balance' => 200.0,
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testLoadWithDefaultOptions(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -134,12 +138,13 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
 
         $res = $selector->fetchAll();
 
-        $this->assertCount(3, $res);
-        $this->assertSame('hello@world.com', $res[0]->user->email);
-        $this->assertSame('another@world.com', $res[1]->user->email);
-        $this->assertSame('another@world.com', $res[2]->user->email);
+        \Testo\Assert::count($res, 3);
+        \Testo\Assert::same($res[0]->user->email, 'hello@world.com');
+        \Testo\Assert::same($res[1]->user->email, 'another@world.com');
+        \Testo\Assert::same($res[2]->user->email, 'another@world.com');
     }
 
+    #[\Testo\Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('user_archive', [
@@ -160,12 +165,13 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
             table: 'user_archive',
         ))->orderBy('profile.id')->fetchAll();
 
-        $this->assertCount(3, $res);
-        $this->assertSame('archived@world.com', $res[0]->user->email);
-        $this->assertSame('archived2@world.com', $res[1]->user->email);
-        $this->assertSame('archived2@world.com', $res[2]->user->email);
+        \Testo\Assert::count($res, 3);
+        \Testo\Assert::same($res[0]->user->email, 'archived@world.com');
+        \Testo\Assert::same($res[1]->user->email, 'archived2@world.com');
+        \Testo\Assert::same($res[2]->user->email, 'archived2@world.com');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

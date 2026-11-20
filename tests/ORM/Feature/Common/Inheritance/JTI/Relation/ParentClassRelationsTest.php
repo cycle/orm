@@ -64,6 +64,7 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
     /**
      * Parent's relation should be initialized
      */
+    #[\Testo\Test]
     public function testLoadParentRelations(): void
     {
         /** @var Programator $entity */
@@ -71,13 +72,14 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
             ->load('tech_book')
             ->wherePK(2)->fetchOne();
 
-        $this->assertNotNull($entity->book);
-        $this->assertNotNull($entity->tech_book);
+        \Testo\Assert::notNull($entity->book);
+        \Testo\Assert::notNull($entity->tech_book);
     }
 
     /**
      * Parent's relations should be removed or not removed with their parent
      */
+    #[\Testo\Test]
     public function testRemoveSubclassWithRelations(): void
     {
         /** @var Engineer $engineer */
@@ -93,27 +95,24 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
         (new Transaction($this->orm))->delete($engineer)->run();
         $this->assertNumWrites(0);
 
-        $this->assertNull(
-            (new Select($this->orm, static::PROGRAMATOR_ROLE))
-                ->wherePK(2)
-                ->fetchOne(),
-        );
-        $this->assertNull(
-            (new Select($this->orm, static::ENGINEER_ROLE))
-                ->loadSubclasses(false)
-                ->wherePK(2)
-                ->fetchOne(),
-        );
+        \Testo\Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))
+            ->wherePK(2)
+            ->fetchOne());
+        \Testo\Assert::null((new Select($this->orm, static::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            ->wherePK(2)
+            ->fetchOne());
         /** @var Employee $employee */
         $employee = (new Select($this->orm, static::EMPLOYEE_ROLE))
             ->loadSubclasses(false)
             ->wherePK(2)
             ->fetchOne();
 
-        $this->assertNotNull($employee);
-        $this->assertNotNull($employee->book);
+        \Testo\Assert::notNull($employee);
+        \Testo\Assert::notNull($employee->book);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         JtiBaseTest::setUp();

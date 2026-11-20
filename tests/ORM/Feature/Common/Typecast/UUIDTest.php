@@ -19,6 +19,7 @@ abstract class UUIDTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey(Uuid::uuid4()->toString()), 'hello@world.com', 500);
@@ -32,6 +33,7 @@ abstract class UUIDTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $uuid = Uuid::uuid4()->toString();
@@ -39,15 +41,16 @@ abstract class UUIDTest extends BaseTest
 
         $this->save($e);
 
-        $this->assertEquals($uuid, (string) $e->getID());
+        \Testo\Assert::equals((string) $e->getID(), $uuid);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $result = (new Select($this->orm, UserWithUUIDPrimaryKey::class))->fetchData();
 
-        $this->assertInstanceOf(UuidPrimaryKey::class, $result[0]['uuid']);
-        $this->assertEquals((string) $e->getID(), (string) $result[0]['uuid']);
+        \Testo\Assert::instanceOf($result[0]['uuid'], UuidPrimaryKey::class);
+        \Testo\Assert::equals((string) $result[0]['uuid'], (string) $e->getID());
     }
 
+    #[\Testo\Test]
     public function testUpdate(): void
     {
         $uuid = Uuid::uuid4()->toString();
@@ -55,13 +58,13 @@ abstract class UUIDTest extends BaseTest
 
         $this->save($e);
 
-        $this->assertEquals($uuid, (string) $e->getID());
+        \Testo\Assert::equals((string) $e->getID(), $uuid);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $result = (new Select($this->orm, UserWithUUIDPrimaryKey::class))->fetchOne();
 
-        $this->assertInstanceOf(UuidPrimaryKey::class, $result->getID());
-        $this->assertEquals((string) $e->getID(), (string) $result->getID());
+        \Testo\Assert::instanceOf($result->getID(), UuidPrimaryKey::class);
+        \Testo\Assert::equals((string) $result->getID(), (string) $e->getID());
 
         $result->setEmail('new-mail@test.loc');
 
@@ -70,10 +73,11 @@ abstract class UUIDTest extends BaseTest
         $selector = new Select($this->orm->withHeap(new Heap()), UserWithUUIDPrimaryKey::class);
         $result2 = $selector->fetchOne();
 
-        $this->assertInstanceOf(UuidPrimaryKey::class, $result2->getID());
-        $this->assertEquals($result->getEmail(), $result2->getEmail());
+        \Testo\Assert::instanceOf($result2->getID(), UuidPrimaryKey::class);
+        \Testo\Assert::equals($result2->getEmail(), $result->getEmail());
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -23,6 +23,7 @@ abstract class CursorTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCursorYieldsAllRowsInOrder(): void
     {
         $this->fillUsers(7);
@@ -36,11 +37,12 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertCount(7, $emails);
-        $this->assertSame('user-1@example.com', $emails[0]);
-        $this->assertSame('user-7@example.com', $emails[6]);
+        \Testo\Assert::count($emails, 7);
+        \Testo\Assert::same($emails[0], 'user-1@example.com');
+        \Testo\Assert::same($emails[6], 'user-7@example.com');
     }
 
+    #[\Testo\Test]
     public function testCursorChunkSmallerThanTotal(): void
     {
         $this->fillUsers(25);
@@ -53,9 +55,10 @@ abstract class CursorTest extends BaseTest
             return $i;
         });
 
-        $this->assertSame(25, $count);
+        \Testo\Assert::same($count, 25);
     }
 
+    #[\Testo\Test]
     public function testCursorChunkExactlyMatchesTotal(): void
     {
         $this->fillUsers(10);
@@ -68,9 +71,10 @@ abstract class CursorTest extends BaseTest
             return $i;
         });
 
-        $this->assertSame(10, $count);
+        \Testo\Assert::same($count, 10);
     }
 
+    #[\Testo\Test]
     public function testCursorOnEmptyTable(): void
     {
 
@@ -82,22 +86,24 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertSame([], $items);
+        \Testo\Assert::same($items, []);
     }
 
+    #[\Testo\Test]
     public function testCursorTypecastsScalars(): void
     {
         $this->fillUsers(1);
 
         $this->getDatabase()->transaction(function (): void {
             foreach ((new Select($this->orm, User::class))->cursor(10) as $user) {
-                $this->assertIsInt($user->id);
-                $this->assertIsFloat($user->balance);
-                $this->assertSame(100.0, $user->balance);
+                \Testo\Assert::int($user->id);
+                \Testo\Assert::float($user->balance);
+                \Testo\Assert::same($user->balance, 100.0);
             }
         });
     }
 
+    #[\Testo\Test]
     public function testCursorRegistersEntitiesInHeap(): void
     {
         $this->fillUsers(3);
@@ -111,19 +117,20 @@ abstract class CursorTest extends BaseTest
             // Same identity returned from the heap
             foreach ($collected as $entity) {
                 $node = $this->orm->getHeap()->get($entity);
-                $this->assertNotNull($node);
-                $this->assertSame(Node::MANAGED, $node->getStatus());
+                \Testo\Assert::notNull($node);
+                \Testo\Assert::same($node->getStatus(), Node::MANAGED);
             }
         });
     }
 
+    #[\Testo\Test]
     public function testCursorReturnsHeapAttachedInstanceForDuplicatePk(): void
     {
         $this->fillUsers(3);
 
         // Pre-load user 2 — it's now attached to the heap.
         $pre = (new Select($this->orm, User::class))->wherePK(2)->fetchOne();
-        $this->assertNotNull($pre);
+        \Testo\Assert::notNull($pre);
 
         $fromCursor = $this->getDatabase()->transaction(function () {
             $found = null;
@@ -136,9 +143,10 @@ abstract class CursorTest extends BaseTest
             return $found;
         });
 
-        $this->assertSame($pre, $fromCursor, 'Cursor must reuse the heap-attached instance for duplicate PKs');
+        \Testo\Assert::same($fromCursor, $pre, 'Cursor must reuse the heap-attached instance for duplicate PKs');
     }
 
+    #[\Testo\Test]
     public function testCursorAllowsHeapCleanBetweenChunks(): void
     {
         $this->fillUsers(20);
@@ -161,22 +169,23 @@ abstract class CursorTest extends BaseTest
 
             // After heap->clean() in the middle of streaming, the heap never accumulates
             // more than a single chunk worth of entities.
-            $this->assertLessThanOrEqual($chunk, $maxLive);
+            \Testo\Assert::numeric($maxLive)->lessThanOrEqual($chunk);
         });
     }
 
+    #[\Testo\Test]
     public function testCursorRequiresActiveTransaction(): void
     {
         $this->fillUsers(2);
 
-        $this->expectException(DriverException::class);
-        $this->expectExceptionMessageMatches('/active transaction/i');
+        \Testo\Expect::exception(DriverException::class)->withMessageMatchingRegex('/active transaction/i');
 
         foreach ((new Select($this->orm, User::class))->cursor(10) as $_) {
             // pulling first row triggers DECLARE CURSOR which requires a transaction
         }
     }
 
+    #[\Testo\Test]
     public function testCursorRespectsWhereAndOrderBy(): void
     {
         $this->fillUsers(10);
@@ -194,9 +203,10 @@ abstract class CursorTest extends BaseTest
         });
 
         // balance = id * 100; balance >= 500 → ids 5..10; DESC → [10,9,8,7,6,5]
-        $this->assertSame([10, 9, 8, 7, 6, 5], $ids);
+        \Testo\Assert::same($ids, [10, 9, 8, 7, 6, 5]);
     }
 
+    #[\Testo\Test]
     public function testCursorSupportsEarlyBreak(): void
     {
         $this->fillUsers(50);
@@ -214,10 +224,11 @@ abstract class CursorTest extends BaseTest
             return ['seen' => $seen, 'total' => $total];
         });
 
-        $this->assertSame(3, $result['seen']);
-        $this->assertSame(50, $result['total']);
+        \Testo\Assert::same($result['seen'], 3);
+        \Testo\Assert::same($result['total'], 50);
     }
 
+    #[\Testo\Test]
     public function testCursorPostloadHasMany(): void
     {
         $this->fillUsers(3);
@@ -239,11 +250,12 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertSame(['msg 1-1', 'msg 1-2', 'msg 1-3', 'msg 1-4'], $byUser[1]);
-        $this->assertSame(['msg 2-1', 'msg 2-2', 'msg 2-3'], $byUser[2]);
-        $this->assertSame([], $byUser[3]);
+        \Testo\Assert::same($byUser[1], ['msg 1-1', 'msg 1-2', 'msg 1-3', 'msg 1-4']);
+        \Testo\Assert::same($byUser[2], ['msg 2-1', 'msg 2-2', 'msg 2-3']);
+        \Testo\Assert::same($byUser[3], []);
     }
 
+    #[\Testo\Test]
     public function testCursorInlineHasOne(): void
     {
         $this->fillUsers(3);
@@ -261,9 +273,10 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertSame(['profile-1.png', null, 'profile-3.png'], \array_values($images));
+        \Testo\Assert::same(\array_values($images), ['profile-1.png', null, 'profile-3.png']);
     }
 
+    #[\Testo\Test]
     public function testCursorInlineBelongsTo(): void
     {
         $this->fillUsers(2);
@@ -281,16 +294,14 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertSame(
-            [
-                ['msg 1-1', 1, 'user-1@example.com'],
-                ['msg 1-2', 1, 'user-1@example.com'],
-                ['msg 2-1', 2, 'user-2@example.com'],
-            ],
-            $rows,
-        );
+        \Testo\Assert::same($rows, [
+            ['msg 1-1', 1, 'user-1@example.com'],
+            ['msg 1-2', 1, 'user-1@example.com'],
+            ['msg 2-1', 2, 'user-2@example.com'],
+        ]);
     }
 
+    #[\Testo\Test]
     public function testCursorAllowsWithOnNonMultiplyingRelation(): void
     {
         $this->fillUsers(2);
@@ -309,9 +320,10 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertSame(['msg 2-1'], $messages);
+        \Testo\Assert::same($messages, ['msg 2-1']);
     }
 
+    #[\Testo\Test]
     public function testCursorInlineHasManySingleQuery(): void
     {
         $this->fillUsers(3);
@@ -334,11 +346,12 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertSame(['msg 1-1', 'msg 1-2', 'msg 1-3', 'msg 1-4'], $byUser[1]);
-        $this->assertSame(['msg 2-1', 'msg 2-2', 'msg 2-3'], $byUser[2]);
-        $this->assertSame([], $byUser[3]);
+        \Testo\Assert::same($byUser[1], ['msg 1-1', 'msg 1-2', 'msg 1-3', 'msg 1-4']);
+        \Testo\Assert::same($byUser[2], ['msg 2-1', 'msg 2-2', 'msg 2-3']);
+        \Testo\Assert::same($byUser[3], []);
     }
 
+    #[\Testo\Test]
     public function testCursorInlineHasManyAcrossChunkBoundary(): void
     {
         // 3 parents straddle a chunk boundary; user_2 has more children than fit in one chunk.
@@ -363,13 +376,14 @@ abstract class CursorTest extends BaseTest
             return $out;
         });
 
-        $this->assertCount(2, $byUser[1]);
-        $this->assertCount(10, $byUser[2]);
-        $this->assertCount(1, $byUser[3]);
-        $this->assertSame('msg 2-1', $byUser[2][0]);
-        $this->assertSame('msg 2-10', $byUser[2][9]);
+        \Testo\Assert::count($byUser[1], 2);
+        \Testo\Assert::count($byUser[2], 10);
+        \Testo\Assert::count($byUser[3], 1);
+        \Testo\Assert::same($byUser[2][0], 'msg 2-1');
+        \Testo\Assert::same($byUser[2][9], 'msg 2-10');
     }
 
+    #[\Testo\Test]
     public function testCursorInlineHasManyDoesNotDuplicateParents(): void
     {
         $this->fillUsers(5);
@@ -381,28 +395,24 @@ abstract class CursorTest extends BaseTest
                 ->load('comments', ['method' => Select::SINGLE_QUERY])
                 ->cursor(2);
             foreach ($cursor as $user) {
-                $this->assertArrayNotHasKey(
-                    $user->id,
-                    $seen,
-                    "User id={$user->id} was yielded more than once",
-                );
+                \Testo\Assert::array($seen)->doesNotHaveKeys($user->id);
                 $seen[$user->id] = true;
             }
             return \count($seen);
         });
 
-        $this->assertSame(5, $count);
+        \Testo\Assert::same($count, 5);
     }
 
+    #[\Testo\Test]
     public function testCursorOnNonCursorableDriverThrows(): void
     {
         if ($this->getDatabase()->getDriver() instanceof CursorInterface) {
-            $this->markTestSkipped('Driver supports cursors — covered by other tests.');
+            throw new \Testo\Core\Exception\SkipTest('Driver supports cursors — covered by other tests.');
         }
         $this->fillUsers(1);
 
-        $this->expectException(DriverException::class);
-        $this->expectExceptionMessageMatches('/cursors are not supported/i');
+        \Testo\Expect::exception(DriverException::class)->withMessageMatchingRegex('/cursors are not supported/i');
 
         $this->getDatabase()->transaction(function (): void {
             foreach ((new Select($this->orm, User::class))->cursor(10) as $_) {
@@ -410,6 +420,7 @@ abstract class CursorTest extends BaseTest
         });
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -16,22 +16,25 @@ abstract class PaginateTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        $this->assertSame(100, $selector->count());
+        \Testo\Assert::same($selector->count(), 100);
     }
 
+    #[\Testo\Test]
     public function testPaginate(): void
     {
         $selector = new Select($this->orm, User::class);
 
         (new Paginator(10))->paginate($selector);
 
-        $this->assertCount(10, $selector->fetchData());
+        \Testo\Assert::count($selector->fetchData(), 10);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

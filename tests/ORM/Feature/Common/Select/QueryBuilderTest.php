@@ -19,12 +19,13 @@ abstract class QueryBuilderTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -54,26 +55,29 @@ abstract class QueryBuilderTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testSimpleWhere(): void
     {
         $select = new Select($this->orm, User::class);
         [$a] = $select->where('id', 2)->fetchAll();
 
-        $this->assertSame(2, $a->id);
+        \Testo\Assert::same($a->id, 2);
     }
 
+    #[\Testo\Test]
     public function testOrderBy(): void
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testOrderByArray(): void
     {
         $select = new Select($this->orm, User::class);
@@ -81,28 +85,31 @@ abstract class QueryBuilderTest extends BaseTest
             'id' => 'DESC',
         ])->fetchAll();
 
-        $this->assertSame(2, $a->id);
-        $this->assertSame(1, $b->id);
+        \Testo\Assert::same($a->id, 2);
+        \Testo\Assert::same($b->id, 1);
     }
 
+    #[\Testo\Test]
     public function testOrWhere(): void
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->where('id', 2)->orWhere('id', 1)->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereIN(): void
     {
         $select = new Select($this->orm, User::class);
         [$a, $b] = $select->where('id', new Parameter([1, 2]))->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereShortSyntax(): void
     {
         $select = new Select($this->orm, User::class);
@@ -110,9 +117,10 @@ abstract class QueryBuilderTest extends BaseTest
             'id' => 2,
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(2, $a->id);
+        \Testo\Assert::same($a->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereShortSyntaxIn(): void
     {
         $select = new Select($this->orm, User::class);
@@ -120,10 +128,11 @@ abstract class QueryBuilderTest extends BaseTest
             'id' => new Parameter([1, 2]),
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testInComplexArray(): void
     {
         $select = new Select($this->orm, User::class);
@@ -131,10 +140,11 @@ abstract class QueryBuilderTest extends BaseTest
             'id' => ['>' => 0, '<' => 3],
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testInComplexArrayVerify(): void
     {
         $select = new Select($this->orm, User::class);
@@ -145,9 +155,10 @@ abstract class QueryBuilderTest extends BaseTest
             ],
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(2, $a->id);
+        \Testo\Assert::same($a->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationOr(): void
     {
         $select = new Select($this->orm, User::class);
@@ -157,10 +168,11 @@ abstract class QueryBuilderTest extends BaseTest
             ->orWhere('comments.message', 'msg 1')
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationComplexParameter(): void
     {
         $select = new Select($this->orm, User::class);
@@ -171,10 +183,11 @@ abstract class QueryBuilderTest extends BaseTest
             ])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationAliased(): void
     {
         $select = new Select($this->orm, User::class);
@@ -185,10 +198,11 @@ abstract class QueryBuilderTest extends BaseTest
             ])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationComplexArray(): void
     {
         $select = new Select($this->orm, User::class);
@@ -202,10 +216,11 @@ abstract class QueryBuilderTest extends BaseTest
             ])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationComplexArrayAliased(): void
     {
         $select = new Select($this->orm, User::class);
@@ -219,10 +234,11 @@ abstract class QueryBuilderTest extends BaseTest
             ])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationComplexArrayVerify(): void
     {
         $select = new Select($this->orm, User::class);
@@ -236,9 +252,10 @@ abstract class QueryBuilderTest extends BaseTest
             ])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(2, $a->id);
+        \Testo\Assert::same($a->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereClosure(): void
     {
         $select = new Select($this->orm, User::class);
@@ -248,9 +265,10 @@ abstract class QueryBuilderTest extends BaseTest
             })
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(2, $a->id);
+        \Testo\Assert::same($a->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereClosureRelation(): void
     {
         $select = new Select($this->orm, User::class);
@@ -261,9 +279,10 @@ abstract class QueryBuilderTest extends BaseTest
             })
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(2, $a->id);
+        \Testo\Assert::same($a->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationComplexArrayOR(): void
     {
         $select = new Select($this->orm, User::class);
@@ -278,10 +297,11 @@ abstract class QueryBuilderTest extends BaseTest
             ])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testRelationComplexArrayORAliased(): void
     {
         $select = new Select($this->orm, User::class);
@@ -296,10 +316,11 @@ abstract class QueryBuilderTest extends BaseTest
             ])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereClosureOr(): void
     {
         $select = new Select($this->orm, User::class);
@@ -312,10 +333,11 @@ abstract class QueryBuilderTest extends BaseTest
             })
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereClosureRelationWithOr(): void
     {
         $select = new Select($this->orm, User::class);
@@ -326,10 +348,11 @@ abstract class QueryBuilderTest extends BaseTest
             })
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testBetween(): void
     {
         $select = new Select($this->orm, User::class);
@@ -338,10 +361,11 @@ abstract class QueryBuilderTest extends BaseTest
             ->where('comments.id', 'between', 1, 4)
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testBetweenArray(): void
     {
         $select = new Select($this->orm, User::class);
@@ -350,10 +374,11 @@ abstract class QueryBuilderTest extends BaseTest
             ->where(['comments.id' => ['between' => [1, 4]]])
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereNestedClosure(): void
     {
         $select = new Select($this->orm, User::class);
@@ -366,10 +391,11 @@ abstract class QueryBuilderTest extends BaseTest
             })
             ->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereForRelation(): void
     {
         $select = new Select($this->orm, User::class);
@@ -379,9 +405,10 @@ abstract class QueryBuilderTest extends BaseTest
             },
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(2, $a->id);
+        \Testo\Assert::same($a->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereForRelationVerify(): void
     {
         $select = new Select($this->orm, User::class);
@@ -391,10 +418,11 @@ abstract class QueryBuilderTest extends BaseTest
             },
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testWhereForRelationArray(): void
     {
         $select = new Select($this->orm, User::class);
@@ -402,10 +430,11 @@ abstract class QueryBuilderTest extends BaseTest
             'where' => ['id' => ['in' => new Parameter([1, 3])]],
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
     }
 
+    #[\Testo\Test]
     public function testLoadRelationsBuilder(): void
     {
         $select = new Select($this->orm, User::class);
@@ -413,14 +442,15 @@ abstract class QueryBuilderTest extends BaseTest
             'where' => ['message' => 'msg 1'],
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
 
-        $this->assertCount(1, $a->comments);
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::count($b->comments, 0);
     }
 
+    #[\Testo\Test]
     public function testLoadRelationsBuilderMultiple(): void
     {
         $select = new Select($this->orm, User::class);
@@ -430,15 +460,16 @@ abstract class QueryBuilderTest extends BaseTest
             },
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
 
-        $this->assertCount(1, $a->comments);
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertCount(1, $b->comments);
-        $this->assertSame('msg 3', $b->comments[0]->message);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::count($b->comments, 1);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 3');
     }
 
+    #[\Testo\Test]
     public function testLoadRelationsBuilderInload(): void
     {
         $select = new Select($this->orm, User::class);
@@ -447,14 +478,15 @@ abstract class QueryBuilderTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
 
-        $this->assertCount(1, $a->comments);
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertCount(0, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::count($b->comments, 0);
     }
 
+    #[\Testo\Test]
     public function testLoadRelationsBuilderInloadVerify(): void
     {
         $select = new Select($this->orm, User::class);
@@ -463,14 +495,15 @@ abstract class QueryBuilderTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
 
-        $this->assertCount(0, $a->comments);
-        $this->assertCount(1, $b->comments);
-        $this->assertSame('msg 3', $b->comments[0]->message);
+        \Testo\Assert::count($a->comments, 0);
+        \Testo\Assert::count($b->comments, 1);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 3');
     }
 
+    #[\Testo\Test]
     public function testLoadRelationsBuilderMultipleInload(): void
     {
         $select = new Select($this->orm, User::class);
@@ -481,16 +514,17 @@ abstract class QueryBuilderTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('id')->fetchAll();
 
-        $this->assertSame(1, $a->id);
-        $this->assertSame(2, $b->id);
+        \Testo\Assert::same($a->id, 1);
+        \Testo\Assert::same($b->id, 2);
 
 
-        $this->assertCount(1, $a->comments);
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertCount(1, $b->comments);
-        $this->assertSame('msg 3', $b->comments[0]->message);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::count($b->comments, 1);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 3');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

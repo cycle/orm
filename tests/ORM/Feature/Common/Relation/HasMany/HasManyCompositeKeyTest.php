@@ -44,36 +44,41 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         self::PARENT_4_FULL,
     ];
 
+    #[\Testo\Test]
     public function testInitRelation(): void
     {
         $u = $this->orm->make(CompositePK::class);
-        $this->assertInstanceOf(ArrayCollection::class, $u->children);
+        \Testo\Assert::instanceOf($u->children, ArrayCollection::class);
     }
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load(self::CHILD_CONTAINER)->orderBy('parent_entity.key3');
 
-        $this->assertEquals(self::SET_FULL, $selector->fetchData());
+        \Testo\Assert::equals($selector->fetchData(), self::SET_FULL);
     }
 
+    #[\Testo\Test]
     public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load(self::CHILD_CONTAINER, ['method' => JoinableLoader::INLOAD])->orderBy('parent_entity.key3');
 
-        $this->assertEquals(self::SET_FULL, $selector->fetchData());
+        \Testo\Assert::equals($selector->fetchData(), self::SET_FULL);
     }
 
+    #[\Testo\Test]
     public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
         $data = $selector->with(self::CHILD_CONTAINER)->buildQuery()->fetchAll();
         // only 3 parents have children
-        $this->assertCount(3, $data[0]);
+        \Testo\Assert::count($data[0], 3);
     }
 
+    #[\Testo\Test]
     public function testAccessRelated(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
@@ -83,19 +88,20 @@ abstract class HasManyCompositeKeyTest extends BaseTest
          */
         [$a, $b, $c, $d] = $selector->load(self::CHILD_CONTAINER)->orderBy('parent_entity.key3')->fetchAll();
 
-        $this->assertInstanceOf(Collection::class, $a->children);
-        $this->assertInstanceOf(Collection::class, $b->children);
+        \Testo\Assert::instanceOf($a->children, Collection::class);
+        \Testo\Assert::instanceOf($b->children, Collection::class);
 
-        $this->assertCount(3, $a->children);
-        $this->assertCount(1, $b->children);
-        $this->assertCount(1, $c->children);
-        $this->assertCount(0, $d->children);
+        \Testo\Assert::count($a->children, 3);
+        \Testo\Assert::count($b->children, 1);
+        \Testo\Assert::count($c->children, 1);
+        \Testo\Assert::count($d->children, 0);
 
-        $this->assertSame(self::CHILD_1_1['key3'], $a->children[0]->key3);
-        $this->assertSame(self::CHILD_1_2['key3'], $a->children[1]->key3);
-        $this->assertSame(self::CHILD_1_3['key3'], $a->children[2]->key3);
+        \Testo\Assert::same($a->children[0]->key3, self::CHILD_1_1['key3']);
+        \Testo\Assert::same($a->children[1]->key3, self::CHILD_1_2['key3']);
+        \Testo\Assert::same($a->children[2]->key3, self::CHILD_1_3['key3']);
     }
 
+    #[\Testo\Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
@@ -113,6 +119,7 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testCreateWithRelations(): void
     {
         $e = new CompositePK();
@@ -137,50 +144,48 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         (new Transaction($this->orm))->persist($e)->run();
         $this->assertNumWrites(0);
 
-        $this->assertTrue($this->orm->getHeap()->has($e));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e)->getStatus());
+        \Testo\Assert::true($this->orm->getHeap()->has($e));
+        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
-        $this->assertTrue($this->orm->getHeap()->has($e->children[0]));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->children[0])->getStatus());
-        $this->assertSame($e->key1, $this->orm->getHeap()->get($e->children[0])->getData()['parent_key1']);
-        $this->assertSame($e->key2, $this->orm->getHeap()->get($e->children[0])->getData()['parent_key2']);
+        \Testo\Assert::true($this->orm->getHeap()->has($e->children[0]));
+        \Testo\Assert::same($this->orm->getHeap()->get($e->children[0])->getStatus(), Node::MANAGED);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->children[0])->getData()['parent_key1'], $e->key1);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->children[0])->getData()['parent_key2'], $e->key2);
 
-        $this->assertTrue($this->orm->getHeap()->has($e->children[1]));
-        $this->assertSame(Node::MANAGED, $this->orm->getHeap()->get($e->children[1])->getStatus());
-        $this->assertSame($e->key1, $this->orm->getHeap()->get($e->children[1])->getData()['parent_key1']);
-        $this->assertSame($e->key2, $this->orm->getHeap()->get($e->children[1])->getData()['parent_key2']);
+        \Testo\Assert::true($this->orm->getHeap()->has($e->children[1]));
+        \Testo\Assert::same($this->orm->getHeap()->get($e->children[1])->getStatus(), Node::MANAGED);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->children[1])->getData()['parent_key1'], $e->key1);
+        \Testo\Assert::same($this->orm->getHeap()->get($e->children[1])->getData()['parent_key2'], $e->key2);
 
         $selector = new Select($this->orm, CompositePK::class);
         $selector->load(self::CHILD_CONTAINER);
 
-        $this->assertEquals(
+        \Testo\Assert::equals($selector->wherePK([91, 91])->fetchData(), [
             [
-                [
-                    'key1' => 91,
-                    'key2' => 91,
-                    'key3' => null,
-                    'children' => [
-                        [
-                            'key1' => 911,
-                            'key2' => 912,
-                            'key3' => 'bar9',
-                            'parent_key1' => 91,
-                            'parent_key2' => 91,
-                        ],
-                        [
-                            'key1' => 921,
-                            'key2' => 922,
-                            'key3' => 'bar14',
-                            'parent_key1' => 91,
-                            'parent_key2' => 91,
-                        ],
+                'key1' => 91,
+                'key2' => 91,
+                'key3' => null,
+                'children' => [
+                    [
+                        'key1' => 911,
+                        'key2' => 912,
+                        'key3' => 'bar9',
+                        'parent_key1' => 91,
+                        'parent_key2' => 91,
+                    ],
+                    [
+                        'key1' => 921,
+                        'key2' => 922,
+                        'key3' => 'bar14',
+                        'parent_key1' => 91,
+                        'parent_key2' => 91,
                     ],
                 ],
             ],
-            $selector->wherePK([91, 91])->fetchData(),
-        );
+        ]);
     }
 
+    #[\Testo\Test]
     public function testRemoveChildren(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))
@@ -201,12 +206,13 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         /** @var CompositePK $e */
         $e = $selector->wherePK([1, 1])->fetchOne();
 
-        $this->assertCount(2, $e->children);
+        \Testo\Assert::count($e->children, 2);
 
-        $this->assertSame(self::CHILD_1_1['key3'], $e->children[0]->key3);
-        $this->assertSame(self::CHILD_1_3['key3'], $e->children[1]->key3);
+        \Testo\Assert::same($e->children[0]->key3, self::CHILD_1_1['key3']);
+        \Testo\Assert::same($e->children[1]->key3, self::CHILD_1_3['key3']);
     }
 
+    #[\Testo\Test]
     public function testRemoveChildrenNullable(): void
     {
         $schemaArray = $this->getSchemaArray();
@@ -232,14 +238,15 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         /** @var CompositePK $e */
         $e = $selector->wherePK([1, 1])->fetchOne();
 
-        $this->assertCount(2, $e->children);
+        \Testo\Assert::count($e->children, 2);
 
-        $this->assertSame(self::CHILD_1_1['key3'], $e->children[0]->key3);
-        $this->assertSame(self::CHILD_1_3['key3'], $e->children[1]->key3);
+        \Testo\Assert::same($e->children[0]->key3, self::CHILD_1_1['key3']);
+        \Testo\Assert::same($e->children[1]->key3, self::CHILD_1_3['key3']);
 
-        $this->assertSame(5, (new Select($this->orm, CompositePKChild::class))->count());
+        \Testo\Assert::same((new Select($this->orm, CompositePKChild::class))->count(), 5);
     }
 
+    #[\Testo\Test]
     public function testAddAndRemoveChildren(): void
     {
         /** @var CompositePK $e */
@@ -270,13 +277,14 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         /** @var CompositePK $e */
         $e = $selector->wherePK([1, 1])->fetchOne();
 
-        $this->assertCount(3, $e->children);
+        \Testo\Assert::count($e->children, 3);
 
-        $this->assertSame(self::CHILD_1_1['key3'], $e->children[0]->key3);
-        $this->assertSame(self::CHILD_1_3['key3'], $e->children[1]->key3);
-        $this->assertSame('fiz', $e->children[2]->key3);
+        \Testo\Assert::same($e->children[0]->key3, self::CHILD_1_1['key3']);
+        \Testo\Assert::same($e->children[1]->key3, self::CHILD_1_3['key3']);
+        \Testo\Assert::same($e->children[2]->key3, 'fiz');
     }
 
+    #[\Testo\Test]
     public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))
@@ -290,8 +298,8 @@ abstract class HasManyCompositeKeyTest extends BaseTest
          */
         [$a, $b, $c, $d] = $selector->fetchAll();
 
-        $this->assertCount(3, $a->children);
-        $this->assertCount(0, $d->children);
+        \Testo\Assert::count($a->children, 3);
+        \Testo\Assert::count($d->children, 0);
 
         $d->children = $a->children->slice(0, 2);
         foreach ($d->children as $c) {
@@ -300,8 +308,8 @@ abstract class HasManyCompositeKeyTest extends BaseTest
 
         $d->children[0]->key3 = 'new value';
 
-        $this->assertCount(1, $a->children);
-        $this->assertCount(2, $d->children);
+        \Testo\Assert::count($a->children, 1);
+        \Testo\Assert::count($d->children, 2);
 
         $this->captureWriteQueries();
         (new Transaction($this->orm))->persist($a)->persist($d)->run();
@@ -323,19 +331,20 @@ abstract class HasManyCompositeKeyTest extends BaseTest
             'as' => 'child',
         ])->orderBy('parent_entity.key3')->fetchAll();
 
-        $this->assertCount(1, $a->children);
-        $this->assertCount(2, $d->children);
+        \Testo\Assert::count($a->children, 1);
+        \Testo\Assert::count($d->children, 2);
 
-        $this->assertSame(self::CHILD_1_3['key1'], $a->children[0]->key1);
-        $this->assertSame(self::CHILD_1_3['key2'], $a->children[0]->key2);
-        $this->assertSame(self::CHILD_1_1['key1'], $d->children[0]->key1);
-        $this->assertSame(self::CHILD_1_1['key2'], $d->children[0]->key2);
-        $this->assertSame(self::CHILD_1_2['key1'], $d->children[1]->key1);
-        $this->assertSame(self::CHILD_1_2['key2'], $d->children[1]->key2);
+        \Testo\Assert::same($a->children[0]->key1, self::CHILD_1_3['key1']);
+        \Testo\Assert::same($a->children[0]->key2, self::CHILD_1_3['key2']);
+        \Testo\Assert::same($d->children[0]->key1, self::CHILD_1_1['key1']);
+        \Testo\Assert::same($d->children[0]->key2, self::CHILD_1_1['key2']);
+        \Testo\Assert::same($d->children[1]->key1, self::CHILD_1_2['key1']);
+        \Testo\Assert::same($d->children[1]->key2, self::CHILD_1_2['key2']);
 
-        $this->assertSame('new value', $d->children[0]->key3);
+        \Testo\Assert::same($d->children[0]->key3, 'new value');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

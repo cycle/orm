@@ -67,6 +67,7 @@
         "roxblnfk/unpoly": "^1.8",
         "spiral/tokenizer": "^3.18",
         "testo/bridge-mockery": "^0.1.2",
+        "testo/bridge-rector": "^0.3.6",
         "testo/testo": "^0.10.60"
     },
     "suggest": {

@@ -7,7 +7,7 @@ namespace Cycle\ORM\Tests\Unit\Collection;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
 use PHPUnit\Framework\TestCase;
 
-abstract class BaseTest extends TestCase
+abstract class BaseTest
 {
     private CollectionFactoryInterface $factory;
 
@@ -32,9 +32,9 @@ abstract class BaseTest extends TestCase
         ];
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     protected function setUp(): void
     {
-        parent::setUp();
         $this->factory = $this->getFactory();
     }
 

@@ -21,6 +21,7 @@ abstract class HasManyLoadOptionsTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -37,18 +38,19 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(\count($expected), $res);
-        $this->assertCount(\count($expected[0]->comments), $res[0]->comments);
-        $this->assertCount(\count($expected[1]->comments), $res[1]->comments);
+        \Testo\Assert::count($res, \count($expected));
+        \Testo\Assert::count($res[0]->comments, \count($expected[0]->comments));
+        \Testo\Assert::count($res[1]->comments, \count($expected[1]->comments));
 
         foreach ($expected[0]->comments as $i => $comment) {
-            $this->assertSame($comment->message, $res[0]->comments[$i]->message);
+            \Testo\Assert::same($res[0]->comments[$i]->message, $comment->message);
         }
         foreach ($expected[1]->comments as $i => $comment) {
-            $this->assertSame($comment->message, $res[1]->comments[$i]->message);
+            \Testo\Assert::same($res[1]->comments[$i]->message, $comment->message);
         }
     }
 
+    #[\Testo\Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -59,13 +61,14 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             method: LoadMethod::OuterQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -77,13 +80,14 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             where: ['@.level' => 1],
         ))->fetchAll();
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomWhereAndSingleQuery(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -96,13 +100,14 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             where: ['@.level' => 1],
         ))->fetchAll();
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testLoadWithOrderBy(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -115,15 +120,16 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             orderBy: ['@.level' => 'ASC'],
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
+        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testLoadWithScopeDisabled(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -134,10 +140,11 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             scope: false,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomScope(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -148,14 +155,15 @@ abstract class HasManyLoadOptionsTest extends BaseTest
 
         [$a, $b] = $res;
 
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testLoadWithCustomScopeAndSingleQuery(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -172,18 +180,19 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             scope: new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']),
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(\count($expected), $res);
-        $this->assertCount(\count($expected[0]->comments), $res[0]->comments);
-        $this->assertCount(\count($expected[1]->comments), $res[1]->comments);
+        \Testo\Assert::count($res, \count($expected));
+        \Testo\Assert::count($res[0]->comments, \count($expected[0]->comments));
+        \Testo\Assert::count($res[1]->comments, \count($expected[1]->comments));
 
         foreach ($expected[0]->comments as $i => $comment) {
-            $this->assertSame($comment->message, $res[0]->comments[$i]->message);
+            \Testo\Assert::same($res[0]->comments[$i]->message, $comment->message);
         }
         foreach ($expected[1]->comments as $i => $comment) {
-            $this->assertSame($comment->message, $res[1]->comments[$i]->message);
+            \Testo\Assert::same($res[1]->comments[$i]->message, $comment->message);
         }
     }
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryAndScopeAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -201,21 +210,22 @@ abstract class HasManyLoadOptionsTest extends BaseTest
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id', 'DESC')->fetchAll();
 
-        $this->assertCount(\count($expected), $res);
-        $this->assertSame($expected[0]->email, $res[0]->email);
-        $this->assertSame($expected[1]->email, $res[1]->email);
+        \Testo\Assert::count($res, \count($expected));
+        \Testo\Assert::same($res[0]->email, $expected[0]->email);
+        \Testo\Assert::same($res[1]->email, $expected[1]->email);
 
-        $this->assertCount(\count($expected[1]->comments), $res[1]->comments);
-        $this->assertCount(\count($expected[0]->comments), $res[0]->comments);
+        \Testo\Assert::count($res[1]->comments, \count($expected[1]->comments));
+        \Testo\Assert::count($res[0]->comments, \count($expected[0]->comments));
 
         foreach ($expected[1]->comments as $i => $comment) {
-            $this->assertSame($comment->message, $res[1]->comments[$i]->message);
+            \Testo\Assert::same($res[1]->comments[$i]->message, $comment->message);
         }
         foreach ($expected[0]->comments as $i => $comment) {
-            $this->assertSame($comment->message, $res[0]->comments[$i]->message);
+            \Testo\Assert::same($res[0]->comments[$i]->message, $comment->message);
         }
     }
 
+    #[\Testo\Test]
     public function testLoadWithDefaultOptions(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -223,10 +233,11 @@ abstract class HasManyLoadOptionsTest extends BaseTest
         [$a, $b] = (new Select($this->orm, User::class))->load('comments', new HasManyLoadOptions())
             ->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
     }
 
+    #[\Testo\Test]
     public function testLoadFromArchiveTable(): void
     {
         // Create archive table with the same structure as comment
@@ -255,14 +266,15 @@ abstract class HasManyLoadOptionsTest extends BaseTest
         ))->orderBy('user.id')->fetchAll();
 
         // Data should come from archive, not from the main comment table
-        $this->assertCount(2, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 2);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('archived 1', $a->comments[0]->message);
-        $this->assertSame('archived 2', $a->comments[1]->message);
-        $this->assertSame('archived 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'archived 1');
+        \Testo\Assert::same($a->comments[1]->message, 'archived 2');
+        \Testo\Assert::same($b->comments[0]->message, 'archived 2.1');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

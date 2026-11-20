@@ -8,51 +8,57 @@ use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\ScopeInterface;
 use PHPUnit\Framework\TestCase;
 
-final class LoadOptionsTest extends TestCase
+final class LoadOptionsTest
 {
+    #[\Testo\Test]
     public function testDefaults(): void
     {
         $options = new LoadOptions();
 
-        $this->assertTrue($options->scope);
-        $this->assertTrue($options->minify);
+        \Testo\Assert::true($options->scope);
+        \Testo\Assert::true($options->minify);
     }
 
+    #[\Testo\Test]
     public function testCustomScope(): void
     {
-        $scope = $this->createMock(ScopeInterface::class);
+        $scope = \Mockery::mock(ScopeInterface::class)->shouldIgnoreMissing();
         $options = new LoadOptions(scope: $scope);
 
-        $this->assertSame($scope, $options->scope);
+        \Testo\Assert::same($options->scope, $scope);
     }
 
+    #[\Testo\Test]
     public function testScopeDisabled(): void
     {
         $options = new LoadOptions(scope: false);
 
-        $this->assertFalse($options->scope);
+        \Testo\Assert::false($options->scope);
     }
 
+    #[\Testo\Test]
     public function testMinifyDisabled(): void
     {
         $options = new LoadOptions(minify: false);
 
-        $this->assertFalse($options->minify);
+        \Testo\Assert::false($options->minify);
     }
 
+    #[\Testo\Test]
     public function testToArray(): void
     {
         $options = new LoadOptions(scope: false, minify: false);
 
         $result = $options->toArray();
 
-        $this->assertSame(['scope' => false, 'minify' => false], $result);
+        \Testo\Assert::same($result, ['scope' => false, 'minify' => false]);
     }
 
+    #[\Testo\Test]
     public function testInheritance(): void
     {
         $options = new LoadOptions();
 
-        $this->assertNotInstanceOf(\Cycle\ORM\Select\Options\JoinableLoadOptions::class, $options);
+        \Testo\Assert::false($options instanceof \Cycle\ORM\Select\Options\JoinableLoadOptions);
     }
 }

@@ -9,8 +9,9 @@ use Cycle\ORM\Tests\Unit\Command\Helper\TestInsert;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 
-class SequenceCommandTest extends TestCase
+class SequenceCommandTest
 {
+    #[\Testo\Test]
     public function testNestedCommands(): void
     {
         // todo test with embedded
@@ -21,22 +22,23 @@ class SequenceCommandTest extends TestCase
 
         $count = 0;
         foreach ($command as $sub) {
-            $this->assertInstanceOf(TestInsert::class, $sub);
+            \Testo\Assert::instanceOf($sub, TestInsert::class);
             $count++;
         }
 
-        $this->assertSame(2, $count);
-        $this->assertCount(2, $command);
-        $this->assertCount(2, $command->getCommands());
+        \Testo\Assert::same($count, 2);
+        \Testo\Assert::count($command, 2);
+        \Testo\Assert::count($command->getCommands(), 2);
 
         //Nothing
         $command->execute();
     }
 
+    #[\Testo\Test]
     public function testNeverExecuted(): void
     {
         $command = new Sequence();
-        $this->assertTrue($command->isReady());
-        $this->assertTrue($command->isExecuted());
+        \Testo\Assert::true($command->isReady());
+        \Testo\Assert::true($command->isExecuted());
     }
 }

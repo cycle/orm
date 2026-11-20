@@ -11,8 +11,9 @@ use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use PHPUnit\Framework\TestCase;
 
-class SchemaTest extends TestCase
+class SchemaTest
 {
+    #[\Testo\Test]
     public function testSchema(): void
     {
         $schema = new Schema([
@@ -22,9 +23,10 @@ class SchemaTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('value', $schema->define(User::class, SchemaInterface::ENTITY));
+        \Testo\Assert::same($schema->define(User::class, SchemaInterface::ENTITY), 'value');
     }
 
+    #[\Testo\Test]
     public function testEntity(): void
     {
         $schema = new Schema([
@@ -33,13 +35,14 @@ class SchemaTest extends TestCase
             ],
         ]);
 
-        $this->assertSame(User::class, $schema->define('user', SchemaInterface::ENTITY));
-        $this->assertSame(User::class, $schema->define(User::class, SchemaInterface::ENTITY));
+        \Testo\Assert::same($schema->define('user', SchemaInterface::ENTITY), User::class);
+        \Testo\Assert::same($schema->define(User::class, SchemaInterface::ENTITY), User::class);
     }
 
+    #[\Testo\Test]
     public function testSchemaException(): void
     {
-        $this->expectException(SchemaException::class);
+        \Testo\Expect::exception(SchemaException::class);
 
         $schema = new Schema([
             User::class => [
@@ -50,6 +53,7 @@ class SchemaTest extends TestCase
         $schema->define(Profile::class, SchemaInterface::ENTITY);
     }
 
+    #[\Testo\Test]
     public function testSchemaNull(): void
     {
         $schema = new Schema([
@@ -59,9 +63,10 @@ class SchemaTest extends TestCase
             ],
         ]);
 
-        $this->assertNull($schema->define(User::class, SchemaInterface::MAPPER));
+        \Testo\Assert::null($schema->define(User::class, SchemaInterface::MAPPER));
     }
 
+    #[\Testo\Test]
     public function testToArray()
     {
         $schema = new Schema([
@@ -71,10 +76,10 @@ class SchemaTest extends TestCase
             ],
         ]);
 
-        $this->assertSame([
+        \Testo\Assert::same($schema->toArray(), [
             'user' => [
                 SchemaInterface::ENTITY => User::class,
             ],
-        ], $schema->toArray());
+        ]);
     }
 }

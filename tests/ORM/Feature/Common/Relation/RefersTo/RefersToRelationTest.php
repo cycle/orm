@@ -20,6 +20,7 @@ abstract class RefersToRelationTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateUserWithDoubleReference(): void
     {
         $u = new User();
@@ -38,10 +39,11 @@ abstract class RefersToRelationTest extends BaseTest
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertNotNull($u->lastComment);
-        $this->assertSame($u->lastComment, $u->comments[0]);
+        \Testo\Assert::notNull($u->lastComment);
+        \Testo\Assert::same($u->comments[0], $u->lastComment);
     }
 
+    #[\Testo\Test]
     public function testCreateUserToExistedReference(): void
     {
         $u = new User();
@@ -73,10 +75,11 @@ abstract class RefersToRelationTest extends BaseTest
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('lastComment')->load('comments')->wherePK(2)->fetchOne();
 
-        $this->assertNotNull($u3->lastComment);
-        $this->assertEquals($u3->lastComment->id, $u->comments[0]->id);
+        \Testo\Assert::notNull($u3->lastComment);
+        \Testo\Assert::equals($u->comments[0]->id, $u3->lastComment->id);
     }
 
+    #[\Testo\Test]
     public function testCreateWhenParentExists(): void
     {
         $u = new User();
@@ -99,13 +102,14 @@ abstract class RefersToRelationTest extends BaseTest
             ->load('comments')
             ->wherePK(1)->fetchOne();
 
-        $this->assertNotNull($u->lastComment);
-        $this->assertSame($u->lastComment, $u->comments[0]);
+        \Testo\Assert::notNull($u->lastComment);
+        \Testo\Assert::same($u->comments[0], $u->lastComment);
     }
 
+    #[\Testo\Test]
     public function testCreateWithoutProperDependency(): void
     {
-        $this->expectException(TransactionException::class);
+        \Testo\Expect::exception(TransactionException::class);
 
         $u = new User();
         $u->email = 'email@email.com';
@@ -126,6 +130,7 @@ abstract class RefersToRelationTest extends BaseTest
         }
     }
 
+    #[\Testo\Test]
     public function testAssignParentAsUpdate(): void
     {
         $u = new User();
@@ -144,8 +149,8 @@ abstract class RefersToRelationTest extends BaseTest
         $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertNull($u->lastComment);
-        $this->assertCount(1, $u->comments);
+        \Testo\Assert::null($u->lastComment);
+        \Testo\Assert::count($u->comments, 1);
 
         $u->lastComment = $u->comments[0];
 
@@ -156,11 +161,12 @@ abstract class RefersToRelationTest extends BaseTest
         $s = new Select($this->orm, User::class);
         $u = $s->load('lastComment')->load('comments')->wherePK(1)->fetchOne();
 
-        $this->assertNotNull($u->lastComment);
-        $this->assertCount(1, $u->comments);
-        $this->assertSame($u->lastComment, $u->comments[0]);
+        \Testo\Assert::notNull($u->lastComment);
+        \Testo\Assert::count($u->comments, 1);
+        \Testo\Assert::same($u->comments[0], $u->lastComment);
     }
 
+    #[\Testo\Test]
     public function testSetNull(): void
     {
         $u = new User();
@@ -183,9 +189,9 @@ abstract class RefersToRelationTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertNotNull($u->lastComment);
-        $this->assertCount(1, $u->comments);
-        $this->assertSame($u->lastComment, $u->comments[0]);
+        \Testo\Assert::notNull($u->lastComment);
+        \Testo\Assert::count($u->comments, 1);
+        \Testo\Assert::same($u->comments[0], $u->lastComment);
 
         $u->lastComment = null;
 
@@ -201,28 +207,27 @@ abstract class RefersToRelationTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        $this->assertNull($u->lastComment);
-        $this->assertCount(1, $u->comments);
+        \Testo\Assert::null($u->lastComment);
+        \Testo\Assert::count($u->comments, 1);
     }
 
     /**
      * Not nullable RefersTo relation should be transformed to BelongsTo
      */
+    #[\Testo\Test]
     public function testSetNotNullable(): void
     {
         $schema = $this->getSchemaArray();
         $schema[User::class][Schema::RELATIONS]['lastComment'][Relation::SCHEMA][Relation::NULLABLE] = false;
         $this->orm = $this->withSchema(new Schema($schema));
 
-        $this->assertInstanceOf(
-            Relation\BelongsTo::class,
-            $this->orm->getRelationMap(User::class)->getRelations()['lastComment'],
-        );
+        \Testo\Assert::instanceOf($this->orm->getRelationMap(User::class)->getRelations()['lastComment'], Relation\BelongsTo::class);
     }
 
     /**
      * If relation property was unset - ignore this field
      */
+    #[\Testo\Test]
     public function testUnsetProperty(): void
     {
         $u = new User();
@@ -244,7 +249,7 @@ abstract class RefersToRelationTest extends BaseTest
             ->wherePK(1)
             ->fetchOne();
 
-        self::assertNotNull($u->lastComment);
+        \Testo\Assert::notNull($u->lastComment);
         unset($u->lastComment);
 
         $this->captureWriteQueries();
@@ -252,6 +257,7 @@ abstract class RefersToRelationTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testUpdateRelation(): void
     {
         // Prepare data
@@ -283,10 +289,11 @@ abstract class RefersToRelationTest extends BaseTest
 
         $this->captureReadQueries();
         $this->assertNotEmpty($user->comments);
-        $this->assertNotNull($user->lastComment);
+        \Testo\Assert::notNull($user->lastComment);
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

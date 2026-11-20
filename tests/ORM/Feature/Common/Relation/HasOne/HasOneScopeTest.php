@@ -22,6 +22,7 @@ abstract class HasOneScopeTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testScopeOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -30,11 +31,12 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment')->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
 
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -43,11 +45,12 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment')->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
 
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAscInLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -59,11 +62,12 @@ abstract class HasOneScopeTest extends BaseTest
         ])->orderBy('user.id')->fetchAll();
 
 
-        $this->assertSame('msg 1', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
 
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedPromisedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -72,11 +76,12 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
 
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -86,13 +91,14 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment')->fetchAll();
 
-        $this->assertSame('msg 2', $a->firstComment->message);
-        $this->assertSame('msg 2.2', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 2');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWherePromised(): void
     {
-        $this->markTestIncomplete();
+        throw new \Testo\Core\Exception\SkipTest('Incomplete');
         $this->orm = $this->withCommentsSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.level' => 'ASC']),
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 2]]],
@@ -100,10 +106,11 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        $this->assertSame('msg 2', $a->firstComment->message);
-        $this->assertSame('msg 2.2', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 2');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWhereReversed(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -113,10 +120,11 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment')->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWhereReversedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -128,10 +136,11 @@ abstract class HasOneScopeTest extends BaseTest
             'method' => JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -141,10 +150,11 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -157,10 +167,11 @@ abstract class HasOneScopeTest extends BaseTest
             'where' => ['@.level' => 1],
         ])->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testScopeOrderedAndCustomWhereInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -174,10 +185,11 @@ abstract class HasOneScopeTest extends BaseTest
             'method' => JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderByWithScopeOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -189,11 +201,12 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment')->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
 
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByInLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -206,14 +219,15 @@ abstract class HasOneScopeTest extends BaseTest
             'method' => JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
 
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByLazyLoad(): void
     {
-        $this->markTestIncomplete();
+        throw new \Testo\Core\Exception\SkipTest('Incomplete');
         $this->orm = $this->withCommentsSchema([
             Relation::SCHEMA => [
                 Relation::ORDER_BY => ['@.level' => 'DESC'],
@@ -222,11 +236,12 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 4', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 4');
 
-        $this->assertSame('msg 2.3', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -239,11 +254,12 @@ abstract class HasOneScopeTest extends BaseTest
             'orderBy' => ['@.level' => 'ASC'],
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('msg 1', $a->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 1');
 
-        $this->assertSame('msg 2.1', $b->firstComment->message);
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testWithOrderByAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -255,10 +271,11 @@ abstract class HasOneScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment')->fetchAll();
 
-        $this->assertSame('msg 2', $a->firstComment->message);
-        $this->assertSame('msg 2.2', $b->firstComment->message);
+        \Testo\Assert::same($a->firstComment->message, 'msg 2');
+        \Testo\Assert::same($b->firstComment->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testWithWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -268,10 +285,11 @@ abstract class HasOneScopeTest extends BaseTest
         // second user has been filtered out
         $res = (new Select($this->orm, User::class))->with('firstComment')->fetchAll();
 
-        $this->assertCount(1, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
+        \Testo\Assert::count($res, 1);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
     }
 
+    #[\Testo\Test]
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -283,11 +301,12 @@ abstract class HasOneScopeTest extends BaseTest
             'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
-        $this->assertSame('another@world.com', $res[1]->email);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        \Testo\Assert::same($res[1]->email, 'another@world.com');
     }
 
+    #[\Testo\Test]
     public function testLimitParentSelection(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -298,15 +317,16 @@ abstract class HasOneScopeTest extends BaseTest
             ->load('firstComment')
             ->limit(1)->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
-        $this->assertEquals(1, $res[0]->firstComment->level);
+        \Testo\Assert::count($res, 1);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        \Testo\Assert::equals($res[0]->firstComment->level, 1);
     }
 
+    #[\Testo\Test]
     public function testLimitParentSelectionError(): void
     {
-        $this->markTestIncomplete();
-        $this->expectException(LoaderException::class);
+        throw new \Testo\Core\Exception\SkipTest('Incomplete');
+        \Testo\Expect::exception(LoaderException::class);
 
         $this->orm = $this->withCommentsSchema([]);
 
@@ -316,6 +336,7 @@ abstract class HasOneScopeTest extends BaseTest
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
+    #[\Testo\Test]
     public function testInloadWithScopeOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -328,17 +349,18 @@ abstract class HasOneScopeTest extends BaseTest
             'method' => JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame('hello@world.com', $res[1]->email);
-        $this->assertSame('another@world.com', $res[0]->email);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[1]->email, 'hello@world.com');
+        \Testo\Assert::same($res[0]->email, 'another@world.com');
 
-        $this->assertSame('msg 4', $res[1]->firstComment->message);
-        $this->assertSame('msg 2.3', $res[0]->firstComment->message);
+        \Testo\Assert::same($res[1]->firstComment->message, 'msg 4');
+        \Testo\Assert::same($res[0]->firstComment->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testInvalidOrderBy(): void
     {
-        $this->expectException(StatementException::class);
+        \Testo\Expect::exception(StatementException::class);
 
         $this->orm = $this->withCommentsSchema([
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
@@ -351,6 +373,7 @@ abstract class HasOneScopeTest extends BaseTest
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

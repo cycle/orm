@@ -52,7 +52,7 @@ class UuidTypecast implements CastableInterface, UncastableInterface
                 continue;
             }
             if (!$data[$column] instanceof UuidInterface) {
-                TestCase::fail(\sprintf(
+                \Testo\Assert::fail(\sprintf(
                     'Expected UuidInterface, got %s: %s',
                     \get_debug_type($data[$column]),
                     \print_r($data[$column], true),

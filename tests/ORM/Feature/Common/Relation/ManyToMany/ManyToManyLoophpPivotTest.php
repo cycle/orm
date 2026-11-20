@@ -23,17 +23,19 @@ abstract class ManyToManyLoophpPivotTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testPivotedCollection(): void
     {
         $data = (new Select($this->orm, User::class))->load('tags')->fetchAll();
 
-        $this->assertInstanceOf(LoophpPivotedCollection::class, $data[0]->tags);
-        $this->assertInstanceOf(LoophpPivotedCollection::class, $data[1]->tags);
+        \Testo\Assert::instanceOf($data[0]->tags, LoophpPivotedCollection::class);
+        \Testo\Assert::instanceOf($data[1]->tags, LoophpPivotedCollection::class);
 
-        $this->assertSame(4, $data[0]->tags->count());
-        $this->assertSame(3, $data[1]->tags->count());
+        \Testo\Assert::same($data[0]->tags->count(), 4);
+        \Testo\Assert::same($data[1]->tags->count(), 3);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

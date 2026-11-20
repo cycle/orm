@@ -88,12 +88,14 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         self::PARENT_4_FULL,
     ];
 
+    #[\Testo\Test]
     public function testInitRelation(): void
     {
         $u = $this->orm->make(CompositePK::class);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $u->pivoted);
+        \Testo\Assert::instanceOf($u->pivoted, PivotedCollectionInterface::class);
     }
 
+    #[\Testo\Test]
     public function testLoadParentRelation(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))
@@ -101,17 +103,19 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->orderBy('key3', 'ASC')
         ;
 
-        $this->assertSame(self::PARENTS_FULL, $selector->fetchData());
+        \Testo\Assert::same($selector->fetchData(), self::PARENTS_FULL);
     }
 
+    #[\Testo\Test]
     public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
         $data = $selector->with(self::CHILDREN_CONTAINER)->buildQuery()->fetchAll();
 
-        $this->assertCount(3, $data[0]);
+        \Testo\Assert::count($data[0], 3);
     }
 
+    #[\Testo\Test]
     public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
@@ -120,9 +124,10 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             'scope' => new Select\QueryScope([], ['key1' => 'ASC', 'key2' => 'ASC']),
         ])->orderBy(['key3' => 'ASC']);
 
-        $this->assertSame(self::PARENTS_FULL, $selector->fetchData());
+        \Testo\Assert::same($selector->fetchData(), self::PARENTS_FULL);
     }
 
+    #[\Testo\Test]
     public function testRelationContextAccess(): void
     {
         /**
@@ -133,34 +138,35 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
          */
         [$a, $b, $c, $d] = (new Select($this->orm, CompositePK::class))->load(self::CHILDREN_CONTAINER)->fetchAll();
 
-        $this->assertCount(3, $a->pivoted);
-        $this->assertCount(2, $b->pivoted);
-        $this->assertCount(1, $c->pivoted);
-        $this->assertCount(0, $d->pivoted);
+        \Testo\Assert::count($a->pivoted, 3);
+        \Testo\Assert::count($b->pivoted, 2);
+        \Testo\Assert::count($c->pivoted, 1);
+        \Testo\Assert::count($d->pivoted, 0);
 
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $a->pivoted);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $b->pivoted);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $c->pivoted);
-        $this->assertInstanceOf(PivotedCollectionInterface::class, $d->pivoted);
+        \Testo\Assert::instanceOf($a->pivoted, PivotedCollectionInterface::class);
+        \Testo\Assert::instanceOf($b->pivoted, PivotedCollectionInterface::class);
+        \Testo\Assert::instanceOf($c->pivoted, PivotedCollectionInterface::class);
+        \Testo\Assert::instanceOf($d->pivoted, PivotedCollectionInterface::class);
 
-        $this->assertTrue($a->pivoted->hasPivot($a->pivoted[0]));
-        $this->assertTrue($a->pivoted->hasPivot($a->pivoted[1]));
-        $this->assertTrue($b->pivoted->hasPivot($b->pivoted[0]));
+        \Testo\Assert::true($a->pivoted->hasPivot($a->pivoted[0]));
+        \Testo\Assert::true($a->pivoted->hasPivot($a->pivoted[1]));
+        \Testo\Assert::true($b->pivoted->hasPivot($b->pivoted[0]));
 
-        $this->assertFalse($b->pivoted->hasPivot($a->pivoted[0]));
-        $this->assertFalse($c->pivoted->hasPivot($a->pivoted[0]));
-        $this->assertFalse($c->pivoted->hasPivot($b->pivoted[0]));
+        \Testo\Assert::false($b->pivoted->hasPivot($a->pivoted[0]));
+        \Testo\Assert::false($c->pivoted->hasPivot($a->pivoted[0]));
+        \Testo\Assert::false($c->pivoted->hasPivot($b->pivoted[0]));
 
-        $this->assertInstanceOf(CompositePKPivot::class, $a->pivoted->getPivot($a->pivoted[0]));
-        $this->assertInstanceOf(CompositePKPivot::class, $a->pivoted->getPivot($a->pivoted[1]));
-        $this->assertInstanceOf(CompositePKPivot::class, $b->pivoted->getPivot($b->pivoted[0]));
+        \Testo\Assert::instanceOf($a->pivoted->getPivot($a->pivoted[0]), CompositePKPivot::class);
+        \Testo\Assert::instanceOf($a->pivoted->getPivot($a->pivoted[1]), CompositePKPivot::class);
+        \Testo\Assert::instanceOf($b->pivoted->getPivot($b->pivoted[0]), CompositePKPivot::class);
 
-        $this->assertEquals('foo1', $a->pivoted->getPivot($a->pivoted[0])->as);
-        $this->assertEquals('foo2', $a->pivoted->getPivot($a->pivoted[1])->as);
-        $this->assertEquals('bar2', $b->pivoted->getPivot($b->pivoted[0])->as);
-        $this->assertEquals('baz3', $c->pivoted->getPivot($c->pivoted[0])->as);
+        \Testo\Assert::equals($a->pivoted->getPivot($a->pivoted[0])->as, 'foo1');
+        \Testo\Assert::equals($a->pivoted->getPivot($a->pivoted[1])->as, 'foo2');
+        \Testo\Assert::equals($b->pivoted->getPivot($b->pivoted[0])->as, 'bar2');
+        \Testo\Assert::equals($c->pivoted->getPivot($c->pivoted[0])->as, 'baz3');
     }
 
+    #[\Testo\Test]
     public function testCreateWithManyToManyCascadeNoContext(): void
     {
         $u = new CompositePK();
@@ -182,13 +188,14 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->wherePK([901, 902])
             ->fetchOne();
 
-        $this->assertSame(900, $u->key3);
-        $this->assertCount(1, $u->pivoted);
-        $this->assertSame('my child', $u->pivoted[0]->key3);
+        \Testo\Assert::same($u->key3, 900);
+        \Testo\Assert::count($u->pivoted, 1);
+        \Testo\Assert::same($u->pivoted[0]->key3, 'my child');
 
-        $this->assertInstanceOf(CompositePKPivot::class, $u->pivoted->getPivot($u->pivoted[0]));
+        \Testo\Assert::instanceOf($u->pivoted->getPivot($u->pivoted[0]), CompositePKPivot::class);
     }
 
+    #[\Testo\Test]
     public function testCreateWithManyToManyPivotContextArray(): void
     {
         $u = new CompositePK();
@@ -211,14 +218,15 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->wherePK([901, 902])
             ->fetchOne();
 
-        $this->assertSame(900, $u->key3);
-        $this->assertCount(1, $u->pivoted);
-        $this->assertSame('my child', $u->pivoted[0]->key3);
+        \Testo\Assert::same($u->key3, 900);
+        \Testo\Assert::count($u->pivoted, 1);
+        \Testo\Assert::same($u->pivoted[0]->key3, 'my child');
 
-        $this->assertInstanceOf(CompositePKPivot::class, $u->pivoted->getPivot($u->pivoted[0]));
-        $this->assertSame('super', $u->pivoted->getPivot($u->pivoted[0])->as);
+        \Testo\Assert::instanceOf($u->pivoted->getPivot($u->pivoted[0]), CompositePKPivot::class);
+        \Testo\Assert::same($u->pivoted->getPivot($u->pivoted[0])->as, 'super');
     }
 
+    #[\Testo\Test]
     public function testCreateWithManyToManyNoWrites(): void
     {
         $u = new CompositePK();
@@ -247,6 +255,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Test]
     public function testCreateWithManyToManyPivotContext(): void
     {
         $u = new CompositePK();
@@ -275,14 +284,15 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $u = $selector->load(self::CHILDREN_CONTAINER)
             ->wherePK([901, 902])->fetchOne();
 
-        $this->assertSame(900, $u->key3);
-        $this->assertCount(1, $u->pivoted);
-        $this->assertSame('my child', $u->pivoted[0]->key3);
+        \Testo\Assert::same($u->key3, 900);
+        \Testo\Assert::count($u->pivoted, 1);
+        \Testo\Assert::same($u->pivoted[0]->key3, 'my child');
 
-        $this->assertInstanceOf(CompositePKPivot::class, $u->pivoted->getPivot($u->pivoted[0]));
-        $this->assertSame('super', $u->pivoted->getPivot($u->pivoted[0])->as);
+        \Testo\Assert::instanceOf($u->pivoted->getPivot($u->pivoted[0]), CompositePKPivot::class);
+        \Testo\Assert::same($u->pivoted->getPivot($u->pivoted[0])->as, 'super');
     }
 
+    #[\Testo\Test]
     public function testUnlinkManyToManyAndReplaceSome(): void
     {
         $tagSelector = new Select($this->orm, CompositePKChild::class);
@@ -337,13 +347,14 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->load(self::CHILDREN_CONTAINER, ['orderBy' => ['@.key1' => 'asc']])
             ->fetchAll();
 
-        $this->assertSame(self::CHILD_2['key3'], $a->pivoted[0]->key3);
-        $this->assertSame('new', $a->pivoted->getPivot($a->pivoted[0])->as);
+        \Testo\Assert::same($a->pivoted[0]->key3, self::CHILD_2['key3']);
+        \Testo\Assert::same($a->pivoted->getPivot($a->pivoted[0])->as, 'new');
 
-        $this->assertSame('new child', $b->pivoted[0]->key3);
-        $this->assertSame('super', $b->pivoted->getPivot($b->pivoted[0])->as);
+        \Testo\Assert::same($b->pivoted[0]->key3, 'new child');
+        \Testo\Assert::same($b->pivoted->getPivot($b->pivoted[0])->as, 'super');
     }
 
+    #[\Testo\Test]
     public function testReassign(): void
     {
         $tagSelect = new Select($this->orm, CompositePKChild::class);
@@ -353,7 +364,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $u = $userSelect->load(self::CHILDREN_CONTAINER)
             ->fetchOne(['key1' => 1, 'key2' => 1]);
 
-        $this->assertInstanceOf(Collection::class, $u->pivoted);
+        \Testo\Assert::instanceOf($u->pivoted, Collection::class);
 
         $this->captureWriteQueries();
         (new Transaction($this->orm))->persist($u)->run();
@@ -392,11 +403,12 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $u = (new Select($this->orm, CompositePK::class))
             ->load(self::CHILDREN_CONTAINER)
             ->fetchOne(['key1' => 1, 'key2' => 1]);
-        $this->assertCount(2, $u->pivoted);
-        $this->assertSame(self::CHILD_1['key3'], $u->pivoted[0]->key3);
-        $this->assertSame(self::CHILD_4['key3'], $u->pivoted[1]->key3);
+        \Testo\Assert::count($u->pivoted, 2);
+        \Testo\Assert::same($u->pivoted[0]->key3, self::CHILD_1['key3']);
+        \Testo\Assert::same($u->pivoted[1]->key3, self::CHILD_4['key3']);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -17,6 +17,7 @@ abstract class CompositePKTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSimpleCreate(): void
     {
         $this->createTable1();
@@ -30,11 +31,12 @@ abstract class CompositePKTest extends BaseTest
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->fetchData()[0];
 
-        $this->assertSame(1, $data['key1']);
-        $this->assertSame(1, $data['key2']);
-        $this->assertSame(null, $data['key3']);
+        \Testo\Assert::same($data['key1'], 1);
+        \Testo\Assert::same($data['key2'], 1);
+        \Testo\Assert::same($data['key3'], null);
     }
 
+    #[\Testo\Test]
     public function testChangePK(): void
     {
         $this->createTable1();
@@ -59,10 +61,11 @@ abstract class CompositePKTest extends BaseTest
 
         $e = (new Select($this->orm, CompositePK::class))
             ->fetchOne();
-        $this->assertSame(2, $e->key1);
-        $this->assertSame(3, $e->key2);
+        \Testo\Assert::same($e->key1, 2);
+        \Testo\Assert::same($e->key2, 3);
     }
 
+    #[\Testo\Test]
     public function testRemoveCreated(): void
     {
         $this->createTable1();
@@ -80,9 +83,10 @@ abstract class CompositePKTest extends BaseTest
             ->run();
 
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))->fetchData();
-        $this->assertSame([], $data);
+        \Testo\Assert::same($data, []);
     }
 
+    #[\Testo\Test]
     public function testCreateWithHalfSame(): void
     {
         $this->createTable1();
@@ -106,10 +110,11 @@ abstract class CompositePKTest extends BaseTest
         $s = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
         $data = $s->fetchData();
 
-        $this->assertSame([1, 1, 2], array_column($data, 'key1'));
-        $this->assertSame([1, 2, 1], array_column($data, 'key2'));
+        \Testo\Assert::same(array_column($data, 'key1'), [1, 1, 2]);
+        \Testo\Assert::same(array_column($data, 'key2'), [1, 2, 1]);
     }
 
+    #[\Testo\Test]
     public function testCreateFullDuplicated(): void
     {
         $this->createTable1();
@@ -122,11 +127,12 @@ abstract class CompositePKTest extends BaseTest
         $u2->key2 = 1;
 
         //todo details
-        $this->expectException(\Exception::class);
+        \Testo\Expect::exception(\Exception::class);
 
         (new Transaction($this->orm))->persist($u1)->persist($u2)->run();
     }
 
+    #[\Testo\Test]
     public function testHeapSelectSame(): void
     {
         $this->createTable1();
@@ -151,11 +157,12 @@ abstract class CompositePKTest extends BaseTest
         $data2 = (new Select($this->orm, CompositePK::class))->wherePK([1, 2])->fetchOne();
         $data3 = (new Select($this->orm, CompositePK::class))->wherePK(['key1' => 1, 'key2' => 2])->fetchOne();
 
-        $this->assertSame($u2, $data1);
-        $this->assertSame($data2, $data1);
-        $this->assertSame($data2, $data3);
+        \Testo\Assert::same($data1, $u2);
+        \Testo\Assert::same($data1, $data2);
+        \Testo\Assert::same($data3, $data2);
     }
 
+    #[\Testo\Test]
     public function testFindByPKAssoc(): void
     {
         $this->createTable1();
@@ -168,11 +175,12 @@ abstract class CompositePKTest extends BaseTest
 
         $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['key2' => 2, 'key1' => 1])->fetchOne();
 
-        $this->assertSame($u1->key1, $data1->key1);
-        $this->assertSame($u1->key2, $data1->key2);
-        $this->assertSame($u1->key3, $data1->key3);
+        \Testo\Assert::same($data1->key1, $u1->key1);
+        \Testo\Assert::same($data1->key2, $u1->key2);
+        \Testo\Assert::same($data1->key3, $u1->key3);
     }
 
+    #[\Testo\Test]
     public function testFindByPKAssocMultiple(): void
     {
         $this->createTable1();
@@ -195,27 +203,26 @@ abstract class CompositePKTest extends BaseTest
         // one entity with array PK
         $data3 = (new Select($this->orm, CompositePK::class))->wherePK([5, 6])->fetchOne();
 
-        $this->assertSame($u2->key1, $data2[0]->key1);
-        $this->assertSame($u2->key2, $data2[0]->key2);
-        $this->assertSame($u2->key3, $data2[0]->key3);
-        $this->assertSame($u3->key1, $data2[1]->key1);
-        $this->assertSame($u3->key2, $data2[1]->key2);
-        $this->assertSame($u3->key3, $data2[1]->key3);
+        \Testo\Assert::same($data2[0]->key1, $u2->key1);
+        \Testo\Assert::same($data2[0]->key2, $u2->key2);
+        \Testo\Assert::same($data2[0]->key3, $u2->key3);
+        \Testo\Assert::same($data2[1]->key1, $u3->key1);
+        \Testo\Assert::same($data2[1]->key2, $u3->key2);
+        \Testo\Assert::same($data2[1]->key3, $u3->key3);
 
-        $this->assertSame($u3->key1, $data3->key1);
-        $this->assertSame($u3->key2, $data3->key2);
-        $this->assertSame($u3->key3, $data3->key3);
+        \Testo\Assert::same($data3->key1, $u3->key1);
+        \Testo\Assert::same($data3->key2, $u3->key2);
+        \Testo\Assert::same($data3->key3, $u3->key3);
     }
 
-    /**
-     * @dataProvider wrongDataProvider
-     */
+    #[\Testo\Test]
+    #[\Testo\Data\DataProvider('wrongDataProvider')]
     public function testFindByPKExceptions(array|string $pk, string $exceptionMsg): void
     {
         $this->createTable1();
 
         $this->expectExceptionMessage($exceptionMsg);
-        $this->expectException(\InvalidArgumentException::class);
+        \Testo\Expect::exception(\InvalidArgumentException::class);
 
         (new Select($this->orm, CompositePK::class))->wherePK($pk)->fetchOne();
     }

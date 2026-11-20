@@ -10,45 +10,50 @@ use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\Options\MorphedHasManyLoadOptions;
 use PHPUnit\Framework\TestCase;
 
-final class MorphedHasManyLoadOptionsTest extends TestCase
+final class MorphedHasManyLoadOptionsTest
 {
+    #[\Testo\Test]
     public function testDefaults(): void
     {
         $options = new MorphedHasManyLoadOptions();
 
-        $this->assertSame(LoadMethod::OuterQuery, $options->method);
-        $this->assertTrue($options->scope);
-        $this->assertTrue($options->minify);
-        $this->assertNull($options->as);
-        $this->assertNull($options->using);
-        $this->assertNull($options->where);
-        $this->assertNull($options->orderBy);
+        \Testo\Assert::same($options->method, LoadMethod::OuterQuery);
+        \Testo\Assert::true($options->scope);
+        \Testo\Assert::true($options->minify);
+        \Testo\Assert::null($options->as);
+        \Testo\Assert::null($options->using);
+        \Testo\Assert::null($options->where);
+        \Testo\Assert::null($options->orderBy);
     }
 
+    #[\Testo\Test]
     public function testInheritance(): void
     {
         $options = new MorphedHasManyLoadOptions();
 
-        $this->assertInstanceOf(JoinableLoadOptions::class, $options);
-        $this->assertInstanceOf(LoadOptions::class, $options);
+        \Testo\Assert::instanceOf($options, JoinableLoadOptions::class);
+        \Testo\Assert::instanceOf($options, LoadOptions::class);
     }
 
+    #[\Testo\Test]
     public function testWithWhere(): void
     {
         $where = ['{@}.status' => 'public'];
         $options = new MorphedHasManyLoadOptions(where: $where);
 
-        $this->assertSame($where, $options->where);
+        \Testo\Assert::same($options->where, $where);
     }
 
+    #[\Testo\Test]
     public function testWithOrderBy(): void
     {
         $orderBy = ['{@}.position' => 'ASC'];
         $options = new MorphedHasManyLoadOptions(orderBy: $orderBy);
 
-        $this->assertSame($orderBy, $options->orderBy);
+        \Testo\Assert::same($options->orderBy, $orderBy);
     }
 
+    #[\Testo\Test]
     public function testAllParameters(): void
     {
         $where = ['{@}.active' => true];
@@ -63,26 +68,28 @@ final class MorphedHasManyLoadOptionsTest extends TestCase
             orderBy: $orderBy,
         );
 
-        $this->assertSame(LoadMethod::SingleQuery, $options->method);
-        $this->assertFalse($options->scope);
-        $this->assertFalse($options->minify);
-        $this->assertSame('alias', $options->as);
-        $this->assertSame('other', $options->using);
-        $this->assertSame($where, $options->where);
-        $this->assertSame($orderBy, $options->orderBy);
+        \Testo\Assert::same($options->method, LoadMethod::SingleQuery);
+        \Testo\Assert::false($options->scope);
+        \Testo\Assert::false($options->minify);
+        \Testo\Assert::same($options->as, 'alias');
+        \Testo\Assert::same($options->using, 'other');
+        \Testo\Assert::same($options->where, $where);
+        \Testo\Assert::same($options->orderBy, $orderBy);
     }
 
+    #[\Testo\Test]
     public function testToArrayDefaults(): void
     {
         $options = new MorphedHasManyLoadOptions();
 
-        $this->assertEquals([
+        \Testo\Assert::equals($options->toArray(), [
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,
-        ], $options->toArray());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testToArrayCustom(): void
     {
         $where = ['{@}.status' => 'public'];
@@ -96,21 +103,21 @@ final class MorphedHasManyLoadOptionsTest extends TestCase
 
         $result = $options->toArray();
 
-        $this->assertSame($where, $result['where']);
-        $this->assertSame($orderBy, $result['orderBy']);
-        $this->assertSame(LoadMethod::SingleQuery->value, $result['method']);
-        $this->assertFalse($result['scope']);
+        \Testo\Assert::same($result['where'], $where);
+        \Testo\Assert::same($result['orderBy'], $orderBy);
+        \Testo\Assert::same($result['method'], LoadMethod::SingleQuery->value);
+        \Testo\Assert::false($result['scope']);
     }
 
+    #[\Testo\Test]
     public function testToArrayWithEmptyArrays(): void
     {
         $options = new MorphedHasManyLoadOptions(where: [], orderBy: []);
 
         $result = $options->toArray();
 
-        $this->assertArrayHasKey('where', $result);
-        $this->assertArrayHasKey('orderBy', $result);
-        $this->assertSame([], $result['where']);
-        $this->assertSame([], $result['orderBy']);
+        \Testo\Assert::array($result)->hasKeys('where')->hasKeys('orderBy');
+        \Testo\Assert::same($result['where'], []);
+        \Testo\Assert::same($result['orderBy'], []);
     }
 }

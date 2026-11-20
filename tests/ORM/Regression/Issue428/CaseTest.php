@@ -14,17 +14,19 @@ abstract class CaseTest extends BaseTest
     use IntegrationTestTrait;
     use TableTrait;
 
+    #[\Testo\Test]
     public function testSelect(): void
     {
         // Get entity
         $post = (new Select($this->orm, Entity\Post::class))->fetchOne();
 
         // Check result
-        $this->assertInstanceOf(Entity\Post::class, $post);
-        $this->assertInstanceOf(Entity\Comment::class, $post->best_comment);
-        $this->assertSame(2, $post->best_comment->id);
+        \Testo\Assert::instanceOf($post, Entity\Post::class);
+        \Testo\Assert::instanceOf($post->best_comment, Entity\Comment::class);
+        \Testo\Assert::same($post->best_comment->id, 2);
     }
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         // Get entity
@@ -44,9 +46,10 @@ abstract class CaseTest extends BaseTest
         $this->orm->getHeap()->clean();
 
         $post = (new Select($this->orm, Entity\Post::class))->where(['id' => $post->id])->fetchOne();
-        self::assertSame(42, $post->best_comment_id);
+        \Testo\Assert::same($post->best_comment_id, 42);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB

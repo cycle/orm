@@ -23,6 +23,7 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
     protected const WORKER_ROLE = 'worker';
     protected const BOSS_ROLE = 'boss';
 
+    #[\Testo\Test]
     public function testInsertChildWritesScalarDespiteEnumOnProperty(): void
     {
         $boss = new BossWithKind();
@@ -40,9 +41,10 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
             ->where('id', $boss->id)
             ->fetchAll()[0];
 
-        $this->assertSame('manager', $row['type']);
+        \Testo\Assert::same($row['type'], 'manager');
     }
 
+    #[\Testo\Test]
     public function testInsertBaseWithEnumPropertyWritesScalar(): void
     {
         // Base entity does NOT match any child in CHILDREN -> getDiscriminatorValues() returns [].
@@ -61,9 +63,10 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
             ->where('id', $worker->id)
             ->fetchAll()[0];
 
-        $this->assertSame('employee', $row['type']);
+        \Testo\Assert::same($row['type'], 'employee');
     }
 
+    #[\Testo\Test]
     public function testRoundTripPreservesEnumOnEntity(): void
     {
         $boss = new BossWithKind();
@@ -79,10 +82,11 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
             ->wherePK($boss->id)
             ->fetchOne();
 
-        $this->assertInstanceOf(BossWithKind::class, $loaded);
-        $this->assertSame(EmployeeType::Manager, $loaded->type);
+        \Testo\Assert::instanceOf($loaded, BossWithKind::class);
+        \Testo\Assert::same($loaded->type, EmployeeType::Manager);
     }
 
+    #[\Testo\Test]
     public function testNoExtraWritesAfterRoundTrip(): void
     {
         $boss = new BossWithKind();
@@ -105,6 +109,7 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

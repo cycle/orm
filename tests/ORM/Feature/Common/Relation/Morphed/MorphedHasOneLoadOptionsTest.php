@@ -21,35 +21,39 @@ abstract class MorphedHasOneLoadOptionsTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->load('image', new MorphedHasOneLoadOptions(
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('user-image.png', $a->image->url);
-        $this->assertSame('user-2-image.png', $b->image->url);
+        \Testo\Assert::same($a->image->url, 'user-image.png');
+        \Testo\Assert::same($b->image->url, 'user-2-image.png');
     }
 
+    #[\Testo\Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->load('image', new MorphedHasOneLoadOptions(
             method: LoadMethod::OuterQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('user-image.png', $a->image->url);
-        $this->assertSame('user-2-image.png', $b->image->url);
+        \Testo\Assert::same($a->image->url, 'user-image.png');
+        \Testo\Assert::same($b->image->url, 'user-2-image.png');
     }
 
+    #[\Testo\Test]
     public function testLoadWithDefaultOptions(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->load('image', new MorphedHasOneLoadOptions())
             ->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('user-image.png', $a->image->url);
-        $this->assertSame('user-2-image.png', $b->image->url);
+        \Testo\Assert::same($a->image->url, 'user-image.png');
+        \Testo\Assert::same($b->image->url, 'user-2-image.png');
     }
 
+    #[\Testo\Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('image_archive', [
@@ -71,10 +75,11 @@ abstract class MorphedHasOneLoadOptionsTest extends BaseTest
             table: 'image_archive',
         ))->orderBy('user.id')->fetchAll();
 
-        $this->assertSame('archived-user-image.png', $a->image->url);
-        $this->assertSame('archived-user-2-image.png', $b->image->url);
+        \Testo\Assert::same($a->image->url, 'archived-user-image.png');
+        \Testo\Assert::same($b->image->url, 'archived-user-2-image.png');
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

@@ -15,6 +15,7 @@ abstract class RenamedPKTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreateEmpty(): void
     {
         $this->createTable1();
@@ -24,9 +25,10 @@ abstract class RenamedPKTest extends BaseTest
 
         $this->save($u);
 
-        $this->assertIsInt($u->getId());
+        \Testo\Assert::int($u->getId());
     }
 
+    #[\Testo\Test]
     public function testCreateWithPredefinedId(): void
     {
         $this->createTable1();
@@ -41,11 +43,12 @@ abstract class RenamedPKTest extends BaseTest
         $s = new Select($this->orm->withHeap(new Heap()), Identity::class);
         $data = $s->fetchData();
 
-        $this->assertIsInt(current($data)['id']);
-        $this->assertSame(2, $u->getId());
-        $this->assertSame(42, $u->getKey());
+        \Testo\Assert::int(current($data)['id']);
+        \Testo\Assert::same($u->getId(), 2);
+        \Testo\Assert::same($u->getKey(), 42);
     }
 
+    #[\Testo\Test]
     public function testChangePK(): void
     {
         $this->createTable2();
@@ -60,7 +63,7 @@ abstract class RenamedPKTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
-        $this->assertCount(1, $data);
+        \Testo\Assert::count($data, 1);
         $u = $data[0];
         $u->setId(8);
 
@@ -71,8 +74,8 @@ abstract class RenamedPKTest extends BaseTest
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
 
-        $this->assertCount(1, $data);
-        $this->assertSame(8, $data[0]->getId());
+        \Testo\Assert::count($data, 1);
+        \Testo\Assert::same($data[0]->getId(), 8);
     }
 
     private function createTable2(): void

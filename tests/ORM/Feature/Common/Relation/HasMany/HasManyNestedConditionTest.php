@@ -20,12 +20,13 @@ abstract class HasManyNestedConditionTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('posts.comments')->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -86,10 +87,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
                     ],
                 ],
             ],
-        ], $selector->fetchData());
+        ]);
     }
 
     // only load posts with comments
+    #[\Testo\Test]
     public function testFetchFiltered(): void
     {
         $users = new Select($this->orm, User::class);
@@ -99,7 +101,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
             },
         ])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($users->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -123,10 +125,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 'balance' => 200.0,
                 'posts' => [],
             ],
-        ], $users->fetchData());
+        ]);
     }
 
     // only load posts without comments
+    #[\Testo\Test]
     public function testFetchFilteredNoComments(): void
     {
         $users = new Select($this->orm, User::class);
@@ -138,7 +141,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
             },
         ])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($users->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -163,10 +166,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
                     ],
                 ],
             ],
-        ], $users->fetchData());
+        ]);
     }
 
     // only load posts with comments left by post author
+    #[\Testo\Test]
     public function testFetchCrossLinked(): void
     {
         $users = new Select($this->orm, User::class);
@@ -181,7 +185,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
             },
         ])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($users->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -200,10 +204,11 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 'balance' => 200.0,
                 'posts' => [],
             ],
-        ], $users->fetchData());
+        ]);
     }
 
     // find all users which have posts without comments and load all posts with comments
+    #[\Testo\Test]
     public function testFindUsersWithoutPostCommentsLoadPostsWithComments(): void
     {
         $users = new Select($this->orm, User::class);
@@ -218,7 +223,7 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 },
             ])->orderBy('user.id');
 
-        $this->assertEquals([
+        \Testo\Assert::equals($users->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -242,9 +247,10 @@ abstract class HasManyNestedConditionTest extends BaseTest
                 'balance' => 200.0,
                 'posts' => [],
             ],
-        ], $users->fetchData());
+        ]);
     }
 
+    #[\Testo\Test]
     public function testUpdateNestedRelation(): void
     {
         $this->captureReadQueries();
@@ -260,18 +266,19 @@ abstract class HasManyNestedConditionTest extends BaseTest
 
         $this->captureReadQueries();
         foreach ($users as $user) {
-            $this->assertIsIterable($user->posts);
+            \Testo\Assert::iterable($user->posts);
             foreach ($user->posts as $post) {
-                $this->assertIsIterable($post->comments);
+                \Testo\Assert::iterable($post->comments);
                 // Verify comments are loaded
                 foreach ($post->comments as $comment) {
-                    $this->assertNotNull($comment->message);
+                    \Testo\Assert::notNull($comment->message);
                 }
             }
         }
         $this->assertNumReads(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

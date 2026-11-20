@@ -21,6 +21,7 @@ abstract class CyclicReferencesTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testCreate(): void
     {
         $u = new User();
@@ -58,16 +59,17 @@ abstract class CyclicReferencesTest extends BaseTest
 
         $u1 = $selector->wherePK(1)->fetchOne();
 
-        $this->assertEquals($u->id, $u1->id);
-        $this->assertEquals($u->lastComment->id, $u1->lastComment->id);
+        \Testo\Assert::equals($u1->id, $u->id);
+        \Testo\Assert::equals($u1->lastComment->id, $u->lastComment->id);
 
-        $this->assertEquals($u->lastComment->user->id, $u1->lastComment->user->id);
-        $this->assertEquals($u->comments[0]->id, $u1->comments[0]->id);
-        $this->assertEquals($u->favorites[0]->id, $u1->favorites[0]->id);
-        $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
-        $this->assertEquals($u->id, $u1->favorites[0]->favoredBy[0]->id);
+        \Testo\Assert::equals($u1->lastComment->user->id, $u->lastComment->user->id);
+        \Testo\Assert::equals($u1->comments[0]->id, $u->comments[0]->id);
+        \Testo\Assert::equals($u1->favorites[0]->id, $u->favorites[0]->id);
+        \Testo\Assert::equals($u1->favorites[0]->user->id, $u->favorites[0]->user->id);
+        \Testo\Assert::equals($u1->favorites[0]->favoredBy[0]->id, $u->id);
     }
 
+    #[\Testo\Test]
     public function testCreateMultipleLinkedTrees(): void
     {
         $u = new User();
@@ -103,21 +105,21 @@ abstract class CyclicReferencesTest extends BaseTest
             ->load('favorites')
             ->wherePK($u->id)->fetchOne();
 
-        $this->assertEquals($u->id, $u1->id);
-        $this->assertEquals($u->lastComment->id, $u1->lastComment->id);
+        \Testo\Assert::equals($u1->id, $u->id);
+        \Testo\Assert::equals($u1->lastComment->id, $u->lastComment->id);
 
-        $this->assertEquals($u->lastComment->user->id, $u1->lastComment->user->id);
-        $this->assertEquals($u->comments[0]->id, $u1->comments[0]->id);
-        $this->assertEquals($u->favorites[0]->id, $u1->favorites[0]->id);
-        $this->assertEquals($u->favorites[0]->user->id, $u1->favorites[0]->user->id);
+        \Testo\Assert::equals($u1->lastComment->user->id, $u->lastComment->user->id);
+        \Testo\Assert::equals($u1->comments[0]->id, $u->comments[0]->id);
+        \Testo\Assert::equals($u1->favorites[0]->id, $u->favorites[0]->id);
+        \Testo\Assert::equals($u1->favorites[0]->user->id, $u->favorites[0]->user->id);
 
         $fav = [
             (string) $u1->favorites[0]->favoredBy[0]->id,
             (string) $u1->favorites[0]->favoredBy[1]->id,
         ];
 
-        $this->assertContains((string) $u->id, $fav);
-        $this->assertContains((string) $u2->id, $fav);
+        \Testo\Assert::contains($fav, (string) $u->id);
+        \Testo\Assert::contains($fav, (string) $u2->id);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -128,9 +130,10 @@ abstract class CyclicReferencesTest extends BaseTest
             ->load('favorites')
             ->wherePK($u2->id)->fetchOne();
 
-        $this->assertEquals($u1->favorites[0]->id, $u2->favorites[0]->id);
+        \Testo\Assert::equals($u2->favorites[0]->id, $u1->favorites[0]->id);
     }
 
+    #[\Testo\Test]
     public function testCreateMultipleLinkedTreesExchange(): void
     {
         $u = new User();
@@ -175,6 +178,7 @@ abstract class CyclicReferencesTest extends BaseTest
         $this->assertNumWrites(0);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

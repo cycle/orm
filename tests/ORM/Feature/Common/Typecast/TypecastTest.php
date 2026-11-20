@@ -30,6 +30,7 @@ abstract class TypecastTest extends BaseTest
 
     // Insert command
 
+    #[\Testo\Test]
     public function testAIIdTypecastingOnInsert(): void
     {
         $user = new User();
@@ -38,12 +39,13 @@ abstract class TypecastTest extends BaseTest
 
         $this->save($user);
 
-        $this->assertNotNull($user->id);
-        $this->assertIsNumeric($user->id->value);
+        \Testo\Assert::notNull($user->id);
+        \Testo\Assert::numeric($user->id->value);
     }
 
     // ORM::make()
 
+    #[\Testo\Test]
     public function testOrmMakePreparedDataCastFlag(): void
     {
         $idValue = new Wrapper(100);
@@ -54,13 +56,14 @@ abstract class TypecastTest extends BaseTest
             'balance' => $balanceValue,
         ], typecast: false);
 
-        $this->assertSame($idValue, $user->id);
-        $this->assertSame($balanceValue, $user->balance);
+        \Testo\Assert::same($user->id, $idValue);
+        \Testo\Assert::same($user->balance, $balanceValue);
 
         // no exceptions thrown
         $this->save($user);
     }
 
+    #[\Testo\Test]
     public function testOrmMakeRawDataCastFlag(): void
     {
         $user = $this->orm->make(User::class, [
@@ -69,13 +72,14 @@ abstract class TypecastTest extends BaseTest
             'balance' => 50,
         ], typecast: true);
 
-        $this->assertNotNull($user->id);
-        $this->assertIsInt($user->id->value);
+        \Testo\Assert::notNull($user->id);
+        \Testo\Assert::int($user->id->value);
 
         // no exceptions thrown
         $this->save($user);
     }
 
+    #[\Testo\Test]
     public function testOrmMakeRehydrateRawDataCastFlag(): void
     {
         $user1 = $this->orm->make(User::class, [
@@ -90,14 +94,15 @@ abstract class TypecastTest extends BaseTest
             'balance' => 200,
         ], status: Node::MANAGED, typecast: true);
 
-        $this->assertSame($user1, $user2);
-        $this->assertNotNull($user1->id);
-        $this->assertSame(50, $user1->balance->value, 'non-relation field must not be overwritten');
+        \Testo\Assert::same($user2, $user1);
+        \Testo\Assert::notNull($user1->id);
+        \Testo\Assert::same($user1->balance->value, 50, 'non-relation field must not be overwritten');
 
         // no exceptions thrown
         $this->save($user1);
     }
 
+    #[\Testo\Test]
     public function testCreateFromRawDataWithRelations(): void
     {
         $user = $this->orm->make('user', [
@@ -116,6 +121,7 @@ abstract class TypecastTest extends BaseTest
         ], typecast: true);
     }
 
+    #[\Testo\Test]
     public function testWrongTypecastShouldBeSkipped(): void
     {
         $book = $this->orm->make('book2', [
@@ -124,11 +130,12 @@ abstract class TypecastTest extends BaseTest
             'description' => 'Super long description',
         ], typecast: true);
 
-        $this->assertSame('15', $book->id);
-        $this->assertSame('hello world', $book->title);
-        $this->assertSame('wrong description', $book->description);
+        \Testo\Assert::same($book->id, '15');
+        \Testo\Assert::same($book->title, 'hello world');
+        \Testo\Assert::same($book->description, 'wrong description');
     }
 
+    #[\Testo\Test]
     public function testCompositeTypecastWith(): void
     {
         $book1 = $this->orm->make('book3', [
@@ -140,33 +147,36 @@ abstract class TypecastTest extends BaseTest
             'id' => 100,
         ], typecast: true);
 
-        $this->assertSame('uuid', $book1->id);
-        $this->assertSame(['json'], $book1->title);
+        \Testo\Assert::same($book1->id, 'uuid');
+        \Testo\Assert::same($book1->title, ['json']);
 
-        $this->assertSame('uuid', $book2->id);
-        $this->assertNull($book2->title);
+        \Testo\Assert::same($book2->id, 'uuid');
+        \Testo\Assert::null($book2->title);
     }
 
     // Select
 
+    #[\Testo\Test]
     public function testSelectOne(): void
     {
         $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
 
-        $this->assertNotNull($user->id);
-        $this->assertIsNotObject($user->id->value);
-        $this->assertEquals(1, $user->id->value);
+        \Testo\Assert::notNull($user->id);
+        \Testo\Assert::false(\is_object($user->id->value));
+        \Testo\Assert::equals($user->id->value, 1);
     }
 
+    #[\Testo\Test]
     public function testSelectMultiple(): void
     {
         $users = (new Select($this->orm, User::class))->orderBy('id', 'asc')->fetchAll();
 
-        $this->assertNotNull($users[0]->id);
-        $this->assertIsNotObject($users[0]->id->value);
-        $this->assertEquals(1, $users[0]->id->value);
+        \Testo\Assert::notNull($users[0]->id);
+        \Testo\Assert::false(\is_object($users[0]->id->value));
+        \Testo\Assert::equals($users[0]->id->value, 1);
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

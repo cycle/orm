@@ -21,6 +21,7 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 {
     use TableTrait;
 
+    #[\Testo\Test]
     public function testOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -29,19 +30,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 1', $a->comments[3]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
+        \Testo\Assert::same($a->comments[3]->message, 'msg 1');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[2]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        \Testo\Assert::same($b->comments[2]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -50,19 +52,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 3', $a->comments[2]->message);
-        $this->assertSame('msg 2', $a->comments[1]->message);
-        $this->assertSame('msg 1', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
 
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedPosts(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -71,19 +74,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('p.msg 4', $a->comments[0]->message);
-        $this->assertSame('p.msg 3', $a->comments[1]->message);
-        $this->assertSame('p.msg 2', $a->comments[2]->message);
-        $this->assertSame('p.msg 1', $a->comments[3]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'p.msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'p.msg 3');
+        \Testo\Assert::same($a->comments[2]->message, 'p.msg 2');
+        \Testo\Assert::same($a->comments[3]->message, 'p.msg 1');
 
-        $this->assertSame('p.msg 2.3', $b->comments[0]->message);
-        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
-        $this->assertSame('p.msg 2.1', $b->comments[2]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'p.msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'p.msg 2.2');
+        \Testo\Assert::same($b->comments[2]->message, 'p.msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedPostsASC(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -92,19 +96,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('p.msg 4', $a->comments[3]->message);
-        $this->assertSame('p.msg 3', $a->comments[2]->message);
-        $this->assertSame('p.msg 2', $a->comments[1]->message);
-        $this->assertSame('p.msg 1', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[3]->message, 'p.msg 4');
+        \Testo\Assert::same($a->comments[2]->message, 'p.msg 3');
+        \Testo\Assert::same($a->comments[1]->message, 'p.msg 2');
+        \Testo\Assert::same($a->comments[0]->message, 'p.msg 1');
 
-        $this->assertSame('p.msg 2.3', $b->comments[2]->message);
-        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
-        $this->assertSame('p.msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[2]->message, 'p.msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'p.msg 2.2');
+        \Testo\Assert::same($b->comments[0]->message, 'p.msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -115,19 +120,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 1', $a->comments[3]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
+        \Testo\Assert::same($a->comments[3]->message, 'msg 1');
 
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[2]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        \Testo\Assert::same($b->comments[2]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedASCInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -138,19 +144,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 3', $a->comments[2]->message);
-        $this->assertSame('msg 2', $a->comments[1]->message);
-        $this->assertSame('msg 1', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
 
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedPostsInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -161,19 +168,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('post.id', 'ASC')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('p.msg 4', $a->comments[0]->message);
-        $this->assertSame('p.msg 3', $a->comments[1]->message);
-        $this->assertSame('p.msg 2', $a->comments[2]->message);
-        $this->assertSame('p.msg 1', $a->comments[3]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'p.msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'p.msg 3');
+        \Testo\Assert::same($a->comments[2]->message, 'p.msg 2');
+        \Testo\Assert::same($a->comments[3]->message, 'p.msg 1');
 
-        $this->assertSame('p.msg 2.3', $b->comments[0]->message);
-        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
-        $this->assertSame('p.msg 2.1', $b->comments[2]->message);
+        \Testo\Assert::same($b->comments[0]->message, 'p.msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'p.msg 2.2');
+        \Testo\Assert::same($b->comments[2]->message, 'p.msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedPostsASCInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -184,19 +192,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('post.id', 'ASC')->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('p.msg 4', $a->comments[3]->message);
-        $this->assertSame('p.msg 3', $a->comments[2]->message);
-        $this->assertSame('p.msg 2', $a->comments[1]->message);
-        $this->assertSame('p.msg 1', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[3]->message, 'p.msg 4');
+        \Testo\Assert::same($a->comments[2]->message, 'p.msg 3');
+        \Testo\Assert::same($a->comments[1]->message, 'p.msg 2');
+        \Testo\Assert::same($a->comments[0]->message, 'p.msg 1');
 
-        $this->assertSame('p.msg 2.3', $b->comments[2]->message);
-        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
-        $this->assertSame('p.msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[2]->message, 'p.msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'p.msg 2.2');
+        \Testo\Assert::same($b->comments[0]->message, 'p.msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedPromisedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -205,19 +214,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('msg 4', $a->comments[3]->message);
-        $this->assertSame('msg 3', $a->comments[2]->message);
-        $this->assertSame('msg 2', $a->comments[1]->message);
-        $this->assertSame('msg 1', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
 
-        $this->assertSame('msg 2.3', $b->comments[2]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -227,16 +237,17 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertSame('msg 4', $a->comments[2]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[0]->message);
-        $this->assertSame('msg 2.3', $b->comments[1]->message);
-        $this->assertSame('msg 2.2', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[2]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[0]->message, 'msg 2');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -246,16 +257,17 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertSame('msg 4', $a->comments[2]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[0]->message);
-        $this->assertSame('msg 2.3', $b->comments[1]->message);
-        $this->assertSame('msg 2.2', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[2]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[0]->message, 'msg 2');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testPostOrderedPromisedASC(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -264,19 +276,20 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
 
-        $this->assertCount(4, $a->comments);
-        $this->assertCount(3, $b->comments);
+        \Testo\Assert::count($a->comments, 4);
+        \Testo\Assert::count($b->comments, 3);
 
-        $this->assertSame('p.msg 4', $a->comments[3]->message);
-        $this->assertSame('p.msg 3', $a->comments[2]->message);
-        $this->assertSame('p.msg 2', $a->comments[1]->message);
-        $this->assertSame('p.msg 1', $a->comments[0]->message);
+        \Testo\Assert::same($a->comments[3]->message, 'p.msg 4');
+        \Testo\Assert::same($a->comments[2]->message, 'p.msg 3');
+        \Testo\Assert::same($a->comments[1]->message, 'p.msg 2');
+        \Testo\Assert::same($a->comments[0]->message, 'p.msg 1');
 
-        $this->assertSame('p.msg 2.3', $b->comments[2]->message);
-        $this->assertSame('p.msg 2.2', $b->comments[1]->message);
-        $this->assertSame('p.msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($b->comments[2]->message, 'p.msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'p.msg 2.2');
+        \Testo\Assert::same($b->comments[0]->message, 'p.msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testPostOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -286,16 +299,17 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, Post::class))->load('comments')->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertSame('p.msg 4', $a->comments[2]->message);
-        $this->assertSame('p.msg 3', $a->comments[1]->message);
-        $this->assertSame('p.msg 2', $a->comments[0]->message);
-        $this->assertSame('p.msg 2.3', $b->comments[1]->message);
-        $this->assertSame('p.msg 2.2', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[2]->message, 'p.msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'p.msg 3');
+        \Testo\Assert::same($a->comments[0]->message, 'p.msg 2');
+        \Testo\Assert::same($b->comments[1]->message, 'p.msg 2.3');
+        \Testo\Assert::same($b->comments[0]->message, 'p.msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testPostOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -306,17 +320,18 @@ abstract class MorphedHasManyScopeTest extends BaseTest
         [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
 
         $this->captureReadQueries();
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 2);
         $this->assertNumReads(2);
 
-        $this->assertSame('p.msg 4', $a->comments[2]->message);
-        $this->assertSame('p.msg 3', $a->comments[1]->message);
-        $this->assertSame('p.msg 2', $a->comments[0]->message);
-        $this->assertSame('p.msg 2.3', $b->comments[1]->message);
-        $this->assertSame('p.msg 2.2', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[2]->message, 'p.msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'p.msg 3');
+        \Testo\Assert::same($a->comments[0]->message, 'p.msg 2');
+        \Testo\Assert::same($b->comments[1]->message, 'p.msg 2.3');
+        \Testo\Assert::same($b->comments[0]->message, 'p.msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testOrderedAndWhereReversed(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -326,16 +341,17 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testOrderedAndWhereReversedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -347,16 +363,17 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -366,16 +383,17 @@ abstract class MorphedHasManyScopeTest extends BaseTest
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        $this->assertCount(3, $a->comments);
-        $this->assertCount(2, $b->comments);
+        \Testo\Assert::count($a->comments, 3);
+        \Testo\Assert::count($b->comments, 2);
 
-        $this->assertSame('msg 4', $a->comments[0]->message);
-        $this->assertSame('msg 3', $a->comments[1]->message);
-        $this->assertSame('msg 2', $a->comments[2]->message);
-        $this->assertSame('msg 2.3', $b->comments[0]->message);
-        $this->assertSame('msg 2.2', $b->comments[1]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
+        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
     }
 
+    #[\Testo\Test]
     public function testCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -388,13 +406,14 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'where' => ['@.level' => 1],
         ])->fetchAll();
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testCustomWhereInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -408,13 +427,14 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        $this->assertCount(1, $a->comments);
-        $this->assertCount(1, $b->comments);
+        \Testo\Assert::count($a->comments, 1);
+        \Testo\Assert::count($b->comments, 1);
 
-        $this->assertSame('msg 1', $a->comments[0]->message);
-        $this->assertSame('msg 2.1', $b->comments[0]->message);
+        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
+    #[\Testo\Test]
     public function testWithWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -424,10 +444,11 @@ abstract class MorphedHasManyScopeTest extends BaseTest
         // second user has been filtered out
         $res = (new Select($this->orm, User::class))->with('comments')->fetchAll();
 
-        $this->assertCount(1, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
+        \Testo\Assert::count($res, 1);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
     }
 
+    #[\Testo\Test]
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -439,11 +460,12 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
-        $this->assertSame('another@world.com', $res[1]->email);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        \Testo\Assert::same($res[1]->email, 'another@world.com');
     }
 
+    #[\Testo\Test]
     public function testLimitParentSelection(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -454,14 +476,15 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             ->load('comments')
             ->limit(1)->orderBy('user.id')->fetchAll();
 
-        $this->assertCount(1, $res);
-        $this->assertSame('hello@world.com', $res[0]->email);
-        $this->assertCount(4, $res[0]->comments);
+        \Testo\Assert::count($res, 1);
+        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        \Testo\Assert::count($res[0]->comments, 4);
     }
 
+    #[\Testo\Test]
     public function testLimitParentSelectionError(): void
     {
-        $this->expectException(LoaderException::class);
+        \Testo\Expect::exception(LoaderException::class);
 
         $this->orm = $this->withCommentsSchema([]);
 
@@ -471,6 +494,7 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
+    #[\Testo\Test]
     public function testInloadWithOrderAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -483,21 +507,22 @@ abstract class MorphedHasManyScopeTest extends BaseTest
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
-        $this->assertCount(2, $res);
-        $this->assertSame('hello@world.com', $res[1]->email);
-        $this->assertSame('another@world.com', $res[0]->email);
+        \Testo\Assert::count($res, 2);
+        \Testo\Assert::same($res[1]->email, 'hello@world.com');
+        \Testo\Assert::same($res[0]->email, 'another@world.com');
 
-        $this->assertCount(2, $res[1]->comments);
-        $this->assertCount(1, $res[0]->comments);
+        \Testo\Assert::count($res[1]->comments, 2);
+        \Testo\Assert::count($res[0]->comments, 1);
 
-        $this->assertSame('msg 4', $res[1]->comments[0]->message);
-        $this->assertSame('msg 3', $res[1]->comments[1]->message);
-        $this->assertSame('msg 2.3', $res[0]->comments[0]->message);
+        \Testo\Assert::same($res[1]->comments[0]->message, 'msg 4');
+        \Testo\Assert::same($res[1]->comments[1]->message, 'msg 3');
+        \Testo\Assert::same($res[0]->comments[0]->message, 'msg 2.3');
     }
 
+    #[\Testo\Test]
     public function testInvalidOrderBy(): void
     {
-        $this->expectException(StatementException::class);
+        \Testo\Expect::exception(StatementException::class);
 
         $this->orm = $this->withCommentsSchema([
             Relation::WHERE => ['@.level' => ['>=' => 3]],
@@ -510,6 +535,7 @@ abstract class MorphedHasManyScopeTest extends BaseTest
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
 
+    #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

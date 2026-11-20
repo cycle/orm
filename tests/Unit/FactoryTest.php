@@ -19,6 +19,7 @@ use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\SourceInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Tests\Fixtures\NotDeletedScope;
@@ -146,6 +147,25 @@ final class FactoryTest
 
         Assert::same($factory->source($schema, 'user')->getScope(), $own);
         Assert::instanceOf($factory->source($schema, 'post')->getScope(), SortByIDScope::class);
+    }
+
+    public function scopeClassMustImplementInterface(): never
+    {
+        $factory = new Factory($this->dbal());
+        $schema = new Schema(['user' => [SchemaInterface::TABLE => 'users', SchemaInterface::SCOPE => \stdClass::class]]);
+
+        Expect::exception(TypecastException::class)
+            ->withMessage(\stdClass::class . ' does not implement ' . ScopeInterface::class . '.');
+
+        $factory->source($schema, 'user');
+    }
+
+    public function scopeClassIsMadeByContainer(): void
+    {
+        $factory = new Factory($this->dbal());
+        $schema = new Schema(['user' => [SchemaInterface::TABLE => 'users', SchemaInterface::SCOPE => SortByIDScope::class]]);
+
+        Assert::instanceOf($factory->source($schema, 'user')->getScope(), SortByIDScope::class);
     }
 
     public function withDefaultSchemaClassesKeepsOriginalFactory(): void

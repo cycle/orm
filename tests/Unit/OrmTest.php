@@ -120,6 +120,26 @@ final class OrmTest
         $orm->getService(\stdClass::class);
     }
 
+    public function indexesComeFromSchema(): void
+    {
+        $orm = $this->createOrm(schema: new Schema([
+            'user' => [
+                Schema::ENTITY => \stdClass::class,
+                Schema::PRIMARY_KEY => 'id',
+                Schema::FIND_BY_KEYS => ['email'],
+            ],
+        ]));
+
+        Assert::same(\array_values($orm->getIndexes(\stdClass::class)), ['id', 'email']);
+    }
+
+    public function debugInfoShowsSchema(): void
+    {
+        $schema = new Schema([]);
+
+        Assert::same($this->createOrm(schema: $schema)->__debugInfo(), ['schema' => $schema]);
+    }
+
     private function heapWith(object $entity): Heap
     {
         $heap = new Heap();
@@ -127,15 +147,18 @@ final class OrmTest
         return $heap;
     }
 
-    private function createOrm(?Heap $heap = null, ?CommandGenerator $commandGenerator = null): ORM
-    {
+    private function createOrm(
+        ?Heap $heap = null,
+        ?CommandGenerator $commandGenerator = null,
+        Schema $schema = new Schema([]),
+    ): ORM {
         return new ORM(
             factory: new Factory(
                 new DatabaseManager(new DatabaseConfig([])),
                 RelationConfig::getDefault(),
                 new SimpleFactory(),
             ),
-            schema: new Schema([]),
+            schema: $schema,
             commandGenerator: $commandGenerator,
             heap: $heap,
         );

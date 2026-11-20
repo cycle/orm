@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Unit;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 use Mockery as m;
@@ -37,6 +38,35 @@ final class RelationMapTest
         ]);
 
         Assert::same(\array_keys($relMap->getMasters()), ['post.~morphed~image:image']);
+    }
+
+    public function childRelationOverridesParentOneOfTheSameName(): void
+    {
+        $schema = m::mock(SchemaInterface::class);
+        $schema->allows('getOuterRelations')->andReturn([]);
+        $schema->allows('getInnerRelations')->andReturnUsing(static fn(string $r): array => match ($r) {
+            'admin' => ['posts' => []],
+            'user' => ['posts' => [], 'comments' => []],
+        });
+        $schema->allows('define')->andReturnUsing(
+            static fn(string $r, int $property): ?string => $property === SchemaInterface::PARENT && $r === 'admin' ? 'user' : null,
+        );
+        $factory = m::mock(FactoryInterface::class);
+        $factory->allows('relation')->andReturnUsing(static function ($orm, $schema, string $role, string $name): RelationInterface {
+            $relation = m::mock(RelationInterface::class);
+            $relation->allows('getName')->andReturn("$role.$name");
+            return $relation;
+        });
+        $orm = m::mock(ORMInterface::class);
+        $orm->allows('getSchema')->andReturn($schema);
+        $orm->allows('getFactory')->andReturn($factory);
+
+        $relations = RelationMap::build($orm, 'admin')->getRelations();
+
+        Assert::same(
+            \array_map(static fn(RelationInterface $r): string => $r->getName(), $relations),
+            ['posts' => 'admin.posts', 'comments' => 'user.comments'],
+        );
     }
 
     private function hasMany(string $target): array

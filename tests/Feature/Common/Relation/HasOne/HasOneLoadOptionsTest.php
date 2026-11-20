@@ -82,6 +82,38 @@ final class HasOneLoadOptionsTest extends OrmTestCase
     }
 
     #[Test]
+    public function testNullWhereKeepsRelationWhereInJoinCondition(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => 4]],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->load('firstComment', ['where' => null])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($a->firstComment->message, 'msg 4');
+        Assert::null($b->firstComment);
+    }
+
+    #[Test]
+    public function testNullOrderByKeepsRelationOrderBy(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA => [Relation::ORDER_BY => ['@.level' => 'DESC']],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->load('firstComment', ['orderBy' => null])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($a->firstComment->message, 'msg 4');
+        Assert::same($b->firstComment->message, 'msg 2.3');
+    }
+
+    #[Test]
     public function testLoadWithOrderBy(): void
     {
         $this->orm = $this->withCommentsSchema([

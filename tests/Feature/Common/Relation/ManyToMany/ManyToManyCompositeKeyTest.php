@@ -96,6 +96,16 @@ final class ManyToManyCompositeKeyTest extends OrmTestCase
     }
 
     #[Test]
+    public function testLazyLoadRelation(): void
+    {
+        $parent = (new Select($this->orm, CompositePK::class))->wherePK([1, 1])->fetchOne();
+
+        $children = \array_map(static fn(CompositePKChild $c): ?string => $c->key3, $parent->pivoted->toArray());
+
+        Assert::same($children, [null, 'foo1', 'bar1']);
+    }
+
+    #[Test]
     public function testLoadParentRelation(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))

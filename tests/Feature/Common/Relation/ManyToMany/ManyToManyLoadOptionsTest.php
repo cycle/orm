@@ -211,6 +211,103 @@ final class ManyToManyLoadOptionsTest extends OrmTestCase
     }
 
     #[Test]
+    public function testNullOptionsKeepRelationWhereAndOrderBy(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA => [
+                Relation::WHERE => ['@.level' => ['>=' => 3]],
+                Relation::ORDER_BY => ['@.level' => 'DESC'],
+            ],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->load('tags', ['where' => null, 'orderBy' => null])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($this->tagNames($a), ['tag e', 'tag d']);
+        Assert::same($this->tagNames($b), ['tag f', 'tag d', 'tag c']);
+    }
+
+    #[Test]
+    public function testRelationWhereInSingleQueryKeepsParentsWithoutMatches(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => 5]],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->load('tags', ['method' => JoinableLoader::INLOAD])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($this->tagNames($a), ['tag e']);
+        Assert::same($this->tagNames($b), []);
+    }
+
+    #[Test]
+    public function testPivotWhereFiltersRelatedEntities(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA => [
+                Relation::THROUGH_WHERE => ['@.tag_id' => ['>' => 3]],
+                Relation::ORDER_BY => ['@.level' => 'ASC'],
+            ],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))->load('tags')->orderBy('user.id')->fetchAll();
+
+        Assert::same($this->tagNames($a), ['tag d', 'tag e']);
+        Assert::same($this->tagNames($b), ['tag d', 'tag f']);
+    }
+
+    #[Test]
+    public function testPivotWhereInSingleQueryKeepsParentsWithoutMatches(): void
+    {
+        $this->orm = $this->withTagSchema([
+            Relation::SCHEMA => [Relation::THROUGH_WHERE => ['@.tag_id' => 5]],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->load('tags', ['method' => JoinableLoader::INLOAD])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($this->tagNames($a), ['tag e']);
+        Assert::same($this->tagNames($b), []);
+    }
+
+    #[Test]
+    public function testPivotCanBeReconfiguredByPath(): void
+    {
+        $this->orm = $this->withTagSchema([]);
+
+        $users = (new Select($this->orm, User::class))
+            ->with('tags')
+            ->with('tags.@', ['as' => 'tm'])
+            ->where('tm.tag_id', 6)
+            ->fetchAll();
+
+        Assert::count($users, 1);
+        Assert::same($users[0]->email, 'another@world.com');
+    }
+
+    #[Test]
+    public function testJoinedRelationAllowsLimit(): void
+    {
+        $this->orm = $this->withTagSchema([]);
+
+        $users = (new Select($this->orm, User::class))
+            ->with('tags')
+            ->where('tags.level', 6)
+            ->limit(1)
+            ->fetchAll();
+
+        Assert::count($users, 1);
+        Assert::same($users[0]->email, 'another@world.com');
+    }
+
+    #[Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('tag_archive', [
@@ -367,5 +464,13 @@ final class ManyToManyLoadOptionsTest extends OrmTestCase
                 Schema::RELATIONS => [],
             ],
         ]));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function tagNames(User $user): array
+    {
+        return \array_map(static fn(Tag $tag): string => $tag->name, [...$user->tags]);
     }
 }

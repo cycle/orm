@@ -155,6 +155,21 @@ final class LoophpCollectionFactoryTest extends BaseTest
     }
 
     #[Test]
+    public function pivotedCollectionTracksPivotsOfItsElements(): void
+    {
+        $linked = new \stdClass();
+        $unlinked = new \stdClass();
+        $collection = new LoophpPivotedCollection([$linked, $unlinked]);
+
+        $collection->setPivot($linked, ['role' => 'admin']);
+
+        Assert::true($collection->hasPivot($linked));
+        Assert::false($collection->hasPivot($unlinked));
+        Assert::count($collection->getPivotContext(), 1);
+        Assert::same($collection->getPivotContext()[$linked], ['role' => 'admin']);
+    }
+
+    #[Test]
     public function withDecoratorClassKeepsOriginalFactory(): void
     {
         $factory = $this->getFactory();

@@ -31,6 +31,14 @@ final class ArrayCollectionFactoryTest extends BaseTest
         ]);
     }
 
+    #[Test]
+    public function collectionClassIsIgnored(): void
+    {
+        $factory = $this->getFactory();
+
+        Assert::same($factory->withCollectionClass(\ArrayObject::class), $factory);
+    }
+
     protected function getFactory(): CollectionFactoryInterface
     {
         return new ArrayCollectionFactory();

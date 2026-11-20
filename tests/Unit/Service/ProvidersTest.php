@@ -79,6 +79,29 @@ final class ProvidersTest
         Assert::instanceOf($provider->getRepository('post'), RepositoryInterface::class);
     }
 
+    public function mapperIsNotMadeWithoutOrm(): never
+    {
+        $provider = new MapperProvider(null, m::mock(FactoryInterface::class));
+
+        Expect::exception(ORMException::class)->withMessage('Mapper is not prepared.');
+
+        $provider->getMapper('user');
+    }
+
+    public function repositoryIsNotMadeWithoutOrm(): never
+    {
+        $provider = new RepositoryProvider(
+            null,
+            m::mock(SourceProviderInterface::class),
+            new Schema(['user' => []]),
+            m::mock(FactoryInterface::class),
+        );
+
+        Expect::exception(ORMException::class)->withMessage('Repository is not prepared.');
+
+        $provider->getRepository('user');
+    }
+
     public function sourceIsMadeOnce(): void
     {
         $factory = m::mock(FactoryInterface::class);

@@ -61,4 +61,20 @@ final class SequenceCommandTest
         Assert::true((new Sequence())->addCommand($done)->isExecuted());
         Assert::false((new Sequence())->addCommand($done, $pending)->isExecuted());
     }
+
+    public function nestedSequenceIsFlattened(): void
+    {
+        $first = m::mock(TestInsert::class);
+        $second = m::mock(TestInsert::class);
+        $third = m::mock(TestInsert::class);
+        $command = (new Sequence())->addCommand($first, (new Sequence())->addCommand($second), $third);
+
+        Assert::same(\iterator_to_array($command, false), [$first, $second, $third]);
+        Assert::count($command, 3);
+    }
+
+    public function sequenceHasNoDatabase(): void
+    {
+        Assert::null((new Sequence(m::mock(TestInsert::class)))->getDatabase());
+    }
 }

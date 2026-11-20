@@ -129,6 +129,39 @@ final class SchemaRelationsTest
         ]);
     }
 
+    public function missingInversionIsRejected(): never
+    {
+        Expect::exception(SchemaException::class)
+            ->withMessage('Relation `author` as inversion of `user.posts` not found in the `post` role.');
+
+        new Schema([
+            'user' => [SchemaInterface::RELATIONS => [
+                'posts' => self::hasMany('post', 'id', 'user_id', [Relation::INVERSION => 'author']),
+            ]],
+            'post' => [SchemaInterface::RELATIONS => []],
+        ]);
+    }
+
+    public function manyToManyIsNotLinkedWithAnotherRelationTypeOrPivot(): void
+    {
+        $schema = new Schema([
+            'user' => [SchemaInterface::RELATIONS => [
+                'tags' => self::mtm('tag', 'id', 'id'),
+                'groups' => self::mtm('group', 'id', 'id'),
+            ]],
+            'tag' => [SchemaInterface::RELATIONS => ['users' => self::hasMany('user', 'id', 'id')]],
+            'group' => [SchemaInterface::RELATIONS => [
+                'users' => self::mtm('user', 'id', 'id', [Relation::THROUGH_ENTITY => 'membership']),
+            ]],
+            'pivot' => [],
+            'membership' => [],
+        ]);
+
+        Assert::null(self::inversion($schema, 'user', 'tags'));
+        Assert::null(self::inversion($schema, 'user', 'groups'));
+        Assert::null(self::inversion($schema, 'group', 'users'));
+    }
+
     public function manyToManyIsLinkedWithSymmetricManyToMany(): void
     {
         $schema = new Schema([

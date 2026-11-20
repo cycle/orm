@@ -123,6 +123,61 @@ final class PoolTest
         Assert::same(\array_slice($trace, 2, 3), ['a:2:0:2', 'c:0:0:3', 'b:2:0:3']);
     }
 
+    public function entityAttachedAtLastStageInterruptsIt(): void
+    {
+        $pool = $this->pool();
+        $pool->attachStore($this->entity('a'), true);
+        $pool->attachStore($this->entity('b'), true);
+        $c = $this->entity('c');
+
+        $trace = $this->trace($pool, static function (object $entity, Tuple $tuple) use ($pool, $c): void {
+            if ($entity->n === 'a' && $tuple->status === Tuple::STATUS_PROPOSED) {
+                $pool->attachStore($c, true);
+            }
+        });
+
+        Assert::same(\array_slice($trace, 4, 4), ['a:4:0:2', 'c:0:0:3', 'a:6:0:3', 'b:4:0:3']);
+    }
+
+    public function processedEntityIsKnownButNotQueued(): void
+    {
+        $pool = $this->pool();
+        $a = $this->entity('a');
+
+        $tuple = $pool->attach($a, Tuple::TASK_STORE, false, status: Tuple::STATUS_PROCESSED);
+
+        Assert::same($pool->offsetGet($a), $tuple);
+        Assert::same(\count($pool), 0);
+        Assert::same($this->trace($pool), []);
+    }
+
+    public function presetStateOfNewEntityIsFilledOnSnap(): void
+    {
+        $mapper = m::mock(MapperInterface::class);
+        $mapper->allows('getRole')->andReturn('user');
+        $mapper->allows('fetchFields')->andReturn(['name' => 'a']);
+        $pool = $this->pool($mapper);
+        $state = new State(Node::NEW, []);
+        $tuple = $pool->attachStore($this->entity('a'), true, state: $state);
+
+        $pool->openIterator()->current();
+
+        Assert::same($tuple->state, $state);
+        Assert::same($state->getData(), ['name' => 'a']);
+        Assert::same($tuple->node->getState(), $state);
+    }
+
+    public function storedEntityCanBeForcedToDeletion(): void
+    {
+        $pool = $this->pool();
+        $a = $this->entity('a');
+        $tuple = $pool->attachStore($a, false);
+
+        $pool->attach($a, Tuple::TASK_FORCE_DELETE, false);
+
+        Assert::same($tuple->task, Tuple::TASK_FORCE_DELETE);
+    }
+
     public function unprocessedEntityIsReturnedAfterOthersProgress(): void
     {
         $pool = $this->pool();

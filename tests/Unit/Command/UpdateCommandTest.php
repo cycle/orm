@@ -133,6 +133,27 @@ final class UpdateCommandTest
         Assert::true($cmd->isReady());
     }
 
+    public function storeDataHoldsColumnsAndMappedChanges(): void
+    {
+        $this->cmd->registerColumn('type', 'admin');
+        $this->cmd->registerAppendix('name', 'new value');
+        $this->mapper->shouldReceive('mapColumns')
+            ->once()
+            ->with(['name' => 'new value'])
+            ->andReturn(['user_name' => 'new value']);
+
+        Assert::same($this->cmd->getStoreData(), ['type' => 'admin', 'user_name' => 'new value']);
+        Assert::same($this->state->getData(), ['foo' => 'bar', 'name' => 'new value']);
+    }
+
+    public function storeDataWithoutMapperHoldsRawChanges(): void
+    {
+        $cmd = new Update($this->db, 'table', $this->state, null, []);
+        $this->state->register('foo', 'changed');
+
+        Assert::same($cmd->getStoreData(), ['foo' => 'changed']);
+    }
+
     public function databaseIsNeededOnlyForScopedChanges(): void
     {
         Assert::null($this->cmd->getDatabase());

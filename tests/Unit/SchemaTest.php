@@ -53,6 +53,32 @@ final class SchemaTest
         $schema->define(Profile::class, SchemaInterface::ENTITY);
     }
 
+    public function undefinedRoleIsRejected(): void
+    {
+        $schema = new Schema(['user' => [SchemaInterface::ENTITY => User::class]]);
+
+        Expect::exception(SchemaException::class)->withMessage('Undefined schema `profile`, not found.');
+
+        $schema->define('profile', SchemaInterface::TABLE);
+    }
+
+    public function exportedSchemaIsRestored(): void
+    {
+        $schema = new Schema([
+            User::class => [
+                SchemaInterface::ENTITY => User::class,
+                SchemaInterface::ROLE => 'user',
+                SchemaInterface::TABLE => 'users',
+            ],
+        ]);
+
+        $restored = eval('return ' . \var_export($schema, true) . ';');
+
+        Assert::instanceOf($restored, Schema::class);
+        Assert::same($restored->define(User::class, SchemaInterface::TABLE), 'users');
+        Assert::same($restored->toArray(), $schema->toArray());
+    }
+
     public function testSchemaNull(): void
     {
         $schema = new Schema([

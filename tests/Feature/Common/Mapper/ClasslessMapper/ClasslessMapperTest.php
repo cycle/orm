@@ -52,6 +52,18 @@ final class ClasslessMapperTest extends OrmTestCase
     }
 
     #[Test]
+    public function extractedDataHoldsEntityFields(): void
+    {
+        $user = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
+
+        $data = $this->orm->getMapper('user')->extract($user);
+
+        Assert::same((int) $data['id'], 1);
+        Assert::same($data['email'], 'hello@world.com');
+        Assert::equals($data['balance'], 100.0);
+    }
+
+    #[Test]
     public function testAssertRoleViaClass(): void
     {
         $result = (new Select($this->orm, 'user'))->fetchOne();

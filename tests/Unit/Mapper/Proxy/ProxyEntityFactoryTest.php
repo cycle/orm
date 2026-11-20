@@ -42,6 +42,24 @@ final class ProxyEntityFactoryTest
         $this->factory->create(RelationMap::build($this->orm, 'user'), 'hello-world');
     }
 
+    public function finalEntityClassCannotBeProxied(): never
+    {
+        Expect::exception(\RuntimeException::class)->withMessage(
+            \sprintf('The entity `%s` class is final and can\'t be extended.', FinalNote::class),
+        );
+
+        $this->factory->create(RelationMap::build($this->orm, 'user'), FinalNote::class);
+    }
+
+    public function entityClassWithoutNamespaceIsProxied(): void
+    {
+        $entity = $this->factory->create(RelationMap::build($this->orm, 'user'), \stdClass::class);
+
+        Assert::instanceOf($entity, \stdClass::class);
+        Assert::instanceOf($entity, EntityProxyInterface::class);
+        Assert::same(\get_parent_class($entity), \stdClass::class);
+    }
+
     public function testExtractRelationsOfNotProxiedEntityReturnsOnlyRelations(): void
     {
         $schema = \Mockery::mock(SchemaInterface::class);
@@ -89,3 +107,7 @@ final class ProxyEntityFactoryTest
         );
     }
 }
+
+// phpcs:disable
+final class FinalNote {}
+// phpcs:enable

@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Copies a regression case folder (CaseTemplate by default) into tests/ORM/Regression/<name>.
+ *
  * Usage:
  *  php tests/generate-case.php --case-name=Issue777
  *  php tests/generate-case.php --case-name=Issue888 --template=Issue777
@@ -11,28 +13,25 @@ declare(strict_types=1);
 \error_reporting(E_ALL);
 \ini_set('display_errors', '1');
 
-//Composer
-require_once \dirname(__DIR__) . '/vendor/autoload.php';
+$regressionDir = __DIR__ . '/ORM/Regression';
 
-$integrationDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration';
-
-function defaultCaseName(string $integrationDir): string
+function defaultCaseName(string $regressionDir): string
 {
     $cases = 0;
 
-    foreach (\scandir($integrationDir) as $dirName) {
+    foreach (\scandir($regressionDir) as $dirName) {
         if (\sscanf($dirName, 'Case%d', $last) === 1) {
             $cases = \max($cases, $last);
         }
     }
     ++$cases;
 
-    return $integrationDir . '/Case' . $cases;
+    return $regressionDir . '/Case' . $cases;
 }
 
-function copyTemplateFiles(string $copyDir, string $caseTemplateDirName): void
+function copyTemplateFiles(string $regressionDir, string $copyDir, string $caseTemplateDirName): void
 {
-    $caseTemplateDir = __DIR__ . '/ORM/Functional/Driver/Common/Integration/' . $caseTemplateDirName;
+    $caseTemplateDir = $regressionDir . '/' . $caseTemplateDirName;
     if (!\file_exists($caseTemplateDir) || !\is_dir($caseTemplateDir)) {
         echo "Error. template folder '$caseTemplateDir' does not exists\n";
         exit(1);
@@ -45,7 +44,7 @@ function copyTemplateFiles(string $copyDir, string $caseTemplateDirName): void
     );
     foreach ($rii as $file) {
         $filePath = $file->getRealPath();
-        $target = \substr($filePath, \strlen($caseTemplateDir));
+        $target = \substr($filePath, \strlen(\realpath($caseTemplateDir)));
 
         // creating directory...
         $dirName = \dirname($copyDir . $target);
@@ -64,8 +63,8 @@ $options = \getopt('', [
 ]);
 
 $copyDir = isset($options['case-name'])
-    ? $integrationDir . DIRECTORY_SEPARATOR . $options['case-name']
-    : defaultCaseName($integrationDir);
+    ? $regressionDir . DIRECTORY_SEPARATOR . $options['case-name']
+    : defaultCaseName($regressionDir);
 
 if (\file_exists($copyDir)) {
     echo "Error. Tests folder `$copyDir` already exists\n";
@@ -77,8 +76,6 @@ echo \sprintf("Generating new test case '%s'... \n", \basename($copyDir));
 \mkdir($copyDir);
 $copyDir = \realpath($copyDir);
 
-copyTemplateFiles($copyDir, $options['template'] ?? 'CaseTemplate');
-
-require 'generate.php';
+copyTemplateFiles($regressionDir, $copyDir, $options['template'] ?? 'CaseTemplate');
 
 echo "Done. New test case is here:\n$copyDir\n";

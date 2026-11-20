@@ -111,6 +111,18 @@
         "psalm:ci": "psalm -c vendor-bin/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
         "db:down": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml down -v",
         "db:up": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml up -d --wait",
+        "infect": [
+            "Composer\\Config::disableProcessTimeout",
+            "@putenv XDEBUG_MODE=coverage",
+            "@putenv DB_DRIVERS=sqlite",
+            "infection --configuration=infection.json --threads=max"
+        ],
+        "infect:ci": [
+            "Composer\\Config::disableProcessTimeout",
+            "@putenv XDEBUG_MODE=coverage",
+            "@putenv DB_DRIVERS=sqlite",
+            "infection --ansi --configuration=infection.json --logger-github --threads=max --show-mutations=0"
+        ],
         "test": "testo",
         "test:mysql": "testo --suite=Feature/MySQL --suite=Regression/MySQL",
         "test:new-case": "cycle-testing new-case --template=orm",
@@ -120,6 +132,8 @@
         "test:unit": "testo --suite=Unit"
     },
     "scripts-descriptions": {
+        "infect": "Run mutation testing with Infection against the Unit and SQLite suites",
+        "infect:ci": "Run mutation testing in CI: GitHub annotations, the Stryker dashboard report and the MSI gate",
         "test:new-case": "Create a regression case for an issue: composer test:new-case -- <issue>"
     }
 }

@@ -1,3 +1,5 @@
+---
+
 name: build
 
 on:  # yamllint disable-line rule:truthy
@@ -10,109 +12,15 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  test:
-    needs: sqlite
-    name: Test PHP ${{ matrix.php-version }} with Code Coverage
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-        php-version:
-          - "8.2"
-          - "8.3"
-          - "8.4"
-          - "8.5"
-    steps:
-      - name: Install ODBC driver.
-        run: |
-          sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
-          sudo apt-get clean
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
+  testo:
+    name: Testo
+    uses: cycle/gh-actions/.github/workflows/testo.yml@master
+    with:
+      coverage: true
+    secrets: inherit
 
-      - name: 📦 Checkout
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - name: 🛠️ Setup DB services
-        run: |
-          cd tests
-          docker compose up -d
-          cd ..
-
-      - name: 🛠️ Setup PHP ${{ matrix.php-version }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-version }}
-          coverage: pcov
-          tools: pecl
-          extensions: mbstring, pdo, pdo_sqlite, pdo_pgsql, pdo_sqlsrv, pdo_mysql
-
-      - name: 🤖 Validate composer.json and composer.lock
-        run: composer validate --ansi --strict
-
-      - name: 📥 Install dependencies with composer
-        uses: ramsey/composer-install@v3
-        with:
-          dependency-versions: "highest"
-
-      - name: 🚀 Execute Tests
-        run: |
-          vendor/bin/phpunit --coverage-clover=coverage.clover
-
-      - name: Upload coverage to Codecov
-        continue-on-error: true # if is fork
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.clover
-
-  sqlite:
-    name: SQLite PHP ${{ matrix.php-version }} (${{ matrix.dependencies }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-        php-version:
-          - "8.2"
-          - "8.3"
-          - "8.4"
-          - "8.5"
-        dependencies:
-          - lowest
-          - highest
-    steps:
-      - name: 📦 Checkout
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-
-      - name: 🛠️ Setup PHP ${{ matrix.php-version }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-version }}
-          coverage: none
-          extensions: mbstring, pdo, pdo_sqlite
-
-      - name: 🤖 Validate composer.json and composer.lock
-        run: composer validate --ansi --strict
-
-      - name: 📥 Install dependencies with composer
-        uses: ramsey/composer-install@v3
-        with:
-          dependency-versions: ${{ matrix.dependencies }}
-
-      - name: 🚀 Execute Tests
-        env:
-          DB: sqlite
-        run: |
-          vendor/bin/phpunit --group driver-sqlite --colors=always
+...

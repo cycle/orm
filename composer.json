@@ -37,6 +37,12 @@
             "url": "https://github.com/sponsors/cycle"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/cycle/testing"
+        }
+    ],
     "require": {
         "php": ">=8.2",
         "cycle/database": "^2.23",
@@ -47,15 +53,16 @@
         "ext-pdo": "*",
         "bamarni/composer-bin-plugin": "^1.9",
         "buggregator/trap": "^1.20",
+        "cycle/testing": "^0.1.1",
         "doctrine/collections": "^2.6 || ^3.0",
         "illuminate/collections": "12 - 13",
         "llm/skills": "^1.20",
         "loophp/collection": "^7.6",
         "mockery/mockery": "^1.6",
-        "phpunit/phpunit": "^9.6",
         "ramsey/uuid": "^4.10",
         "roxblnfk/unpoly": "^1.8",
-        "spiral/tokenizer": "^3.18"
+        "testo/bridge-mockery": "^0.1.2",
+        "testo/testo": "^0.10.60"
     },
     "suggest": {
         "llm/skills": "To sync the cycle-orm AI skill into your project"
@@ -67,7 +74,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Cycle\\ORM\\Tests\\": "tests/ORM/"
+            "Cycle\\ORM\\Tests\\": "tests/"
         }
     },
     "config": {
@@ -102,8 +109,17 @@
         "psalm": "psalm -c vendor-bin/psalm/psalm.xml",
         "psalm:baseline": "psalm -c vendor-bin/psalm/psalm.xml --set-baseline=vendor-bin/psalm/psalm-baseline.xml",
         "psalm:ci": "psalm -c vendor-bin/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
-        "test": "phpunit --color=always",
-        "test:unit": "phpunit --exclude-group driver --colors=always",
-        "test:sqlite": "phpunit --group driver-sqlite --colors=always"
+        "db:down": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml down -v",
+        "db:up": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml up -d --wait",
+        "test": "testo",
+        "test:mysql": "testo --suite=Feature/MySQL --suite=Regression/MySQL",
+        "test:new-case": "cycle-testing new-case --template=orm",
+        "test:postgres": "testo --suite=Feature/Postgres --suite=Regression/Postgres",
+        "test:sqlite": "testo --suite=Feature/SQLite --suite=Regression/SQLite",
+        "test:sqlserver": "testo --suite=Feature/SQLServer --suite=Regression/SQLServer",
+        "test:unit": "testo --suite=Unit"
+    },
+    "scripts-descriptions": {
+        "test:new-case": "Create a regression case for an issue: composer test:new-case -- <issue>"
     }
 }

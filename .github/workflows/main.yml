@@ -41,8 +41,6 @@ jobs:
           coverage: none
           extensions: mbstring, pdo, pdo_sqlite
 
-      # TODO(cycle/testing): switch to the released package; the path repository in composer.json
-      # (../../testing) does not exist on the runner yet.
       - name: 📥 Install dependencies with composer
         uses: ramsey/composer-install@v3
         with:
@@ -99,8 +97,6 @@ jobs:
           tools: pecl
           extensions: mbstring, pdo, ${{ matrix.extensions }}
 
-      # TODO(cycle/testing): switch to the released package; the path repository in composer.json
-      # (../../testing) does not exist on the runner yet.
       - name: 📥 Install dependencies with composer
         uses: ramsey/composer-install@v3
 

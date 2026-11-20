@@ -251,6 +251,30 @@ final class BelongsToTest
         Assert::same($tuple->state->getRelationStatus('user'), RelationInterface::STATUS_RESOLVED);
     }
 
+    public function queueDoesNotPullKeyThatParentHasNotGot(): void
+    {
+        $tuple = $this->tuple();
+        $user = new \stdClass();
+        $tuple->state->setRelation('user', $user);
+        $this->attachParent($user, Tuple::STATUS_DEFERRED_RESOLVED, []);
+
+        $this->relation()->queue($this->pool, $tuple);
+
+        Assert::false(\array_key_exists('user_id', $tuple->state->getData()));
+        Assert::same($tuple->state->getRelationStatus('user'), RelationInterface::STATUS_PREPARE);
+    }
+
+    public function queueNullOnRequiredRelationWaitsWhileEntityIsPreparing(): void
+    {
+        $tuple = $this->tuple();
+        $tuple->state->setRelation('user', null);
+
+        $this->relation()->queue($this->pool, $tuple);
+
+        Assert::null($tuple->state->getRelation('user'));
+        Assert::same($tuple->state->getRelationStatus('user'), RelationInterface::STATUS_PREPARE);
+    }
+
     public function queueNullOnRequiredRelationOfWaitedEntityUsesKeyValue(): void
     {
         $tuple = $this->tuple(['user_id' => 5], Tuple::STATUS_WAITED);

@@ -7,6 +7,7 @@ namespace Cycle\ORM\Tests\Unit\Relation;
 use Cycle\ORM\Command\StoreCommandInterface;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
+use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Reference\Reference;
@@ -147,6 +148,66 @@ final class EmbeddedTest
 
             $relation->queue($pool, $tuple, $command);
         });
+    }
+
+    public function isAlwaysCascadeToTheEmbeddedRole(): void
+    {
+        $relation = $this->relation();
+
+        Assert::same($relation->getTarget(), 'user_address');
+        Assert::true($relation->isCascade());
+    }
+
+    public function castUsesTargetMapperAndKeepsNull(): void
+    {
+        $relation = $this->relation();
+        $this->mapper->allows('cast')->with(['city' => 'Paris'])->andReturn(['city' => 'PARIS']);
+
+        Assert::null($relation->cast(null));
+        Assert::same($relation->cast(['city' => 'Paris']), ['city' => 'PARIS']);
+    }
+
+    public function referenceOfNodeWithoutKeyIsResolvedToNull(): void
+    {
+        $reference = $this->relation()->initReference(new Node(Node::NEW, ['id' => null], 'user'));
+
+        Assert::instanceOf($reference, Reference::class);
+        Assert::same($reference->getScope(), []);
+        Assert::true($reference->hasValue());
+        Assert::null($reference->getValue());
+    }
+
+    public function referenceOfStoredNodeIsScopedByKey(): void
+    {
+        $reference = $this->relation()->initReference(new Node(Node::MANAGED, ['id' => 3], 'user'));
+
+        Assert::same($reference->getRole(), 'user_address');
+        Assert::same($reference->getScope(), ['id' => 3]);
+        Assert::false($reference->hasValue());
+    }
+
+    public function queueIgnoresDeletion(): void
+    {
+        $relation = $this->relation();
+        $tuple = new Tuple(Tuple::TASK_DELETE, new \stdClass(), false, Tuple::STATUS_PREPARING);
+        $tuple->state = new State(Node::MANAGED, ['id' => 1]);
+        $tuple->state->setRelation('address', new \stdClass());
+
+        $relation->queue(new Pool(m::mock(ORMInterface::class)), $tuple);
+
+        Assert::same($tuple->state->getRelationStatus('address'), RelationInterface::STATUS_PREPARE);
+    }
+
+    public function queueWithoutEmbeddedValueIsResolved(): void
+    {
+        $relation = $this->relation();
+
+        $this->inIteration(static function (Pool $pool, Tuple $tuple) use ($relation): void {
+            $relation->queue($pool, $tuple);
+        }, $pool, $tuple);
+
+        Assert::false($tuple->state->hasRelation('address'));
+        Assert::same($tuple->state->getRelationStatus('address'), RelationInterface::STATUS_RESOLVED);
     }
 
     /**

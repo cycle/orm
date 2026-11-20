@@ -35,6 +35,9 @@ final class NodeComparisonTest
             [10, '10'],
             [2.1, '2.1'],
             [199.0, '199.0'],
+            ['1', 1],
+            ['2.5', 2.5],
+            [3.0, 3],
             // String
             ['', b''],
         ];
@@ -54,6 +57,11 @@ final class NodeComparisonTest
         yield 'Objects with ValueInterface' => [
             $this->createObjectWithValueInterface('foo'),
             $this->createObjectWithValueInterface('foo'),
+        ];
+
+        yield 'ValueInterface objects of different classes' => [
+            $this->createObjectWithValueInterface('foo'),
+            $this->createAnotherObjectWithValueInterface('foo'),
         ];
 
         $obj1 = $this->createStringableObject('obj');
@@ -86,6 +94,8 @@ final class NodeComparisonTest
             [0, '0x0'],
             [2, '1'],
             [300.0, 400],
+            [0.0, 'abc'],
+            [1.5, 'abc'],
             // Array
             [[], null],
             [[], true],
@@ -120,6 +130,15 @@ final class NodeComparisonTest
             $this->createNotStringableObject(null, 'foo'),
             $this->createNotStringableObject2(null, 'foo'),
         ];
+        yield 'ValueInterface and Stringable with the same text' => [
+            $this->createObjectWithValueInterface('foo'),
+            $this->createStringableObject('foo'),
+        ];
+        yield 'Stringable and not Stringable' => [
+            $this->createStringableObject('foo'),
+            $this->createNotStringableObject(null, 'foo'),
+        ];
+        yield 'Stringable and bool' => [$this->createStringableObject('1'), true];
         yield 'Datetime and not Stringable' => [
             new \DateTimeImmutable(),
             $this->createNotStringableObject(null, 'foo'),
@@ -157,6 +176,23 @@ final class NodeComparisonTest
             public function rawValue(): string
             {
                 return \implode('', $this->toConcat);
+            }
+
+            public function rawType(): int
+            {
+                return 1;
+            }
+        };
+    }
+
+    private function createAnotherObjectWithValueInterface(string $value): object
+    {
+        return new class($value) implements ValueInterface {
+            public function __construct(private string $value) {}
+
+            public function rawValue(): string
+            {
+                return $this->value;
             }
 
             public function rawType(): int

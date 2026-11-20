@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copies a regression case folder (CaseTemplate by default) into tests/ORM/Regression/<name>.
+ * Copies a regression case folder (CaseTemplate by default) into tests/Regression/<name>.
  *
  * Usage:
  *  php tests/generate-case.php --case-name=Issue777
@@ -13,7 +13,7 @@ declare(strict_types=1);
 \error_reporting(E_ALL);
 \ini_set('display_errors', '1');
 
-$regressionDir = __DIR__ . '/ORM/Regression';
+$regressionDir = __DIR__ . '/Regression';
 
 function defaultCaseName(string $regressionDir): string
 {

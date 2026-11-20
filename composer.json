@@ -74,7 +74,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Cycle\\ORM\\Tests\\": "tests/ORM/"
+            "Cycle\\ORM\\Tests\\": "tests/"
         }
     },
     "config": {

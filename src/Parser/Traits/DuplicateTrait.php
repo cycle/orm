@@ -69,6 +69,7 @@ trait DuplicateTrait
                 $zoom[$criteria] = [];
             }
             $zoom = &$zoom[$criteria];
+            \assert(\is_array($zoom));
         }
         // duplicate is presented, let's reduplicate
         $data = $zoom;

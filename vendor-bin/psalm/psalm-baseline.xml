@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="7.11.0@9e0d0f88bc0a4233357a9aeb4b32da060644e196">
+<files psalm-version="7.12.0@67cfa8476f9f2d666a5d3b54817738d1536afa77">
   <file src="src/Collection/ArrayCollectionFactory.php">
     <DocblockTypeContradiction>
       <code><![CDATA[throw new CollectionFactoryException('Unsupported iterable type.')]]></code>
@@ -895,23 +895,12 @@
     <MixedArgument>
       <code><![CDATA[$criteria]]></code>
       <code><![CDATA[$index]]></code>
-      <code><![CDATA[$subset]]></code>
-      <code><![CDATA[$subset]]></code>
-      <code><![CDATA[$subset[$container]]]></code>
     </MixedArgument>
     <MixedArgumentTypeCoercion>
       <code><![CDATA[$criteria]]></code>
       <code><![CDATA[$criteria]]></code>
       <code><![CDATA[$data]]></code>
     </MixedArgumentTypeCoercion>
-    <MixedArrayAccess>
-      <code><![CDATA[$subset[$container]]]></code>
-      <code><![CDATA[$subset[$container]]]></code>
-      <code><![CDATA[$subset[$container]]]></code>
-    </MixedArrayAccess>
-    <MixedArrayAssignment>
-      <code><![CDATA[$subset[$container]]]></code>
-    </MixedArrayAssignment>
     <MixedArrayOffset>
       <code><![CDATA[$data[$key]]]></code>
       <code><![CDATA[$result[$key]]]></code>
@@ -920,9 +909,6 @@
       <code><![CDATA[$index]]></code>
       <code><![CDATA[$key]]></code>
       <code><![CDATA[$result[$key]]]></code>
-      <code><![CDATA[$subset]]></code>
-      <code><![CDATA[$subset]]></code>
-      <code><![CDATA[$subset]]></code>
     </MixedAssignment>
     <NullableReturnStatement>
       <code><![CDATA[$this->mergeParent]]></code>
@@ -1039,17 +1025,10 @@
     </InvalidClassConstantType>
   </file>
   <file src="src/Parser/Traits/DuplicateTrait.php">
-    <MixedArgument>
-      <code><![CDATA[$zoom]]></code>
-    </MixedArgument>
-    <MixedArrayAssignment>
-      <code><![CDATA[$zoom[$criteria]]]></code>
-    </MixedArrayAssignment>
     <MixedArrayOffset>
       <code><![CDATA[$data[$key]]]></code>
     </MixedArrayOffset>
     <MixedAssignment>
-      <code><![CDATA[$data]]></code>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$key]]></code>
     </MixedAssignment>
@@ -1343,8 +1322,6 @@
     <MixedArgument>
       <code><![CDATA[$d]]></code>
       <code><![CDATA[$data->toArray()]]></code>
-      <code><![CDATA[$entity]]></code>
-      <code><![CDATA[$entity]]></code>
       <code><![CDATA[$entity]]></code>
       <code><![CDATA[$entity]]></code>
       <code><![CDATA[$entity]]></code>

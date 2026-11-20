@@ -198,6 +198,15 @@ final class TupleStorageTest
         }
     }
 
+    public function missingTupleIsReportedWithRuntimeException(): never
+    {
+        $storage = new TupleStorage();
+
+        Expect::exception(\RuntimeException::class)->withMessage('Tuple not found');
+
+        $storage->getTuple(new \stdClass());
+    }
+
     private function createTuple(object $entity): Tuple
     {
         return new Tuple(Tuple::TASK_STORE, $entity, true, Tuple::STATUS_PREPARING);

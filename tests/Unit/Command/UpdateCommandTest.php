@@ -122,6 +122,37 @@ final class UpdateCommandTest
         Assert::same($this->cmd->getAffectedRows(), 0);
     }
 
+    public function primaryKeysAreAwaitedUntilScopeIsSet(): void
+    {
+        $cmd = new Update($this->db, 'table', $this->state, $this->mapper, ['id']);
+
+        Assert::false($cmd->isReady());
+
+        $cmd->setScope('id', 1);
+
+        Assert::true($cmd->isReady());
+    }
+
+    public function databaseIsNeededOnlyForScopedChanges(): void
+    {
+        Assert::null($this->cmd->getDatabase());
+
+        $this->cmd->setScope('id', 1);
+
+        Assert::null($this->cmd->getDatabase());
+
+        $this->state->register('foo', 'changed');
+
+        Assert::same($this->cmd->getDatabase(), $this->db);
+    }
+
+    public function unscopedChangesNeedNoDatabase(): void
+    {
+        $this->state->register('foo', 'changed');
+
+        Assert::null($this->cmd->getDatabase());
+    }
+
     #[BeforeTest]
     protected function setUp(): void
     {

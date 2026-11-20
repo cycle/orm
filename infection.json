@@ -12,7 +12,7 @@
     "tmpDir": "runtime",
     "logs": {
         "stryker": {
-            "report": "2.x"
+            "badge": "2.x"
         }
     }
 }

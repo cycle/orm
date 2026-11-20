@@ -68,6 +68,16 @@ final class DoctrineCollectionFactoryTest extends BaseTest
         Assert::same($collection->toArray(), $array);
     }
 
+    #[Test]
+    public function withCollectionClassKeepsOriginalFactory(): void
+    {
+        $factory = $this->getFactory();
+
+        $factory->withCollectionClass(CustomPivotedCollection::class);
+
+        Assert::same($factory->collect(['foo' => 'bar'])::class, ArrayCollection::class);
+    }
+
     protected function getFactory(): CollectionFactoryInterface
     {
         return new DoctrineCollectionFactory();

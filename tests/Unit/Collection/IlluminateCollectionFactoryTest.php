@@ -53,6 +53,16 @@ final class IlluminateCollectionFactoryTest extends BaseTest
         ]);
     }
 
+    #[Test]
+    public function withCollectionClassKeepsOriginalFactory(): void
+    {
+        $factory = $this->getFactory();
+
+        $factory->withCollectionClass(CustomCollection::class);
+
+        Assert::same($factory->collect(['foo' => 'bar'])::class, Collection::class);
+    }
+
     protected function getFactory(): CollectionFactoryInterface
     {
         return new IlluminateCollectionFactory();

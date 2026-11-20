@@ -9,10 +9,14 @@ use Cycle\Database\DatabaseManager;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Heap\Heap;
+use Cycle\ORM\Heap\Node;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
+use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Tests\Util\SimpleFactory;
+use Cycle\ORM\Transaction\CommandGenerator;
 use Testo\Assert;
+use Testo\Expect;
 use Testo\Test;
 
 #[Test]
@@ -60,7 +64,70 @@ final class OrmTest
         Assert::notSame($orm->getHeap(), $new->getHeap());
     }
 
-    private function createOrm(): ORM
+    public function givenHeapAndCommandGeneratorAreUsed(): void
+    {
+        $heap = new Heap();
+        $generator = new CommandGenerator();
+
+        $orm = $this->createOrm(heap: $heap, commandGenerator: $generator);
+
+        Assert::same($orm->getHeap(), $heap);
+        Assert::same($orm->getCommandGenerator(), $generator);
+    }
+
+    public function withGivenHeapUsesItCleaned(): void
+    {
+        $orm = $this->createOrm();
+        $heap = $this->heapWith($entity = new \stdClass());
+
+        $new = $orm->with(heap: $heap);
+
+        Assert::same($new->getHeap(), $heap);
+        Assert::false($heap->has($entity));
+    }
+
+    public function withoutHeapUsesCleanCopy(): void
+    {
+        $heap = $this->heapWith($entity = new \stdClass());
+        $orm = $this->createOrm(heap: $heap);
+
+        $new = $orm->with();
+
+        Assert::notSame($new->getHeap(), $heap);
+        Assert::false($new->getHeap()->has($entity));
+        Assert::true($heap->has($entity));
+    }
+
+    public function cloneGetsCleanHeapAndOwnServices(): void
+    {
+        $heap = $this->heapWith($entity = new \stdClass());
+        $orm = $this->createOrm(heap: $heap);
+
+        $clone = clone $orm;
+
+        Assert::notSame($clone->getHeap(), $heap);
+        Assert::false($clone->getHeap()->has($entity));
+        Assert::true($heap->has($entity));
+        Assert::notSame($clone->getService(MapperProviderInterface::class), $orm->getService(MapperProviderInterface::class));
+    }
+
+    public function unknownServiceIsRejected(): never
+    {
+        $orm = $this->createOrm();
+
+        Expect::exception(\InvalidArgumentException::class)->withMessage('Undefined service `stdClass`.');
+
+        $orm->getService(\stdClass::class);
+    }
+
+    private function heapWith(object $entity): Heap
+    {
+        $heap = new Heap();
+        $heap->attach($entity, new Node(Node::MANAGED, ['id' => 1], 'user'));
+        return $heap;
+    }
+
+    private function createOrm(?Heap $heap = null, ?CommandGenerator $commandGenerator = null): ORM
     {
         return new ORM(
             factory: new Factory(
@@ -69,6 +136,8 @@ final class OrmTest
                 new SimpleFactory(),
             ),
             schema: new Schema([]),
+            commandGenerator: $commandGenerator,
+            heap: $heap,
         );
     }
 }

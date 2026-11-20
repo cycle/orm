@@ -16,11 +16,14 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\UnitOfWork;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class UnitOfWorkTest extends OrmTestCase
+final class UnitOfWorkTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSuccessRetry(): void
     {
         $eow = new UnitOfWork($this->orm, Runner::outerTransaction());
@@ -32,18 +35,18 @@ class UnitOfWorkTest extends OrmTestCase
         $eow->persistState($entity);
 
         $result = $eow->run();
-        \Testo\Assert::false($result->isSuccess());
-        \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
+        Assert::false($result->isSuccess());
+        Assert::instanceOf($result->getLastError(), RunnerException::class);
 
         $this->database->getDriver()->beginTransaction();
 
         $result = $result->retry();
 
-        \Testo\Assert::true($result->isSuccess());
-        \Testo\Assert::null($result->getLastError());
+        Assert::true($result->isSuccess());
+        Assert::null($result->getLastError());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPendingChanges(): void
     {
         $eow = new UnitOfWork($this->orm, Runner::outerTransaction());
@@ -54,23 +57,23 @@ class UnitOfWorkTest extends OrmTestCase
 
         $eow->persistState($entity);
 
-        \Testo\Assert::true($eow->hasPendingChanges());
+        Assert::true($eow->hasPendingChanges());
 
         $result = $eow->run();
-        \Testo\Assert::true($eow->hasPendingChanges());
-        \Testo\Assert::false($result->isSuccess());
-        \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
+        Assert::true($eow->hasPendingChanges());
+        Assert::false($result->isSuccess());
+        Assert::instanceOf($result->getLastError(), RunnerException::class);
 
         $this->database->getDriver()->beginTransaction();
 
         $result = $result->retry();
 
-        \Testo\Assert::false($eow->hasPendingChanges());
-        \Testo\Assert::true($result->isSuccess());
-        \Testo\Assert::null($result->getLastError());
+        Assert::false($eow->hasPendingChanges());
+        Assert::true($result->isSuccess());
+        Assert::null($result->getLastError());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testParallelPersist(): void
     {
         $eow = new UnitOfWork($this->orm);
@@ -100,23 +103,23 @@ class UnitOfWorkTest extends OrmTestCase
         $result = $eow->run();
         $result2 = $eow2->run();
 
-        \Testo\Assert::true($result->isSuccess());
-        \Testo\Assert::null($result->getLastError());
-        \Testo\Assert::true($result2->isSuccess());
-        \Testo\Assert::null($result2->getLastError());
+        Assert::true($result->isSuccess());
+        Assert::null($result->getLastError());
+        Assert::true($result2->isSuccess());
+        Assert::null($result2->getLastError());
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))
             ->wherePK($post1->id, $post2->id, $post3->id, $post4->id)
             ->fetchAll();
 
-        \Testo\Assert::same($stored[0]->title, 'Title1');
-        \Testo\Assert::same($stored[1]->title, 'Title2');
-        \Testo\Assert::same($stored[2]->title, 'Title3');
-        \Testo\Assert::same($stored[3]->title, 'Title4');
+        Assert::same($stored[0]->title, 'Title1');
+        Assert::same($stored[1]->title, 'Title2');
+        Assert::same($stored[2]->title, 'Title3');
+        Assert::same($stored[3]->title, 'Title4');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testParallelPersistOneFail(): void
     {
         $eow = new UnitOfWork($this->orm, Runner::outerTransaction());
@@ -147,25 +150,25 @@ class UnitOfWorkTest extends OrmTestCase
         $result2 = $eow2->run();
 
         // failed transaction
-        \Testo\Assert::false($result->isSuccess());
-        \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
-        \Testo\Assert::null($post1->id);
-        \Testo\Assert::null($post2->id);
+        Assert::false($result->isSuccess());
+        Assert::instanceOf($result->getLastError(), RunnerException::class);
+        Assert::null($post1->id);
+        Assert::null($post2->id);
 
         // success transaction
-        \Testo\Assert::true($result2->isSuccess());
-        \Testo\Assert::null($result2->getLastError());
-        \Testo\Assert::notNull($post3->id);
-        \Testo\Assert::notNull($post4->id);
+        Assert::true($result2->isSuccess());
+        Assert::null($result2->getLastError());
+        Assert::notNull($post3->id);
+        Assert::notNull($post4->id);
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($post3->id, $post4->id)->fetchAll();
 
-        \Testo\Assert::same($stored[0]->title, 'Title3');
-        \Testo\Assert::same($stored[1]->title, 'Title4');
+        Assert::same($stored[0]->title, 'Title3');
+        Assert::same($stored[1]->title, 'Title4');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithoutTransactionNotChanged(): void
     {
         $eow = new UnitOfWork($this->orm, Runner::outerTransaction());
@@ -189,17 +192,17 @@ class UnitOfWorkTest extends OrmTestCase
 
         $result = $eow->run();
 
-        \Testo\Assert::false($result->isSuccess());
-        \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
+        Assert::false($result->isSuccess());
+        Assert::instanceOf($result->getLastError(), RunnerException::class);
 
         // Node in the transaction, the state cleared
-        \Testo\Assert::null($this->orm->getHeap()->get($post1)->getState());
+        Assert::null($this->orm->getHeap()->get($post1)->getState());
 
         // Node outside the transaction - the state not changed
-        \Testo\Assert::same($this->orm->getHeap()->get($post2)->getState()->getData(), ['title' => 'Title2', 'content' => 'Test2']);
+        Assert::same($this->orm->getHeap()->get($post2)->getState()->getData(), ['title' => 'Title2', 'content' => 'Test2']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCallSuccessRetryException(): void
     {
         $eow = new UnitOfWork($this->orm, Runner::outerTransaction());
@@ -212,21 +215,21 @@ class UnitOfWorkTest extends OrmTestCase
 
         $result = $eow->run();
 
-        \Testo\Assert::false($result->isSuccess());
-        \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
+        Assert::false($result->isSuccess());
+        Assert::instanceOf($result->getLastError(), RunnerException::class);
 
         $this->database->getDriver()->beginTransaction();
 
         $result = $result->retry();
 
-        \Testo\Assert::true($result->isSuccess());
-        \Testo\Assert::null($result->getLastError());
+        Assert::true($result->isSuccess());
+        Assert::null($result->getLastError());
 
-        \Testo\Expect::exception(SuccessTransactionRetryException::class);
+        Expect::exception(SuccessTransactionRetryException::class);
         $result->retry();
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('post', [

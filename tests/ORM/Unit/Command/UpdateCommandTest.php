@@ -12,69 +12,64 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
 use Cycle\ORM\MapperInterface;
 use Mockery as m;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Assert\ExpectException;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class UpdateCommandTest
+#[Test]
+final class UpdateCommandTest
 {
     private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
     private Update $cmd;
     private DatabaseInterface $db;
     private State $state;
 
-    #[\Testo\Test]
     public function testIsEmpty(): void
     {
-        \Testo\Assert::true($this->cmd->isReady());
+        Assert::true($this->cmd->isReady());
     }
 
-    #[\Testo\Test]
     public function testHasData(): void
     {
         $this->state->register('name', 'new value');
-        \Testo\Assert::true($this->cmd->hasData());
+        Assert::true($this->cmd->hasData());
     }
 
-    #[\Testo\Test]
     public function testHasDataAppendix(): void
     {
         $this->cmd->registerAppendix('name', 'new value');
-        \Testo\Assert::false($this->cmd->hasData());
+        Assert::false($this->cmd->hasData());
     }
 
-    #[\Testo\Test]
     public function testHasDataColumn(): void
     {
         $this->cmd->registerColumn('name', 'new value');
-        \Testo\Assert::true($this->cmd->hasData());
+        Assert::true($this->cmd->hasData());
     }
 
-    #[\Testo\Test]
     public function testScopeSetter(): void
     {
         $this->cmd->waitScope('key');
         $this->cmd->setScope('key', 'value');
-        \Testo\Assert::same($this->cmd->getScope(), ['key' => 'value']);
-        \Testo\Assert::true($this->cmd->isScopeReady());
+        Assert::same($this->cmd->getScope(), ['key' => 'value']);
+        Assert::true($this->cmd->isScopeReady());
     }
 
-    #[\Testo\Test]
     public function testSetNullScope(): void
     {
         $this->cmd->waitScope('key');
         $this->cmd->setScope('key', null);
-        \Testo\Assert::false($this->cmd->isScopeReady());
+        Assert::false($this->cmd->isScopeReady());
     }
 
-    #[\Testo\Test]
+    #[ExpectException(CommandException::class)]
     public function testExecuteWithNoScopeShouldThrowException(): void
     {
-        \Testo\Expect::exception(CommandException::class);
-
         $this->cmd->execute();
     }
 
-    #[\Testo\Test]
-    public function testExecuteWithAppendix()
+    public function testExecuteWithAppendix(): void
     {
         $this->cmd->setScope('key', 'value');
         $this->cmd->registerAppendix('name', 'new value');
@@ -104,12 +99,11 @@ class UpdateCommandTest
 
         $this->cmd->execute();
 
-        \Testo\Assert::same($this->state->getData(), ['foo' => 'bar', 'name' => 'new value']);
-        \Testo\Assert::same($this->cmd->getAffectedRows(), 5);
+        Assert::same($this->state->getData(), ['foo' => 'bar', 'name' => 'new value']);
+        Assert::same($this->cmd->getAffectedRows(), 5);
     }
 
-    #[\Testo\Test]
-    public function testExecuteWithEmptyDataShouldNotRunQuery()
+    public function testExecuteWithEmptyDataShouldNotRunQuery(): void
     {
         $this->cmd->setScope('key', 'value');
         $this->cmd->registerAppendix('name', 'new value');
@@ -124,11 +118,11 @@ class UpdateCommandTest
 
         $this->cmd->execute();
 
-        \Testo\Assert::same($this->state->getData(), ['foo' => 'bar', 'name' => 'new value']);
-        \Testo\Assert::same($this->cmd->getAffectedRows(), 0);
+        Assert::same($this->state->getData(), ['foo' => 'bar', 'name' => 'new value']);
+        Assert::same($this->cmd->getAffectedRows(), 0);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     protected function setUp(): void
     {
         $this->mapper = m::mock(MapperInterface::class);

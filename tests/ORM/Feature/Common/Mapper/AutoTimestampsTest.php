@@ -11,13 +11,15 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class AutoTimestampsTest extends OrmTestCase
+final class AutoTimestampsTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $u = new User();
@@ -29,11 +31,11 @@ class AutoTimestampsTest extends OrmTestCase
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $data = $s->fetchData();
 
-        \Testo\Assert::notNull($data[0]['created_at']);
-        \Testo\Assert::notNull($data[0]['updated_at']);
+        Assert::notNull($data[0]['created_at']);
+        Assert::notNull($data[0]['updated_at']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrites(): void
     {
         $u = new User();
@@ -45,10 +47,11 @@ class AutoTimestampsTest extends OrmTestCase
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $u = $s->fetchOne();
+
         QueryAssert::writes(0, fn() => (new Transaction($orm))->persist($u)->run());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdate(): void
     {
         $u = new User();
@@ -63,10 +66,11 @@ class AutoTimestampsTest extends OrmTestCase
         $u = $s->fetchOne();
 
         $u->balance = 200;
+
         QueryAssert::writes(1, fn() => $this->save($u));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable(

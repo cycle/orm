@@ -17,39 +17,41 @@ use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookStates;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\IDCaster;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class TypecastWithLinkedDataTest extends OrmTestCase
+final class TypecastWithLinkedDataTest extends OrmTestCase
 {
-
     // Select
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectOne(): void
     {
         $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
 
-        \Testo\Assert::notNull($user->id);
-        \Testo\Assert::false(\is_object($user->id->value));
-        \Testo\Assert::equals($user->id->value, 1);
+        Assert::notNull($user->id);
+        Assert::false(\is_object($user->id->value));
+        Assert::equals($user->id->value, 1);
     }
 
     /**
      * Test the Typecaster doesn't type casting twice when data passed via links
      */
-    #[\Testo\Test]
+    #[Test]
     public function testSelectMultiple(): void
     {
         $users = (new Select($this->orm, User::class))->orderBy('id', 'asc')->fetchAll();
 
-        \Testo\Assert::notNull($users[0]->id);
-        \Testo\Assert::false(\is_object($users[0]->id->value));
-        \Testo\Assert::equals($users[0]->id->value, 1);
+        Assert::notNull($users[0]->id);
+        Assert::false(\is_object($users[0]->id->value));
+        Assert::equals($users[0]->id->value, 1);
     }
 
     /**
      * Test the Typecaster doesn't type casting twice when data passed via links
      */
-    #[\Testo\Test]
+    #[Test]
     public function testCustomArrayInIterator(): void
     {
         $bookData = [
@@ -78,10 +80,10 @@ class TypecastWithLinkedDataTest extends OrmTestCase
         /** @var User $user */
         $users = \iterator_to_array($iterator);
 
-        \Testo\Assert::count($users, 3);
+        Assert::count($users, 3);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

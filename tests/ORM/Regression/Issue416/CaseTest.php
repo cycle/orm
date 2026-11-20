@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\Issue416;
 
 use Cycle\ORM\Select;
-use Ramsey\Uuid\Uuid;
 use Cycle\Testing\ORM\OrmTestCase;
+use Ramsey\Uuid\Uuid;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * @link https://github.com/cycle/orm/issues/416
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         $uuid = Uuid::uuid7();
@@ -43,13 +45,13 @@ class CaseTest extends OrmTestCase
         // Cannot assign Cycle\ORM\Reference\Reference to property
         // Cycle\ORM\Tests\Regression\Issue416\Entity\Profile::$identity of type
         // Cycle\ORM\Tests\Regression\Issue416\Entity\Identity
-        \Testo\Assert::true(true);
+        Assert::true(true);
 
         // To avoid `Entity and State are not in sync` exception
         $this->orm->getHeap()->clean();
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

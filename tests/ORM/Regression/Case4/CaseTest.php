@@ -6,14 +6,15 @@ namespace Cycle\ORM\Tests\Regression\Case4;
 
 use Cycle\ORM\Select;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * @link https://github.com/cycle/orm/pull/414
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         $model = (new Select($this->orm, Entity\Node::class))
@@ -29,7 +30,7 @@ class CaseTest extends OrmTestCase
         $this->save($model);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

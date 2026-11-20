@@ -8,11 +8,13 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Issue422\Entity\Billing;
 use Cycle\ORM\Tests\Regression\Issue422\Entity\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         /** @var User $user */
@@ -20,18 +22,18 @@ class CaseTest extends OrmTestCase
             ->load('billing')
             ->wherePK(1)
             ->fetchOne();
-        \Testo\Assert::instanceOf($user->billing, Billing::class);
+        Assert::instanceOf($user->billing, Billing::class);
 
         /** @var User $user */
         $user = (new Select($this->orm, User::class))
             ->load('billing')
             ->wherePK(2)
             ->fetchOne();
-        \Testo\Assert::null($user->billing);
-        \Testo\Assert::same($user->otherEmbedded->propertyInt, 200);
+        Assert::null($user->billing);
+        Assert::same($user->otherEmbedded->propertyInt, 200);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

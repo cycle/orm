@@ -9,10 +9,11 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
+use Testo\Lifecycle\BeforeTest;
 
 class RefersToRelationRenamedFieldsTest extends RefersToRelationTest
 {
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
 

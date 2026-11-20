@@ -12,16 +12,19 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class RefersToRelationMiniRowsetTest extends OrmTestCase
+final class RefersToRelationMiniRowsetTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreateEmptyComment(): void
     {
         $c = new Comment();
+
         QueryAssert::writes(1, function () use ($c): void {
             $tr = new Transaction($this->orm);
             $tr->persist($c);
@@ -31,15 +34,16 @@ class RefersToRelationMiniRowsetTest extends OrmTestCase
         $s = new Select($this->orm->withHeap(new Heap()), Comment::class);
         $cd = $s->fetchData();
 
-        \Testo\Assert::same($cd[0], ['id' => 1]);
+        Assert::same($cd[0], ['id' => 1]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateEmptyCommentMultiple(): void
     {
         $c1 = new Comment();
         $c2 = new Comment();
         $c3 = new Comment();
+
         QueryAssert::writes(3, function () use ($c1, $c2, $c3): void {
             $tr = new Transaction($this->orm);
             $tr->persist($c1);
@@ -50,15 +54,16 @@ class RefersToRelationMiniRowsetTest extends OrmTestCase
 
         $cd = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
 
-        \Testo\Assert::same($cd[0], ['id' => 1]);
-        \Testo\Assert::same($cd[1], ['id' => 2]);
-        \Testo\Assert::same($cd[2], ['id' => 3]);
+        Assert::same($cd[0], ['id' => 1]);
+        Assert::same($cd[1], ['id' => 2]);
+        Assert::same($cd[2], ['id' => 3]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateEmptyUser(): void
     {
         $u = new User();
+
         QueryAssert::writes(1, function () use ($u): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
@@ -67,25 +72,26 @@ class RefersToRelationMiniRowsetTest extends OrmTestCase
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
 
-        \Testo\Assert::same($userData[0], ['id' => 1, 'comment_id' => null]);
+        Assert::same($userData[0], ['id' => 1, 'comment_id' => null]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateUserWithComment(): void
     {
         $c = new Comment();
         $u = new User();
         $u->lastComment = $c;
+
         QueryAssert::writes(2, fn() => $this->save($c, $u));
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
         $commentData = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
 
-        \Testo\Assert::same($userData[0], ['id' => 1, 'comment_id' => 1]);
-        \Testo\Assert::same($commentData[0], ['id' => 1]);
+        Assert::same($userData[0], ['id' => 1, 'comment_id' => 1]);
+        Assert::same($commentData[0], ['id' => 1]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

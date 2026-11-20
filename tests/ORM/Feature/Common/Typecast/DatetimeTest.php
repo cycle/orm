@@ -12,12 +12,15 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Common\Attribute\AssertMethod;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class DatetimeTest extends OrmTestCase
+final class DatetimeTest extends OrmTestCase
 {
-
     /**
      * @var \DateTimeImmutable
      */
@@ -33,36 +36,37 @@ class DatetimeTest extends OrmTestCase
      */
     protected $b;
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchAll(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchAll();
 
-        \Testo\Assert::instanceOf($result[0], User::class);
-        \Testo\Assert::same($result[0]->id, 1);
-        \Testo\Assert::same($result[0]->email, 'hello@world.com');
-        \Testo\Assert::same($result[0]->balance, 100.0);
-        \Testo\Assert::instanceOf($result[0]->time_created, \DateTimeInterface::class);
-        \Testo\Assert::same($result[0]->time_created->getTimezone()->getName(), 'UTC');
+        Assert::instanceOf($result[0], User::class);
+        Assert::same($result[0]->id, 1);
+        Assert::same($result[0]->email, 'hello@world.com');
+        Assert::same($result[0]->balance, 100.0);
+        Assert::instanceOf($result[0]->time_created, \DateTimeInterface::class);
+        Assert::same($result[0]->time_created->getTimezone()->getName(), 'UTC');
 
         $this->assertSameTimestamp($this->a, $result[0]->time_created, 0);
 
-        \Testo\Assert::instanceOf($result[1], User::class);
-        \Testo\Assert::same($result[1]->id, 2);
-        \Testo\Assert::same($result[1]->email, 'another@world.com');
-        \Testo\Assert::same($result[1]->balance, 200.0);
-        \Testo\Assert::instanceOf($result[1]->time_created, \DateTimeInterface::class);
-        \Testo\Assert::same($result[1]->time_created->getTimezone()->getName(), 'UTC');
+        Assert::instanceOf($result[1], User::class);
+        Assert::same($result[1]->id, 2);
+        Assert::same($result[1]->email, 'another@world.com');
+        Assert::same($result[1]->balance, 200.0);
+        Assert::instanceOf($result[1]->time_created, \DateTimeInterface::class);
+        Assert::same($result[1]->time_created->getTimezone()->getName(), 'UTC');
 
         $this->assertSameTimestamp($this->b, $result[1]->time_created, 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
+
         QueryAssert::writes(0, function () use ($result): void {
             $tr = new Transaction($this->orm);
             $tr->persist($result);
@@ -70,13 +74,14 @@ class DatetimeTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testStore(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
         $e->time_created = new \DateTimeImmutable('tomorrow 10am');
+
         QueryAssert::writes(1, function () use (&$tr, $e): void {
             $tr = new Transaction($this->orm);
             $tr->persist($e);
@@ -88,24 +93,25 @@ class DatetimeTest extends OrmTestCase
             $tr->run();
         });
 
-        \Testo\Assert::equals($e->id, 3);
+        Assert::equals($e->id, 3);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($e));
-        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
+        Assert::true($this->orm->getHeap()->has($e));
+        Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
         $selector = new Select($this->orm, User::class);
         $result = $selector->where('id', 3)->fetchOne();
-        \Testo\Assert::equals($result->balance, 300);
+        Assert::equals($result->balance, 300);
         $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdate(): void
     {
         $e = $this->orm->get('user', ['id' => 1]);
         $e->time_created = new \DateTimeImmutable('tomorrow 10pm');
+
         QueryAssert::writes(1, function () use (&$tr, $e): void {
             $tr = new Transaction($this->orm);
             $tr->persist($e);
@@ -124,7 +130,7 @@ class DatetimeTest extends OrmTestCase
         $this->assertSameTimestamp($e->time_created, $result->time_created, 0);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [
@@ -163,10 +169,10 @@ class DatetimeTest extends OrmTestCase
         ]));
     }
 
-    #[\Testo\Common\Attribute\AssertMethod]
+    #[AssertMethod]
     protected function assertSameTimestamp(\DateTimeInterface $a, \DateTimeInterface $b, int $max): void
     {
         $diff = abs($a->getTimestamp() - $b->getTimestamp());
-        \Testo\Assert::true($diff <= $max, 'Invalid time internal');
+        Assert::true($diff <= $max, 'Invalid time internal');
     }
 }

@@ -14,19 +14,21 @@ use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
+use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * This tests provides ability to create deep linked trees using pivoted entity.
  * We did not plan to have such functionality
  * but the side effect of having pivot loader to behave as normal made it possible.
  */
-class ManyToManyBelongsToTest extends OrmTestCase
+final class ManyToManyBelongsToTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $user = new User();
@@ -47,8 +49,8 @@ class ManyToManyBelongsToTest extends OrmTestCase
         $collection = $post->comments;
         $this->save($post);
         // $this->assertSame($this->orm->getHeap()->get($post)->getRelation('comments'), $post->comments);
-        \Testo\Assert::instanceOf($post->comments, ArrayCollection::class);
-        \Testo\Assert::same($post->comments, $collection);
+        Assert::instanceOf($post->comments, ArrayCollection::class);
+        Assert::same($post->comments, $collection);
 
         $postId = $post->id;
 
@@ -57,11 +59,11 @@ class ManyToManyBelongsToTest extends OrmTestCase
         $p = (new Select($this->orm, Post::class))
             ->wherePK($postId)->fetchOne();
 
-        \Testo\Assert::same($p->comments[0]->name, 'name 1');
-        \Testo\Assert::same($p->comments[1]->name, 'name 2');
+        Assert::same($p->comments[0]->name, 'name 1');
+        Assert::same($p->comments[1]->name, 'name 2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdate(): void
     {
         $user = new User();
@@ -87,7 +89,7 @@ class ManyToManyBelongsToTest extends OrmTestCase
         $post->comments[0]->name = 'new name';
 
         $this->save($post);
-        \Testo\Assert::instanceOf($post->comments, Collection::class);
+        Assert::instanceOf($post->comments, Collection::class);
 
         $this->orm->getHeap()->clean();
         /** @var Post $p */
@@ -95,12 +97,12 @@ class ManyToManyBelongsToTest extends OrmTestCase
             ->load('user', ['method' => Select\AbstractLoader::INLOAD])
             ->wherePK($postId)->fetchOne();
 
-        \Testo\Assert::same($p->user->email, 'new-email');
-        \Testo\Assert::same($p->title, 'new title');
-        \Testo\Assert::same($p->comments[0]->name, 'new name');
+        Assert::same($p->user->email, 'new-email');
+        Assert::same($p->title, 'new title');
+        Assert::same($p->comments[0]->name, 'new name');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

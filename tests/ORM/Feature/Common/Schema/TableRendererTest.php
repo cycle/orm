@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Feature\Common\Schema;
 
-use Cycle\Database\Schema\AbstractTable;
 use Cycle\Database\Exception\SchemaException;
+use Cycle\Database\Schema\AbstractTable;
 use Cycle\Testing\Database\Schema\TableRenderer as Renderer;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Test;
 
-class TableRendererTest extends OrmTestCase
+final class TableRendererTest extends OrmTestCase
 {
-    #[\Testo\Test]
+    #[Test]
     public function testRenderString(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
@@ -30,15 +33,15 @@ class TableRendererTest extends OrmTestCase
 
         $table = $this->reload($table);
 
-        \Testo\Assert::true($table->hasColumn('name'));
+        Assert::true($table->hasColumn('name'));
         $column = $table->column('name');
 
-        \Testo\Assert::same($column->getType(), 'string');
-        \Testo\Assert::same($column->getDefaultValue(), 'default');
-        \Testo\Assert::false($column->isNullable());
+        Assert::same($column->getType(), 'string');
+        Assert::same($column->getDefaultValue(), 'default');
+        Assert::false($column->isNullable());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderStringNullDefault(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
@@ -57,15 +60,15 @@ class TableRendererTest extends OrmTestCase
 
         $table = $this->reload($table);
 
-        \Testo\Assert::true($table->hasColumn('name'));
+        Assert::true($table->hasColumn('name'));
         $column = $table->column('name');
 
-        \Testo\Assert::same($column->getType(), 'string');
-        \Testo\Assert::same($column->getDefaultValue(), null);
-        \Testo\Assert::true($column->isNullable());
+        Assert::same($column->getType(), 'string');
+        Assert::same($column->getDefaultValue(), null);
+        Assert::true($column->isNullable());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderStringNullDeclared(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
@@ -82,14 +85,14 @@ class TableRendererTest extends OrmTestCase
 
         $table = $this->reload($table);
 
-        \Testo\Assert::true($table->hasColumn('name'));
+        Assert::true($table->hasColumn('name'));
         $column = $table->column('name');
 
-        \Testo\Assert::same($column->getType(), 'string');
-        \Testo\Assert::true($column->isNullable());
+        Assert::same($column->getType(), 'string');
+        Assert::true($column->isNullable());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderStringNullableDeclared(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
@@ -106,14 +109,14 @@ class TableRendererTest extends OrmTestCase
 
         $table = $this->reload($table);
 
-        \Testo\Assert::true($table->hasColumn('name'));
+        Assert::true($table->hasColumn('name'));
         $column = $table->column('name');
 
-        \Testo\Assert::same($column->getType(), 'string');
-        \Testo\Assert::true($column->isNullable());
+        Assert::same($column->getType(), 'string');
+        Assert::true($column->isNullable());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderEnum(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
@@ -130,17 +133,17 @@ class TableRendererTest extends OrmTestCase
 
         $table = $this->reload($table);
 
-        \Testo\Assert::true($table->hasColumn('name'));
+        Assert::true($table->hasColumn('name'));
         $column = $table->column('name');
 
-        \Testo\Assert::same($column->getType(), 'string');
-        \Testo\Assert::same($column->getEnumValues(), ['active', 'disabled']);
-        \Testo\Assert::same($column->getDefaultValue(), 'active');
+        Assert::same($column->getType(), 'string');
+        Assert::same($column->getEnumValues(), ['active', 'disabled']);
+        Assert::same($column->getDefaultValue(), 'active');
 
-        \Testo\Assert::false($column->isNullable());
+        Assert::false($column->isNullable());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderEnumNullDefault(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
@@ -159,17 +162,17 @@ class TableRendererTest extends OrmTestCase
 
         $table = $this->reload($table);
 
-        \Testo\Assert::true($table->hasColumn('name'));
+        Assert::true($table->hasColumn('name'));
         $column = $table->column('name');
 
-        \Testo\Assert::same($column->getType(), 'string');
-        \Testo\Assert::same($column->getEnumValues(), ['active', 'disabled']);
-        \Testo\Assert::same($column->getDefaultValue(), null);
+        Assert::same($column->getType(), 'string');
+        Assert::same($column->getEnumValues(), ['active', 'disabled']);
+        Assert::same($column->getDefaultValue(), null);
 
-        \Testo\Assert::true($column->isNullable());
+        Assert::true($column->isNullable());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderEnumNullSecond(): void
     {
         $table = $this->getDatabase()->table('sample')->getSchema();
@@ -188,20 +191,20 @@ class TableRendererTest extends OrmTestCase
 
         $table = $this->reload($table);
 
-        \Testo\Assert::true($table->hasColumn('name'));
+        Assert::true($table->hasColumn('name'));
         $column = $table->column('name');
 
-        \Testo\Assert::same($column->getType(), 'string');
-        \Testo\Assert::same($column->getEnumValues(), ['active', 'disabled']);
-        \Testo\Assert::same($column->getDefaultValue(), 'disabled');
+        Assert::same($column->getType(), 'string');
+        Assert::same($column->getEnumValues(), ['active', 'disabled']);
+        Assert::same($column->getDefaultValue(), 'disabled');
 
-        \Testo\Assert::false($column->isNullable());
+        Assert::false($column->isNullable());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderBadDeclaration(): void
     {
-        \Testo\Expect::exception(SchemaException::class);
+        Expect::exception(SchemaException::class);
 
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -215,10 +218,10 @@ class TableRendererTest extends OrmTestCase
         );
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderBadDeclaration2(): void
     {
-        \Testo\Expect::exception(SchemaException::class);
+        Expect::exception(SchemaException::class);
 
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();
@@ -232,10 +235,10 @@ class TableRendererTest extends OrmTestCase
         );
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRenderBadDeclaration3(): void
     {
-        \Testo\Expect::exception(SchemaException::class);
+        Expect::exception(SchemaException::class);
 
         $table = $this->getDatabase()->table('sample')->getSchema();
         $renderer = new Renderer();

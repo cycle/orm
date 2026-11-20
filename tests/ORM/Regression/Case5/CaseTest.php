@@ -7,11 +7,13 @@ namespace Cycle\ORM\Tests\Regression\Case5;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Case5\Entity\Buyer;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         /** @var Buyer $buyer */
@@ -20,17 +22,17 @@ class CaseTest extends OrmTestCase
             ->fetchOne();
 
         // It's important. $buyer->partners - will trigger relation load and we test it
-        \Testo\Assert::true($buyer->partners->exists(function (int $key, Buyer $element): bool {
+        Assert::true($buyer->partners->exists(function (int $key, Buyer $element): bool {
             return $element->id === 2;
         }));
-        \Testo\Assert::true($buyer->partners->exists(function (int $key, Buyer $element): bool {
+        Assert::true($buyer->partners->exists(function (int $key, Buyer $element): bool {
             return $element->id === 3;
         }));
-        \Testo\Assert::count($buyer->partners, 2);
-        \Testo\Assert::same($buyer->badge->label, 'lab');
+        Assert::count($buyer->partners, 2);
+        Assert::same($buyer->badge->label, 'lab');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

@@ -10,13 +10,15 @@ use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ClasslessCyclicReferencesTest extends OrmTestCase
+final class ClasslessCyclicReferencesTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $u = $this->orm->make('user');
@@ -30,7 +32,9 @@ class ClasslessCyclicReferencesTest extends OrmTestCase
         $u->lastComment = $c;
         $u->comments[] = $c;
         $u->favorites->add($c);
+
         QueryAssert::writes(4, fn() => $this->save($u));
+
         // no changes!
         QueryAssert::writes(0, fn() => $this->save($u, $c));
 
@@ -43,17 +47,17 @@ class ClasslessCyclicReferencesTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::equals($u1->id, $u->id);
-        \Testo\Assert::equals($u1->lastComment->id, $u->lastComment->id);
+        Assert::equals($u1->id, $u->id);
+        Assert::equals($u1->lastComment->id, $u->lastComment->id);
 
-        \Testo\Assert::equals($u1->lastComment->user->id, $u->lastComment->user->id);
-        \Testo\Assert::equals($u1->comments[0]->id, $u->comments[0]->id);
-        \Testo\Assert::equals($u1->favorites[0]->id, $u->favorites[0]->id);
-        \Testo\Assert::equals($u1->favorites[0]->user->id, $u->favorites[0]->user->id);
-        \Testo\Assert::equals($u1->favorites[0]->favoredBy[0]->id, $u->id);
+        Assert::equals($u1->lastComment->user->id, $u->lastComment->user->id);
+        Assert::equals($u1->comments[0]->id, $u->comments[0]->id);
+        Assert::equals($u1->favorites[0]->id, $u->favorites[0]->id);
+        Assert::equals($u1->favorites[0]->user->id, $u->favorites[0]->user->id);
+        Assert::equals($u1->favorites[0]->favoredBy[0]->id, $u->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateMultipleLinkedTrees(): void
     {
         $u = $this->orm->make('user');
@@ -72,7 +76,9 @@ class ClasslessCyclicReferencesTest extends OrmTestCase
         $u->comments[] = $c;
         $u->favorites->add($c);
         $u2->favorites->add($c);
+
         QueryAssert::writes(6, fn() => $this->save($u, $u2));
+
         // no changes!
         QueryAssert::writes(0, fn() => $this->save($u, $u2));
 
@@ -85,21 +91,21 @@ class ClasslessCyclicReferencesTest extends OrmTestCase
             ->load('favorites')
             ->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u1->id, $u->id);
-        \Testo\Assert::equals($u1->lastComment->id, $u->lastComment->id);
+        Assert::equals($u1->id, $u->id);
+        Assert::equals($u1->lastComment->id, $u->lastComment->id);
 
-        \Testo\Assert::equals($u1->lastComment->user->id, $u->lastComment->user->id);
-        \Testo\Assert::equals($u1->comments[0]->id, $u->comments[0]->id);
-        \Testo\Assert::equals($u1->favorites[0]->id, $u->favorites[0]->id);
-        \Testo\Assert::equals($u1->favorites[0]->user->id, $u->favorites[0]->user->id);
+        Assert::equals($u1->lastComment->user->id, $u->lastComment->user->id);
+        Assert::equals($u1->comments[0]->id, $u->comments[0]->id);
+        Assert::equals($u1->favorites[0]->id, $u->favorites[0]->id);
+        Assert::equals($u1->favorites[0]->user->id, $u->favorites[0]->user->id);
 
         $fav = [
             (string) $u1->favorites[0]->favoredBy[0]->id,
             (string) $u1->favorites[0]->favoredBy[1]->id,
         ];
 
-        \Testo\Assert::contains($fav, (string) $u->id);
-        \Testo\Assert::contains($fav, (string) $u2->id);
+        Assert::contains($fav, (string) $u->id);
+        Assert::contains($fav, (string) $u2->id);
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -110,11 +116,11 @@ class ClasslessCyclicReferencesTest extends OrmTestCase
             ->load('favorites')
             ->wherePK($u2->id)->fetchOne();
 
-        \Testo\Assert::equals($u2->id, (string) $u1->id);
-        \Testo\Assert::equals($u2->favorites[0]->id, (string) $u1->favorites[0]->id);
+        Assert::equals($u2->id, (string) $u1->id);
+        Assert::equals($u2->favorites[0]->id, (string) $u1->favorites[0]->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateMultipleLinkedTreesExchange(): void
     {
         $u = $this->orm->make('user');
@@ -143,12 +149,14 @@ class ClasslessCyclicReferencesTest extends OrmTestCase
         $u2->favorites->add($c);
         $u->favorites->add($c);
         $u2->favorites->add($c2);
+
         QueryAssert::writes(10, fn() => $this->save($u, $u2));
+
         // no changes!
         QueryAssert::writes(0, fn() => $this->save($u, $u2));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

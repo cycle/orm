@@ -21,8 +21,12 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Tool;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HierarchyInRelationTest extends JtiBaseTest
+final class HierarchyInRelationTest extends JtiBaseTest
 {
     protected const HUMAN_ROLE = 'human';
     protected const EMPLOYEE_ROLE = 'employee';
@@ -96,106 +100,106 @@ class HierarchyInRelationTest extends JtiBaseTest
     /**
      * Subclasses in relations should be loaded and initialized
      */
-    #[\Testo\Test]
+    #[Test]
     public function testLoadSubclassAndCheckParentsRelations(): void
     {
         /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+        $entity = (new Select($this->orm, self::PROGRAMATOR_ROLE))
             ->load('tech_book')
             ->wherePK(2)->fetchOne();
 
-        \Testo\Assert::instanceOf($entity, Programator::class);
+        Assert::instanceOf($entity, Programator::class);
         /** BOOK_3 */
-        \Testo\Assert::instanceOf($entity->tech_book, Book::class);
-        \Testo\Assert::same($entity->tech_book->id, 3);
+        Assert::instanceOf($entity->tech_book, Book::class);
+        Assert::same($entity->tech_book->id, 3);
         /** EBOOK_3 */
-        \Testo\Assert::instanceOf($entity->tech_book, EBook::class);
-        \Testo\Assert::same($entity->tech_book->url, static::EBOOK_3['url']);
+        Assert::instanceOf($entity->tech_book, EBook::class);
+        Assert::same($entity->tech_book->url, self::EBOOK_3['url']);
         // Check relation eager loading in the book subclass
         /** @var EBook $ebook */
         $ebook = $entity->tech_book;
-        \Testo\Assert::count($ebook->pages, 3);
+        Assert::count($ebook->pages, 3);
     }
 
     /**
      * Subclass relations can't be resolved manually
      */
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelationOfSubclass(): void
     {
-        \Testo\Expect::exception(LoaderException::class)->withMessageContaining('Unable to create loader: Undefined relation `human`.`book`.');
+        Expect::exception(LoaderException::class)->withMessageContaining('Unable to create loader: Undefined relation `human`.`book`.');
 
         /** @var Programator $entity */
-        (new Select($this->orm, static::HUMAN_ROLE))
+        (new Select($this->orm, self::HUMAN_ROLE))
             // Load subclass relation
             ->load('book')
             ->wherePK(2)->fetchOne();
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadBaseClassAndCheckSubclassEagerRelations(): void
     {
         /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::HUMAN_ROLE))
+        $entity = (new Select($this->orm, self::HUMAN_ROLE))
             ->wherePK(2)->fetchOne();
 
-        \Testo\Assert::instanceOf($entity, Programator::class);
+        Assert::instanceOf($entity, Programator::class);
         /** BOOK_4 */
-        \Testo\Assert::instanceOf($entity->book, Book::class);
-        \Testo\Assert::same($entity->book->id, 4);
+        Assert::instanceOf($entity->book, Book::class);
+        Assert::same($entity->book->id, 4);
         /** EBOOK_4 */
-        \Testo\Assert::instanceOf($entity->book, EBook::class);
-        \Testo\Assert::same($entity->book->url, static::EBOOK_4['url']);
+        Assert::instanceOf($entity->book, EBook::class);
+        Assert::same($entity->book->url, self::EBOOK_4['url']);
         // Check relation eager loading in the book subclass
         /** @var EBook $ebook */
         $ebook = $entity->book;
-        \Testo\Assert::blank($ebook->pages);
+        Assert::blank($ebook->pages);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInnerLoadParentClassRelation(): void
     {
-        $entity = QueryAssert::reads(2, fn() => (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
+        $entity = QueryAssert::reads(2, fn() => (new Select($this->orm, self::MARKDOWN_PAGE_ROLE))
             ->load('owner', ['method' => Select::SINGLE_QUERY])
             ->wherePK(1)->fetchOne());
-        \Testo\Assert::instanceOf($entity, MarkdownPage::class);
-        \Testo\Assert::instanceOf($entity->owner, Programator::class);
+        Assert::instanceOf($entity, MarkdownPage::class);
+        Assert::instanceOf($entity->owner, Programator::class);
     }
 
     /**
      * Inheritance hierarchy should be joined as sub-query
      */
-    #[\Testo\Test]
+    #[Test]
     public function testInnerLoadParentClassRelationNullToNull(): void
     {
         /** @var MarkdownPage $entity */
-        $entity = (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
+        $entity = (new Select($this->orm, self::MARKDOWN_PAGE_ROLE))
             ->load('ebook', ['method' => Select::SINGLE_QUERY])
             ->wherePK(5)->fetchOne();
 
-        \Testo\Assert::instanceOf($entity, MarkdownPage::class);
-        \Testo\Assert::null($entity->block_id);
-        \Testo\Assert::null($entity->ebook);
+        Assert::instanceOf($entity, MarkdownPage::class);
+        Assert::null($entity->block_id);
+        Assert::null($entity->ebook);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadTwoInheritancesInSingleQuery(): void
     {
-        $entity = QueryAssert::reads(1, fn() => (new Select($this->orm, static::PROGRAMATOR_ROLE))
+        $entity = QueryAssert::reads(1, fn() => (new Select($this->orm, self::PROGRAMATOR_ROLE))
             ->load('book', ['method' => Select::SINGLE_QUERY])
             ->load('tech_book', ['method' => Select::SINGLE_QUERY])
             ->load('tech_book.pages', ['method' => Select::SINGLE_QUERY])
             ->wherePK(2)->fetchOne());
         QueryAssert::reads(0, function () use ($entity): void {
-            \Testo\Assert::instanceOf($entity->book, EBook::class);
-            \Testo\Assert::same($entity->book->id, 4);
-            \Testo\Assert::instanceOf($entity->tech_book, EBook::class);
-            \Testo\Assert::same($entity->tech_book->id, 3);
-            \Testo\Assert::notBlank($entity->tech_book->pages);
+            Assert::instanceOf($entity->book, EBook::class);
+            Assert::same($entity->book->id, 4);
+            Assert::instanceOf($entity->tech_book, EBook::class);
+            Assert::same($entity->tech_book->id, 3);
+            Assert::notBlank($entity->tech_book->pages);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPersistRelatedHierarchy(): void
     {
         /** @var EBook $entity */
@@ -210,20 +214,21 @@ class HierarchyInRelationTest extends JtiBaseTest
             $this->orm->make(Page::class, ['title' => 'page 2', 'content' => '...', 'owner_id' => 1]),
             $this->orm->make(MarkdownPage::class, ['title' => 'page 3', 'content' => '...', 'owner_id' => 2]),
         ];
+
         QueryAssert::writes(6, fn() => $this->save($entity));
 
         // Relations are not non-rewritable on sync hydration
         // This behavior can be changed
-        \Testo\Assert::null($entity->pages[0]->ebook);
-        \Testo\Assert::null($entity->pages[1]->ebook);
-        \Testo\Assert::null($entity->pages[2]->ebook);
+        Assert::null($entity->pages[0]->ebook);
+        Assert::null($entity->pages[1]->ebook);
+        Assert::null($entity->pages[2]->ebook);
 
         // $this->captureWriteQueries();
         // $this->save($entity);
         // $this->assertNumWrites(0);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         JtiBaseTest::setUp();
@@ -301,7 +306,7 @@ class HierarchyInRelationTest extends JtiBaseTest
         ]);
 
         $this->getDatabase()->table('book_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::BOOK_1), ['id'])),
+            \array_values(\array_diff(\array_keys(self::BOOK_1), ['id'])),
             \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::BOOK_1,
                 self::BOOK_2,
@@ -310,14 +315,14 @@ class HierarchyInRelationTest extends JtiBaseTest
             ]),
         );
         $this->getDatabase()->table('ebook_table')->insertMultiple(
-            array_keys(static::EBOOK_3),
+            array_keys(self::EBOOK_3),
             [
                 self::EBOOK_3,
                 self::EBOOK_4,
             ],
         );
         $this->getDatabase()->table('human_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::HUMAN_1), ['id'])),
+            \array_values(\array_diff(\array_keys(self::HUMAN_1), ['id'])),
             \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::HUMAN_1,
                 self::HUMAN_2,
@@ -326,7 +331,7 @@ class HierarchyInRelationTest extends JtiBaseTest
             ]),
         );
         $this->getDatabase()->table('employee_table')->insertMultiple(
-            array_keys(static::EMPLOYEE_1),
+            array_keys(self::EMPLOYEE_1),
             [
                 self::EMPLOYEE_1,
                 self::EMPLOYEE_2,
@@ -335,28 +340,28 @@ class HierarchyInRelationTest extends JtiBaseTest
             ],
         );
         $this->getDatabase()->table('engineer_table')->insertMultiple(
-            array_keys(static::ENGINEER_2),
+            array_keys(self::ENGINEER_2),
             [
                 self::ENGINEER_2,
                 self::ENGINEER_4,
             ],
         );
         $this->getDatabase()->table('programator_table')->insertMultiple(
-            array_keys(static::PROGRAMATOR_2),
+            array_keys(self::PROGRAMATOR_2),
             [
                 self::PROGRAMATOR_2,
                 self::PROGRAMATOR_4,
             ],
         );
         $this->getDatabase()->table('manager_table')->insertMultiple(
-            array_keys(static::MANAGER_1),
+            array_keys(self::MANAGER_1),
             [
                 self::MANAGER_1,
                 self::MANAGER_3,
             ],
         );
         $this->getDatabase()->table('page_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::PAGE_1), ['id'])),
+            \array_values(\array_diff(\array_keys(self::PAGE_1), ['id'])),
             \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::PAGE_1,
                 self::PAGE_2,
@@ -366,20 +371,20 @@ class HierarchyInRelationTest extends JtiBaseTest
             ]),
         );
         $this->getDatabase()->table('html_page_table')->insertMultiple(
-            array_keys(static::HTML_PAGE_2),
+            array_keys(self::HTML_PAGE_2),
             [
-                static::HTML_PAGE_2,
+                self::HTML_PAGE_2,
             ],
         );
         $this->getDatabase()->table('markdown_page_table')->insertMultiple(
-            array_keys(static::MARKDOWN_PAGE_1),
+            array_keys(self::MARKDOWN_PAGE_1),
             [
-                static::MARKDOWN_PAGE_1,
-                static::MARKDOWN_PAGE_5,
+                self::MARKDOWN_PAGE_1,
+                self::MARKDOWN_PAGE_5,
             ],
         );
         $this->getDatabase()->table('tool_table')->insertMultiple(
-            \array_values(\array_diff(\array_keys(static::TOOL_1), ['id'])),
+            \array_values(\array_diff(\array_keys(self::TOOL_1), ['id'])),
             \array_map(static fn(array $value): array => \array_diff_key($value, ['id' => 1]), [
                 self::TOOL_1,
                 self::TOOL_2,
@@ -392,28 +397,28 @@ class HierarchyInRelationTest extends JtiBaseTest
     protected function getSchemaArray(): array
     {
         return [
-            static::HUMAN_ROLE => [
+            self::HUMAN_ROLE => [
                 SchemaInterface::ENTITY => Human::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'human_table',
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'birthday'],
                 SchemaInterface::TYPECAST => ['id' => 'int'],
             ],
-            static::EMPLOYEE_ROLE => [
+            self::EMPLOYEE_ROLE => [
                 SchemaInterface::ENTITY => Employee::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'employee_table',
-                SchemaInterface::PARENT => static::HUMAN_ROLE,
+                SchemaInterface::PARENT => self::HUMAN_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'name', 'book_id'],
                 SchemaInterface::TYPECAST => ['id' => 'int', 'book_id' => 'int'],
                 SchemaInterface::RELATIONS => [
                     'book' => [
                         Relation::TYPE => Relation::REFERS_TO,
-                        Relation::TARGET => static::BOOK_ROLE,
+                        Relation::TARGET => self::BOOK_ROLE,
                         Relation::LOAD => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
@@ -424,12 +429,12 @@ class HierarchyInRelationTest extends JtiBaseTest
                     ],
                 ],
             ],
-            static::ENGINEER_ROLE => [
+            self::ENGINEER_ROLE => [
                 SchemaInterface::ENTITY => Engineer::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'engineer_table',
-                SchemaInterface::PARENT => static::EMPLOYEE_ROLE,
+                SchemaInterface::PARENT => self::EMPLOYEE_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'level', 'tech_book_id'],
                 SchemaInterface::TYPECAST => ['id' => 'int', 'level' => 'int', 'tech_book_id' => 'int'],
@@ -437,7 +442,7 @@ class HierarchyInRelationTest extends JtiBaseTest
                 SchemaInterface::RELATIONS => [
                     'tech_book' => [
                         Relation::TYPE => Relation::REFERS_TO,
-                        Relation::TARGET => static::EBOOK_ROLE,
+                        Relation::TARGET => self::EBOOK_ROLE,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
                             Relation::NULLABLE => true,
@@ -447,7 +452,7 @@ class HierarchyInRelationTest extends JtiBaseTest
                     ],
                     'tools' => [
                         Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => static::TOOL_ROLE,
+                        Relation::TARGET => self::TOOL_ROLE,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
                             Relation::NULLABLE => false,
@@ -457,41 +462,41 @@ class HierarchyInRelationTest extends JtiBaseTest
                     ],
                 ],
             ],
-            static::PROGRAMATOR_ROLE => [
+            self::PROGRAMATOR_ROLE => [
                 SchemaInterface::ENTITY => Programator::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'programator_table',
-                SchemaInterface::PARENT => static::ENGINEER_ROLE,
+                SchemaInterface::PARENT => self::ENGINEER_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'language'],
                 SchemaInterface::TYPECAST => ['id' => 'int'],
             ],
-            static::MANAGER_ROLE => [
+            self::MANAGER_ROLE => [
                 SchemaInterface::ENTITY => Manager::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'manager_table',
-                SchemaInterface::PARENT => static::EMPLOYEE_ROLE,
+                SchemaInterface::PARENT => self::EMPLOYEE_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'rank'],
                 SchemaInterface::TYPECAST => ['id' => 'int'],
             ],
-            static::BOOK_ROLE => [
+            self::BOOK_ROLE => [
                 SchemaInterface::ENTITY => Book::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'book_table',
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'title'],
                 SchemaInterface::TYPECAST => ['id' => 'int'],
             ],
-            static::EBOOK_ROLE => [
+            self::EBOOK_ROLE => [
                 SchemaInterface::ENTITY => EBook::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'ebook_table',
-                SchemaInterface::PARENT => static::BOOK_ROLE,
+                SchemaInterface::PARENT => self::BOOK_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'url', 'block_id'],
                 SchemaInterface::TYPECAST => ['id' => 'int', 'block_id' => 'int'],
@@ -499,7 +504,7 @@ class HierarchyInRelationTest extends JtiBaseTest
                 SchemaInterface::RELATIONS => [
                     'pages' => [
                         Relation::TYPE => Relation::HAS_MANY,
-                        Relation::TARGET => static::PAGE_ROLE,
+                        Relation::TARGET => self::PAGE_ROLE,
                         Relation::LOAD => Relation::LOAD_EAGER,
                         Relation::SCHEMA => [
                             Relation::CASCADE => true,
@@ -510,9 +515,9 @@ class HierarchyInRelationTest extends JtiBaseTest
                     ],
                 ],
             ],
-            static::PAGE_ROLE => [
+            self::PAGE_ROLE => [
                 SchemaInterface::ENTITY => Page::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'page_table',
                 SchemaInterface::PRIMARY_KEY => 'id',
@@ -521,7 +526,7 @@ class HierarchyInRelationTest extends JtiBaseTest
                 SchemaInterface::RELATIONS => [
                     'owner' => [
                         Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => static::ENGINEER_ROLE,
+                        Relation::TARGET => self::ENGINEER_ROLE,
                         Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::NULLABLE => true,
@@ -532,7 +537,7 @@ class HierarchyInRelationTest extends JtiBaseTest
                     ],
                     'ebook' => [
                         Relation::TYPE => Relation::BELONGS_TO,
-                        Relation::TARGET => static::EBOOK_ROLE,
+                        Relation::TARGET => self::EBOOK_ROLE,
                         Relation::LOAD => Relation::LOAD_PROMISE,
                         Relation::SCHEMA => [
                             Relation::NULLABLE => true,
@@ -543,29 +548,29 @@ class HierarchyInRelationTest extends JtiBaseTest
                     ],
                 ],
             ],
-            static::HTML_PAGE_ROLE => [
+            self::HTML_PAGE_ROLE => [
                 SchemaInterface::ENTITY => HtmlPage::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'html_page_table',
-                SchemaInterface::PARENT => static::PAGE_ROLE,
+                SchemaInterface::PARENT => self::PAGE_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id'],
                 SchemaInterface::TYPECAST => ['id' => 'int'],
             ],
-            static::MARKDOWN_PAGE_ROLE => [
+            self::MARKDOWN_PAGE_ROLE => [
                 SchemaInterface::ENTITY => MarkdownPage::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'markdown_page_table',
-                SchemaInterface::PARENT => static::PAGE_ROLE,
+                SchemaInterface::PARENT => self::PAGE_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id'],
                 SchemaInterface::TYPECAST => ['id' => 'int'],
             ],
-            static::TOOL_ROLE => [
+            self::TOOL_ROLE => [
                 SchemaInterface::ENTITY => Tool::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'tool_table',
                 SchemaInterface::PRIMARY_KEY => 'id',

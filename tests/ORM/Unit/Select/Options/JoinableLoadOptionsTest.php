@@ -9,80 +9,73 @@ use Cycle\ORM\Select\Options\JoinMethod;
 use Cycle\ORM\Select\Options\LoadMethod;
 use Cycle\ORM\Select\Options\LoadOptions;
 use Cycle\ORM\Select\ScopeInterface;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
+#[Test]
 final class JoinableLoadOptionsTest
 {
-    #[\Testo\Test]
     public function testDefaults(): void
     {
         $options = new JoinableLoadOptions();
 
-        \Testo\Assert::null($options->method);
-        \Testo\Assert::true($options->scope);
-        \Testo\Assert::true($options->minify);
-        \Testo\Assert::null($options->as);
-        \Testo\Assert::null($options->using);
+        Assert::null($options->method);
+        Assert::true($options->scope);
+        Assert::true($options->minify);
+        Assert::null($options->as);
+        Assert::null($options->using);
     }
 
-    #[\Testo\Test]
     public function testExtendsLoadOptions(): void
     {
         $options = new JoinableLoadOptions();
 
-        \Testo\Assert::instanceOf($options, LoadOptions::class);
+        Assert::instanceOf($options, LoadOptions::class);
     }
 
-    #[\Testo\Test]
     public function testWithLoadMethod(): void
     {
         $options = new JoinableLoadOptions(method: LoadMethod::SingleQuery);
 
-        \Testo\Assert::same($options->method, LoadMethod::SingleQuery);
+        Assert::same($options->method, LoadMethod::SingleQuery);
     }
 
-    #[\Testo\Test]
     public function testWithJoinMethod(): void
     {
         $options = new JoinableLoadOptions(method: JoinMethod::InnerJoin);
 
-        \Testo\Assert::same($options->method, JoinMethod::InnerJoin);
+        Assert::same($options->method, JoinMethod::InnerJoin);
     }
 
-    #[\Testo\Test]
     public function testWithLeftJoinMethod(): void
     {
         $options = new JoinableLoadOptions(method: JoinMethod::LeftJoin);
 
-        \Testo\Assert::same($options->method, JoinMethod::LeftJoin);
+        Assert::same($options->method, JoinMethod::LeftJoin);
     }
 
-    #[\Testo\Test]
     public function testCustomAlias(): void
     {
         $options = new JoinableLoadOptions(as: 'my_alias');
 
-        \Testo\Assert::same($options->as, 'my_alias');
+        Assert::same($options->as, 'my_alias');
     }
 
-    #[\Testo\Test]
     public function testUsing(): void
     {
         $options = new JoinableLoadOptions(using: 'other_relation');
 
-        \Testo\Assert::same($options->using, 'other_relation');
+        Assert::same($options->using, 'other_relation');
     }
 
-    #[\Testo\Test]
     public function testCustomScope(): void
     {
         $scope = \Mockery::mock(ScopeInterface::class)->shouldIgnoreMissing();
         $options = new JoinableLoadOptions(scope: $scope);
 
-        \Testo\Assert::same($options->scope, $scope);
+        Assert::same($options->scope, $scope);
     }
 
-    #[\Testo\Test]
     public function testAllParameters(): void
     {
         $scope = \Mockery::mock(ScopeInterface::class)->shouldIgnoreMissing();
@@ -94,14 +87,13 @@ final class JoinableLoadOptionsTest
             using: 'other',
         );
 
-        \Testo\Assert::same($options->method, LoadMethod::OuterQuery);
-        \Testo\Assert::same($options->scope, $scope);
-        \Testo\Assert::false($options->minify);
-        \Testo\Assert::same($options->as, 'alias');
-        \Testo\Assert::same($options->using, 'other');
+        Assert::same($options->method, LoadMethod::OuterQuery);
+        Assert::same($options->scope, $scope);
+        Assert::false($options->minify);
+        Assert::same($options->as, 'alias');
+        Assert::same($options->using, 'other');
     }
 
-    #[\Testo\Test]
     public function testToArrayWithLoadMethod(): void
     {
         $options = new JoinableLoadOptions(
@@ -112,7 +104,7 @@ final class JoinableLoadOptionsTest
             using: 'other',
         );
 
-        \Testo\Assert::equals($options->toArray(), [
+        Assert::equals($options->toArray(), [
             'method' => LoadMethod::SingleQuery->value,
             'as' => 'my_alias',
             'using' => 'other',
@@ -121,20 +113,18 @@ final class JoinableLoadOptionsTest
         ]);
     }
 
-    #[\Testo\Test]
     public function testToArrayWithJoinMethod(): void
     {
         $options = new JoinableLoadOptions(method: JoinMethod::LeftJoin);
 
-        \Testo\Assert::same($options->toArray()['method'], JoinMethod::LeftJoin->value);
+        Assert::same($options->toArray()['method'], JoinMethod::LeftJoin->value);
     }
 
-    #[\Testo\Test]
     public function testToArrayDefaults(): void
     {
         $options = new JoinableLoadOptions(method: LoadMethod::OuterQuery);
 
-        \Testo\Assert::equals($options->toArray(), [
+        Assert::equals($options->toArray(), [
             'method' => LoadMethod::OuterQuery->value,
             'scope' => true,
             'minify' => true,

@@ -8,31 +8,35 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ORMTest extends OrmTestCase
+final class ORMTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testORMGet(): void
     {
-        \Testo\Assert::null($this->orm->get(User::class, ['id' => 1], false));
-        \Testo\Assert::instanceOf($this->orm->get(User::class, ['id' => 1], true), User::class);
-        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($this->orm->get(User::class, ['id' => 1]), User::class));
+        Assert::null($this->orm->get(User::class, ['id' => 1], false));
+        Assert::instanceOf($this->orm->get(User::class, ['id' => 1], true), User::class);
 
-        \Testo\Assert::count($this->orm->getSchema()->getRoles(), 1);
+        QueryAssert::reads(0, fn() => Assert::instanceOf($this->orm->get(User::class, ['id' => 1]), User::class));
+
+        Assert::count($this->orm->getSchema()->getRoles(), 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testORMGetByRole(): void
     {
-        \Testo\Assert::null($this->orm->get('user', ['id' => 1], false));
-        \Testo\Assert::instanceOf($this->orm->get('user', ['id' => 1], true), User::class);
-        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($this->orm->get('user', ['id' => 1]), User::class));
+        Assert::null($this->orm->get('user', ['id' => 1], false));
+        Assert::instanceOf($this->orm->get('user', ['id' => 1], true), User::class);
+
+        QueryAssert::reads(0, fn() => Assert::instanceOf($this->orm->get('user', ['id' => 1]), User::class));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

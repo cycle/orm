@@ -6,9 +6,9 @@ namespace Cycle\ORM\Tests\Regression\Issue427;
 
 use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\UncastableInterface;
-use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Testo\Assert;
 
 class UuidTypecast implements CastableInterface, UncastableInterface
 {
@@ -52,7 +52,7 @@ class UuidTypecast implements CastableInterface, UncastableInterface
                 continue;
             }
             if (!$data[$column] instanceof UuidInterface) {
-                \Testo\Assert::fail(\sprintf(
+                Assert::fail(\sprintf(
                     'Expected UuidInterface, got %s: %s',
                     \get_debug_type($data[$column]),
                     \print_r($data[$column], true),

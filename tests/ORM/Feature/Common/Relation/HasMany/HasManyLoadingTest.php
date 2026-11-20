@@ -6,24 +6,26 @@ namespace Cycle\ORM\Tests\Feature\Common\Relation\HasMany;
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
-use Cycle\ORM\Relation\BulkLoader;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HasManyLoadingTest extends OrmTestCase
+final class HasManyLoadingTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -55,7 +57,7 @@ class HasManyLoadingTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelationLoaded(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -65,7 +67,7 @@ class HasManyLoadingTest extends OrmTestCase
             },
         ])->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -97,7 +99,7 @@ class HasManyLoadingTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelationLoadedInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -108,7 +110,7 @@ class HasManyLoadingTest extends OrmTestCase
             },
         ])->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -140,10 +142,11 @@ class HasManyLoadingTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateRelationSortedById(): void
     {
         $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('comments', [
                 'orderBy' => ['id' => 'DESC'],
@@ -151,18 +154,18 @@ class HasManyLoadingTest extends OrmTestCase
         QueryAssert::reads(0, function () use ($users): void {
             $checked = false;
             foreach ($users as $user) {
-                \Testo\Assert::iterable($user->comments);
+                Assert::iterable($user->comments);
                 // Check order
                 if (\count($user->comments) > 1) {
-                    \Testo\Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
+                    Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
                     $checked = true;
                 }
             }
-            \Testo\Assert::true($checked, 'No comments to check order.');
+            Assert::true($checked, 'No comments to check order.');
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

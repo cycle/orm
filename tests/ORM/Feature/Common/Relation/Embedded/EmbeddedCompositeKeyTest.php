@@ -12,12 +12,15 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class EmbeddedCompositeKeyTest extends OrmTestCase
+final class EmbeddedCompositeKeyTest extends OrmTestCase
 {
-
     protected const CHILD_CONTAINER = 'child_entity';
     protected const CHILD_ROLE = 'parent_entity:' . self::CHILD_CONTAINER;
     protected const KEY_1 = ['key1' => 1, 'key2' => 1];
@@ -35,16 +38,16 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
         self::KEY_3 + self::PARENT_3 + [self::CHILD_CONTAINER => self::CHILD_3],
     ];
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))
             ->load(self::CHILD_CONTAINER);
 
-        \Testo\Assert::equals($selector->fetchData(), self::ALL_LOADED);
+        Assert::equals($selector->fetchData(), self::ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelation(): void
     {
         $selector = (new Select($this->orm, CompositePK::class))
@@ -52,15 +55,15 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
 
         [$a, $b, $c] = $selector->fetchAll();
 
-        \Testo\Assert::instanceOf($a->child_entity, CompositePKChild::class);
-        \Testo\Assert::instanceOf($b->child_entity, CompositePKChild::class);
+        Assert::instanceOf($a->child_entity, CompositePKChild::class);
+        Assert::instanceOf($b->child_entity, CompositePKChild::class);
 
-        \Testo\Assert::same($a->child_entity->key3, 'foo');
-        \Testo\Assert::same($b->child_entity->key3, 'bar');
-        \Testo\Assert::same($c->child_entity->key3, 'baz');
+        Assert::same($a->child_entity->key3, 'foo');
+        Assert::same($b->child_entity->key3, 'bar');
+        Assert::same($c->child_entity->key3, 'baz');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelationFetchOne(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
@@ -68,11 +71,11 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->orderBy('key3', 'ASC')
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($u->child_entity, CompositePKChild::class);
-        \Testo\Assert::same($u->child_entity->key3, 'foo');
+        Assert::instanceOf($u->child_entity, CompositePKChild::class);
+        Assert::same($u->child_entity->key3, 'foo');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateParentWithEmbedded(): void
     {
         $u = new CompositePK();
@@ -81,6 +84,7 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
         $u->key3 = 900;
         $u->child_entity = new CompositePKChild();
         $u->child_entity->key3 = 'user3';
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -88,24 +92,25 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->wherePK([$u->key1, $u->key2])
             ->fetchOne();
 
-        \Testo\Assert::same($u2->key1, $u->key1);
-        \Testo\Assert::same($u2->key2, $u->key2);
-        \Testo\Assert::same($u2->child_entity->key1, $u->key1);
-        \Testo\Assert::same($u2->child_entity->key2, $u->key2);
-        \Testo\Assert::same($u2->child_entity->key3, 'user3');
+        Assert::same($u2->key1, $u->key1);
+        Assert::same($u2->key2, $u->key2);
+        Assert::same($u2->child_entity->key1, $u->key1);
+        Assert::same($u2->child_entity->key2, $u->key2);
+        Assert::same($u2->child_entity->key3, 'user3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrites(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
             ->load(self::CHILD_CONTAINER)
             ->orderBy('key3', 'ASC')
             ->fetchOne();
+
         QueryAssert::writes(0, fn() => $this->save($u));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateEmbeddedValue(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
@@ -123,7 +128,9 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
                 'pField2' => $u->key2,
             ],
         )->run();
+
         QueryAssert::writes(1, fn() => $this->save($u));
+
         QueryAssert::writes(0, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -131,42 +138,45 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->wherePK([$u->key1, $u->key2])
             ->fetchOne();
 
-        \Testo\Assert::equals($u2->key1, $u->key1);
-        \Testo\Assert::equals($u2->key2, $u->key2);
-        \Testo\Assert::equals($u2->key3, 808);
-        \Testo\Assert::same($u2->child_entity->key3, 'newpass');
+        Assert::equals($u2->key1, $u->key1);
+        Assert::equals($u2->key2, $u->key2);
+        Assert::equals($u2->key3, 808);
+        Assert::same($u2->child_entity->key3, 'newpass');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelationReferenceNothing(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
             ->orderBy('key3', 'ASC')->fetchOne();
+
         QueryAssert::writes(0, fn() => $this->save($u));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateEmbeddedDirectly(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
             ->orderBy('key3', 'ASC')
             ->load(self::CHILD_CONTAINER)
             ->fetchOne();
+
         QueryAssert::writes(0, fn() => $this->save($u->child_entity));
 
         $u->child_entity->key3 = 'altered';
+
         QueryAssert::writes(1, fn() => $this->save($u->child_entity));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
             ->wherePK([$u->key1, $u->key2])->fetchOne();
 
-        \Testo\Assert::equals($u2->key1, $u->key1);
-        \Testo\Assert::equals($u2->key2, $u->key2);
-        \Testo\Assert::same($u2->child_entity->key3, 'altered');
+        Assert::equals($u2->key1, $u->key1);
+        Assert::equals($u2->key2, $u->key2);
+        Assert::same($u2->child_entity->key3, 'altered');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testResolvePromise(): void
     {
         /** @var CompositePK $u */
@@ -174,10 +184,10 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->orderBy('key3', 'ASC')
             ->fetchOne();
 
-        \Testo\Assert::same($u->child_entity->key3, 'foo');
+        Assert::same($u->child_entity->key3, 'foo');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangePromise(): void
     {
         /** @var CompositePK $u */
@@ -186,6 +196,7 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->fetchOne();
 
         $u->child_entity->key3 = 'user3';
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -193,20 +204,21 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->wherePK([$u->key1, $u->key2])
             ->fetchOne();
 
-        \Testo\Assert::equals($u2->key1, $u->key1);
-        \Testo\Assert::equals($u2->key2, $u->key2);
-        \Testo\Assert::same($u2->child_entity->key3, 'user3');
+        Assert::equals($u2->key1, $u->key1);
+        Assert::equals($u2->key2, $u->key2);
+        Assert::same($u2->child_entity->key3, 'user3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSavePromise(): void
     {
         $selector = new Select($this->orm, CompositePK::class);
         $u = $selector->orderBy('key3', 'ASC')->fetchOne();
+
         QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMovePromise(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
@@ -221,6 +233,7 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
         $u2Data = $this->extractEntity($u2);
 
         $u->child_entity = $u2Data['child_entity'];
+
         QueryAssert::count(1, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -228,9 +241,9 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->wherePK([$u->key1, $u->key2])
             ->fetchOne();
 
-        \Testo\Assert::equals($u3->key1, $u->key1);
-        \Testo\Assert::equals($u3->key2, $u->key2);
-        \Testo\Assert::same($u3->child_entity->key3, 'bar');
+        Assert::equals($u3->key1, $u->key1);
+        Assert::equals($u3->key2, $u->key2);
+        Assert::same($u3->child_entity->key3, 'bar');
 
         $u4 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -238,12 +251,12 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->fetchOne();
 
         // unchanged
-        \Testo\Assert::equals($u4->key1, $u2->key1);
-        \Testo\Assert::equals($u4->key2, $u2->key2);
-        \Testo\Assert::same($u4->child_entity->key3, 'bar');
+        Assert::equals($u4->key1, $u2->key1);
+        Assert::equals($u4->key2, $u2->key2);
+        Assert::same($u4->child_entity->key3, 'bar');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveClonedEmbedding(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
@@ -258,6 +271,7 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->fetchOne();
 
         $u->child_entity = clone $u2->child_entity;
+
         QueryAssert::count(0, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -265,9 +279,9 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->wherePK([$u->key1, $u->key2])
             ->fetchOne();
 
-        \Testo\Assert::same($u3->key1, $u->key1);
-        \Testo\Assert::same($u3->key2, $u->key2);
-        \Testo\Assert::same($u3->child_entity->key3, 'bar');
+        Assert::same($u3->key1, $u->key1);
+        Assert::same($u3->key2, $u->key2);
+        Assert::same($u3->child_entity->key3, 'bar');
 
         $u4 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -275,12 +289,12 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->fetchOne();
 
         // unchanged
-        \Testo\Assert::same($u4->key1, $u2->key1);
-        \Testo\Assert::same($u4->key2, $u2->key2);
-        \Testo\Assert::same($u4->child_entity->key3, 'bar');
+        Assert::same($u4->key1, $u2->key1);
+        Assert::same($u4->key2, $u2->key2);
+        Assert::same($u4->child_entity->key3, 'bar');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEmbeddable(): void
     {
         $u = (new Select($this->orm, CompositePKChild::class))
@@ -288,11 +302,11 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
             ->orderBy('key2', 'ASC')
             ->fetchOne();
 
-        \Testo\Assert::same($u->key3, 'foo');
-        \Testo\Assert::same([$u->key1, $u->key2], array_values(self::KEY_1));
+        Assert::same($u->key3, 'foo');
+        Assert::same([$u->key1, $u->key2], array_values(self::KEY_1));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeWhole(): void
     {
         $u = (new Select($this->orm, CompositePK::class))
@@ -301,36 +315,38 @@ class EmbeddedCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = new CompositePKChild();
         $u->child_entity->key3 = 'abc';
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();
 
-        \Testo\Assert::same($u2->key1, $u->key1);
-        \Testo\Assert::same($u2->key2, $u->key2);
-        \Testo\Assert::same($u2->child_entity->key3, 'abc');
+        Assert::same($u2->key1, $u->key1);
+        Assert::same($u2->key2, $u->key2);
+        Assert::same($u2->child_entity->key3, 'abc');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNullify(): void
     {
-        \Testo\Expect::exception(NullException::class);
+        Expect::exception(NullException::class);
 
         $u = (new Select($this->orm, CompositePK::class))
             ->orderBy('key3', 'ASC')->fetchOne();
 
         $u->child_entity = null;
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();
 
-        \Testo\Assert::same($u2->key1, $u->key1);
-        \Testo\Assert::same($u2->key2, $u->key2);
-        \Testo\Assert::same($u2->child_entity->key3, 'user3');
+        Assert::same($u2->key1, $u->key1);
+        Assert::same($u2->key2, $u->key2);
+        Assert::same($u2->child_entity->key3, 'user3');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable(

@@ -13,11 +13,13 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ManyToManyScopedPivotTest extends OrmTestCase
+final class ManyToManyScopedPivotTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelation(): void
     {
         $this->orm = $this->withPivotSchema([
@@ -28,7 +30,7 @@ class ManyToManyScopedPivotTest extends OrmTestCase
             ->orderBy('id')
             ->orderBy('tags.id');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -132,7 +134,7 @@ class ManyToManyScopedPivotTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelationOrderByPivotColumn(): void
     {
         $this->orm = $this->withPivotSchema([
@@ -142,7 +144,7 @@ class ManyToManyScopedPivotTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')->orderBy('id');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -245,7 +247,7 @@ class ManyToManyScopedPivotTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoaderRelationWithScope(): void
     {
         $this->orm = $this->withPivotSchema([
@@ -261,7 +263,7 @@ class ManyToManyScopedPivotTest extends OrmTestCase
             ->load('tags')
             ->orderBy('id');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -284,7 +286,7 @@ class ManyToManyScopedPivotTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

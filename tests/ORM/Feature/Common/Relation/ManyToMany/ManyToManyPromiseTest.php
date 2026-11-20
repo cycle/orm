@@ -15,20 +15,22 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Doctrine\Common\Collections\Collection;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Doctrine\Common\Collections\Collection;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ManyToManyPromiseTest extends OrmTestCase
+final class ManyToManyPromiseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -77,7 +79,7 @@ class ManyToManyPromiseTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRelationContextAccess(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -86,29 +88,30 @@ class ManyToManyPromiseTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->fetchAll();
+
         QueryAssert::reads(2, function () use ($a, $b): void {
-            \Testo\Assert::count($a->tags, 2);
-            \Testo\Assert::count($b->tags, 1);
+            Assert::count($a->tags, 2);
+            Assert::count($b->tags, 1);
         });
         QueryAssert::reads(0, function () use ($a, $b): void {
-            \Testo\Assert::instanceOf($a->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
-            \Testo\Assert::instanceOf($b->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
-            \Testo\Assert::true($a->tags->hasPivot($a->tags[0]));
-            \Testo\Assert::true($a->tags->hasPivot($a->tags[1]));
-            \Testo\Assert::true($b->tags->hasPivot($b->tags[0]));
-            \Testo\Assert::false($b->tags->hasPivot($a->tags[0]));
-            \Testo\Assert::false($b->tags->hasPivot($a->tags[1]));
-            \Testo\Assert::false($a->tags->hasPivot($b->tags[0]));
-            \Testo\Assert::instanceOf($a->tags->getPivot($a->tags[0]), TagContext::class);
-            \Testo\Assert::instanceOf($a->tags->getPivot($a->tags[1]), TagContext::class);
-            \Testo\Assert::instanceOf($b->tags->getPivot($b->tags[0]), TagContext::class);
-            \Testo\Assert::equals($a->tags->getPivot($a->tags[0])->as, 'primary');
-            \Testo\Assert::equals($a->tags->getPivot($a->tags[1])->as, 'secondary');
-            \Testo\Assert::equals($b->tags->getPivot($b->tags[0])->as, 'primary');
+            Assert::instanceOf($a->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
+            Assert::instanceOf($b->tags, \Cycle\ORM\Collection\Pivoted\PivotedCollectionInterface::class);
+            Assert::true($a->tags->hasPivot($a->tags[0]));
+            Assert::true($a->tags->hasPivot($a->tags[1]));
+            Assert::true($b->tags->hasPivot($b->tags[0]));
+            Assert::false($b->tags->hasPivot($a->tags[0]));
+            Assert::false($b->tags->hasPivot($a->tags[1]));
+            Assert::false($a->tags->hasPivot($b->tags[0]));
+            Assert::instanceOf($a->tags->getPivot($a->tags[0]), TagContext::class);
+            Assert::instanceOf($a->tags->getPivot($a->tags[1]), TagContext::class);
+            Assert::instanceOf($b->tags->getPivot($b->tags[0]), TagContext::class);
+            Assert::equals($a->tags->getPivot($a->tags[0])->as, 'primary');
+            Assert::equals($a->tags->getPivot($a->tags[1])->as, 'secondary');
+            Assert::equals($b->tags->getPivot($b->tags[0])->as, 'primary');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoQueries(): void
     {
         /**
@@ -117,10 +120,11 @@ class ManyToManyPromiseTest extends OrmTestCase
          */
         [$a, $b] = (new Select($this->orm, User::class))
             ->fetchAll();
+
         QueryAssert::reads(0, fn() => $this->save($a, $b));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUnlinkManyToManyAndReplaceSome(): void
     {
         /**
@@ -145,7 +149,9 @@ class ManyToManyPromiseTest extends OrmTestCase
 
         $b->tags->add($t);
         $b->tags->setPivot($t, $pc);
+
         QueryAssert::writes(6, fn() => $this->save($a, $b));
+
         QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -155,14 +161,14 @@ class ManyToManyPromiseTest extends OrmTestCase
          */
         [$a, $b] = (new Select($this->orm, User::class))->load('tags')->fetchAll();
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag b');
-        \Testo\Assert::same($a->tags->getPivot($a->tags[0])->as, 'new');
+        Assert::same($a->tags[0]->name, 'tag b');
+        Assert::same($a->tags->getPivot($a->tags[0])->as, 'new');
 
-        \Testo\Assert::same($b->tags[0]->name, 'new tag');
-        \Testo\Assert::same($b->tags->getPivot($b->tags[0])->as, 'super');
+        Assert::same($b->tags[0]->name, 'new tag');
+        Assert::same($b->tags->getPivot($b->tags[0])->as, 'super');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testReassign(): void
     {
         $tagSelect = new Select($this->orm, Tag::class);
@@ -173,7 +179,8 @@ class ManyToManyPromiseTest extends OrmTestCase
          */
         $user = $userSelect->load('tags')->fetchOne(['id' => 1]);
 
-        \Testo\Assert::instanceOf($user->tags, Collection::class);
+        Assert::instanceOf($user->tags, Collection::class);
+
         QueryAssert::writes(0, function () use (&$tr, $user): void {
             $tr = new Transaction($this->orm);
             $tr->persist($user);
@@ -210,23 +217,23 @@ class ManyToManyPromiseTest extends OrmTestCase
         $this->orm = $this->orm->withHeap(new Heap());
 
         $user = (new Select($this->orm, User::class))->fetchOne(['id' => 1]);
-        \Testo\Assert::count($user->tags, 2);
-        \Testo\Assert::same($user->tags[0]->name, 'tag a');
-        \Testo\Assert::same($user->tags[1]->name, 'tag c');
+        Assert::count($user->tags, 2);
+        Assert::same($user->tags[0]->name, 'tag a');
+        Assert::same($user->tags[1]->name, 'tag c');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testResolvePromise(): void
     {
         /** @var User $u */
         $u = $this->orm->get('user', ['id' => 1]);
         $uData = $this->extractEntity($u);
 
-        \Testo\Assert::instanceOf($uData['tags'], ReferenceInterface::class);
-        \Testo\Assert::count($u->tags, 2);
+        Assert::instanceOf($uData['tags'], ReferenceInterface::class);
+        Assert::count($u->tags, 2);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

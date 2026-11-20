@@ -12,27 +12,29 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
-use Doctrine\Common\Collections\ArrayCollection;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Doctrine\Common\Collections\ArrayCollection;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ClasslessHasManyPromiseTest extends OrmTestCase
+final class ClasslessHasManyPromiseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelation(): void
     {
         $u = $this->orm->make('user');
-        \Testo\Assert::instanceOf($u->comments, ArrayCollection::class);
+        Assert::instanceOf($u->comments, ArrayCollection::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, 'user');
         $selector->load('comments')->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -64,98 +66,103 @@ class ClasslessHasManyPromiseTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPromised(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
 
         QueryAssert::reads(0, function () use ($u): void {
-            \Testo\Assert::instanceOf($u->comments, Promise::class);
-            \Testo\Assert::false($u->comments->hasValue());
+            Assert::instanceOf($u->comments, Promise::class);
+            Assert::false($u->comments->hasValue());
         });
 
         // Resolve promise
         $resolved = QueryAssert::reads(1, fn() => $u->comments->fetch());
 
-        \Testo\Assert::true($u->comments->hasValue());
-        \Testo\Assert::count($resolved, 3);
+        Assert::true($u->comments->hasValue());
+        Assert::count($resolved, 3);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHasManyPromiseLoaded(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
+
         QueryAssert::reads(0, function () use (&$p, $u): void {
-            \Testo\Assert::instanceOf($p = $u->comments, Promise::class);
+            Assert::instanceOf($p = $u->comments, Promise::class);
         });
 
         /** @var Promise $p */
-        \Testo\Assert::false($p->hasValue());
+        Assert::false($p->hasValue());
         $p->resolve();
-        \Testo\Assert::array($p->getValue());
-        \Testo\Assert::true($p->hasValue());
+        Assert::array($p->getValue());
+        Assert::true($p->hasValue());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHasManyPromiseRole(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
+
         QueryAssert::reads(0, function () use (&$p, $u): void {
-            \Testo\Assert::instanceOf($p = $u->comments, Promise::class);
+            Assert::instanceOf($p = $u->comments, Promise::class);
         });
 
         /** @var Promise $p */
-        \Testo\Assert::same($p->getRole(), 'comment');
+        Assert::same($p->getRole(), 'comment');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHasManyPromiseScope(): void
     {
         $u = (new Select($this->orm, 'user'))
             ->wherePK(1)->fetchOne();
+
         QueryAssert::reads(0, function () use (&$r, $u): void {
-            \Testo\Assert::instanceOf($r = $u->comments, ReferenceInterface::class);
+            Assert::instanceOf($r = $u->comments, ReferenceInterface::class);
         });
 
         /** @var ReferenceInterface $r */
-        \Testo\Assert::equals($r->getScope(), [
+        Assert::equals($r->getScope(), [
             'user_id' => 1,
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPromisedEmpty(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
 
         QueryAssert::reads(0, function () use ($u): void {
-            \Testo\Assert::instanceOf($u->comments, Promise::class);
-            \Testo\Assert::false($u->comments->hasValue());
+            Assert::instanceOf($u->comments, Promise::class);
+            Assert::false($u->comments->hasValue());
         });
 
-        \Testo\Assert::count(QueryAssert::reads(1, fn() => $u->comments->fetch()), 0);
+        Assert::count(QueryAssert::reads(1, fn() => $u->comments->fetch()), 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoChanges(): void
     {
         $u = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
+
         QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoChangesWithNoChildren(): void
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
+
         QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveChildren(): void
     {
         $e = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
@@ -169,13 +176,13 @@ class ClasslessHasManyPromiseTest extends OrmTestCase
             ->wherePK(1)->fetchOne();
 
         $e->comments = $e->comments->fetch();
-        \Testo\Assert::count($e->comments, 2);
+        Assert::count($e->comments, 2);
 
-        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
+        Assert::same($e->comments[0]->message, 'msg 1');
+        Assert::same($e->comments[1]->message, 'msg 3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAddAndRemoveChildren(): void
     {
         $e = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
@@ -193,14 +200,14 @@ class ClasslessHasManyPromiseTest extends OrmTestCase
             ->wherePK(1)->fetchOne();
 
         $e->comments = $e->comments->fetch();
-        \Testo\Assert::count($e->comments, 3);
+        Assert::count($e->comments, 3);
 
-        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($e->comments[2]->message, 'msg 4');
+        Assert::same($e->comments[0]->message, 'msg 1');
+        Assert::same($e->comments[1]->message, 'msg 3');
+        Assert::same($e->comments[2]->message, 'msg 4');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, 'user');
@@ -209,8 +216,8 @@ class ClasslessHasManyPromiseTest extends OrmTestCase
         $a->comments = $a->comments->fetch();
         $b->comments = $b->comments->fetch();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 0);
 
         $b->comments = $a->comments->slice(0, 2);
         foreach ($b->comments as $c) {
@@ -219,9 +226,11 @@ class ClasslessHasManyPromiseTest extends OrmTestCase
 
         $b->comments[0]->message = 'new b';
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 2);
+
         QueryAssert::writes(2, fn() => $this->save($a, $b));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($a, $b));
 
@@ -232,17 +241,17 @@ class ClasslessHasManyPromiseTest extends OrmTestCase
             ])
             ->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::equals($a->comments[0]->id, 3);
-        \Testo\Assert::equals($b->comments[0]->id, 1);
-        \Testo\Assert::equals($b->comments[1]->id, 2);
+        Assert::equals($a->comments[0]->id, 3);
+        Assert::equals($b->comments[0]->id, 1);
+        Assert::equals($b->comments[1]->id, 2);
 
-        \Testo\Assert::equals($b->comments[0]->message, 'new b');
+        Assert::equals($b->comments[0]->message, 'new b');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

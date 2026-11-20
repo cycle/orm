@@ -7,6 +7,8 @@ namespace Cycle\ORM\Tests\Unit\Select;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Tests\Unit\Select\Fixture\StubLoader;
+use Testo\Assert;
+use Testo\Test;
 
 /**
  * Reproduces a TypeError thrown by {@see QueryBuilder::targetFunc()} on PHP 8.3+:
@@ -18,9 +20,9 @@ use Cycle\ORM\Tests\Unit\Select\Fixture\StubLoader;
  * `[$this->query, $call]` — a value that PHP's stricter return-type validation
  * no longer accepts as `callable` without further checks.
  */
+#[Test]
 final class QueryBuilderTest
 {
-    #[\Testo\Test]
     public function testTargetFuncReturnTypeAcceptsArrayCallable(): void
     {
         $builder = $this->makeBuilder();
@@ -31,10 +33,9 @@ final class QueryBuilderTest
         // so the TypeError (if any) is thrown by this invocation itself.
         $callable = $method->invoke($builder, 'where');
 
-        \Testo\Assert::callable($callable);
+        Assert::callable($callable);
     }
 
-    #[\Testo\Test]
     public function testWhereCallDoesNotThrowTypeError(): void
     {
         $builder = $this->makeBuilder();
@@ -43,10 +44,9 @@ final class QueryBuilderTest
         // routes through __call() -> targetFunc(), tripping the return-type check.
         $builder->where('id', 1);
 
-        \Testo\Assert::notBlank($builder->getQuery()->getTokens()['where']);
+        Assert::notBlank($builder->getQuery()->getTokens()['where']);
     }
 
-    #[\Testo\Test]
     public function testWrapWhereForwardsToWrapOnWhereInJoinedMode(): void
     {
         // A scope attached to a joined loader gets a QueryBuilder with forward='onWhere'.
@@ -73,17 +73,16 @@ final class QueryBuilderTest
 
         // JOIN's ON tokens are now a single wrapped group.
         $onTokens = $tokens['join'][1]['on'];
-        \Testo\Assert::same($onTokens[0], ['AND', '(']);
-        \Testo\Assert::same($onTokens[\count($onTokens) - 1], ['', ')']);
+        Assert::same($onTokens[0], ['AND', '(']);
+        Assert::same($onTokens[\count($onTokens) - 1], ['', ')']);
 
         // Top-level WHERE is untouched — no extra parenthesizing on the user's clause.
         $whereTokens = $tokens['where'];
-        \Testo\Assert::count($whereTokens, 1);
-        \Testo\Assert::same($whereTokens[0][0], 'AND');
-        \Testo\Assert::same($whereTokens[0][1][0], 'users.active');
+        Assert::count($whereTokens, 1);
+        Assert::same($whereTokens[0][0], 'AND');
+        Assert::same($whereTokens[0][1][0], 'users.active');
     }
 
-    #[\Testo\Test]
     public function testWrapWhereWithoutForwardTargetsRootWhere(): void
     {
         // Counter-case: without forwarding (root scope), wrapWhere wraps the
@@ -104,14 +103,14 @@ final class QueryBuilderTest
 
         // WHERE tokens are wrapped.
         $whereTokens = $tokens['where'];
-        \Testo\Assert::same($whereTokens[0], ['AND', '(']);
-        \Testo\Assert::same($whereTokens[\count($whereTokens) - 1], ['', ')']);
+        Assert::same($whereTokens[0], ['AND', '(']);
+        Assert::same($whereTokens[\count($whereTokens) - 1], ['', ')']);
 
         // JOIN ON tokens are NOT wrapped — they still start with the plain join key.
         $onTokens = $tokens['join'][1]['on'];
-        \Testo\Assert::same($onTokens[0][0], 'AND');
+        Assert::same($onTokens[0][0], 'AND');
         // First token's payload is the [column, operator, value] triplet, not the opening paren.
-        \Testo\Assert::array($onTokens[0][1]);
+        Assert::array($onTokens[0][1]);
     }
 
     private function makeBuilder(): QueryBuilder
@@ -122,5 +121,4 @@ final class QueryBuilderTest
 
         return new QueryBuilder($query, $loader);
     }
-
 }

@@ -9,11 +9,13 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserPersistRepository;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class PersistRepositoryTest extends OrmTestCase
+final class PersistRepositoryTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testPersist(): void
     {
         /** @var UserPersistRepository $users */
@@ -24,14 +26,14 @@ class PersistRepositoryTest extends OrmTestCase
         $u->email = 'test@email.com';
         $u->balance = 1000;
 
-        \Testo\Assert::null($u->id);
+        Assert::null($u->id);
 
         $users->save($u);
 
-        \Testo\Assert::notNull($u->id);
+        Assert::notNull($u->id);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

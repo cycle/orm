@@ -6,8 +6,11 @@ namespace Cycle\ORM\Tests\Regression\Issue431;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * BulkLoader with object primary keys and one-way typecast (CastableInterface only, no UncastableInterface).
@@ -16,9 +19,8 @@ use Cycle\Testing\Database\Assert\QueryAssert;
  * Post uses OneWayValueInterfaceTypecast → ValueInterfaceUuid (ValueInterface + Stringable,
  *   where rawValue() returns the DB string and __toString() returns a different format).
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
     private const USER_1 = '550e8400-e29b-41d4-a716-446655440001';
     private const USER_2 = '550e8400-e29b-41d4-a716-446655440002';
     private const USER_3 = '550e8400-e29b-41d4-a716-446655440003';
@@ -34,14 +36,15 @@ class CaseTest extends OrmTestCase
     // Stringable PK tests (User entity, StringableUuid)
     // =============================================
 
-    #[\Testo\Test]
+    #[Test]
     public function testStringablePk_HasMany(): void
     {
         $users = (new Select($this->orm, Entity\User::class))
             ->orderBy('login')
             ->fetchAll();
 
-        \Testo\Assert::count($users, 3);
+        Assert::count($users, 3);
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('posts')
@@ -49,29 +52,30 @@ class CaseTest extends OrmTestCase
         QueryAssert::reads(0, function () use (&$postCounts, $users): void {
             $postCounts = [];
             foreach ($users as $user) {
-                \Testo\Assert::instanceOf($user->id, Typecast\StringableUuid::class);
+                Assert::instanceOf($user->id, Typecast\StringableUuid::class);
                 $postCounts[$user->id->toString()] = \count($user->posts);
             }
         });
 
-        \Testo\Assert::same($postCounts[self::USER_1], 1);
-        \Testo\Assert::same($postCounts[self::USER_2], 2);
-        \Testo\Assert::same($postCounts[self::USER_3], 1);
+        Assert::same($postCounts[self::USER_1], 1);
+        Assert::same($postCounts[self::USER_2], 2);
+        Assert::same($postCounts[self::USER_3], 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testStringablePk_SingleEntity(): void
     {
         $user = (new Select($this->orm, Entity\User::class))
             ->where('login', 'user-2')
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($user, Entity\User::class);
+        Assert::instanceOf($user, Entity\User::class);
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect($user)
             ->load('posts')
             ->run());
-        QueryAssert::reads(0, fn() => \Testo\Assert::count($user->posts, 2));
+        QueryAssert::reads(0, fn() => Assert::count($user->posts, 2));
     }
 
     // =============================================
@@ -80,16 +84,16 @@ class CaseTest extends OrmTestCase
     // If BulkLoader incorrectly uses __toString(), indexing won't match DB data.
     // =============================================
 
-    #[\Testo\Test]
+    #[Test]
     public function testValueInterfacePk_HasMany(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->fetchAll();
 
-        \Testo\Assert::count($posts, 4);
+        Assert::count($posts, 4);
 
         foreach ($posts as $post) {
-            \Testo\Assert::instanceOf($post->id, Typecast\ValueInterfaceUuid::class);
+            Assert::instanceOf($post->id, Typecast\ValueInterfaceUuid::class);
         }
         QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
@@ -98,37 +102,39 @@ class CaseTest extends OrmTestCase
         // 1 comments + 1 eager comment.user
         QueryAssert::reads(0, function () use ($posts, &$post): void {
             foreach ($posts as $post) {
-                \Testo\Assert::array($post->comments);
+                Assert::array($post->comments);
             }
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testValueInterfacePk_BelongsTo(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->orderBy('title')
             ->fetchAll();
 
-        \Testo\Assert::count($posts, 4);
+        Assert::count($posts, 4);
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
             ->run());
         QueryAssert::reads(0, function () use ($posts): void {
             foreach ($posts as $post) {
-                \Testo\Assert::instanceOf($post->user, Entity\User::class);
+                Assert::instanceOf($post->user, Entity\User::class);
             }
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testValueInterfacePk_MultipleRelations(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->fetchAll();
 
-        \Testo\Assert::count($posts, 4);
+        Assert::count($posts, 4);
+
         QueryAssert::reads(3, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
@@ -137,8 +143,8 @@ class CaseTest extends OrmTestCase
         // 1 users + 1 comments + 1 eager comment.user
         QueryAssert::reads(0, function () use ($posts): void {
             foreach ($posts as $post) {
-                \Testo\Assert::instanceOf($post->user, Entity\User::class);
-                \Testo\Assert::array($post->comments);
+                Assert::instanceOf($post->user, Entity\User::class);
+                Assert::array($post->comments);
             }
         });
     }
@@ -147,26 +153,27 @@ class CaseTest extends OrmTestCase
     // Cross-type: BulkLoad comments, load lazy post (ValueInterfaceUuid FK)
     // =============================================
 
-    #[\Testo\Test]
+    #[Test]
     public function testStringablePk_BelongsToValueInterfaceEntity(): void
     {
         $comments = (new Select($this->orm, Entity\Comment::class))
             ->fetchAll();
 
-        \Testo\Assert::count($comments, 3);
+        Assert::count($comments, 3);
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$comments)
             ->load('post')
             ->run());
         QueryAssert::reads(0, function () use ($comments): void {
             foreach ($comments as $comment) {
-                \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
-                \Testo\Assert::instanceOf($comment->post->id, Typecast\ValueInterfaceUuid::class);
+                Assert::instanceOf($comment->post, Entity\Post::class);
+                Assert::instanceOf($comment->post->id, Typecast\ValueInterfaceUuid::class);
             }
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTables();

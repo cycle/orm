@@ -11,28 +11,32 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Options;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
-use Cycle\ORM\Relation\BulkLoader;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Core\Exception\SkipTest;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 class BelongsToRelationTest extends OrmTestCase
 {
-
     protected const NULLABLE = false;
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user')->orderBy('profile.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -66,7 +70,7 @@ class BelongsToRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchLimitAndSortByParent(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -78,7 +82,7 @@ class BelongsToRelationTest extends OrmTestCase
             ->orderBy('id', 'DESC')
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 3,
                 'user_id' => 2,
@@ -92,23 +96,23 @@ class BelongsToRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $data = $selector->with('user')->buildQuery()->fetchAll();
 
-        \Testo\Assert::count($data[0], 3);
+        Assert::count($data[0], 3);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user', ['method' => Select\JoinableLoader::INLOAD])
             ->orderBy('profile.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -142,29 +146,29 @@ class BelongsToRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAccessEntities(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user')->orderBy('profile.id');
         $result = $selector->fetchAll();
 
-        \Testo\Assert::instanceOf($result[0], Profile::class);
-        \Testo\Assert::instanceOf($result[0]->user, User::class);
-        \Testo\Assert::equals($result[0]->user->email, 'hello@world.com');
+        Assert::instanceOf($result[0], Profile::class);
+        Assert::instanceOf($result[0]->user, User::class);
+        Assert::equals($result[0]->user->email, 'hello@world.com');
 
-        \Testo\Assert::instanceOf($result[1], Profile::class);
-        \Testo\Assert::instanceOf($result[1]->user, User::class);
-        \Testo\Assert::equals($result[1]->user->email, 'another@world.com');
+        Assert::instanceOf($result[1], Profile::class);
+        Assert::instanceOf($result[1]->user, User::class);
+        Assert::equals($result[1]->user->email, 'another@world.com');
 
-        \Testo\Assert::instanceOf($result[2], Profile::class);
-        \Testo\Assert::instanceOf($result[2]->user, User::class);
-        \Testo\Assert::equals($result[2]->user->email, 'another@world.com');
+        Assert::instanceOf($result[2], Profile::class);
+        Assert::instanceOf($result[2]->user, User::class);
+        Assert::equals($result[2]->user->email, 'another@world.com');
 
-        \Testo\Assert::same($result[2]->user, $result[1]->user);
+        Assert::same($result[2]->user, $result[1]->user);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithRelations(): void
     {
         $u = new User();
@@ -177,21 +181,21 @@ class BelongsToRelationTest extends OrmTestCase
 
         $this->save($p);
 
-        \Testo\Assert::equals($u->id, 3);
-        \Testo\Assert::equals($p->id, 4);
+        Assert::equals($u->id, 3);
+        Assert::equals($p->id, 4);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($u));
-        \Testo\Assert::same($this->orm->getHeap()->get($u)->getStatus(), Node::MANAGED);
+        Assert::true($this->orm->getHeap()->has($u));
+        Assert::same($this->orm->getHeap()->get($u)->getStatus(), Node::MANAGED);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($p));
-        \Testo\Assert::same($this->orm->getHeap()->get($p)->getStatus(), Node::MANAGED);
+        Assert::true($this->orm->getHeap()->has($p));
+        Assert::same($this->orm->getHeap()->get($p)->getStatus(), Node::MANAGED);
 
-        \Testo\Assert::same($this->orm->getHeap()->get($p)->getData()['user_id'], $u->id);
+        Assert::same($this->orm->getHeap()->get($p)->getData()['user_id'], $u->id);
 
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user');
 
-        \Testo\Assert::equals($selector->wherePK(4)->fetchData(), [
+        Assert::equals($selector->wherePK(4)->fetchData(), [
             [
                 'id' => 4,
                 'user_id' => 3,
@@ -205,7 +209,7 @@ class BelongsToRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWriteQueries(): void
     {
         $u = new User();
@@ -220,10 +224,11 @@ class BelongsToRelationTest extends OrmTestCase
 
         $this->orm = $this->orm->withHeap(new Heap());
         $p = (new Select($this->orm, Profile::class))->load('user')->wherePK(4)->fetchOne();
+
         QueryAssert::writes(0, fn() => $this->save($p));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSetExistedParent(): void
     {
         $s = new Select($this->orm, User::class);
@@ -237,18 +242,18 @@ class BelongsToRelationTest extends OrmTestCase
         $tr->persist($p);
         $tr->run();
 
-        \Testo\Assert::equals($u->id, 1);
-        \Testo\Assert::equals($p->id, 4);
+        Assert::equals($u->id, 1);
+        Assert::equals($p->id, 4);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($p));
-        \Testo\Assert::same($this->orm->getHeap()->get($p)->getStatus(), Node::MANAGED);
+        Assert::true($this->orm->getHeap()->has($p));
+        Assert::same($this->orm->getHeap()->get($p)->getStatus(), Node::MANAGED);
 
-        \Testo\Assert::same($this->orm->getHeap()->get($p)->getData()['user_id'], $u->id);
+        Assert::same($this->orm->getHeap()->get($p)->getData()['user_id'], $u->id);
 
         $selector = new Select($this->orm, Profile::class);
         $selector->load('user');
 
-        \Testo\Assert::equals($selector->wherePK(4)->fetchData(), [
+        Assert::equals($selector->wherePK(4)->fetchData(), [
             [
                 'id' => 4,
                 'user_id' => 1,
@@ -262,7 +267,7 @@ class BelongsToRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParent(): void
     {
         $s = new Select($this->orm, Profile::class);
@@ -277,7 +282,7 @@ class BelongsToRelationTest extends OrmTestCase
         $tr->persist($p);
         $tr->run();
 
-        \Testo\Assert::equals((new Select($this->orm, Profile::class))->load('user')->wherePK(
+        Assert::equals((new Select($this->orm, Profile::class))->load('user')->wherePK(
             1,
         )->fetchData(), [
             [
@@ -293,7 +298,7 @@ class BelongsToRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testExchangeParents(): void
     {
         /**
@@ -305,22 +310,24 @@ class BelongsToRelationTest extends OrmTestCase
             ->load('user')->fetchAll();
 
         [$a->user, $b->user] = [$b->user, $a->user];
+
         QueryAssert::writes(2, fn() => $this->save($a, $b));
+
         QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
             ->load('user')->fetchAll();
 
-        \Testo\Assert::same($a2->user->id, $a->user->id);
-        \Testo\Assert::same($b2->user->id, $b->user->id);
+        Assert::same($a2->user->id, $a->user->id);
+        Assert::same($b2->user->id, $b->user->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSetNullException(): void
     {
-        static::NULLABLE and (throw new \Testo\Core\Exception\SkipTest());
-        \Testo\Expect::exception(NullException::class);
+        static::NULLABLE and (throw new SkipTest());
+        Expect::exception(NullException::class);
 
         $s = new Select($this->orm, Profile::class);
         $p = $s->wherePK(1)->load('user')->fetchOne();
@@ -336,7 +343,7 @@ class BelongsToRelationTest extends OrmTestCase
         }
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNested(): void
     {
         $n = new Nested();
@@ -346,17 +353,19 @@ class BelongsToRelationTest extends OrmTestCase
         $n->profile->user = new User();
         $n->profile->user->email = 'new@email.com';
         $n->profile->user->balance = 999;
+
         QueryAssert::writes(3, fn() => $this->save($n));
+
         QueryAssert::writes(0, fn() => $this->save($n));
 
         $n = (new Select($this->orm->withHeap(new Heap()), Nested::class))
             ->wherePK(2)->load('profile.user')->fetchOne();
 
-        \Testo\Assert::same($n->profile->image, 'profile');
-        \Testo\Assert::same($n->profile->user->email, 'new@email.com');
+        Assert::same($n->profile->image, 'profile');
+        Assert::same($n->profile->user->email, 'new@email.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereNested(): void
     {
         $s = new Select($this->orm, Nested::class);
@@ -364,10 +373,10 @@ class BelongsToRelationTest extends OrmTestCase
             ->where('profile.user.id', 1)
             ->fetchOne();
 
-        \Testo\Assert::same($n->label, 'nested-label');
+        Assert::same($n->label, 'nested-label');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereNestedWithAlias(): void
     {
         $s = new Select($this->orm, Nested::class);
@@ -376,13 +385,13 @@ class BelongsToRelationTest extends OrmTestCase
             ->where('u.id', 1)
             ->fetchOne();
 
-        \Testo\Assert::same($n->label, 'nested-label');
+        Assert::same($n->label, 'nested-label');
     }
 
     /**
      * If relation property was unset - ignore this field
      */
-    #[\Testo\Test]
+    #[Test]
     public function testUnsetProperty(): void
     {
         /** @var Profile $profile */
@@ -390,13 +399,14 @@ class BelongsToRelationTest extends OrmTestCase
             ->wherePK(1)->load('user')->fetchOne();
 
         unset($profile->user);
+
         QueryAssert::writes(0, fn() => $this->save($profile));
     }
 
     /**
      * If non-nullable relation property was unset - throw NullException
      */
-    #[\Testo\Test]
+    #[Test]
     public function testUnsetPropertyWithoutIgnoreUninitializedRelations(): void
     {
         $this->orm = $this->orm->with(options: (new Options())->withIgnoreUninitializedRelations(false));
@@ -405,31 +415,33 @@ class BelongsToRelationTest extends OrmTestCase
             ->wherePK(1)->load('user')->fetchOne();
 
         unset($profile->user);
-        \Testo\Expect::exception(NullException::class);
+        Expect::exception(NullException::class);
 
         $log = $this->context->queryLog();
         $writes = $log->countWrites();
         try {
             $this->save($profile);
         } finally {
-            \Testo\Assert::same($log->countWrites() - $writes, 0);
+            Assert::same($log->countWrites() - $writes, 0);
         }
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateRelation(): void
     {
         $profiles = QueryAssert::reads(1, fn() => (new Select($this->orm, Profile::class))->fetchAll());
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$profiles)->load('user')->run());
+
         QueryAssert::reads(0, function () use ($profiles): void {
             foreach ($profiles as $profile) {
                 $profile->user; // force loading
-                static::NULLABLE or \Testo\Assert::notNull($profile->user);
+                static::NULLABLE or Assert::notNull($profile->user);
             }
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

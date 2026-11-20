@@ -6,23 +6,25 @@ namespace Cycle\ORM\Tests\Regression\Issue428;
 
 use Cycle\ORM\Select;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         // Get entity
         $post = (new Select($this->orm, Entity\Post::class))->fetchOne();
 
         // Check result
-        \Testo\Assert::instanceOf($post, Entity\Post::class);
-        \Testo\Assert::instanceOf($post->best_comment, Entity\Comment::class);
-        \Testo\Assert::same($post->best_comment->id, 2);
+        Assert::instanceOf($post, Entity\Post::class);
+        Assert::instanceOf($post->best_comment, Entity\Comment::class);
+        Assert::same($post->best_comment->id, 2);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         // Get entity
@@ -42,10 +44,10 @@ class CaseTest extends OrmTestCase
         $this->orm->getHeap()->clean();
 
         $post = (new Select($this->orm, Entity\Post::class))->where(['id' => $post->id])->fetchOne();
-        \Testo\Assert::same($post->best_comment_id, 42);
+        Assert::same($post->best_comment_id, 42);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

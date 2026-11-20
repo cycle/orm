@@ -13,11 +13,13 @@ use Cycle\ORM\Select\Options\LoadMethod;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class BelongsToLoadOptionsTest extends OrmTestCase
+final class BelongsToLoadOptionsTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -25,7 +27,7 @@ class BelongsToLoadOptionsTest extends OrmTestCase
             method: LoadMethod::SingleQuery,
         ))->orderBy('profile.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -59,7 +61,7 @@ class BelongsToLoadOptionsTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -67,7 +69,7 @@ class BelongsToLoadOptionsTest extends OrmTestCase
             method: LoadMethod::OuterQuery,
         ))->orderBy('profile.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -101,7 +103,7 @@ class BelongsToLoadOptionsTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithUsing(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -114,7 +116,7 @@ class BelongsToLoadOptionsTest extends OrmTestCase
             ->orderBy('id', 'DESC')
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 3,
                 'user_id' => 2,
@@ -128,7 +130,7 @@ class BelongsToLoadOptionsTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithDefaultOptions(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -136,13 +138,13 @@ class BelongsToLoadOptionsTest extends OrmTestCase
 
         $res = $selector->fetchAll();
 
-        \Testo\Assert::count($res, 3);
-        \Testo\Assert::same($res[0]->user->email, 'hello@world.com');
-        \Testo\Assert::same($res[1]->user->email, 'another@world.com');
-        \Testo\Assert::same($res[2]->user->email, 'another@world.com');
+        Assert::count($res, 3);
+        Assert::same($res[0]->user->email, 'hello@world.com');
+        Assert::same($res[1]->user->email, 'another@world.com');
+        Assert::same($res[2]->user->email, 'another@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('user_archive', [
@@ -163,13 +165,13 @@ class BelongsToLoadOptionsTest extends OrmTestCase
             table: 'user_archive',
         ))->orderBy('profile.id')->fetchAll();
 
-        \Testo\Assert::count($res, 3);
-        \Testo\Assert::same($res[0]->user->email, 'archived@world.com');
-        \Testo\Assert::same($res[1]->user->email, 'archived2@world.com');
-        \Testo\Assert::same($res[2]->user->email, 'archived2@world.com');
+        Assert::count($res, 3);
+        Assert::same($res[0]->user->email, 'archived@world.com');
+        Assert::same($res[1]->user->email, 'archived2@world.com');
+        Assert::same($res[2]->user->email, 'archived2@world.com');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

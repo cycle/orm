@@ -8,12 +8,13 @@ use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\DatabaseManager;
 use Cycle\Testing\ORM\OrmFactory;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function test1WithClean(): void
     {
         $user = new Entity\User('test', 'test');
@@ -22,10 +23,10 @@ class CaseTest extends OrmTestCase
         $this->orm->getHeap()->clean();
         $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
 
-        \Testo\Assert::equals($get_user->id, $user->id);
+        Assert::equals($get_user->id, $user->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function test2WithoutClean(): void
     {
         $user = new Entity\User('test', 'test');
@@ -33,10 +34,10 @@ class CaseTest extends OrmTestCase
 
         $get_user = $this->orm->getRepository(Entity\User::class)->findByPK($user->id);
 
-        \Testo\Assert::equals($get_user->id, $user->id);
+        Assert::equals($get_user->id, $user->id);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // A connection that keeps microseconds in datetime values

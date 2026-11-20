@@ -12,47 +12,56 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookStates;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 final class ObjectsCompareTest extends OrmTestCase
 {
-    #[\Testo\Test]
+    #[Test]
     public function testCompare(): void
     {
         $book = new Book();
         $book->states = new BookStates(['foo']);
         $book->nested_states = new BookNestedStates(['bar']);
+
         QueryAssert::writes(1, fn() => $this->save($book));
+
         QueryAssert::writes(0, fn() => $this->save($book));
 
-        \Testo\Assert::equals($book->id, 1);
+        Assert::equals($book->id, 1);
 
         $this->orm->getHeap()->clean();
         $fetched = (new Select($this->orm, Book::class))->fetchOne();
 
-        \Testo\Assert::equals($book->states, $fetched->states);
-        \Testo\Assert::equals($book->nested_states, $fetched->nested_states);
+        Assert::equals($book->states, $fetched->states);
+        Assert::equals($book->nested_states, $fetched->nested_states);
 
         $fetched->states->states = ['foo', 'bar'];
         $fetched->nested_states->states[0]->title = 'baz';
+
         QueryAssert::writes(1, fn() => $this->save($fetched));
+
         QueryAssert::writes(0, fn() => $this->save($fetched));
 
         $this->orm->getHeap()->clean();
         $changed = (new Select($this->orm, Book::class))->fetchOne();
 
-        \Testo\Assert::equals($changed->states, $fetched->states);
-        \Testo\Assert::equals($changed->nested_states, $fetched->nested_states);
+        Assert::equals($changed->states, $fetched->states);
+        Assert::equals($changed->nested_states, $fetched->nested_states);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCompareDateTime(): void
     {
         $book = new Book();
         $book->states = new BookStates(['foo']);
         $book->nested_states = new BookNestedStates(['bar']);
+
         QueryAssert::writes(1, fn() => $this->save($book));
+
         QueryAssert::writes(0, fn() => $this->save($book));
 
         $this->orm->getHeap()->clean();
@@ -61,7 +70,9 @@ final class ObjectsCompareTest extends OrmTestCase
 
         $fetched = $this->orm->make('book', $data[0], Node::MANAGED, typecast: false);
         $fetched->published_at->setDate(2010, 1, 1);
+
         QueryAssert::writes(1, fn() => $this->save($fetched));
+
         QueryAssert::writes(0, fn() => $this->save($fetched));
 
         $this->orm->getHeap()->clean();
@@ -69,13 +80,13 @@ final class ObjectsCompareTest extends OrmTestCase
 
         $interval = $changed->published_at->diff($fetched->published_at);
 
-        \Testo\Assert::instanceOf($interval, \DateInterval::class);
-        \Testo\Assert::same($interval->y, 0);
-        \Testo\Assert::same($interval->m, 0);
-        \Testo\Assert::same($interval->d, 0);
+        Assert::instanceOf($interval, \DateInterval::class);
+        Assert::same($interval->y, 0);
+        Assert::same($interval->m, 0);
+        Assert::same($interval->d, 0);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('book', [

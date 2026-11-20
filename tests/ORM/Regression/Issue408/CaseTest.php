@@ -7,11 +7,13 @@ namespace Cycle\ORM\Tests\Regression\Issue408;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Issue408\Entity\TargetGroup;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelectHasMany(): void
     {
         // Get entity
@@ -20,10 +22,10 @@ class CaseTest extends OrmTestCase
             ->where('id', 1)
             ->fetchOne();
 
-        \Testo\Assert::count($group->getTargets(), 3);
+        Assert::count($group->getTargets(), 3);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectManyManyToMany(): void
     {
         // Get entity
@@ -32,10 +34,10 @@ class CaseTest extends OrmTestCase
             ->where('id', 1)
             ->fetchOne();
 
-        \Testo\Assert::count($group->getManyTargets(), 2);
+        Assert::count($group->getManyTargets(), 2);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

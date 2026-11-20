@@ -13,32 +13,34 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\Database\Driver;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
 use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class JsonMethodsTest extends OrmTestCase
+final class JsonMethodsTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJson(): void
     {
         $selector = new Select($this->orm, User::class);
         $user = $selector->whereJson('settings->theme', 'light')->fetchOne();
 
-        \Testo\Assert::same($user->id, 2);
-        \Testo\Assert::equals($user->settings, ['theme' => 'light']);
+        Assert::same($user->id, 2);
+        Assert::equals($user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
         $post = $selector->whereJson('user.settings->theme', 'light')->fetchOne();
 
-        \Testo\Assert::same($post->id, 2);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'light']);
+        Assert::same($post->id, 2);
+        Assert::equals($post->user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJson(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -47,11 +49,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJson('settings->theme', 'light')
             ->fetchOne();
 
-        \Testo\Assert::same($user->id, 2);
-        \Testo\Assert::equals($user->settings, ['theme' => 'light']);
+        Assert::same($user->id, 2);
+        Assert::equals($user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
@@ -60,11 +62,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJson('user.settings->theme', 'light')
             ->fetchOne();
 
-        \Testo\Assert::same($post->id, 2);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'light']);
+        Assert::same($post->id, 2);
+        Assert::equals($post->user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonContains(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -72,11 +74,11 @@ class JsonMethodsTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $users = $selector->whereJsonContains('settings->foo', ['bar', 'baz'])->fetchAll();
 
-        \Testo\Assert::same($users[0]->id, 1);
-        \Testo\Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($users[0]->id, 1);
+        Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonContainsWithRelation(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -84,11 +86,11 @@ class JsonMethodsTest extends OrmTestCase
         $selector = new Select($this->orm, Post::class);
         $posts = $selector->whereJsonContains('user.settings->foo', ['bar', 'baz'])->fetchAll();
 
-        \Testo\Assert::same($posts[0]->id, 1);
-        \Testo\Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($posts[0]->id, 1);
+        Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonContains(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -99,11 +101,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonContains('user.settings->foo', ['bar', 'baz'])
             ->fetchAll();
 
-        \Testo\Assert::same($users[0]->id, 1);
-        \Testo\Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($users[0]->id, 1);
+        Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonContainsWithRelation(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -114,11 +116,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonContains('user.settings->foo', ['bar', 'baz'])
             ->fetchAll();
 
-        \Testo\Assert::same($posts[0]->id, 1);
-        \Testo\Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($posts[0]->id, 1);
+        Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonDoesntContain(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -126,11 +128,11 @@ class JsonMethodsTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $users = $selector->whereJsonDoesntContain('settings->theme', 'light')->fetchAll();
 
-        \Testo\Assert::same($users[0]->id, 1);
-        \Testo\Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($users[0]->id, 1);
+        Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonDoesntContainWithRelation(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -138,11 +140,11 @@ class JsonMethodsTest extends OrmTestCase
         $selector = new Select($this->orm, Post::class);
         $posts = $selector->whereJsonDoesntContain('user.settings->theme', 'light')->fetchAll();
 
-        \Testo\Assert::same($posts[0]->id, 1);
-        \Testo\Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($posts[0]->id, 1);
+        Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonDoesntContain(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -153,11 +155,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonDoesntContain('settings->theme', 'light')
             ->fetchAll();
 
-        \Testo\Assert::same($users[0]->id, 1);
-        \Testo\Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($users[0]->id, 1);
+        Assert::equals($users[0]->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonDoesntContainWithRelation(): void
     {
         $this->expectDriverExceptionOnSQLite();
@@ -168,31 +170,31 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonDoesntContain('user.settings->theme', 'light')
             ->fetchAll();
 
-        \Testo\Assert::same($posts[0]->id, 1);
-        \Testo\Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($posts[0]->id, 1);
+        Assert::equals($posts[0]->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonContainsKey(): void
     {
         $selector = new Select($this->orm, User::class);
         $user = $selector->whereJsonContainsKey('settings->foo')->fetchOne();
 
-        \Testo\Assert::same($user->id, 1);
-        \Testo\Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($user->id, 1);
+        Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonContainsKeyWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
         $post = $selector->whereJsonContainsKey('user.settings->foo')->fetchOne();
 
-        \Testo\Assert::same($post->id, 1);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($post->id, 1);
+        Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonContainsKey(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -201,11 +203,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonContainsKey('settings->foo')
             ->fetchOne();
 
-        \Testo\Assert::same($user->id, 1);
-        \Testo\Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($user->id, 1);
+        Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonContainsKeyWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
@@ -214,31 +216,31 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonContainsKey('user.settings->foo')
             ->fetchOne();
 
-        \Testo\Assert::same($post->id, 1);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($post->id, 1);
+        Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonDoesntContainKey(): void
     {
         $selector = new Select($this->orm, User::class);
         $user = $selector->whereJsonDoesntContainKey('settings->foo')->fetchOne();
 
-        \Testo\Assert::same($user->id, 2);
-        \Testo\Assert::equals($user->settings, ['theme' => 'light']);
+        Assert::same($user->id, 2);
+        Assert::equals($user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonDoesntContainKeyWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
         $post = $selector->whereJsonDoesntContainKey('user.settings->foo')->fetchOne();
 
-        \Testo\Assert::same($post->id, 2);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'light']);
+        Assert::same($post->id, 2);
+        Assert::equals($post->user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonDoesntContainKey(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -247,11 +249,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonDoesntContainKey('settings->foo')
             ->fetchOne();
 
-        \Testo\Assert::same($user->id, 2);
-        \Testo\Assert::equals($user->settings, ['theme' => 'light']);
+        Assert::same($user->id, 2);
+        Assert::equals($user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonDoesntContainKeyWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
@@ -260,31 +262,31 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonDoesntContainKey('user.settings->foo')
             ->fetchOne();
 
-        \Testo\Assert::same($post->id, 2);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'light']);
+        Assert::same($post->id, 2);
+        Assert::equals($post->user->settings, ['theme' => 'light']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonLength(): void
     {
         $selector = new Select($this->orm, User::class);
         $user = $selector->whereJsonLength('settings->foo', 2)->fetchOne();
 
-        \Testo\Assert::same($user->id, 1);
-        \Testo\Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($user->id, 1);
+        Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWhereJsonLengthWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
         $post = $selector->whereJsonLength('user.settings->foo', 2)->fetchOne();
 
-        \Testo\Assert::same($post->id, 1);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($post->id, 1);
+        Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonLength(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -293,11 +295,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonLength('settings->foo', 2)
             ->fetchOne();
 
-        \Testo\Assert::same($user->id, 1);
-        \Testo\Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($user->id, 1);
+        Assert::equals($user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrWhereJsonLengthWithRelation(): void
     {
         $selector = new Select($this->orm, Post::class);
@@ -306,11 +308,11 @@ class JsonMethodsTest extends OrmTestCase
             ->orWhereJsonLength('user.settings->foo', 2)
             ->fetchOne();
 
-        \Testo\Assert::same($post->id, 1);
-        \Testo\Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
+        Assert::same($post->id, 1);
+        Assert::equals($post->user->settings, ['theme' => 'dark', 'foo' => ['bar', 'baz']]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('users', ['id' => 'primary', 'user_settings' => 'json,nullable']);

@@ -14,19 +14,21 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HasManyProxyMapperTest extends OrmTestCase
+final class HasManyProxyMapperTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -58,21 +60,22 @@ class HasManyProxyMapperTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPromised(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
         $uData = $this->extractEntity($u);
 
-        \Testo\Assert::instanceOf($uData['comments'], ReferenceInterface::class);
+        Assert::instanceOf($uData['comments'], ReferenceInterface::class);
+
         QueryAssert::reads(1, function () use ($u): void {
-            \Testo\Assert::count($u->comments, 3);
-            \Testo\Assert::instanceOf($u->comments[0], Comment::class);
+            Assert::count($u->comments, 3);
+            Assert::instanceOf($u->comments[0], Comment::class);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHasManyPromiseLoaded(): void
     {
         /** @var User $u */
@@ -80,69 +83,76 @@ class HasManyProxyMapperTest extends OrmTestCase
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
 
-        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($r, ReferenceInterface::class));
+        QueryAssert::reads(0, fn() => Assert::instanceOf($r, ReferenceInterface::class));
 
-        \Testo\Assert::false($r->hasValue());
-        QueryAssert::reads(1, fn() => \Testo\Assert::iterable($u->comments));
-        \Testo\Assert::true($r->hasValue());
+        Assert::false($r->hasValue());
+
+        QueryAssert::reads(1, fn() => Assert::iterable($u->comments));
+
+        Assert::true($r->hasValue());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHasManyPromiseRole(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
-        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($r, ReferenceInterface::class));
 
-        \Testo\Assert::same($r->getRole(), 'comment');
+        QueryAssert::reads(0, fn() => Assert::instanceOf($r, ReferenceInterface::class));
+
+        Assert::same($r->getRole(), 'comment');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHasManyPromiseScope(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
-        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($r, ReferenceInterface::class));
 
-        \Testo\Assert::equals($r->getScope(), [
+        QueryAssert::reads(0, fn() => Assert::instanceOf($r, ReferenceInterface::class));
+
+        Assert::equals($r->getScope(), [
             'user_id' => 1,
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPromisedEmpty(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->wherePK(2)->fetchOne();
         $uData = $this->extractEntity($u);
         $r = $uData['comments'];
+
         QueryAssert::reads(1, function () use ($r, $u): void {
-            \Testo\Assert::instanceOf($r, ReferenceInterface::class);
-            \Testo\Assert::count($u->comments, 0);
+            Assert::instanceOf($r, ReferenceInterface::class);
+            Assert::count($u->comments, 0);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoChanges(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+
         QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoChangesWithNoChildren(): void
     {
         $u = (new Select($this->orm, User::class))
             ->wherePK(2)->fetchOne();
+
         QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -157,13 +167,13 @@ class HasManyProxyMapperTest extends OrmTestCase
         /** @var User $e */
         $e = (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne();
 
-        \Testo\Assert::count($e->comments, 2);
+        Assert::count($e->comments, 2);
 
-        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
+        Assert::same($e->comments[0]->message, 'msg 1');
+        Assert::same($e->comments[1]->message, 'msg 3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAddAndRemoveChildren(): void
     {
         /** @var User $e */
@@ -181,14 +191,14 @@ class HasManyProxyMapperTest extends OrmTestCase
         /** @var User $e */
         $e = (new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne();
 
-        \Testo\Assert::count($e->comments, 3);
+        Assert::count($e->comments, 3);
 
-        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($e->comments[2]->message, 'msg 4');
+        Assert::same($e->comments[0]->message, 'msg 1');
+        Assert::same($e->comments[1]->message, 'msg 3');
+        Assert::same($e->comments[2]->message, 'msg 4');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSliceAndSaveToAnotherParent(): void
     {
         /**
@@ -197,8 +207,8 @@ class HasManyProxyMapperTest extends OrmTestCase
          */
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 0);
 
         $b->comments = $a->comments->slice(0, 2);
         foreach ($b->comments as $c) {
@@ -207,9 +217,11 @@ class HasManyProxyMapperTest extends OrmTestCase
 
         $b->comments[0]->message = 'new b';
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 2);
+
         QueryAssert::writes(2, fn() => $this->save($a, $b));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($a, $b));
 
@@ -223,17 +235,17 @@ class HasManyProxyMapperTest extends OrmTestCase
                 'as' => 'comment',
             ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::equals($a->comments[0]->id, 3);
-        \Testo\Assert::equals($b->comments[0]->id, 1);
-        \Testo\Assert::equals($b->comments[1]->id, 2);
+        Assert::equals($a->comments[0]->id, 3);
+        Assert::equals($b->comments[0]->id, 1);
+        Assert::equals($b->comments[1]->id, 2);
 
-        \Testo\Assert::equals($b->comments[0]->message, 'new b');
+        Assert::equals($b->comments[0]->message, 'new b');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

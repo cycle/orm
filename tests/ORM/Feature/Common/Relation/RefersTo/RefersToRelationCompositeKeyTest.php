@@ -13,16 +13,19 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class RefersToRelationCompositeKeyTest extends OrmTestCase
+final class RefersToRelationCompositeKeyTest extends OrmTestCase
 {
-
     protected const CHILD_CONTAINER = 'child_entity';
     protected const CHILDREN_CONTAINER = 'children';
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateParentWithDoubleReference(): void
     {
         $u = new CompositePK();
@@ -37,6 +40,7 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = $c;
         $u->children->add($c);
+
         QueryAssert::writes(3, fn() => $this->save($u));
 
         $u = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -46,13 +50,13 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->fetchOne();
 
         /** @var CompositePK $u */
-        \Testo\Assert::same($c->key1, $u->child_key1);
-        \Testo\Assert::same($c->key2, $u->child_key2);
-        \Testo\Assert::notNull($u->child_entity);
-        \Testo\Assert::same($u->children[0], $u->child_entity);
+        Assert::same($c->key1, $u->child_key1);
+        Assert::same($c->key2, $u->child_key2);
+        Assert::notNull($u->child_entity);
+        Assert::same($u->children[0], $u->child_entity);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateParentPKWithDoubleReference(): void
     {
         $p = new CompositePK();
@@ -72,7 +76,9 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
         // Link Child with Parent
         $p->child_entity = $c;
         $p->children->add($c);
+
         QueryAssert::writes(3, fn() => $this->save($p));
+
         QueryAssert::writes(0, fn() => $this->save($p));
 
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -80,14 +86,14 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->load(self::CHILDREN_CONTAINER)
             ->fetchAll();
 
-        \Testo\Assert::count($data, 1);
-        \Testo\Assert::same($c->key1, $data[0]->child_key1);
-        \Testo\Assert::same($c->key2, $data[0]->child_key2);
-        \Testo\Assert::notNull($data[0]->child_entity);
-        \Testo\Assert::same($data[0]->children[0], $data[0]->child_entity);
+        Assert::count($data, 1);
+        Assert::same($c->key1, $data[0]->child_key1);
+        Assert::same($c->key2, $data[0]->child_key2);
+        Assert::notNull($data[0]->child_entity);
+        Assert::same($data[0]->children[0], $data[0]->child_entity);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateParentToExistedReference(): void
     {
         $u = new CompositePK();
@@ -102,7 +108,9 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = $c;
         $u->children->add($c);
+
         QueryAssert::writes(3, fn() => $this->save($u));
+
         QueryAssert::writes(0, fn() => $this->save($u));
 
         $u2 = new CompositePK();
@@ -110,7 +118,9 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
         $u2->key2 = 301;
         $u2->key3 = 303;
         $u2->child_entity = $c;
+
         QueryAssert::writes(1, fn() => $this->save($u2));
+
         QueryAssert::writes(0, fn() => $this->save($u2));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -119,12 +129,12 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->wherePK([300, 301])
             ->fetchOne();
 
-        \Testo\Assert::notNull($u3->child_entity);
-        \Testo\Assert::equals($u->children[0]->key1, $u3->child_entity->key1);
-        \Testo\Assert::equals($u->children[0]->key2, $u3->child_entity->key2);
+        Assert::notNull($u3->child_entity);
+        Assert::equals($u->children[0]->key1, $u3->child_entity->key1);
+        Assert::equals($u->children[0]->key2, $u3->child_entity->key2);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWhenParentExists(): void
     {
         $u = new CompositePK();
@@ -141,6 +151,7 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
 
         $u->child_entity = $c;
         $u->children->add($c);
+
         QueryAssert::writes(2, fn() => (new Transaction($this->orm))->persist($u)->run());
 
         $s = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
@@ -149,14 +160,14 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->wherePK([900, 901])
             ->fetchOne();
 
-        \Testo\Assert::notNull($u->child_entity);
-        \Testo\Assert::same($u->children[0], $u->child_entity);
+        Assert::notNull($u->child_entity);
+        Assert::same($u->children[0], $u->child_entity);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithoutProperDependency(): void
     {
-        \Testo\Expect::exception(TransactionException::class);
+        Expect::exception(TransactionException::class);
 
         $u = new CompositePK();
         $u->key1 = 900;
@@ -178,7 +189,7 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
         }
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAssignParentAsUpdate(): void
     {
         $u = new CompositePK();
@@ -201,8 +212,8 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->wherePK([900, 901])
             ->fetchOne();
 
-        \Testo\Assert::null($u->child_entity);
-        \Testo\Assert::count($u->children, 1);
+        Assert::null($u->child_entity);
+        Assert::count($u->children, 1);
 
         $u->child_entity = $u->children[0];
 
@@ -214,12 +225,12 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->wherePK([900, 901])
             ->fetchOne();
 
-        \Testo\Assert::notNull($u->child_entity);
-        \Testo\Assert::count($u->children, 1);
-        \Testo\Assert::same($u->children[0], $u->child_entity);
+        Assert::notNull($u->child_entity);
+        Assert::count($u->children, 1);
+        Assert::same($u->children[0], $u->child_entity);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSetNull(): void
     {
         $u = new CompositePK();
@@ -233,6 +244,7 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
         $c->key3 = 'last comment';
         $u->child_entity = $c;
         $u->children->add($c);
+
         QueryAssert::writes(3, fn() => (new Transaction($this->orm))->persist($u)->run());
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -242,11 +254,12 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->wherePK([900, 901])
             ->fetchOne();
 
-        \Testo\Assert::notNull($u->child_entity);
-        \Testo\Assert::count($u->children, 1);
-        \Testo\Assert::same($u->children[0], $u->child_entity);
+        Assert::notNull($u->child_entity);
+        Assert::count($u->children, 1);
+        Assert::same($u->children[0], $u->child_entity);
 
         $u->child_entity = null;
+
         QueryAssert::writes(1, fn() => (new Transaction($this->orm))->persist($u)->run());
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -257,11 +270,11 @@ class RefersToRelationCompositeKeyTest extends OrmTestCase
             ->wherePK([900, 901])
             ->fetchOne();
 
-        \Testo\Assert::null($u->child_entity);
-        \Testo\Assert::count($u->children, 1);
+        Assert::null($u->child_entity);
+        Assert::count($u->children, 1);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable(

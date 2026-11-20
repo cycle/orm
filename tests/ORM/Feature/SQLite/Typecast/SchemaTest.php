@@ -21,8 +21,11 @@ use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Typecaster;
 use Cycle\ORM\Tests\Util\SimpleFactory;
-use Spiral\Core\Container;
 use Cycle\Testing\ORM\OrmTestCase;
+use Spiral\Core\Container;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Test;
 
 final class SchemaTest extends OrmTestCase
 {
@@ -84,10 +87,10 @@ final class SchemaTest extends OrmTestCase
         );
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testEmptyStringShouldThrowAnException(): void
     {
-        \Testo\Expect::exception(FactoryTypecastException::class)->withMessageMatchingRegex('/Bad typecast handler declaration for the `book` role./');
+        Expect::exception(FactoryTypecastException::class)->withMessageMatchingRegex('/Bad typecast handler declaration for the `book` role./');
 
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => '',
@@ -96,19 +99,19 @@ final class SchemaTest extends OrmTestCase
         $this->getTypecast(self::PRIMARY_ROLE);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHandlerWithWrongInterfaceShouldThrowAnException(): void
     {
         $this->setUpOrm([
             SchemaInterface::TYPECAST_HANDLER => InvalidTypecaster::class,
         ]);
 
-        \Testo\Expect::exception(FactoryTypecastException::class)->withMessageContaining('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned');
+        Expect::exception(FactoryTypecastException::class)->withMessageContaining('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned');
 
         $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHandlerWithWrongInterfaceAmongArrayShouldThrowAnException(): void
     {
         $this->container = new Container();
@@ -120,12 +123,12 @@ final class SchemaTest extends OrmTestCase
             ],
         ]);
 
-        \Testo\Expect::exception(FactoryTypecastException::class)->withMessageContaining('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned');
+        Expect::exception(FactoryTypecastException::class)->withMessageContaining('Bad typecast handler declaration for the `book` role. Cycle\ORM\Factory::makeTypecastHandler(): Return value must be of type Cycle\ORM\Parser\TypecastInterface, Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster returned');
 
         $this->orm->getService(TypecastProviderInterface::class)->getTypecast(self::PRIMARY_ROLE);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUseTypecastFromContainer(): void
     {
         $this->container = new Container();
@@ -136,10 +139,10 @@ final class SchemaTest extends OrmTestCase
         ]);
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
-        \Testo\Assert::same($typecast::class, Typecaster::class);
+        Assert::same($typecast::class, Typecaster::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUseTypecastAliasAsString(): void
     {
         $tc = new Typecaster(new Schema([]), self::PRIMARY_ROLE);
@@ -149,10 +152,10 @@ final class SchemaTest extends OrmTestCase
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        \Testo\Assert::same($typecast::class, Typecaster::class);
+        Assert::same($typecast::class, Typecaster::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUseTypecastClassAsString(): void
     {
         $options = ['id' => 'int', 'published_at' => 'datetime(d-m-Y-H-i-s-u)'];
@@ -164,12 +167,12 @@ final class SchemaTest extends OrmTestCase
         /** @var Typecaster $typecast */
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        \Testo\Assert::same($typecast::class, Typecaster::class);
-        \Testo\Assert::same($typecast->role, self::PRIMARY_ROLE);
-        \Testo\Assert::same($typecast->rules, $options);
+        Assert::same($typecast::class, Typecaster::class);
+        Assert::same($typecast->role, self::PRIMARY_ROLE);
+        Assert::same($typecast->rules, $options);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNullDefinitionAndEmptyRules(): void
     {
         $this->setUpOrm([
@@ -178,10 +181,10 @@ final class SchemaTest extends OrmTestCase
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        \Testo\Assert::null($typecast);
+        Assert::null($typecast);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testTypecastWithJti(): void
     {
         $this->setUpOrm();
@@ -190,15 +193,15 @@ final class SchemaTest extends OrmTestCase
         $bar = $this->getTypecast('bar');
         $baz = $this->getTypecast('baz');
 
-        \Testo\Assert::null($foo);
-        \Testo\Assert::same($bar::class, Typecast::class);
-        \Testo\Assert::same($baz::class, CompositeTypecast::class);
+        Assert::null($foo);
+        Assert::same($bar::class, Typecast::class);
+        Assert::same($baz::class, CompositeTypecast::class);
     }
 
     /**
      * @see CompositeTypecast::cast()
      */
-    #[\Testo\Test]
+    #[Test]
     public function testUseCompositeTypecast(): void
     {
         $containerTypecast = \Mockery::mock(CastableInterface::class)->shouldIgnoreMissing();
@@ -225,8 +228,8 @@ final class SchemaTest extends OrmTestCase
 
         $typecast = $this->getTypecast(self::PRIMARY_ROLE);
 
-        \Testo\Assert::same($typecast::class, CompositeTypecast::class);
-        \Testo\Assert::same($typecast->cast(['foo' => 'bar']), ['foo' => 'bar2']);
+        Assert::same($typecast::class, CompositeTypecast::class);
+        Assert::same($typecast->cast(['foo' => 'bar']), ['foo' => 'bar2']);
     }
 
     private function getTypecast(string $role): ?TypecastInterface

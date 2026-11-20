@@ -8,14 +8,16 @@ use Cycle\ORM\Tests\Regression\Case7\Entity\Post;
 use Cycle\ORM\Tests\Regression\Case7\Entity\PostTag;
 use Cycle\ORM\Tests\Regression\Case7\Entity\Tag;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * ManyToMany load=eager MUST load related entities.
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreatePostEntity(): void
     {
         // Create and save post
@@ -44,7 +46,7 @@ class CaseTest extends OrmTestCase
 
         // Get tag
         $tag = $this->orm->get(Tag::class, ['id' => 1]);
-        \Testo\Assert::same($tag->label, 'foo');
+        Assert::same($tag->label, 'foo');
 
         // Save PostTag
         $pt1 = $this->orm->make(PostTag::class);
@@ -63,10 +65,10 @@ class CaseTest extends OrmTestCase
          * @since ORM 2.10.0 EntityManager can fill only unresolved relations
          */
         $post = $this->orm->getRepository(Post::class)->findByPK($id);
-        \Testo\Assert::count($post->postTags, 1);
+        Assert::count($post->postTags, 1);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

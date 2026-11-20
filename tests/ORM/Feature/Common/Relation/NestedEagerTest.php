@@ -12,17 +12,19 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class NestedEagerTest extends OrmTestCase
+final class NestedEagerTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchEager(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('id', 'ASC');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -58,13 +60,13 @@ class NestedEagerTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchEagerReverse(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id', 'DESC');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 3,
                 'email' => 'third@world.com',
@@ -100,7 +102,7 @@ class NestedEagerTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable(

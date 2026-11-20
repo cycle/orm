@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Regression\Issue321;
 
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function test1(): void
     {
         $user = new Entity\User1();
@@ -19,7 +19,7 @@ class CaseTest extends OrmTestCase
         QueryAssert::writes(1, fn() => $this->save($user));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function test2(): void
     {
         $user = new Entity\User2();
@@ -27,14 +27,15 @@ class CaseTest extends OrmTestCase
         QueryAssert::writes(1, fn() => $this->save($user));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function test3(): void
     {
         $user = new Entity\User3();
+
         QueryAssert::writes(0, fn() => $this->save($user));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function test4(): void
     {
         $user = new Entity\User4();
@@ -44,7 +45,7 @@ class CaseTest extends OrmTestCase
         QueryAssert::writes(0, fn() => $this->save($user));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

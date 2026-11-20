@@ -12,16 +12,18 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class Eager2Test extends OrmTestCase
+final class Eager2Test extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchEager(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -35,15 +37,15 @@ class Eager2Test extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchEager2(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->where('profile.id', '>', 0);
 
-        \Testo\Assert::count($selector->buildQuery()->getColumns(), 3);
+        Assert::count($selector->buildQuery()->getColumns(), 3);
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -52,7 +54,7 @@ class Eager2Test extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

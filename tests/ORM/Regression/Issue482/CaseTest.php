@@ -7,13 +7,15 @@ namespace Cycle\ORM\Tests\Regression\Issue482;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Tests\Regression\Issue482\Entity\Country;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\SqlAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         $select = $this->orm->getRepository(Country::class)
@@ -62,8 +64,8 @@ class CaseTest extends OrmTestCase
         );
 
         $data = $select->fetchData();
-        \Testo\Assert::count($data, 3);
-        \Testo\Assert::equals(\array_column(
+        Assert::count($data, 3);
+        Assert::equals(\array_column(
             \array_merge(
                 ...\array_column($data, 'translations'),
             ),
@@ -75,10 +77,10 @@ class CaseTest extends OrmTestCase
         ]);
 
         $all = $select->fetchAll();
-        \Testo\Assert::count($all, 3);
-        \Testo\Assert::equals(\array_map(
+        Assert::count($all, 3);
+        Assert::equals(\array_map(
             static function (Country $c) {
-                \Testo\Assert::count($c->translations, 1);
+                Assert::count($c->translations, 1);
                 return $c->translations[0]->title;
             },
             $all,
@@ -89,7 +91,7 @@ class CaseTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

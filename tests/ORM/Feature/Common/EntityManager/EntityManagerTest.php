@@ -11,13 +11,16 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class EntityManagerTest extends OrmTestCase
+final class EntityManagerTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testClean(): void
     {
         $em = new EntityManager($this->orm);
@@ -35,15 +38,17 @@ class EntityManagerTest extends OrmTestCase
         $em->persist($entity2);
 
         $em->clean();
+
         QueryAssert::writes(0, function () use ($em): void {
             $result = $em->run();
-            \Testo\Assert::true($result->isSuccess());
+            Assert::true($result->isSuccess());
         });
-        \Testo\Assert::true($this->orm->getHeap()->has($entity0));
-        \Testo\Assert::true($this->orm->getHeap()->has($entity1));
+
+        Assert::true($this->orm->getHeap()->has($entity0));
+        Assert::true($this->orm->getHeap()->has($entity1));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCleanWithHeap(): void
     {
         $em = new EntityManager($this->orm);
@@ -61,19 +66,20 @@ class EntityManagerTest extends OrmTestCase
         $em->persist($entity2);
 
         $em->clean(true);
+
         QueryAssert::writes(0, function () use ($em): void {
             $result = $em->run();
-            \Testo\Assert::true($result->isSuccess());
+            Assert::true($result->isSuccess());
         });
 
-        \Testo\Assert::false($this->orm->getHeap()->has($entity0));
-        \Testo\Assert::false($this->orm->getHeap()->has($entity1));
+        Assert::false($this->orm->getHeap()->has($entity0));
+        Assert::false($this->orm->getHeap()->has($entity1));
     }
 
     /**
      * Deferred persisting should be calc changes after the `run()` method calling
      */
-    #[\Testo\Test]
+    #[Test]
     public function testPersistDeferred(): void
     {
         $em = new EntityManager($this->orm);
@@ -84,21 +90,22 @@ class EntityManagerTest extends OrmTestCase
 
         $em->persist($entity);
         $entity->title = 'changed title';
+
         QueryAssert::writes(1, function () use ($em): void {
             $result = $em->run();
-            \Testo\Assert::true($result->isSuccess());
+            Assert::true($result->isSuccess());
         });
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
 
-        \Testo\Assert::same($stored->title, 'changed title');
+        Assert::same($stored->title, 'changed title');
     }
 
     /**
      * Not deferred persisting should calc changes on entity when adding into transaction
      */
-    #[\Testo\Test]
+    #[Test]
     public function testPersistState(): void
     {
         $em = new EntityManager($this->orm);
@@ -109,20 +116,22 @@ class EntityManagerTest extends OrmTestCase
 
         $em->persistState($entity);
         $entity->title = 'changed title';
+
         QueryAssert::writes(1, function () use ($em): void {
             $result = $em->run();
-            \Testo\Assert::true($result->isSuccess());
+            Assert::true($result->isSuccess());
         });
-        \Testo\Assert::notNull($entity->id);
+
+        Assert::notNull($entity->id);
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
 
-        \Testo\Assert::same($stored->title, 'Test title');
-        \Testo\Assert::same($entity->title, 'changed title');
+        Assert::same($stored->title, 'Test title');
+        Assert::same($entity->title, 'changed title');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPersistStateTwiceAndChangeEntity(): void
     {
         $em = new EntityManager($this->orm);
@@ -135,19 +144,21 @@ class EntityManagerTest extends OrmTestCase
         $entity->title = 'Title 2';
         $em->persistState($entity);
         $entity->title = 'Title 3';
+
         QueryAssert::writes(1, function () use ($em): void {
             $result = $em->run();
-            \Testo\Assert::true($result->isSuccess());
+            Assert::true($result->isSuccess());
         });
-        \Testo\Assert::notNull($entity->id);
+
+        Assert::notNull($entity->id);
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
 
-        \Testo\Assert::same($stored->title, 'Title 2');
+        Assert::same($stored->title, 'Title 2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPersistStateTwiceAndChangeEntityWithStoredEntity(): void
     {
         $em = new EntityManager($this->orm);
@@ -162,22 +173,24 @@ class EntityManagerTest extends OrmTestCase
         $entity->title = 'Title 3';
         $em->persistState($entity);
         $entity->title = 'Title 4';
+
         QueryAssert::writes(1, function () use ($em): void {
             $result = $em->run();
-            \Testo\Assert::true($result->isSuccess());
+            Assert::true($result->isSuccess());
         });
-        \Testo\Assert::notNull($entity->id);
+
+        Assert::notNull($entity->id);
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
 
-        \Testo\Assert::same($stored->title, 'Title 3');
+        Assert::same($stored->title, 'Title 3');
     }
 
     /**
      * @link https://github.com/cycle/orm/issues/355
      */
-    #[\Testo\Test]
+    #[Test]
     public function testPersistStateTwice(): void
     {
         $em = new EntityManager($this->orm);
@@ -186,12 +199,15 @@ class EntityManagerTest extends OrmTestCase
             'title' => 'Test title',
             'content' => 'Test content',
         ]);
+
         QueryAssert::writes(1, fn() => $em->persistState($entity)->run());
-        \Testo\Assert::notNull($entity->id);
+
+        Assert::notNull($entity->id);
+
         QueryAssert::writes(0, fn() => $em->persistState($entity)->run());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRunException(): void
     {
         $em = new EntityManager($this->orm);
@@ -201,11 +217,11 @@ class EntityManagerTest extends OrmTestCase
 
         $em->persistState($entity);
 
-        \Testo\Expect::exception(ConstrainException::class);
+        Expect::exception(ConstrainException::class);
         $em->run();
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRunError(): void
     {
         $em = new EntityManager($this->orm);
@@ -217,11 +233,11 @@ class EntityManagerTest extends OrmTestCase
 
         $result = $em->run(false);
 
-        \Testo\Assert::false($result->isSuccess());
-        \Testo\Assert::instanceOf($result->getLastError(), ConstrainException::class);
+        Assert::false($result->isSuccess());
+        Assert::instanceOf($result->getLastError(), ConstrainException::class);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('post', [

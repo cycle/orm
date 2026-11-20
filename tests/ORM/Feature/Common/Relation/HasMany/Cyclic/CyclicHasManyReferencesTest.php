@@ -12,13 +12,15 @@ use Cycle\ORM\Tests\Fixtures\CyclicRef\Comment;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\Post;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\User;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CyclicHasManyReferencesTest extends OrmTestCase
+final class CyclicHasManyReferencesTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $u = new User();
@@ -33,7 +35,9 @@ class CyclicHasManyReferencesTest extends OrmTestCase
         $c->message = 'hello hello';
 
         $p->addComment($c);
+
         QueryAssert::writes(4, fn() => $this->save($p));
+
         // no changes!
         QueryAssert::writes(0, fn() => $this->save($u));
 
@@ -44,15 +48,15 @@ class CyclicHasManyReferencesTest extends OrmTestCase
 
         $p1 = $selector->wherePK(1)->fetchOne();
 
-        \Testo\Assert::equals($p1->id, $p->id);
-        \Testo\Assert::equals($p1->lastComment->id, $p->lastComment->id);
+        Assert::equals($p1->id, $p->id);
+        Assert::equals($p1->lastComment->id, $p->lastComment->id);
 
-        \Testo\Assert::equals($p1->lastComment->user->id, $p->lastComment->user->id);
-        \Testo\Assert::equals($p1->comments[0]->id, $p->comments[0]->id);
-        \Testo\Assert::equals($p1->comments[0]->post_id, $p1->id);
+        Assert::equals($p1->lastComment->user->id, $p->lastComment->user->id);
+        Assert::equals($p1->comments[0]->id, $p->comments[0]->id);
+        Assert::equals($p1->comments[0]->post_id, $p1->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testReferenceUpdate(): void
     {
         $u1 = new User();
@@ -75,6 +79,7 @@ class CyclicHasManyReferencesTest extends OrmTestCase
 
         $p->addComment($c1);
         $p->addComment($c2);
+
         QueryAssert::writes(6, fn() => $this->save($p));
 
         $c3 = new Comment();
@@ -82,6 +87,7 @@ class CyclicHasManyReferencesTest extends OrmTestCase
         $c3->message = 'hello again 2';
 
         $p->addComment($c3);
+
         QueryAssert::writes(2, fn() => $this->save($p));
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -96,13 +102,13 @@ class CyclicHasManyReferencesTest extends OrmTestCase
         sort($pCommentIds);
         sort($p1CommentIds);
 
-        \Testo\Assert::equals($c3->id, $p1->lastComment->id);
-        \Testo\Assert::equals($p1->lastComment->user->id, $p->lastComment->user->id);
-        \Testo\Assert::equals($p1CommentIds, $pCommentIds);
-        \Testo\Assert::equals($p1->comments[0]->post_id, $p1->id);
+        Assert::equals($c3->id, $p1->lastComment->id);
+        Assert::equals($p1->lastComment->user->id, $p->lastComment->user->id);
+        Assert::equals($p1CommentIds, $pCommentIds);
+        Assert::equals($p1->comments[0]->post_id, $p1->id);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

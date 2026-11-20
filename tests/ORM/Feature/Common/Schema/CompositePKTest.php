@@ -10,13 +10,16 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Expect;
+use Testo\Test;
 
-class CompositePKTest extends OrmTestCase
+final class CompositePKTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSimpleCreate(): void
     {
         $this->createTable1();
@@ -30,12 +33,12 @@ class CompositePKTest extends OrmTestCase
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->fetchData()[0];
 
-        \Testo\Assert::same($data['key1'], 1);
-        \Testo\Assert::same($data['key2'], 1);
-        \Testo\Assert::same($data['key3'], null);
+        Assert::same($data['key1'], 1);
+        Assert::same($data['key2'], 1);
+        Assert::same($data['key3'], null);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangePK(): void
     {
         $this->createTable1();
@@ -53,15 +56,16 @@ class CompositePKTest extends OrmTestCase
         $e->key1 = 2;
         $e->key2 = 3;
         $e->key3 = 9;
+
         QueryAssert::writes(1, fn() => $this->save($e));
 
         $e = (new Select($this->orm, CompositePK::class))
             ->fetchOne();
-        \Testo\Assert::same($e->key1, 2);
-        \Testo\Assert::same($e->key2, 3);
+        Assert::same($e->key1, 2);
+        Assert::same($e->key2, 3);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveCreated(): void
     {
         $this->createTable1();
@@ -79,10 +83,10 @@ class CompositePKTest extends OrmTestCase
             ->run();
 
         $data = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))->fetchData();
-        \Testo\Assert::same($data, []);
+        Assert::same($data, []);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithHalfSame(): void
     {
         $this->createTable1();
@@ -106,11 +110,11 @@ class CompositePKTest extends OrmTestCase
         $s = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
         $data = $s->fetchData();
 
-        \Testo\Assert::same(array_column($data, 'key1'), [1, 1, 2]);
-        \Testo\Assert::same(array_column($data, 'key2'), [1, 2, 1]);
+        Assert::same(array_column($data, 'key1'), [1, 1, 2]);
+        Assert::same(array_column($data, 'key2'), [1, 2, 1]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateFullDuplicated(): void
     {
         $this->createTable1();
@@ -123,12 +127,12 @@ class CompositePKTest extends OrmTestCase
         $u2->key2 = 1;
 
         //todo details
-        \Testo\Expect::exception(\Exception::class);
+        Expect::exception(\Exception::class);
 
         (new Transaction($this->orm))->persist($u1)->persist($u2)->run();
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testHeapSelectSame(): void
     {
         $this->createTable1();
@@ -153,12 +157,12 @@ class CompositePKTest extends OrmTestCase
         $data2 = (new Select($this->orm, CompositePK::class))->wherePK([1, 2])->fetchOne();
         $data3 = (new Select($this->orm, CompositePK::class))->wherePK(['key1' => 1, 'key2' => 2])->fetchOne();
 
-        \Testo\Assert::same($data1, $u2);
-        \Testo\Assert::same($data1, $data2);
-        \Testo\Assert::same($data3, $data2);
+        Assert::same($data1, $u2);
+        Assert::same($data1, $data2);
+        Assert::same($data3, $data2);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFindByPKAssoc(): void
     {
         $this->createTable1();
@@ -171,12 +175,12 @@ class CompositePKTest extends OrmTestCase
 
         $data1 = (new Select($this->orm, CompositePK::class))->wherePK(['key2' => 2, 'key1' => 1])->fetchOne();
 
-        \Testo\Assert::same($data1->key1, $u1->key1);
-        \Testo\Assert::same($data1->key2, $u1->key2);
-        \Testo\Assert::same($data1->key3, $u1->key3);
+        Assert::same($data1->key1, $u1->key1);
+        Assert::same($data1->key2, $u1->key2);
+        Assert::same($data1->key3, $u1->key3);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFindByPKAssocMultiple(): void
     {
         $this->createTable1();
@@ -199,25 +203,25 @@ class CompositePKTest extends OrmTestCase
         // one entity with array PK
         $data3 = (new Select($this->orm, CompositePK::class))->wherePK([5, 6])->fetchOne();
 
-        \Testo\Assert::same($data2[0]->key1, $u2->key1);
-        \Testo\Assert::same($data2[0]->key2, $u2->key2);
-        \Testo\Assert::same($data2[0]->key3, $u2->key3);
-        \Testo\Assert::same($data2[1]->key1, $u3->key1);
-        \Testo\Assert::same($data2[1]->key2, $u3->key2);
-        \Testo\Assert::same($data2[1]->key3, $u3->key3);
+        Assert::same($data2[0]->key1, $u2->key1);
+        Assert::same($data2[0]->key2, $u2->key2);
+        Assert::same($data2[0]->key3, $u2->key3);
+        Assert::same($data2[1]->key1, $u3->key1);
+        Assert::same($data2[1]->key2, $u3->key2);
+        Assert::same($data2[1]->key3, $u3->key3);
 
-        \Testo\Assert::same($data3->key1, $u3->key1);
-        \Testo\Assert::same($data3->key2, $u3->key2);
-        \Testo\Assert::same($data3->key3, $u3->key3);
+        Assert::same($data3->key1, $u3->key1);
+        Assert::same($data3->key2, $u3->key2);
+        Assert::same($data3->key3, $u3->key3);
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('wrongDataProvider')]
+    #[Test]
+    #[DataProvider('wrongDataProvider')]
     public function testFindByPKExceptions(array|string $pk, string $exceptionMsg): void
     {
         $this->createTable1();
 
-        \Testo\Expect::exception(\InvalidArgumentException::class)->withMessageContaining($exceptionMsg);
+        Expect::exception(\InvalidArgumentException::class)->withMessageContaining($exceptionMsg);
 
         (new Select($this->orm, CompositePK::class))->wherePK($pk)->fetchOne();
     }

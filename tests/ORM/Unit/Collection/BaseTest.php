@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Unit\Collection;
 
 use Cycle\ORM\Collection\CollectionFactoryInterface;
-use PHPUnit\Framework\TestCase;
+use Testo\Lifecycle\BeforeTest;
 
 abstract class BaseTest
 {
@@ -32,7 +32,7 @@ abstract class BaseTest
         ];
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     protected function setUp(): void
     {
         $this->factory = $this->getFactory();

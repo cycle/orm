@@ -9,17 +9,19 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Options\LoadOptions;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * Lazy-loaded embedded (same-row) relations: end-to-end coverage for `Select::load()`,
  * promise resolution on property access, and `BulkLoader::load()`.
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelectLoadEmbedded(): void
     {
         /** @var Entity\User $user */
@@ -28,13 +30,13 @@ class CaseTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
-        \Testo\Assert::same($user->credentials->username, 'user1');
-        \Testo\Assert::same($user->credentials->password, 'pass1');
-        \Testo\Assert::same($user->credentials->numLogins, 0);
+        Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
+        Assert::same($user->credentials->username, 'user1');
+        Assert::same($user->credentials->password, 'pass1');
+        Assert::same($user->credentials->numLogins, 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectLoadEmbeddedMultiple(): void
     {
         /** @var array<Entity\User> $users */
@@ -43,13 +45,13 @@ class CaseTest extends OrmTestCase
             ->orderBy('id')
             ->fetchAll();
 
-        \Testo\Assert::count($users, 2);
-        \Testo\Assert::same($users[0]->credentials->username, 'user1');
-        \Testo\Assert::same($users[1]->credentials->username, 'user2');
-        \Testo\Assert::same($users[1]->credentials->numLogins, 1);
+        Assert::count($users, 2);
+        Assert::same($users[0]->credentials->username, 'user1');
+        Assert::same($users[1]->credentials->username, 'user2');
+        Assert::same($users[1]->credentials->numLogins, 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectWithoutLoadProducesPromise(): void
     {
         /** @var Entity\User $user */
@@ -58,10 +60,10 @@ class CaseTest extends OrmTestCase
             ->fetchOne();
 
         $relations = $this->extractEntity($user);
-        \Testo\Assert::instanceOf($relations['credentials'], ReferenceInterface::class);
+        Assert::instanceOf($relations['credentials'], ReferenceInterface::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPromiseResolvesOnPropertyAccess(): void
     {
         /** @var Entity\User $user */
@@ -69,11 +71,11 @@ class CaseTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
-        \Testo\Assert::same($user->credentials->username, 'user1');
+        Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
+        Assert::same($user->credentials->username, 'user1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadLazyEmbeddedSingleEntity(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -84,7 +86,7 @@ class CaseTest extends OrmTestCase
             ->fetchOne();
 
         $rels = $this->extractEntity($user);
-        \Testo\Assert::instanceOf($rels['credentials'], ReferenceInterface::class);
+        Assert::instanceOf($rels['credentials'], ReferenceInterface::class);
 
         (new BulkLoader($this->orm))
             ->collect($user)
@@ -92,14 +94,14 @@ class CaseTest extends OrmTestCase
             ->run();
         // After BulkLoader the relation is hydrated; reading the fields must not query the DB.
         QueryAssert::reads(0, function () use ($user): void {
-            \Testo\Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
-            \Testo\Assert::same($user->credentials->username, 'user1');
-            \Testo\Assert::same($user->credentials->password, 'pass1');
-            \Testo\Assert::same($user->credentials->numLogins, 0);
+            Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
+            Assert::same($user->credentials->username, 'user1');
+            Assert::same($user->credentials->password, 'pass1');
+            Assert::same($user->credentials->numLogins, 0);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadLazyEmbeddedMultipleEntities(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -109,21 +111,22 @@ class CaseTest extends OrmTestCase
             ->orderBy('id')
             ->fetchAll();
 
-        \Testo\Assert::count($users, 2);
+        Assert::count($users, 2);
 
         (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('credentials')
             ->run();
+
         QueryAssert::reads(0, function () use ($users): void {
-            \Testo\Assert::same($users[0]->credentials->username, 'user1');
-            \Testo\Assert::same($users[1]->credentials->username, 'user2');
-            \Testo\Assert::same($users[0]->credentials->numLogins, 0);
-            \Testo\Assert::same($users[1]->credentials->numLogins, 1);
+            Assert::same($users[0]->credentials->username, 'user1');
+            Assert::same($users[1]->credentials->username, 'user2');
+            Assert::same($users[0]->credentials->numLogins, 0);
+            Assert::same($users[1]->credentials->numLogins, 1);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadEmbeddedAlongsideHasMany(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -138,15 +141,16 @@ class CaseTest extends OrmTestCase
             ->load('credentials')
             ->load('comments')
             ->run();
+
         QueryAssert::reads(0, function () use ($users): void {
-            \Testo\Assert::same($users[0]->credentials->username, 'user1');
-            \Testo\Assert::same($users[1]->credentials->username, 'user2');
-            \Testo\Assert::count($users[0]->comments, 2);
-            \Testo\Assert::count($users[1]->comments, 1);
+            Assert::same($users[0]->credentials->username, 'user1');
+            Assert::same($users[1]->credentials->username, 'user2');
+            Assert::count($users[0]->comments, 2);
+            Assert::count($users[1]->comments, 1);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadMultipleEmbeddedInSingleQuery(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -163,15 +167,15 @@ class CaseTest extends OrmTestCase
             ->load('profile')
             ->run());
         QueryAssert::reads(0, function () use ($users): void {
-            \Testo\Assert::same($users[0]->credentials->username, 'user1');
-            \Testo\Assert::same($users[1]->credentials->username, 'user2');
-            \Testo\Assert::same($users[0]->profile->bio, 'bio 1');
-            \Testo\Assert::same($users[1]->profile->bio, 'bio 2');
-            \Testo\Assert::same($users[0]->profile->image, 'image1.png');
+            Assert::same($users[0]->credentials->username, 'user1');
+            Assert::same($users[1]->credentials->username, 'user2');
+            Assert::same($users[0]->profile->bio, 'bio 1');
+            Assert::same($users[1]->profile->bio, 'bio 2');
+            Assert::same($users[0]->profile->image, 'image1.png');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadDoesNotRefetchParentFields(): void
     {
         /** @var Entity\User $user */
@@ -188,11 +192,11 @@ class CaseTest extends OrmTestCase
             ->load('credentials')
             ->run();
 
-        \Testo\Assert::same($user->email, 'hello@world.com');
-        \Testo\Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
+        Assert::same($user->email, 'hello@world.com');
+        Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadEmbeddedAcceptsLoadOptionsDTO(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -209,11 +213,11 @@ class CaseTest extends OrmTestCase
             ->load('credentials', new LoadOptions(minify: false))
             ->run();
 
-        \Testo\Assert::same($users[0]->credentials->username, 'user1');
-        \Testo\Assert::same($users[1]->credentials->username, 'user2');
+        Assert::same($users[0]->credentials->username, 'user1');
+        Assert::same($users[1]->credentials->username, 'user2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadEmbeddedWithCompositePk(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());
@@ -224,7 +228,7 @@ class CaseTest extends OrmTestCase
             ->orderBy('number')
             ->fetchAll();
 
-        \Testo\Assert::count($orders, 3);
+        Assert::count($orders, 3);
         // Composite PK: BulkLoader must build (tenant_id, number) tuples and pass them
         // through Select::wherePK's composite branch.
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
@@ -232,14 +236,14 @@ class CaseTest extends OrmTestCase
             ->load('shipping')
             ->run());
         QueryAssert::reads(0, function () use ($orders): void {
-            \Testo\Assert::same($orders[0]->shipping->address, 'Addr A');
-            \Testo\Assert::same($orders[0]->shipping->recipient, 'Alice');
-            \Testo\Assert::same($orders[1]->shipping->address, 'Addr B');
-            \Testo\Assert::same($orders[2]->shipping->address, 'Addr C');
+            Assert::same($orders[0]->shipping->address, 'Addr A');
+            Assert::same($orders[0]->shipping->recipient, 'Alice');
+            Assert::same($orders[1]->shipping->address, 'Addr B');
+            Assert::same($orders[2]->shipping->address, 'Addr C');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadDoesNotOverwriteAlreadyLoadedEmbedded(): void
     {
         /** @var Entity\User $user */
@@ -249,7 +253,7 @@ class CaseTest extends OrmTestCase
             ->fetchOne();
 
         $originalCredentials = $user->credentials;
-        \Testo\Assert::instanceOf($originalCredentials, Entity\UserCredentials::class);
+        Assert::instanceOf($originalCredentials, Entity\UserCredentials::class);
 
         // The relation is already a real entity (not a Reference), so BulkLoader must
         // keep the same instance instead of replacing it.
@@ -258,11 +262,11 @@ class CaseTest extends OrmTestCase
             ->load('credentials')
             ->run();
 
-        \Testo\Assert::same($user->credentials, $originalCredentials);
-        \Testo\Assert::same($user->credentials->username, 'user1');
+        Assert::same($user->credentials, $originalCredentials);
+        Assert::same($user->credentials->username, 'user1');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTables();

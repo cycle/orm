@@ -13,19 +13,21 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class LinkedTreeTest extends OrmTestCase
+final class LinkedTreeTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelations(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -53,7 +55,7 @@ class LinkedTreeTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateDoubleLinked(): void
     {
         $u1 = new User();
@@ -69,6 +71,7 @@ class LinkedTreeTest extends OrmTestCase
 
         $u1->nested = $n;
         $u2->owned = $n;
+
         QueryAssert::writes(3, function () use ($u1, $u2): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u1);
@@ -79,7 +82,7 @@ class LinkedTreeTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 3,
                 'email' => 'u1@email.com',
@@ -111,10 +114,10 @@ class LinkedTreeTest extends OrmTestCase
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
 
         [$u1, $u2] = $selector->fetchAll();
-        \Testo\Assert::same($u2->owned, $u1->nested);
+        Assert::same($u2->owned, $u1->nested);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

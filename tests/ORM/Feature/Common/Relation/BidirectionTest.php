@@ -12,19 +12,21 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class BidirectionTest extends OrmTestCase
+final class BidirectionTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -51,30 +53,30 @@ class BidirectionTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveCommentFromUser(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))
             ->load('comments')->wherePK(1)->fetchOne();
 
-        \Testo\Assert::count($u->comments, 2);
+        Assert::count($u->comments, 2);
 
         $comment = $u->comments[0];
         $u->comments->removeElement($comment);
 
         $this->save($u);
-        \Testo\Assert::same($comment->user, $u);
+        Assert::same($comment->user, $u);
 
         /** @var User $u2 */
         $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('comments')->wherePK(1)->fetchOne();
 
-        \Testo\Assert::count($u2->comments, 1);
+        Assert::count($u2->comments, 1);
         $this->orm->getHeap()->clean();
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveFromCommentEnd(): void
     {
         $u = (new Select($this->orm, User::class))
@@ -82,9 +84,10 @@ class BidirectionTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::count($u->comments, 2);
+        Assert::count($u->comments, 2);
 
         $u->comments[0]->user = null;
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
         $this->orm->getHeap()->clean();
@@ -93,10 +96,10 @@ class BidirectionTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::count($u->comments, 1);
+        Assert::count($u->comments, 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveFromCommentEndDoublePersist(): void
     {
         $u = (new Select($this->orm, User::class))
@@ -104,7 +107,7 @@ class BidirectionTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::count($u->comments, 2);
+        Assert::count($u->comments, 2);
 
         $u->comments[0]->user = null;
 
@@ -115,20 +118,21 @@ class BidirectionTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::count($u->comments, 1);
+        Assert::count($u->comments, 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testDoubleRemoval(): void
     {
         $select = new Select($this->orm, User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
-        \Testo\Assert::count($u->comments, 2);
+        Assert::count($u->comments, 2);
 
         $c = $u->comments[0];
         $c->user = null;
         $u->comments->removeElement($c);
+
         QueryAssert::writes(1, function () use ($u, $c): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -139,10 +143,10 @@ class BidirectionTest extends OrmTestCase
         $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
 
-        \Testo\Assert::count($u->comments, 1);
+        Assert::count($u->comments, 1);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

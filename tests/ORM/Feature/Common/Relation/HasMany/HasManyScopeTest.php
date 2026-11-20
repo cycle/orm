@@ -16,11 +16,14 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HasManyScopeTest extends OrmTestCase
+final class HasManyScopeTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -29,20 +32,20 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[3]->message, 'msg 1');
+        Assert::same($a->comments[0]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[2]->message, 'msg 2');
+        Assert::same($a->comments[3]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.1');
+        Assert::same($b->comments[0]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[2]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -51,20 +54,20 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        Assert::same($a->comments[3]->message, 'msg 4');
+        Assert::same($a->comments[2]->message, 'msg 3');
+        Assert::same($a->comments[1]->message, 'msg 2');
+        Assert::same($a->comments[0]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
+        Assert::same($b->comments[2]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAscInLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -75,20 +78,20 @@ class HasManyScopeTest extends OrmTestCase
             'method' => JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        Assert::same($a->comments[3]->message, 'msg 4');
+        Assert::same($a->comments[2]->message, 'msg 3');
+        Assert::same($a->comments[1]->message, 'msg 2');
+        Assert::same($a->comments[0]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
+        Assert::same($b->comments[2]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedPromisedAsc(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -97,20 +100,20 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        Assert::same($a->comments[3]->message, 'msg 4');
+        Assert::same($a->comments[2]->message, 'msg 3');
+        Assert::same($a->comments[1]->message, 'msg 2');
+        Assert::same($a->comments[0]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
+        Assert::same($b->comments[2]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -120,17 +123,17 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::same($a->comments[2]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[0]->message, 'msg 2');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.2');
+        Assert::same($a->comments[2]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[0]->message, 'msg 2');
+        Assert::same($b->comments[1]->message, 'msg 2.3');
+        Assert::same($b->comments[0]->message, 'msg 2.2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWherePromised(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -140,17 +143,17 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::same($a->comments[2]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[0]->message, 'msg 2');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.2');
+        Assert::same($a->comments[2]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[0]->message, 'msg 2');
+        Assert::same($b->comments[1]->message, 'msg 2.3');
+        Assert::same($b->comments[0]->message, 'msg 2.2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWhereReversed(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -160,17 +163,17 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($a->comments[0]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[2]->message, 'msg 2');
+        Assert::same($b->comments[0]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWhereReversedInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -182,17 +185,17 @@ class HasManyScopeTest extends OrmTestCase
             'method' => JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($a->comments[0]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[2]->message, 'msg 2');
+        Assert::same($b->comments[0]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWhereReversedPromised(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -202,17 +205,17 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($a->comments[0]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[2]->message, 'msg 2');
+        Assert::same($b->comments[0]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -225,14 +228,14 @@ class HasManyScopeTest extends OrmTestCase
             'where' => ['@.level' => 1],
         ])->fetchAll();
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 1);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 1);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
+        Assert::same($a->comments[0]->message, 'msg 1');
+        Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndCustomWhereInload(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -246,14 +249,14 @@ class HasManyScopeTest extends OrmTestCase
             'method' => JoinableLoader::INLOAD,
         ])->fetchAll();
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 1);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 1);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
+        Assert::same($a->comments[0]->message, 'msg 1');
+        Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrderByWithScopeOrdered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -265,20 +268,20 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[3]->message, 'msg 1');
+        Assert::same($a->comments[0]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[2]->message, 'msg 2');
+        Assert::same($a->comments[3]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.1');
+        Assert::same($b->comments[0]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[2]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByInLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -291,20 +294,20 @@ class HasManyScopeTest extends OrmTestCase
             'method' => JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[3]->message, 'msg 1');
+        Assert::same($a->comments[0]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[2]->message, 'msg 2');
+        Assert::same($a->comments[3]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.1');
+        Assert::same($b->comments[0]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[2]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByLazyLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -315,20 +318,20 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[3]->message, 'msg 1');
+        Assert::same($a->comments[0]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[2]->message, 'msg 2');
+        Assert::same($a->comments[3]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.1');
+        Assert::same($b->comments[0]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[2]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -341,20 +344,20 @@ class HasManyScopeTest extends OrmTestCase
             'orderBy' => ['@.level' => 'ASC'],
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::same($a->comments[3]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[2]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 2');
-        \Testo\Assert::same($a->comments[0]->message, 'msg 1');
+        Assert::same($a->comments[3]->message, 'msg 4');
+        Assert::same($a->comments[2]->message, 'msg 3');
+        Assert::same($a->comments[1]->message, 'msg 2');
+        Assert::same($a->comments[0]->message, 'msg 1');
 
-        \Testo\Assert::same($b->comments[2]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.2');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.1');
+        Assert::same($b->comments[2]->message, 'msg 2.3');
+        Assert::same($b->comments[1]->message, 'msg 2.2');
+        Assert::same($b->comments[0]->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -366,17 +369,17 @@ class HasManyScopeTest extends OrmTestCase
 
         [$a, $b] = (new Select($this->orm, User::class))->load('comments')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::same($a->comments[2]->message, 'msg 4');
-        \Testo\Assert::same($a->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($a->comments[0]->message, 'msg 2');
-        \Testo\Assert::same($b->comments[1]->message, 'msg 2.3');
-        \Testo\Assert::same($b->comments[0]->message, 'msg 2.2');
+        Assert::same($a->comments[2]->message, 'msg 4');
+        Assert::same($a->comments[1]->message, 'msg 3');
+        Assert::same($a->comments[0]->message, 'msg 2');
+        Assert::same($b->comments[1]->message, 'msg 2.3');
+        Assert::same($b->comments[0]->message, 'msg 2.2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -386,11 +389,11 @@ class HasManyScopeTest extends OrmTestCase
         // second user has been filtered out
         $res = (new Select($this->orm, User::class))->with('comments')->fetchAll();
 
-        \Testo\Assert::count($res, 1);
-        \Testo\Assert::same($res[0]->email, 'hello@world.com');
+        Assert::count($res, 1);
+        Assert::same($res[0]->email, 'hello@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -402,12 +405,12 @@ class HasManyScopeTest extends OrmTestCase
             'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($res, 2);
-        \Testo\Assert::same($res[0]->email, 'hello@world.com');
-        \Testo\Assert::same($res[1]->email, 'another@world.com');
+        Assert::count($res, 2);
+        Assert::same($res[0]->email, 'hello@world.com');
+        Assert::same($res[1]->email, 'another@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLimitParentSelection(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -418,15 +421,15 @@ class HasManyScopeTest extends OrmTestCase
             ->load('comments')
             ->limit(1)->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($res, 1);
-        \Testo\Assert::same($res[0]->email, 'hello@world.com');
-        \Testo\Assert::count($res[0]->comments, 4);
+        Assert::count($res, 1);
+        Assert::same($res[0]->email, 'hello@world.com');
+        Assert::count($res[0]->comments, 4);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLimitParentSelectionError(): void
     {
-        \Testo\Expect::exception(LoaderException::class);
+        Expect::exception(LoaderException::class);
 
         $this->orm = $this->withCommentsSchema([]);
 
@@ -436,7 +439,7 @@ class HasManyScopeTest extends OrmTestCase
             ->limit(1)->orderBy('user.id')->fetchAll();
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInloadWithScopeOrderedAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -449,16 +452,16 @@ class HasManyScopeTest extends OrmTestCase
             'method' => JoinableLoader::INLOAD,
         ])->orderBy('user.id', 'DESC')->fetchAll();
 
-        \Testo\Assert::count($res, 2);
-        \Testo\Assert::same($res[1]->email, 'hello@world.com');
-        \Testo\Assert::same($res[0]->email, 'another@world.com');
+        Assert::count($res, 2);
+        Assert::same($res[1]->email, 'hello@world.com');
+        Assert::same($res[0]->email, 'another@world.com');
 
-        \Testo\Assert::count($res[1]->comments, 2);
-        \Testo\Assert::count($res[0]->comments, 1);
+        Assert::count($res[1]->comments, 2);
+        Assert::count($res[0]->comments, 1);
 
-        \Testo\Assert::same($res[1]->comments[0]->message, 'msg 4');
-        \Testo\Assert::same($res[1]->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($res[0]->comments[0]->message, 'msg 2.3');
+        Assert::same($res[1]->comments[0]->message, 'msg 4');
+        Assert::same($res[1]->comments[1]->message, 'msg 3');
+        Assert::same($res[0]->comments[0]->message, 'msg 2.3');
     }
 
     /**
@@ -466,7 +469,7 @@ class HasManyScopeTest extends OrmTestCase
      * condition (no wrapWhere), an adversarial `orWhere` injected via the 'load' option
      * bypasses the scope due to AND-over-OR precedence inside the JOIN's ON clause.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testInloadJoinedScopeWithoutWrapWhereIsBypassedByAdversarialOrLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -494,13 +497,13 @@ class HasManyScopeTest extends OrmTestCase
 
         // User A: msg 1 (level=1) sneaks through the first OR-arm; msg 4 matches the
         // second arm legitimately.
-        \Testo\Assert::count($userA->comments, 2);
+        Assert::count($userA->comments, 2);
         $aMessages = $this->extractMessages($userA->comments);
-        \Testo\Assert::same($aMessages, ['msg 1', 'msg 4']);
+        Assert::same($aMessages, ['msg 1', 'msg 4']);
 
         // User B: msg 2.1 (level=1) sneaks through the first arm — scope leaks again.
-        \Testo\Assert::count($userB->comments, 1);
-        \Testo\Assert::same($userB->comments[0]->message, 'msg 2.1');
+        Assert::count($userB->comments, 1);
+        Assert::same($userB->comments[0]->message, 'msg 2.1');
     }
 
     /**
@@ -508,7 +511,7 @@ class HasManyScopeTest extends OrmTestCase
      * QueryBuilder::targetFunc() forwards the wrap to `wrapOnWhere` on the JOIN's ON tokens,
      * enclosing the user's OR group. The scope's `level >= 2` condition stays effective.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testInloadJoinedScopeWithWrapWhereProtectsAgainstAdversarialOrLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -530,11 +533,11 @@ class HasManyScopeTest extends OrmTestCase
 
         // ON ((join_key AND level = 1) OR message = 'msg 4') AND level >= 2
         // User A: only msg 4 (level = 4) matches the OR group AND scope.
-        \Testo\Assert::count($userA->comments, 1);
-        \Testo\Assert::same($userA->comments[0]->message, 'msg 4');
+        Assert::count($userA->comments, 1);
+        Assert::same($userA->comments[0]->message, 'msg 4');
 
         // User B: no comment satisfies both the OR group and `level >= 2`.
-        \Testo\Assert::count($userB->comments, 0);
+        Assert::count($userB->comments, 0);
     }
 
     /**
@@ -542,7 +545,7 @@ class HasManyScopeTest extends OrmTestCase
      * any adversarial conditions — wrapWhere() on empty ON tokens is a no-op and the
      * scope adds its condition at the top level of the JOIN's ON clause.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testInloadJoinedScopeWithWrapWhereWithoutAdversarialLoad(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -559,12 +562,12 @@ class HasManyScopeTest extends OrmTestCase
         [$userA, $userB] = $res;
 
         // Only level >= 3 comments survive: msg 3, msg 4, msg 2.3
-        \Testo\Assert::count($userA->comments, 2);
+        Assert::count($userA->comments, 2);
         $aMessages = $this->extractMessages($userA->comments);
-        \Testo\Assert::same($aMessages, ['msg 3', 'msg 4']);
+        Assert::same($aMessages, ['msg 3', 'msg 4']);
 
-        \Testo\Assert::count($userB->comments, 1);
-        \Testo\Assert::same($userB->comments[0]->message, 'msg 2.3');
+        Assert::count($userB->comments, 1);
+        Assert::same($userB->comments[0]->message, 'msg 2.3');
     }
 
     /**
@@ -574,7 +577,7 @@ class HasManyScopeTest extends OrmTestCase
      * AbstractLoader::__clone() → JoinableLoader::withContext() with empty options, whose
      * `else` branch used to blindly re-apply the source scope, dropping the override.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testDisabledRelationScopeSurvivesClone(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -591,8 +594,8 @@ class HasManyScopeTest extends OrmTestCase
 
         // Baseline (no clone): override works, all comments are loaded.
         [$a, $b] = $select->fetchAll();
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
 
         // Drop identity map so the cloned query re-reads comments from the database
         // instead of returning the already-hydrated User instances above.
@@ -600,8 +603,8 @@ class HasManyScopeTest extends OrmTestCase
 
         // The clone must preserve the disabled scope.
         [$a, $b] = $clone->fetchAll();
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 4);
+        Assert::count($b->comments, 3);
     }
 
     /**
@@ -609,7 +612,7 @@ class HasManyScopeTest extends OrmTestCase
      * `scope: false` override must reach the cloned loader. Before the fix the source scope
      * (level >= 2) leaked back in and 'msg 1' was filtered out.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testFetchOneKeepsDisabledRelationScope(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -621,8 +624,8 @@ class HasManyScopeTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::notNull($user);
-        \Testo\Assert::count($user->comments, 4);
+        Assert::notNull($user);
+        Assert::count($user->comments, 4);
     }
 
     /**
@@ -631,7 +634,7 @@ class HasManyScopeTest extends OrmTestCase
      * (level >= 3). Before the fix the clone reset it back to the source scope, yielding 3
      * comments instead of 2.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testFetchOneKeepsCustomRelationScopeOverride(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -643,15 +646,15 @@ class HasManyScopeTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::notNull($user);
+        Assert::notNull($user);
         // level 3 and 4 only.
-        \Testo\Assert::count($user->comments, 2);
+        Assert::count($user->comments, 2);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInvalidOrderBy(): void
     {
-        \Testo\Expect::exception(StatementException::class);
+        Expect::exception(StatementException::class);
 
         $this->orm = $this->withCommentsSchema([
             Relation::SCHEMA => [Relation::WHERE => ['@.level' => ['>=' => 3]]],
@@ -664,7 +667,7 @@ class HasManyScopeTest extends OrmTestCase
         ])->orderBy('user.id', 'DESC')->fetchAll();
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

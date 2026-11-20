@@ -13,8 +13,11 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Engineer;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CompositePKTest extends SimpleCasesTest
+final class CompositePKTest extends SimpleCasesTest
 {
     protected const EMPLOYEE_DEFAULT_SORTING = ['id' => 'ASC', 'employee_id' => 'ASC'];
     protected const EMPLOYEE_1 = ['id' => 1, 'employee_id' => 2, 'name' => 'John', 'age' => 38];
@@ -60,17 +63,17 @@ class CompositePKTest extends SimpleCasesTest
         PROGRAMATOR_ROLE = Programator::class;
     protected const ENGINEER_ROLE = Engineer::class;
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerAllDataWithInheritance(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
             // todo: this condition should be added automatically by STI
             ->where('_type', '=', 'engineer');
 
-        \Testo\Assert::equals($selector->fetchData(), static::ENGINEER_INHERITED_LOADED);
+        Assert::equals($selector->fetchData(), self::ENGINEER_INHERITED_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerAllDataWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
@@ -78,10 +81,10 @@ class CompositePKTest extends SimpleCasesTest
             ->loadSubclasses(false)
             ->where('_type', '=', 'engineer');
 
-        \Testo\Assert::equals($selector->fetchData(), static::ENGINEER_ALL_LOADED);
+        Assert::equals($selector->fetchData(), self::ENGINEER_ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerDataFirstWithInheritance(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
@@ -89,10 +92,10 @@ class CompositePKTest extends SimpleCasesTest
             ->where('_type', '=', 'engineer')
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_2_LOADED);
+        Assert::equals($selector->fetchData()[0], self::PROGRAMATOR_2_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerDataFirstWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, Engineer::class))
@@ -101,31 +104,31 @@ class CompositePKTest extends SimpleCasesTest
             ->loadSubclasses(false)
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::ENGINEER_2_LOADED);
+        Assert::equals($selector->fetchData()[0], self::ENGINEER_2_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerEntityFirstWithInheritance(): void
     {
-        $selector = (new Select($this->orm, static::ENGINEER_ROLE))
+        $selector = (new Select($this->orm, self::ENGINEER_ROLE))
             // todo: this condition should be added automatically by STI
             ->where('_type', '=', 'engineer')
             ->limit(1);
 
-        \Testo\Assert::instanceOf($selector->fetchOne(), Programator::class);
+        Assert::instanceOf($selector->fetchOne(), Programator::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectManagerAllData(): void
     {
         $selector = (new Select($this->orm, Manager::class))
             // todo: this condition should be added automatically by STI
             ->where('_type', '=', 'manager');
 
-        \Testo\Assert::equals($selector->fetchData(), static::MANAGER_ALL_LOADED);
+        Assert::equals($selector->fetchData(), self::MANAGER_ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectManagerDataFirst(): void
     {
         $selector = (new Select($this->orm, Manager::class))
@@ -133,10 +136,10 @@ class CompositePKTest extends SimpleCasesTest
             ->where('_type', '=', 'manager')
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::MANAGER_1_LOADED);
+        Assert::equals($selector->fetchData()[0], self::MANAGER_1_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateProgramator(): void
     {
         $programator = new Programator();
@@ -145,24 +148,26 @@ class CompositePKTest extends SimpleCasesTest
         $programator->name = 'Merlin';
         $programator->level = 50;
         $programator->language = 'VanillaJS';
+
         QueryAssert::writes(3, fn() => $this->save($programator));
+
         QueryAssert::writes(0, fn() => $this->save($programator));
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->with(heap: new Heap()), Programator::class))
             ->wherePK(['second_id' => 11, 'subrole_id' => 10])
             ->fetchOne();
-        \Testo\Assert::same($programator->id, 10);
-        \Testo\Assert::same($programator->employee_id, 11);
-        \Testo\Assert::same($programator->role_id, 11);
-        \Testo\Assert::same($programator->subrole_id, 10);
-        \Testo\Assert::same($programator->second_id, 11);
-        \Testo\Assert::same($programator->name, 'Merlin');
-        \Testo\Assert::same($programator->level, 50);
-        \Testo\Assert::same($programator->language, 'VanillaJS');
+        Assert::same($programator->id, 10);
+        Assert::same($programator->employee_id, 11);
+        Assert::same($programator->role_id, 11);
+        Assert::same($programator->subrole_id, 10);
+        Assert::same($programator->second_id, 11);
+        Assert::same($programator->name, 'Merlin');
+        Assert::same($programator->level, 50);
+        Assert::same($programator->language, 'VanillaJS');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         JtiBaseTest::setUp();

@@ -12,23 +12,26 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\EmployeeKind;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class IntEnumDiscriminatorTest extends StiBaseTest
+final class IntEnumDiscriminatorTest extends StiBaseTest
 {
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';
 
-    #[\Testo\Test]
+    #[Test]
     public function testChildClassResolvedFromIntScalarInDatabase(): void
     {
         [$first, $second] = (new Select($this->orm, Employee::class))->orderBy('id')->fetchAll();
 
-        \Testo\Assert::instanceOf($first, Manager::class);
-        \Testo\Assert::instanceOf($second, Employee::class);
-        \Testo\Assert::false($second instanceof Manager);
+        Assert::instanceOf($first, Manager::class);
+        Assert::instanceOf($second, Employee::class);
+        Assert::false($second instanceof Manager);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPersistedChildWritesIntScalar(): void
     {
         $manager = new Manager();
@@ -43,23 +46,23 @@ class IntEnumDiscriminatorTest extends StiBaseTest
             ->where('id', $manager->id)
             ->fetchAll()[0];
 
-        \Testo\Assert::same((int) $row['kind'], EmployeeKind::Manager->value);
+        Assert::same((int) $row['kind'], EmployeeKind::Manager->value);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMakeResolvesChildClassFromIntEnumInputData(): void
     {
-        $entity = $this->orm->make(static::BASE_ROLE, [
+        $entity = $this->orm->make(self::BASE_ROLE, [
             '_type' => EmployeeKind::Manager,
             'name' => 'Senya',
             'email' => 'sene4ka@hamster.me',
             'age' => 12,
         ]);
 
-        \Testo\Assert::instanceOf($entity, Manager::class);
+        Assert::instanceOf($entity, Manager::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRoundTripChildEntity(): void
     {
         $manager = new Manager();
@@ -72,10 +75,10 @@ class IntEnumDiscriminatorTest extends StiBaseTest
             ->wherePK($manager->id)
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($loaded, Manager::class);
+        Assert::instanceOf($loaded, Manager::class);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         parent::setUp();
@@ -102,7 +105,7 @@ class IntEnumDiscriminatorTest extends StiBaseTest
     protected function getSchemaArray(): array
     {
         return [
-            static::BASE_ROLE => [
+            self::BASE_ROLE => [
                 SchemaInterface::ENTITY => Employee::class,
                 SchemaInterface::CHILDREN => [
                     EmployeeKind::Manager->value => Manager::class,

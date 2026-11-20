@@ -9,10 +9,13 @@ use Cycle\ORM\Tests\Regression\Case1\Entity\Post;
 use Cycle\ORM\Tests\Regression\Case1\Entity\Tag;
 use Cycle\ORM\Tests\Regression\Case1\Entity\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
     /** @var User[] */
     private array $users = [];
 
@@ -34,8 +37,8 @@ class CaseTest extends OrmTestCase
         ];
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('countProvider')]
+    #[Test]
+    #[DataProvider('countProvider')]
     public function testRun(int $count): void
     {
         $generator = $this->generate($count);
@@ -51,12 +54,12 @@ class CaseTest extends OrmTestCase
         $this->snapMemory('Clean state');
 
         // No errors
-        \Testo\Assert::true(true);
+        Assert::true(true);
 
         // $this->printDebug();
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->resetState();

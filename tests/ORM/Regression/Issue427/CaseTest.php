@@ -8,25 +8,27 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Issue427\Entity\Buyer;
 use Cycle\ORM\Tests\Regression\Issue427\Entity\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * @link https://github.com/cycle/orm/issues/427
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         $buyer = (new Select($this->orm, Buyer::class))
             ->wherePK(4)
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($buyer, Buyer::class);
-        \Testo\Assert::same($buyer->id, 4);
-        \Testo\Assert::same($buyer->address, 'foo');
+        Assert::instanceOf($buyer, Buyer::class);
+        Assert::same($buyer->id, 4);
+        Assert::same($buyer->address, 'foo');
 
-        \Testo\Assert::count($buyer->partners, 2);
+        Assert::count($buyer->partners, 2);
 
         $user1 = $buyer->partners[0];
         $user2 = $buyer->partners[1];
@@ -34,13 +36,13 @@ class CaseTest extends OrmTestCase
         \assert($user1 instanceof User);
         \assert($user2 instanceof User);
 
-        \Testo\Assert::same($user1->id->toString(), '00000000-0000-0000-0000-000000000001');
-        \Testo\Assert::same($user2->id->toString(), '00000000-0000-0000-0000-000000000002');
-        \Testo\Assert::same($user1->name, 'John');
-        \Testo\Assert::same($user2->name, 'Sam');
+        Assert::same($user1->id->toString(), '00000000-0000-0000-0000-000000000001');
+        Assert::same($user2->id->toString(), '00000000-0000-0000-0000-000000000002');
+        Assert::same($user1->name, 'John');
+        Assert::same($user2->name, 'Sam');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

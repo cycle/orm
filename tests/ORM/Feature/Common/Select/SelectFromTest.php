@@ -11,62 +11,64 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class SelectFromTest extends OrmTestCase
+final class SelectFromTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFromOverridesSchemaTable(): void
     {
         $select = new Select($this->orm, User::class);
         $select->from('user_archive');
 
-        \Testo\Assert::string($select->sqlStatement())->contains('user_archive');
+        Assert::string($select->sqlStatement())->contains('user_archive');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFromFetchesDataFromAnotherTable(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->from('user_archive')->orderBy('id')->fetchAll();
 
-        \Testo\Assert::count($result, 1);
-        \Testo\Assert::instanceOf($result[0], User::class);
-        \Testo\Assert::same($result[0]->email, 'archived@world.com');
+        Assert::count($result, 1);
+        Assert::instanceOf($result[0], User::class);
+        Assert::same($result[0]->email, 'archived@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFromWithWhere(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->from('user_archive')->where('id', 1)->fetchAll();
 
-        \Testo\Assert::count($result, 1);
-        \Testo\Assert::same($result[0]->id, 1);
-        \Testo\Assert::same($result[0]->email, 'archived@world.com');
+        Assert::count($result, 1);
+        Assert::same($result[0]->id, 1);
+        Assert::same($result[0]->email, 'archived@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFromDoesNotAffectOriginalTable(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->orderBy('id')->fetchAll();
 
-        \Testo\Assert::count($result, 2);
-        \Testo\Assert::same($result[0]->email, 'hello@world.com');
-        \Testo\Assert::same($result[1]->email, 'another@world.com');
+        Assert::count($result, 2);
+        Assert::same($result[0]->email, 'hello@world.com');
+        Assert::same($result[1]->email, 'another@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFromReturnsFluent(): void
     {
         $select = new Select($this->orm, User::class);
         $result = $select->from('user_archive');
 
-        \Testo\Assert::same($result, $select);
+        Assert::same($result, $select);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFromWithLoadRelation(): void
     {
         $select = new Select($this->orm, User::class);
@@ -76,34 +78,34 @@ class SelectFromTest extends OrmTestCase
             ->orderBy('id')
             ->fetchAll();
 
-        \Testo\Assert::count($result, 1);
-        \Testo\Assert::same($result[0]->email, 'archived@world.com');
+        Assert::count($result, 1);
+        Assert::same($result[0]->email, 'archived@world.com');
         // Comments are loaded from the regular 'comment' table via user_id FK
-        \Testo\Assert::count($result[0]->comments, 2);
-        \Testo\Assert::same($result[0]->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($result[0]->comments[1]->message, 'msg 2');
+        Assert::count($result[0]->comments, 2);
+        Assert::same($result[0]->comments[0]->message, 'msg 1');
+        Assert::same($result[0]->comments[1]->message, 'msg 2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFromPreservesAlias(): void
     {
         $select = new Select($this->orm, User::class);
         $sql = $select->from('user_archive')->sqlStatement();
 
         // The alias should remain the entity role ('user') so that column references still work
-        \Testo\Assert::string($sql)->contains('user_archive')->notContains('"user"."user"');
+        Assert::string($sql)->contains('user_archive')->notContains('"user"."user"');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFromWithCount(): void
     {
         $select = new Select($this->orm, User::class);
         $count = $select->from('user_archive')->count();
 
-        \Testo\Assert::same($count, 1);
+        Assert::same($count, 1);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

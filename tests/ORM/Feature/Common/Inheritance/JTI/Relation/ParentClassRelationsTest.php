@@ -17,6 +17,9 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\SimpleCasesTest;
 use Cycle\ORM\Transaction;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 class ParentClassRelationsTest extends SimpleCasesTest
 {
@@ -65,7 +68,7 @@ class ParentClassRelationsTest extends SimpleCasesTest
     /**
      * Parent's relation should be initialized
      */
-    #[\Testo\Test]
+    #[Test]
     public function testLoadParentRelations(): void
     {
         /** @var Programator $entity */
@@ -73,27 +76,29 @@ class ParentClassRelationsTest extends SimpleCasesTest
             ->load('tech_book')
             ->wherePK(2)->fetchOne();
 
-        \Testo\Assert::notNull($entity->book);
-        \Testo\Assert::notNull($entity->tech_book);
+        Assert::notNull($entity->book);
+        Assert::notNull($entity->tech_book);
     }
 
     /**
      * Parent's relations should be removed or not removed with their parent
      */
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveSubclassWithRelations(): void
     {
         /** @var Engineer $engineer */
         $engineer = (new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
             ->wherePK(2)->fetchOne();
+
         QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($engineer)->run());
+
         QueryAssert::writes(0, fn() => (new Transaction($this->orm))->delete($engineer)->run());
 
-        \Testo\Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))
+        Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(2)
             ->fetchOne());
-        \Testo\Assert::null((new Select($this->orm, static::ENGINEER_ROLE))
+        Assert::null((new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
             ->wherePK(2)
             ->fetchOne());
@@ -103,11 +108,11 @@ class ParentClassRelationsTest extends SimpleCasesTest
             ->wherePK(2)
             ->fetchOne();
 
-        \Testo\Assert::notNull($employee);
-        \Testo\Assert::notNull($employee->book);
+        Assert::notNull($employee);
+        Assert::notNull($employee->book);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         JtiBaseTest::setUp();

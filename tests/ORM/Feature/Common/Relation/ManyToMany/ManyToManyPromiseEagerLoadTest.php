@@ -10,17 +10,19 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ManyToManyPromiseEagerLoadTest extends OrmTestCase
+final class ManyToManyPromiseEagerLoadTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, 'distribution');
         $selector->load('versions');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'name' => 'production',
@@ -121,13 +123,13 @@ class ManyToManyPromiseEagerLoadTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchDataSingleQuery(): void
     {
         $selector = new Select($this->orm, 'distribution');
         $selector->load('versions', ['method' => Select::SINGLE_QUERY]);
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'name' => 'production',
@@ -228,7 +230,7 @@ class ManyToManyPromiseEagerLoadTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadEagerAfterPreload(): void
     {
         $selector = new Select($this->orm, 'distribution');
@@ -238,11 +240,11 @@ class ManyToManyPromiseEagerLoadTest extends OrmTestCase
             ->fetchOne();
 
         foreach ($d->versions as $version) {
-            \Testo\Assert::notNull($version->module);
+            Assert::notNull($version->module);
         }
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadPromised(): void
     {
         $selector = new Select($this->orm, 'distribution');
@@ -251,11 +253,11 @@ class ManyToManyPromiseEagerLoadTest extends OrmTestCase
             ->fetchOne();
 
         foreach ($d->versions as $version) {
-            \Testo\Assert::notNull($version->module);
+            Assert::notNull($version->module);
         }
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('distributions', [

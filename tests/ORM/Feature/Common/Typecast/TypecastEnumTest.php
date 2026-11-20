@@ -11,35 +11,37 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-/**
- */
-class TypecastEnumTest extends OrmTestCase
+final class TypecastEnumTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $result = (new Select($this->orm, User::class))->fetchData();
 
-        \Testo\Assert::same(\array_column($result, 'enum_string'), [TypeStringEnum::Admin, TypeStringEnum::Guest]);
-        \Testo\Assert::same(\array_column($result, 'enum_int'), [TypeIntEnum::Admin, TypeIntEnum::Guest]);
+        Assert::same(\array_column($result, 'enum_string'), [TypeStringEnum::Admin, TypeStringEnum::Guest]);
+        Assert::same(\array_column($result, 'enum_int'), [TypeIntEnum::Admin, TypeIntEnum::Guest]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $e = new User();
         $e->balance = 304;
         $e->enum_string = TypeStringEnum::Admin;
         $e->enum_int = TypeIntEnum::Admin;
+
         QueryAssert::writes(1, fn() => $this->save($e));
+
         QueryAssert::writes(0, fn() => $this->save($e));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPushAndFetchData(): void
     {
         $e = new User();
@@ -49,16 +51,16 @@ class TypecastEnumTest extends OrmTestCase
 
         $this->save($e);
 
-        \Testo\Assert::same($e->enum_string, TypeStringEnum::Admin);
-        \Testo\Assert::same($e->enum_int, TypeIntEnum::Admin);
+        Assert::same($e->enum_string, TypeStringEnum::Admin);
+        Assert::same($e->enum_int, TypeIntEnum::Admin);
         $this->orm->getHeap()->clean();
         $result = (new Select($this->orm, User::class))->wherePK($e->id)->fetchOne();
 
-        \Testo\Assert::same($result->enum_string, TypeStringEnum::Admin);
-        \Testo\Assert::same($result->enum_int, TypeIntEnum::Admin);
+        Assert::same($result->enum_string, TypeStringEnum::Admin);
+        Assert::same($result->enum_int, TypeIntEnum::Admin);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdate(): void
     {
         $e = new User();
@@ -72,8 +74,8 @@ class TypecastEnumTest extends OrmTestCase
         /** @var User $result */
         $result = (new Select($this->orm, User::class))->fetchOne();
 
-        \Testo\Assert::same($result->enum_string, TypeStringEnum::Admin);
-        \Testo\Assert::same($result->enum_int, TypeIntEnum::Admin);
+        Assert::same($result->enum_string, TypeStringEnum::Admin);
+        Assert::same($result->enum_int, TypeIntEnum::Admin);
 
         $result->enum_string = TypeStringEnum::Guest;
         $result->enum_int = TypeIntEnum::Guest;
@@ -84,11 +86,11 @@ class TypecastEnumTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $result2 = $selector->fetchOne();
 
-        \Testo\Assert::same($result2->enum_string, TypeStringEnum::Guest);
-        \Testo\Assert::same($result2->enum_int, TypeIntEnum::Guest);
+        Assert::same($result2->enum_string, TypeStringEnum::Guest);
+        Assert::same($result2->enum_int, TypeIntEnum::Guest);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable(

@@ -14,27 +14,29 @@ use Cycle\ORM\Tests\Fixtures\SortByMsgScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UUIDMapper;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
-use Cycle\Testing\ORM\OrmTestCase;
-use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class UUIDTest extends OrmTestCase
+final class UUIDTest extends OrmTestCase
 {
-
     private $u1;
     private $u2;
     private $c1;
     private $c2;
     private $c3;
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.email');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => $this->u2,
                 'email' => 'another@world.com',
@@ -66,13 +68,13 @@ class UUIDTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments', ['method' => Select\JoinableLoader::INLOAD])->orderBy('user.email');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => $this->u2,
                 'email' => 'another@world.com',
@@ -104,7 +106,7 @@ class UUIDTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAccessRelated(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -114,18 +116,18 @@ class UUIDTest extends OrmTestCase
          */
         [$b, $a] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
-        \Testo\Assert::instanceOf($a->comments, Collection::class);
-        \Testo\Assert::instanceOf($b->comments, Collection::class);
+        Assert::instanceOf($a->comments, Collection::class);
+        Assert::instanceOf($b->comments, Collection::class);
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 0);
 
-        \Testo\Assert::equals($a->comments[0]->message, 'msg 1');
-        \Testo\Assert::equals($a->comments[1]->message, 'msg 2');
-        \Testo\Assert::equals($a->comments[2]->message, 'msg 3');
+        Assert::equals($a->comments[0]->message, 'msg 1');
+        Assert::equals($a->comments[1]->message, 'msg 2');
+        Assert::equals($a->comments[2]->message, 'msg 3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -134,10 +136,11 @@ class UUIDTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->load('comments')->orderBy('user.email')->fetchAll();
+
         QueryAssert::writes(0, fn() => $this->save($a, $b));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithRelations(): void
     {
         $e = new User();
@@ -148,28 +151,30 @@ class UUIDTest extends OrmTestCase
 
         $e->comments[0]->message = 'msg A';
         $e->comments[1]->message = 'msg B';
+
         QueryAssert::writes(3, fn() => $this->save($e));
+
         // consecutive test
         QueryAssert::writes(0, fn() => $this->save($e));
 
-        \Testo\Assert::string($e->id);
-        \Testo\Assert::equals(strlen($e->id), 36);
+        Assert::string($e->id);
+        Assert::equals(strlen($e->id), 36);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($e));
-        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
+        Assert::true($this->orm->getHeap()->has($e));
+        Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($e->comments[0]));
-        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[0])->getStatus(), Node::MANAGED);
-        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[0])->getData()['user_id'], $e->id);
+        Assert::true($this->orm->getHeap()->has($e->comments[0]));
+        Assert::same($this->orm->getHeap()->get($e->comments[0])->getStatus(), Node::MANAGED);
+        Assert::same($this->orm->getHeap()->get($e->comments[0])->getData()['user_id'], $e->id);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($e->comments[1]));
-        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[1])->getStatus(), Node::MANAGED);
-        \Testo\Assert::same($this->orm->getHeap()->get($e->comments[1])->getData()['user_id'], $e->id);
+        Assert::true($this->orm->getHeap()->has($e->comments[1]));
+        Assert::same($this->orm->getHeap()->get($e->comments[1])->getStatus(), Node::MANAGED);
+        Assert::same($this->orm->getHeap()->get($e->comments[1])->getData()['user_id'], $e->id);
 
         $selector = new Select($this->orm, User::class);
         $selector->load('comments');
 
-        \Testo\Assert::equals($selector->wherePK($e->id)->fetchData(), [
+        Assert::equals($selector->wherePK($e->id)->fetchData(), [
             [
                 'id' => $e->id,
                 'email' => 'test@email.com',
@@ -190,7 +195,7 @@ class UUIDTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveChildren(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -211,13 +216,13 @@ class UUIDTest extends OrmTestCase
         /** @var User $e */
         $e = $selector->wherePK($this->u1)->fetchOne();
 
-        \Testo\Assert::count($e->comments, 2);
+        Assert::count($e->comments, 2);
 
-        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
+        Assert::same($e->comments[0]->message, 'msg 1');
+        Assert::same($e->comments[1]->message, 'msg 3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAddAndRemoveChildren(): void
     {
         /** @var User $e */
@@ -231,7 +236,9 @@ class UUIDTest extends OrmTestCase
         $c = new Comment();
         $c->message = 'msg 4';
         $e->comments->add($c);
+
         QueryAssert::writes(2, fn() => $this->save($e));
+
         // consecutive test
         QueryAssert::writes(0, fn() => $this->save($e));
 
@@ -241,14 +248,14 @@ class UUIDTest extends OrmTestCase
         /** @var User $e */
         $e = $selector->wherePK($this->u1)->fetchOne();
 
-        \Testo\Assert::count($e->comments, 3);
+        Assert::count($e->comments, 3);
 
-        \Testo\Assert::same($e->comments[0]->message, 'msg 1');
-        \Testo\Assert::same($e->comments[1]->message, 'msg 3');
-        \Testo\Assert::same($e->comments[2]->message, 'msg 4');
+        Assert::same($e->comments[0]->message, 'msg 1');
+        Assert::same($e->comments[1]->message, 'msg 3');
+        Assert::same($e->comments[2]->message, 'msg 4');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSliceAndSaveToAnotherParent(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -258,8 +265,8 @@ class UUIDTest extends OrmTestCase
          */
         [$b, $a] = $selector->load('comments')->orderBy('user.email')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 0);
 
         $b->comments = $a->comments->slice(0, 2);
         foreach ($b->comments as $c) {
@@ -268,9 +275,11 @@ class UUIDTest extends OrmTestCase
 
         $b->comments[0]->message = 'new b';
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 2);
+
         QueryAssert::writes(2, fn() => $this->save($a, $b));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($a, $b));
 
@@ -285,18 +294,18 @@ class UUIDTest extends OrmTestCase
             'as' => 'comment',
         ])->orderBy('user.email')->fetchAll();
 
-        \Testo\Assert::count($a->comments, 1);
-        \Testo\Assert::count($b->comments, 2);
+        Assert::count($a->comments, 1);
+        Assert::count($b->comments, 2);
 
-        \Testo\Assert::equals($a->comments[0]->id, $this->c3);
+        Assert::equals($a->comments[0]->id, $this->c3);
 
-        \Testo\Assert::equals($b->comments[0]->id, $this->c2);
-        \Testo\Assert::equals($b->comments[1]->id, $this->c1);
+        Assert::equals($b->comments[0]->id, $this->c2);
+        Assert::equals($b->comments[1]->id, $this->c1);
 
-        \Testo\Assert::equals($b->comments[1]->message, 'new b');
+        Assert::equals($b->comments[1]->message, 'new b');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

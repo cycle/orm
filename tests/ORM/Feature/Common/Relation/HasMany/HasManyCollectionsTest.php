@@ -19,19 +19,22 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\CustomCollection;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HasManyCollectionsTest extends OrmTestCase
+final class HasManyCollectionsTest extends OrmTestCase
 {
-
     /**
      * @var CollectionFactoryInterface[]
      */
     private array $collectionFactory = [];
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('collectionTypesProvider')]
+    #[Test]
+    #[DataProvider('collectionTypesProvider')]
     public function testCustomCollectionLoad(?string $factory, bool $lazy, string $class): void
     {
         $this->orm = $this->createOrm()->withSchema(
@@ -44,11 +47,11 @@ class HasManyCollectionsTest extends OrmTestCase
         }
         $res = $select->wherePK(1)->fetchOne();
 
-        \Testo\Assert::instanceOf($res->comments, $class);
+        Assert::instanceOf($res->comments, $class);
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('collectionFactoryProvider')]
+    #[Test]
+    #[DataProvider('collectionFactoryProvider')]
     public function testCustomCollectionPersist(string $factory, string $type): void
     {
         $this->orm = $this->createOrm()->withSchema(
@@ -62,7 +65,9 @@ class HasManyCollectionsTest extends OrmTestCase
         ]);
         $user = $this->orm->make(User::class, ['email' => 'new-test@mail', 'balance' => 101]);
         $user->comments = $comments;
+
         QueryAssert::writes(5, fn() => $this->save($user));
+
         QueryAssert::writes(0, fn() => $this->save($user));
     }
 
@@ -105,7 +110,7 @@ class HasManyCollectionsTest extends OrmTestCase
         ];
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->collectionFactory = [];

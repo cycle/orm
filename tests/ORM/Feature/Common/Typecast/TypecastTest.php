@@ -21,16 +21,18 @@ use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\ParentTypecast;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\User;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\UuidTypecast;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Wrapper;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Attribute\ExceptDriver;
 use Cycle\Testing\Database\Driver;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class TypecastTest extends OrmTestCase
+final class TypecastTest extends OrmTestCase
 {
-
     // Insert command
 
-    #[\Testo\Test]
+    #[Test]
     public function testAIIdTypecastingOnInsert(): void
     {
         $user = new User();
@@ -39,13 +41,13 @@ class TypecastTest extends OrmTestCase
 
         $this->save($user);
 
-        \Testo\Assert::notNull($user->id);
-        \Testo\Assert::numeric($user->id->value);
+        Assert::notNull($user->id);
+        Assert::numeric($user->id->value);
     }
 
     // ORM::make()
 
-    #[\Testo\Test]
+    #[Test]
     #[ExceptDriver(Driver::SQLServer)]
     public function testOrmMakePreparedDataCastFlag(): void
     {
@@ -57,14 +59,14 @@ class TypecastTest extends OrmTestCase
             'balance' => $balanceValue,
         ], typecast: false);
 
-        \Testo\Assert::same($user->id, $idValue);
-        \Testo\Assert::same($user->balance, $balanceValue);
+        Assert::same($user->id, $idValue);
+        Assert::same($user->balance, $balanceValue);
 
         // no exceptions thrown
         $this->save($user);
     }
 
-    #[\Testo\Test]
+    #[Test]
     #[ExceptDriver(Driver::SQLServer)]
     public function testOrmMakeRawDataCastFlag(): void
     {
@@ -74,14 +76,14 @@ class TypecastTest extends OrmTestCase
             'balance' => 50,
         ], typecast: true);
 
-        \Testo\Assert::notNull($user->id);
-        \Testo\Assert::int($user->id->value);
+        Assert::notNull($user->id);
+        Assert::int($user->id->value);
 
         // no exceptions thrown
         $this->save($user);
     }
 
-    #[\Testo\Test]
+    #[Test]
     #[ExceptDriver(Driver::SQLServer)]
     public function testOrmMakeRehydrateRawDataCastFlag(): void
     {
@@ -97,15 +99,15 @@ class TypecastTest extends OrmTestCase
             'balance' => 200,
         ], status: Node::MANAGED, typecast: true);
 
-        \Testo\Assert::same($user2, $user1);
-        \Testo\Assert::notNull($user1->id);
-        \Testo\Assert::same($user1->balance->value, 50, 'non-relation field must not be overwritten');
+        Assert::same($user2, $user1);
+        Assert::notNull($user1->id);
+        Assert::same($user1->balance->value, 50, 'non-relation field must not be overwritten');
 
         // no exceptions thrown
         $this->save($user1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateFromRawDataWithRelations(): void
     {
         $user = $this->orm->make('user', [
@@ -124,7 +126,7 @@ class TypecastTest extends OrmTestCase
         ], typecast: true);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWrongTypecastShouldBeSkipped(): void
     {
         $book = $this->orm->make('book2', [
@@ -133,12 +135,12 @@ class TypecastTest extends OrmTestCase
             'description' => 'Super long description',
         ], typecast: true);
 
-        \Testo\Assert::same($book->id, '15');
-        \Testo\Assert::same($book->title, 'hello world');
-        \Testo\Assert::same($book->description, 'wrong description');
+        Assert::same($book->id, '15');
+        Assert::same($book->title, 'hello world');
+        Assert::same($book->description, 'wrong description');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCompositeTypecastWith(): void
     {
         $book1 = $this->orm->make('book3', [
@@ -150,36 +152,36 @@ class TypecastTest extends OrmTestCase
             'id' => 100,
         ], typecast: true);
 
-        \Testo\Assert::same($book1->id, 'uuid');
-        \Testo\Assert::same($book1->title, ['json']);
+        Assert::same($book1->id, 'uuid');
+        Assert::same($book1->title, ['json']);
 
-        \Testo\Assert::same($book2->id, 'uuid');
-        \Testo\Assert::null($book2->title);
+        Assert::same($book2->id, 'uuid');
+        Assert::null($book2->title);
     }
 
     // Select
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectOne(): void
     {
         $user = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
 
-        \Testo\Assert::notNull($user->id);
-        \Testo\Assert::false(\is_object($user->id->value));
-        \Testo\Assert::equals($user->id->value, 1);
+        Assert::notNull($user->id);
+        Assert::false(\is_object($user->id->value));
+        Assert::equals($user->id->value, 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectMultiple(): void
     {
         $users = (new Select($this->orm, User::class))->orderBy('id', 'asc')->fetchAll();
 
-        \Testo\Assert::notNull($users[0]->id);
-        \Testo\Assert::false(\is_object($users[0]->id->value));
-        \Testo\Assert::equals($users[0]->id->value, 1);
+        Assert::notNull($users[0]->id);
+        Assert::false(\is_object($users[0]->id->value));
+        Assert::equals($users[0]->id->value, 1);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

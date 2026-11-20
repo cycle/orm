@@ -8,15 +8,18 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Regression\Issue71\Entity\Tag;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * Loading a HasMany relation of entities that are loaded through a ManyToMany relation.
  *
  * @link https://github.com/cycle/orm/issues/71
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
     public static function loadMethodProvider(): iterable
     {
         $all = [
@@ -39,8 +42,8 @@ class CaseTest extends OrmTestCase
         yield 'POSTLOAD' => [JoinableLoader::POSTLOAD, $all];
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('loadMethodProvider')]
+    #[Test]
+    #[DataProvider('loadMethodProvider')]
     public function testFetchData(int $method, array $expected): void
     {
         $data = $this->select($method)->fetchData();
@@ -53,11 +56,11 @@ class CaseTest extends OrmTestCase
             }
         }
 
-        \Testo\Assert::same($this->normalize($result), $expected);
+        Assert::same($this->normalize($result), $expected);
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('loadMethodProvider')]
+    #[Test]
+    #[DataProvider('loadMethodProvider')]
     public function testFetchAll(int $method, array $expected): void
     {
         $tags = $this->select($method)->fetchAll();
@@ -72,10 +75,10 @@ class CaseTest extends OrmTestCase
             }
         }
 
-        \Testo\Assert::same($this->normalize($result), $expected);
+        Assert::same($this->normalize($result), $expected);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

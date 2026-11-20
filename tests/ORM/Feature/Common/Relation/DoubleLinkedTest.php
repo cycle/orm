@@ -11,13 +11,15 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class DoubleLinkedTest extends OrmTestCase
+final class DoubleLinkedTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreateDoubleLink(): void
     {
         $c1 = new Cyclic();
@@ -28,16 +30,19 @@ class DoubleLinkedTest extends OrmTestCase
 
         $c1->cyclic = $c2;
         $c2->cyclic = $c1;
+
         QueryAssert::writes(3, fn() => $this->save($c1, $c2));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
-        QueryAssert::reads(0, fn() => \Testo\Assert::same($a->cyclic, $b));
+
+        QueryAssert::reads(0, fn() => Assert::same($a->cyclic, $b));
+
         QueryAssert::writes(0, fn() => $this->save($a, $b));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateDoubleLinkWithInverted(): void
     {
         $c1 = new Cyclic();
@@ -51,18 +56,21 @@ class DoubleLinkedTest extends OrmTestCase
         $c2->cyclic = $c1;
         $c1->other = $c2;
         $c2->other = $c1;
+
         QueryAssert::writes(3, fn() => $this->save($c1, $c2));
+
         QueryAssert::writes(0, fn() => $this->save($c1, $c2));
 
         $this->orm = $this->orm->withHeap(new Heap());
         [$a, $b] = (new Select($this->orm, Cyclic::class))->orderBy('id')->fetchAll();
+
         QueryAssert::reads(0, function () use ($b, $a): void {
-            \Testo\Assert::same($b->cyclic, $a);
-            \Testo\Assert::same($a->cyclic, $b);
+            Assert::same($b->cyclic, $a);
+            Assert::same($a->cyclic, $b);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelfReference(): void
     {
         $c1 = new Cyclic();
@@ -71,6 +79,7 @@ class DoubleLinkedTest extends OrmTestCase
         $c1->name = 'self-reference';
         $c1->cyclic = $c1;
         $c1->other = $c1;
+
         QueryAssert::writes(2, function () use ($c1): void {
             $tr = new Transaction($this->orm);
             $tr->persist($c1);
@@ -80,13 +89,14 @@ class DoubleLinkedTest extends OrmTestCase
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         $a = $selector->orderBy('id')->fetchOne();
+
         QueryAssert::reads(0, function () use ($a): void {
-            \Testo\Assert::same($a->cyclic, $a);
-            \Testo\Assert::same($a->other, $a);
+            Assert::same($a->cyclic, $a);
+            Assert::same($a->other, $a);
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('cyclic', [

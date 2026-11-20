@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Unit\Select\Traits;
 
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
-final class ColumnsTrait
+#[Test]
+final class ColumnsTraitTest
 {
     private const FIELDS = ['id' => 'column_id'];
 
@@ -20,8 +23,7 @@ final class ColumnsTrait
         yield ['', null];
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('getColumnsDataProvider')]
+    #[DataProvider('getColumnsDataProvider')]
     public function testGetColumns(string $input, ?string $expected): void
     {
         $class = $this->prepareClass();
@@ -30,7 +32,7 @@ final class ColumnsTrait
             $class->fieldAlias($input);
         }
 
-        \Testo\Assert::same($class->fieldAlias($input), $expected);
+        Assert::same($class->fieldAlias($input), $expected);
     }
 
     private function prepareClass(): object

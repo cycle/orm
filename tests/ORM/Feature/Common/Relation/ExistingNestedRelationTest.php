@@ -13,18 +13,20 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ExistingNestedRelationTest extends OrmTestCase
+final class ExistingNestedRelationTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreateForExisting(): void
     {
         $u = new User();
         $u->email = 'test@email.com';
         $u->balance = 1000;
+
         QueryAssert::writes(1, function () use (&$tr, $u): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
@@ -42,6 +44,7 @@ class ExistingNestedRelationTest extends OrmTestCase
         $c->message = 'hello world';
 
         $u->addComment($c);
+
         QueryAssert::writes(1, function () use (&$tr, $u): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
@@ -49,7 +52,7 @@ class ExistingNestedRelationTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

@@ -10,11 +10,11 @@ use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Schema;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Lifecycle\BeforeTest;
 
 abstract class StiBaseTest extends OrmTestCase
 {
-
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $factory = (new Factory(

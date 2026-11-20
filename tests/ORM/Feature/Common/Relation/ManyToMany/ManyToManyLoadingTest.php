@@ -6,25 +6,27 @@ namespace Cycle\ORM\Tests\Feature\Common\Relation\ManyToMany;
 
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
-use Cycle\ORM\Relation\BulkLoader;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * This tests provides ability to create deep linked trees using pivoted entity.
  * We did not plan to have such functionality
  * but the side effect of having pivot loader to behave as normal made it possible.
  */
-class ManyToManyLoadingTest extends OrmTestCase
+final class ManyToManyLoadingTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadSortedByPivot(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -34,7 +36,7 @@ class ManyToManyLoadingTest extends OrmTestCase
             },
         ])->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -82,7 +84,7 @@ class ManyToManyLoadingTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadSortedByPivotInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -93,7 +95,7 @@ class ManyToManyLoadingTest extends OrmTestCase
             },
         ])->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -141,10 +143,11 @@ class ManyToManyLoadingTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateRelationSortedByPivot(): void
     {
         $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('tags', [
                 // 'load' => function (Select\QueryBuilder $q): void {
@@ -154,17 +157,17 @@ class ManyToManyLoadingTest extends OrmTestCase
             ])->run());
         QueryAssert::reads(0, function () use ($users): void {
             foreach ($users as $user) {
-                \Testo\Assert::iterable($user->tags);
-                \Testo\Assert::notBlank($user->tags);
+                Assert::iterable($user->tags);
+                Assert::notBlank($user->tags);
                 // Check order
                 if (\count($user->tags) > 1) {
-                    \Testo\Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan($user->tags->offsetGet(1)->id);
+                    Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan($user->tags->offsetGet(1)->id);
                 }
             }
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

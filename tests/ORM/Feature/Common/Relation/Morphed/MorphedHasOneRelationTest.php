@@ -7,26 +7,28 @@ namespace Cycle\ORM\Tests\Feature\Common\Relation\Morphed;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
-use Cycle\ORM\Relation\BulkLoader;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class MorphedHasOneRelationTest extends OrmTestCase
+final class MorphedHasOneRelationTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -53,13 +55,13 @@ class MorphedHasOneRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelationAnother(): void
     {
         $selector = new Select($this->orm, Post::class);
         $selector->load('image')->orderBy('post.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -106,7 +108,7 @@ class MorphedHasOneRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchOverlapping(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -115,7 +117,7 @@ class MorphedHasOneRelationTest extends OrmTestCase
             ->orderBy('user.id');
 
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -188,26 +190,27 @@ class MorphedHasOneRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::instanceOf($a->image, Image::class);
-        \Testo\Assert::instanceOf($b->image, Image::class);
+        Assert::instanceOf($a->image, Image::class);
+        Assert::instanceOf($b->image, Image::class);
 
-        \Testo\Assert::same($a->image->url, 'user-image.png');
-        \Testo\Assert::same($b->image->url, 'user-2-image.png');
+        Assert::same($a->image->url, 'user-image.png');
+        Assert::same($b->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('image')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
+
         QueryAssert::writes(0, function () use ($a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
@@ -216,7 +219,7 @@ class MorphedHasOneRelationTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSetNull(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -224,6 +227,7 @@ class MorphedHasOneRelationTest extends OrmTestCase
         [$a, $b] = $selector->fetchAll();
 
         $a->image = null;
+
         QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
@@ -242,11 +246,11 @@ class MorphedHasOneRelationTest extends OrmTestCase
         $selector->load('image')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::same($a->image, null);
-        \Testo\Assert::same($b->image->url, 'user-2-image.png');
+        Assert::same($a->image, null);
+        Assert::same($b->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testExchangeParentsSameType(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -254,12 +258,14 @@ class MorphedHasOneRelationTest extends OrmTestCase
         [$a, $b] = $selector->fetchAll();
 
         [$a->image, $b->image] = [$b->image, $a->image];
+
         QueryAssert::writes(2, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
             $tr->persist($b);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
@@ -273,11 +279,11 @@ class MorphedHasOneRelationTest extends OrmTestCase
         $selector->load('image')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::same($b->image->url, 'user-image.png');
-        \Testo\Assert::same($a->image->url, 'user-2-image.png');
+        Assert::same($b->image->url, 'user-image.png');
+        Assert::same($a->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testReplaceExisted(): void
     {
         $count = (new Select($this->orm, Image::class))->count();
@@ -288,11 +294,13 @@ class MorphedHasOneRelationTest extends OrmTestCase
 
         $u->image = new Image();
         $u->image->url = 'new.png';
+
         QueryAssert::writes(2, function () use (&$tr, $u): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $u): void {
             $tr = new Transaction($this->orm);
@@ -305,11 +313,11 @@ class MorphedHasOneRelationTest extends OrmTestCase
         $selector->load('image');
         $u = $selector->wherePK(1)->fetchOne();
 
-        \Testo\Assert::same($u->image->url, 'new.png');
-        \Testo\Assert::same((new Select($this->orm, Image::class))->count(), $count);
+        Assert::same($u->image->url, 'new.png');
+        Assert::same((new Select($this->orm, Image::class))->count(), $count);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithRelated(): void
     {
         $schemaArray = $this->getSchemaArray();
@@ -322,7 +330,9 @@ class MorphedHasOneRelationTest extends OrmTestCase
 
         $p->image = new Image();
         $p->image->url = 'new-post.png';
+
         QueryAssert::writes(2, fn() => $this->save($p));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($p));
 
@@ -331,11 +341,11 @@ class MorphedHasOneRelationTest extends OrmTestCase
             ->load('image')
             ->wherePK(5)->fetchOne();
 
-        \Testo\Assert::same($p->title, 'post title');
-        \Testo\Assert::same($p->image->url, 'new-post.png');
+        Assert::same($p->title, 'post title');
+        Assert::same($p->image->url, 'new-post.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithRelatedAndBelongsToUser(): void
     {
         $schemaArray = $this->getSchemaArray();
@@ -360,7 +370,9 @@ class MorphedHasOneRelationTest extends OrmTestCase
 
         $p->image = new Image();
         $p->image->url = 'new-post.png';
+
         QueryAssert::writes(3, fn() => $this->save($p));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($p));
 
@@ -369,11 +381,11 @@ class MorphedHasOneRelationTest extends OrmTestCase
             ->load('image')
             ->wherePK(5)->fetchOne();
 
-        \Testo\Assert::same($p->title, 'post title');
-        \Testo\Assert::same($p->image->url, 'new-post.png');
+        Assert::same($p->title, 'post title');
+        Assert::same($p->image->url, 'new-post.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnotherParent(): void
     {
         $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
@@ -381,6 +393,7 @@ class MorphedHasOneRelationTest extends OrmTestCase
 
         $u->image = $p->image;
         $p->image = null;
+
         QueryAssert::writes(2, function () use ($u, $p): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
@@ -393,23 +406,25 @@ class MorphedHasOneRelationTest extends OrmTestCase
         $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 1]);
 
-        \Testo\Assert::same($u->image->url, 'post-image.png');
-        \Testo\Assert::same($p->image, null);
+        Assert::same($u->image->url, 'post-image.png');
+        Assert::same($p->image, null);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParents(): void
     {
         $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
 
         [$u->image, $p->image] = [$p->image, $u->image];
+
         QueryAssert::writes(2, function () use (&$tr, $u, $p): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
             $tr->persist($p);
             $tr->run();
         });
+
         // no changes expected
         QueryAssert::writes(0, function () use (&$tr, $u, $p): void {
             $tr = new Transaction($this->orm);
@@ -423,44 +438,47 @@ class MorphedHasOneRelationTest extends OrmTestCase
         $u = (new Select($this->orm, User::class))->load('image')->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->load('image')->fetchOne(['post.id' => 2]);
 
-        \Testo\Assert::same($u->image->url, 'post-2-image.png');
-        \Testo\Assert::same($p->image->url, 'user-image.png');
+        Assert::same($u->image->url, 'post-2-image.png');
+        Assert::same($p->image->url, 'user-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateRelation(): void
     {
         $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)->load('image')->run());
+
         QueryAssert::reads(0, function () use ($users): void {
             foreach ($users as $user) {
-                \Testo\Assert::notNull($user->image);
+                Assert::notNull($user->image);
             }
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateNestedRelation(): void
     {
         $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('posts.image')
             ->run());
         QueryAssert::reads(0, function () use ($users): void {
             foreach ($users as $user) {
-                \Testo\Assert::iterable($user->posts);
+                Assert::iterable($user->posts);
                 foreach ($user->posts as $post) {
                     // Post 4 doesn't have an image
                     if ($post->id !== 4) {
-                        \Testo\Assert::notNull($post->image);
-                        \Testo\Assert::instanceOf($post->image, Image::class);
+                        Assert::notNull($post->image);
+                        Assert::instanceOf($post->image, Image::class);
                     }
                 }
             }
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

@@ -10,32 +10,35 @@ use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Collection\Pivoted\PivotedStorage;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
-class DoctrineCollectionFactoryTest extends BaseTest
+final class DoctrineCollectionFactoryTest extends BaseTest
 {
-    #[\Testo\Test]
+    #[Test]
     public function testGetInterface(): void
     {
-        \Testo\Assert::same($this->getFactory()->getInterface(), Collection::class);
+        Assert::same($this->getFactory()->getInterface(), Collection::class);
     }
 
     /**
      * @param mixed $data
      */
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('collectionDataProvider')]
+    #[Test]
+    #[DataProvider('collectionDataProvider')]
     public function testCollectShouldReturnArray($data): void
     {
         $collection = $this->getFactory()->collect($data);
 
-        \Testo\Assert::instanceOf($collection, ArrayCollection::class);
-        \Testo\Assert::same($collection->toArray(), [
+        Assert::instanceOf($collection, ArrayCollection::class);
+        Assert::same($collection->toArray(), [
             'foo' => 'bar',
             'baz' => 'bar',
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCollectPivotStorageWithArrayCollection(): void
     {
         $collection = $this->getFactory()->collect(
@@ -45,11 +48,11 @@ class DoctrineCollectionFactoryTest extends BaseTest
             ]),
         );
 
-        \Testo\Assert::instanceOf($collection, PivotedCollection::class);
-        \Testo\Assert::same($collection->toArray(), $array);
+        Assert::instanceOf($collection, PivotedCollection::class);
+        Assert::same($collection->toArray(), $array);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCollectPivotStorageWithPivotedCollection(): void
     {
         $collection = $this->getFactory()
@@ -61,8 +64,8 @@ class DoctrineCollectionFactoryTest extends BaseTest
                 ]),
             );
 
-        \Testo\Assert::instanceOf($collection, CustomPivotedCollection::class);
-        \Testo\Assert::same($collection->toArray(), $array);
+        Assert::instanceOf($collection, CustomPivotedCollection::class);
+        Assert::same($collection->toArray(), $array);
     }
 
     protected function getFactory(): CollectionFactoryInterface

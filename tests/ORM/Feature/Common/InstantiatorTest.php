@@ -12,21 +12,23 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\WithConstructor;
 use Cycle\ORM\Transaction;
-use Doctrine\Common\Collections\ArrayCollection;
 use Cycle\Testing\ORM\OrmTestCase;
+use Doctrine\Common\Collections\ArrayCollection;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class InstantiatorTest extends OrmTestCase
+final class InstantiatorTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelation(): void
     {
         $u = $this->orm->make(WithConstructor::class);
-        \Testo\Assert::instanceOf($u->comments, ArrayCollection::class);
-        \Testo\Assert::null($u->called);
+        Assert::instanceOf($u->comments, ArrayCollection::class);
+        Assert::null($u->called);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testConstructor(): void
     {
         $u = new WithConstructor('email');
@@ -38,10 +40,10 @@ class InstantiatorTest extends OrmTestCase
         $selector = new Select(clone $this->orm, 'user');
         $u = $selector->fetchOne();
 
-        \Testo\Assert::same($u->email, 'email');
+        Assert::same($u->email, 'email');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

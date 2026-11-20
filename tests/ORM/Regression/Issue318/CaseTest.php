@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Regression\Issue318;
 
-use Ramsey\Uuid\Uuid;
 use Cycle\Testing\ORM\OrmTestCase;
+use Ramsey\Uuid\Uuid;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * @link https://github.com/cycle/orm/issues/318
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         $groupUuid = Uuid::uuid4();
@@ -36,10 +38,10 @@ class CaseTest extends OrmTestCase
             ->findByPK($userUuid);
         $groups = $user->groups;
 
-        \Testo\Assert::equals($groups[0]->uuid, $groupUuid);
+        Assert::equals($groups[0]->uuid, $groupUuid);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

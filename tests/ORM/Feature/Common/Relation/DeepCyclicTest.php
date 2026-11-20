@@ -11,13 +11,15 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class DeepCyclicTest extends OrmTestCase
+final class DeepCyclicTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreateDeepCyclic(): void
     {
         $c1 = new Cyclic('C1');
@@ -34,6 +36,7 @@ class DeepCyclicTest extends OrmTestCase
         $c2->other = $c3;
         $c3->other = $c4;
         $c4->other = $c2;
+
         QueryAssert::writes(7, fn() => $this->save($c1, $c2, $c3, $c4, $c5));
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -44,22 +47,22 @@ class DeepCyclicTest extends OrmTestCase
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        \Testo\Assert::same('C1', $c1->name);
-        \Testo\Assert::same('C2', $c2->name);
-        \Testo\Assert::same('C3', $c3->name);
-        \Testo\Assert::same('C4', $c4->name);
-        \Testo\Assert::same('C5', $c5->name);
+        Assert::same('C1', $c1->name);
+        Assert::same('C2', $c2->name);
+        Assert::same('C3', $c3->name);
+        Assert::same('C4', $c4->name);
+        Assert::same('C5', $c5->name);
 
-        \Testo\Assert::same($c5, $c1->cyclic);
-        \Testo\Assert::same($c1, $c5->cyclic);
+        Assert::same($c5, $c1->cyclic);
+        Assert::same($c1, $c5->cyclic);
 
-        \Testo\Assert::same($c3, $c2->other);
-        \Testo\Assert::same($c4, $c3->other);
-        \Testo\Assert::same($c2, $c4->other);
+        Assert::same($c3, $c2->other);
+        Assert::same($c4, $c3->other);
+        Assert::same($c2, $c4->other);
     }
 
     // make sure that graph transformation is homogeneous
-    #[\Testo\Test]
+    #[Test]
     public function testCreateDeepCyclicPartial(): void
     {
         $c1 = new Cyclic('C1');
@@ -76,6 +79,7 @@ class DeepCyclicTest extends OrmTestCase
         $c2->other = $c3;
         $c3->other = $c4;
         $c4->other = $c2;
+
         QueryAssert::writes(7, function () use ($c1, $c2): void {
             $tr = new Transaction($this->orm);
             $tr->persist($c1);
@@ -91,22 +95,22 @@ class DeepCyclicTest extends OrmTestCase
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        \Testo\Assert::same('C1', $c1->name);
-        \Testo\Assert::same('C2', $c2->name);
-        \Testo\Assert::same('C3', $c3->name);
-        \Testo\Assert::same('C4', $c4->name);
-        \Testo\Assert::same('C5', $c5->name);
+        Assert::same('C1', $c1->name);
+        Assert::same('C2', $c2->name);
+        Assert::same('C3', $c3->name);
+        Assert::same('C4', $c4->name);
+        Assert::same('C5', $c5->name);
 
-        \Testo\Assert::same($c5, $c1->cyclic);
-        \Testo\Assert::same($c1, $c5->cyclic);
+        Assert::same($c5, $c1->cyclic);
+        Assert::same($c1, $c5->cyclic);
 
-        \Testo\Assert::same($c3, $c2->other);
-        \Testo\Assert::same($c4, $c3->other);
-        \Testo\Assert::same($c2, $c4->other);
+        Assert::same($c3, $c2->other);
+        Assert::same($c4, $c3->other);
+        Assert::same($c2, $c4->other);
     }
 
     // make sure that graph transformation is homogeneous
-    #[\Testo\Test]
+    #[Test]
     public function testCreateDeepCyclicPartial2(): void
     {
         $c1 = new Cyclic('C1');
@@ -123,6 +127,7 @@ class DeepCyclicTest extends OrmTestCase
         $c2->other = $c3;
         $c3->other = $c4;
         $c4->other = $c2;
+
         QueryAssert::writes(7, function () use ($c5, $c4): void {
             $tr = new Transaction($this->orm);
             $tr->persist($c5);
@@ -138,22 +143,22 @@ class DeepCyclicTest extends OrmTestCase
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        \Testo\Assert::same('C1', $c1->name);
-        \Testo\Assert::same('C2', $c2->name);
-        \Testo\Assert::same('C3', $c3->name);
-        \Testo\Assert::same('C4', $c4->name);
-        \Testo\Assert::same('C5', $c5->name);
+        Assert::same('C1', $c1->name);
+        Assert::same('C2', $c2->name);
+        Assert::same('C3', $c3->name);
+        Assert::same('C4', $c4->name);
+        Assert::same('C5', $c5->name);
 
-        \Testo\Assert::same($c5, $c1->cyclic);
-        \Testo\Assert::same($c1, $c5->cyclic);
+        Assert::same($c5, $c1->cyclic);
+        Assert::same($c1, $c5->cyclic);
 
-        \Testo\Assert::same($c3, $c2->other);
-        \Testo\Assert::same($c4, $c3->other);
-        \Testo\Assert::same($c2, $c4->other);
+        Assert::same($c3, $c2->other);
+        Assert::same($c4, $c3->other);
+        Assert::same($c2, $c4->other);
     }
 
     // make sure that graph transformation is homogeneous
-    #[\Testo\Test]
+    #[Test]
     public function testOverlappingCycles(): void
     {
         $c1 = new Cyclic('C1');
@@ -172,6 +177,7 @@ class DeepCyclicTest extends OrmTestCase
         $c4->other = $c1;
         $c1->other = $c5;
         $c5->other = $c2;
+
         QueryAssert::writes(7, function () use ($c1, $c2, $c3, $c4, $c5): void {
             $tr = new Transaction($this->orm);
             $tr->persist($c1);
@@ -190,23 +196,23 @@ class DeepCyclicTest extends OrmTestCase
             ->orderBy('cyclic.name')
             ->fetchAll();
 
-        \Testo\Assert::same('C1', $c1->name);
-        \Testo\Assert::same('C2', $c2->name);
-        \Testo\Assert::same('C3', $c3->name);
-        \Testo\Assert::same('C4', $c4->name);
-        \Testo\Assert::same('C5', $c5->name);
+        Assert::same('C1', $c1->name);
+        Assert::same('C2', $c2->name);
+        Assert::same('C3', $c3->name);
+        Assert::same('C4', $c4->name);
+        Assert::same('C5', $c5->name);
 
-        \Testo\Assert::same($c5, $c1->cyclic);
-        \Testo\Assert::same($c1, $c5->cyclic);
+        Assert::same($c5, $c1->cyclic);
+        Assert::same($c1, $c5->cyclic);
 
-        \Testo\Assert::same($c3, $c2->other);
-        \Testo\Assert::same($c4, $c3->other);
-        \Testo\Assert::same($c1, $c4->other);
-        \Testo\Assert::same($c5, $c1->other);
-        \Testo\Assert::same($c2, $c5->other);
+        Assert::same($c3, $c2->other);
+        Assert::same($c4, $c3->other);
+        Assert::same($c1, $c4->other);
+        Assert::same($c5, $c1->other);
+        Assert::same($c2, $c5->other);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('cyclic', [

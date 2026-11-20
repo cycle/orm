@@ -14,21 +14,24 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class EmbeddedRelationTest extends OrmTestCase
+final class EmbeddedRelationTest extends OrmTestCase
 {
-
     protected const NULLABLE = false;
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -50,7 +53,7 @@ class EmbeddedRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelation(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -58,24 +61,24 @@ class EmbeddedRelationTest extends OrmTestCase
 
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::instanceOf($a->credentials, UserCredentials::class);
-        \Testo\Assert::instanceOf($b->credentials, UserCredentials::class);
+        Assert::instanceOf($a->credentials, UserCredentials::class);
+        Assert::instanceOf($b->credentials, UserCredentials::class);
 
-        \Testo\Assert::same($a->credentials->username, 'user1');
-        \Testo\Assert::same($b->credentials->username, 'user2');
+        Assert::same($a->credentials->username, 'user1');
+        Assert::same($b->credentials->username, 'user2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelationFetchOne(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
 
-        \Testo\Assert::instanceOf($u->credentials, UserCredentials::class);
-        \Testo\Assert::same($u->credentials->username, 'user1');
+        Assert::instanceOf($u->credentials, UserCredentials::class);
+        Assert::same($u->credentials->username, 'user1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateUserWithEmbedded(): void
     {
         $u = new User();
@@ -83,22 +86,24 @@ class EmbeddedRelationTest extends OrmTestCase
         $u->balance = 900;
         $u->credentials->username = 'user3';
         $u->credentials->password = 'pass3';
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
-        \Testo\Assert::same((int) $u->id, 3);
+        Assert::same((int) $u->id, 3);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u2->id, $u->id);
-        \Testo\Assert::same($u2->credentials->username, 'user3');
+        Assert::equals($u2->id, $u->id);
+        Assert::same($u2->credentials->username, 'user3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrites(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
+
         QueryAssert::writes(0, function () use ($u): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -106,7 +111,7 @@ class EmbeddedRelationTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateEmbeddedValue(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -124,6 +129,7 @@ class EmbeddedRelationTest extends OrmTestCase
                 'id' => $u->id,
             ],
         )->run();
+
         QueryAssert::writes(1, function () use (&$t, $u): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -138,17 +144,18 @@ class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u2->id, $u->id);
-        \Testo\Assert::equals($u2->balance, 800);
-        \Testo\Assert::same($u2->credentials->username, 'altered');
-        \Testo\Assert::same($u2->credentials->password, 'newpass');
+        Assert::equals($u2->id, $u->id);
+        Assert::equals($u2->balance, 800);
+        Assert::same($u2->credentials->username, 'altered');
+        Assert::same($u2->credentials->password, 'newpass');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelationReferenceNothing(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
         QueryAssert::writes(0, function () use ($u): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -156,7 +163,7 @@ class EmbeddedRelationTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateEmbeddedDirectly(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -164,6 +171,7 @@ class EmbeddedRelationTest extends OrmTestCase
             ->orderBy('id', 'ASC')
             ->load('credentials')
             ->fetchOne();
+
         QueryAssert::writes(0, function () use (&$t, $u): void {
             $t = new Transaction($this->orm);
             $t->persist($u->credentials);
@@ -171,6 +179,7 @@ class EmbeddedRelationTest extends OrmTestCase
         });
 
         $u->credentials->username = 'altered';
+
         QueryAssert::writes(1, function () use (&$t, $u): void {
             $t = new Transaction($this->orm);
             $t->persist($u->credentials);
@@ -180,26 +189,27 @@ class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u2->id, $u->id);
-        \Testo\Assert::same($u2->credentials->username, 'altered');
+        Assert::equals($u2->id, $u->id);
+        Assert::same($u2->credentials->username, 'altered');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testResolvePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        \Testo\Assert::same($u->credentials->username, 'user1');
+        Assert::same($u->credentials->username, 'user1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
         $u->credentials->username = 'user3';
+
         QueryAssert::writes(1, function () use ($u): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -209,15 +219,16 @@ class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u2->id, $u->id);
-        \Testo\Assert::same($u2->credentials->username, 'user3');
+        Assert::equals($u2->id, $u->id);
+        Assert::same($u2->credentials->username, 'user3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSavePromise(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
+
         QueryAssert::count(0, 0, function () use ($u): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -225,7 +236,7 @@ class EmbeddedRelationTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMovePromise(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -236,23 +247,24 @@ class EmbeddedRelationTest extends OrmTestCase
 
         $u2Data = $this->extractEntity($u2);
         $u->credentials = $u2Data['credentials'];
+
         QueryAssert::count(1, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u3->id, $u->id);
-        \Testo\Assert::same($u3->credentials->username, 'user2');
+        Assert::equals($u3->id, $u->id);
+        Assert::same($u3->credentials->username, 'user2');
 
         $u4 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
-        \Testo\Assert::equals($u4->id, $u2->id);
-        \Testo\Assert::same($u4->credentials->username, 'user2');
+        Assert::equals($u4->id, $u2->id);
+        Assert::same($u4->credentials->username, 'user2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveLoadedPromise(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -266,23 +278,24 @@ class EmbeddedRelationTest extends OrmTestCase
         $promise->setValue($this->orm->get($promise->getRole(), $promise->getScope(), true));
 
         $u->credentials = $promise;
+
         QueryAssert::count(0, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u3->id, $u->id);
-        \Testo\Assert::same($u3->credentials->username, 'user2');
+        Assert::equals($u3->id, $u->id);
+        Assert::same($u3->credentials->username, 'user2');
 
         $u4 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
-        \Testo\Assert::equals($u4->id, $u2->id);
-        \Testo\Assert::same($u4->credentials->username, 'user2');
+        Assert::equals($u4->id, $u2->id);
+        Assert::same($u4->credentials->username, 'user2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveClonedEmbedding(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -292,6 +305,7 @@ class EmbeddedRelationTest extends OrmTestCase
         $u2 = $selector->load('credentials')->orderBy('id', 'ASC')->wherePK(2)->fetchOne();
 
         $u->credentials = clone $u2->credentials;
+
         QueryAssert::count(0, 1, function () use ($u): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -301,27 +315,27 @@ class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u3->id, $u->id);
-        \Testo\Assert::same($u3->credentials->username, 'user2');
+        Assert::equals($u3->id, $u->id);
+        Assert::same($u3->credentials->username, 'user2');
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u4 = $selector->load('credentials')->wherePK($u2->id)->fetchOne();
 
         // unchanged
-        \Testo\Assert::equals($u4->id, $u2->id);
-        \Testo\Assert::same($u4->credentials->username, 'user2');
+        Assert::equals($u4->id, $u2->id);
+        Assert::same($u4->credentials->username, 'user2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEmbeddable(): void
     {
         $selector = new Select($this->orm, UserCredentials::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
-        \Testo\Assert::same($u->username, 'user1');
+        Assert::same($u->username, 'user1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeWhole(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -330,6 +344,7 @@ class EmbeddedRelationTest extends OrmTestCase
         $u->credentials = new UserCredentials();
         $u->credentials->username = 'abc';
         $u->credentials->password = 'new-pass';
+
         QueryAssert::writes(1, function () use ($u): void {
             $t = new Transaction($this->orm);
             $t->persist($u);
@@ -339,21 +354,22 @@ class EmbeddedRelationTest extends OrmTestCase
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
 
-        \Testo\Assert::equals($u2->id, $u->id);
-        \Testo\Assert::same($u2->credentials->username, 'abc');
-        \Testo\Assert::same($u2->credentials->password, 'new-pass');
+        Assert::equals($u2->id, $u->id);
+        Assert::same($u2->credentials->username, 'abc');
+        Assert::same($u2->credentials->password, 'new-pass');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNullify(): void
     {
-        \Testo\Expect::exception(NullException::class);
+        Expect::exception(NullException::class);
 
         $u = (new Select($this->orm, User::class))
             ->orderBy('id', 'ASC')
             ->fetchOne();
 
         $u->credentials = null;
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
@@ -361,14 +377,14 @@ class EmbeddedRelationTest extends OrmTestCase
             ->wherePK($u->id)
             ->fetchOne();
 
-        \Testo\Assert::equals($u2->id, $u->id);
-        \Testo\Assert::same($u2->credentials->username, 'user3');
+        Assert::equals($u2->id, $u->id);
+        Assert::same($u2->credentials->username, 'user3');
     }
 
     /**
      * If relation property was unset - ignore this field
      */
-    #[\Testo\Test]
+    #[Test]
     public function testUnsetProperty(): void
     {
         /** @var User $user */
@@ -377,6 +393,7 @@ class EmbeddedRelationTest extends OrmTestCase
             ->with('credentials')->fetchOne();
 
         unset($user->credentials);
+
         QueryAssert::writes(0, fn() => $this->save($user));
     }
 
@@ -435,7 +452,7 @@ class EmbeddedRelationTest extends OrmTestCase
     //     $this->assertNumWrites(0);
     // }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [
@@ -465,7 +482,7 @@ class EmbeddedRelationTest extends OrmTestCase
                 Schema::SCHEMA => [],
                 Schema::RELATIONS => [
                     'credentials' => [
-                        Relation::NULLABLE => static::NULLABLE,
+                        Relation::NULLABLE => self::NULLABLE,
                         Relation::TYPE => Relation::EMBEDDED,
                         Relation::TARGET => 'user:credentials',
                         Relation::LOAD => Relation::LOAD_PROMISE,

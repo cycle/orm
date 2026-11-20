@@ -16,23 +16,27 @@ use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserRepository;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class FactoryTest extends OrmTestCase
+final class FactoryTest extends OrmTestCase
 {
     /**
      * @var Factory
      */
     private $factory;
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldMakeDefaultMapper(): void
     {
         $mapper = $this->factory->mapper($this->orm, 'user');
 
-        \Testo\Assert::instanceOf($mapper, Mapper::class);
+        Assert::instanceOf($mapper, Mapper::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldChangeDefaultMapperClass(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
@@ -41,22 +45,22 @@ class FactoryTest extends OrmTestCase
 
         $mapper = $this->factory->mapper($this->orm, 'user');
 
-        \Testo\Assert::instanceOf($mapper, TimestampedMapper::class);
+        Assert::instanceOf($mapper, TimestampedMapper::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldThrowExceptionIfDefaultMapperClassNotImplementMapperInterface(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::MAPPER => User::class,
         ]);
 
-        \Testo\Expect::exception(TypecastException::class);
+        Expect::exception(TypecastException::class);
 
         $this->factory->mapper($this->orm, 'user');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldMakeDefaultRepository(): void
     {
         $result = $this->factory->repository(
@@ -66,10 +70,10 @@ class FactoryTest extends OrmTestCase
             new Select($this->orm, 'user'),
         );
 
-        \Testo\Assert::instanceOf($result, Repository::class);
+        Assert::instanceOf($result, Repository::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldChangeDefaultRepositoryClass(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
@@ -83,30 +87,30 @@ class FactoryTest extends OrmTestCase
             new Select($this->orm, 'user'),
         );
 
-        \Testo\Assert::instanceOf($result, UserRepository::class);
+        Assert::instanceOf($result, UserRepository::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldThrowExceptionIfDefaultRepositoryClassNotImplementRepositoryInterface(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::REPOSITORY => User::class,
         ]);
 
-        \Testo\Expect::exception(TypecastException::class);
+        Expect::exception(TypecastException::class);
 
         $this->factory->repository($this->orm, $this->orm->getSchema(), 'user', new Select($this->orm, 'user'));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldMakeDefaultSource(): void
     {
         $result = $this->factory->source($this->orm->getSchema(), 'user');
 
-        \Testo\Assert::instanceOf($result, Source::class);
+        Assert::instanceOf($result, Source::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldChangeDefaultSourceClass(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
@@ -115,22 +119,22 @@ class FactoryTest extends OrmTestCase
 
         $result = $this->factory->source($this->orm->getSchema(), 'user');
 
-        \Testo\Assert::instanceOf($result, DifferentSource::class);
+        Assert::instanceOf($result, DifferentSource::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testShouldThrowExceptionIfDefaultSourceClassNotImplementSourceInterface(): void
     {
         $this->factory = $this->factory->withDefaultSchemaClasses([
             Schema::SOURCE => User::class,
         ]);
 
-        \Testo\Expect::exception(TypecastException::class);
+        Expect::exception(TypecastException::class);
 
         $this->factory->source($this->orm->getSchema(), 'user');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->orm = $this->withSchema(new Schema([

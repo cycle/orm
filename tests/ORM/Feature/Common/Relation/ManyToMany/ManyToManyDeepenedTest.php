@@ -17,24 +17,26 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * This tests provides ability to create deep linked trees using pivoted entity.
  * We did not plan to have such functionality
  * but the side effect of having pivot loader to behave as normal made it possible.
  */
-class ManyToManyDeepenedTest extends OrmTestCase
+final class ManyToManyDeepenedTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags.@.image')->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(typecast: true), [
+        Assert::same($selector->fetchData(typecast: true), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -93,7 +95,7 @@ class ManyToManyDeepenedTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -102,7 +104,7 @@ class ManyToManyDeepenedTest extends OrmTestCase
             ->load('tags.@.image')
             ->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -161,7 +163,7 @@ class ManyToManyDeepenedTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelationPostload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -170,7 +172,7 @@ class ManyToManyDeepenedTest extends OrmTestCase
             ->load('tags.@.image', ['method' => Select\AbstractLoader::POSTLOAD])
             ->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -229,7 +231,7 @@ class ManyToManyDeepenedTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAccessLoadedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -241,34 +243,34 @@ class ManyToManyDeepenedTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 1);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 1);
 
-        \Testo\Assert::instanceOf($a->tags, PivotedCollectionInterface::class);
-        \Testo\Assert::instanceOf($b->tags, PivotedCollectionInterface::class);
+        Assert::instanceOf($a->tags, PivotedCollectionInterface::class);
+        Assert::instanceOf($b->tags, PivotedCollectionInterface::class);
 
-        \Testo\Assert::true($a->tags->hasPivot($a->tags[0]));
-        \Testo\Assert::true($a->tags->hasPivot($a->tags[1]));
-        \Testo\Assert::true($b->tags->hasPivot($b->tags[0]));
+        Assert::true($a->tags->hasPivot($a->tags[0]));
+        Assert::true($a->tags->hasPivot($a->tags[1]));
+        Assert::true($b->tags->hasPivot($b->tags[0]));
 
-        \Testo\Assert::false($b->tags->hasPivot($a->tags[0]));
-        \Testo\Assert::false($b->tags->hasPivot($a->tags[1]));
-        \Testo\Assert::false($a->tags->hasPivot($b->tags[0]));
+        Assert::false($b->tags->hasPivot($a->tags[0]));
+        Assert::false($b->tags->hasPivot($a->tags[1]));
+        Assert::false($a->tags->hasPivot($b->tags[0]));
 
-        \Testo\Assert::instanceOf($a->tags->getPivot($a->tags[0]), TagContext::class);
-        \Testo\Assert::instanceOf($a->tags->getPivot($a->tags[1]), TagContext::class);
-        \Testo\Assert::instanceOf($b->tags->getPivot($b->tags[0]), TagContext::class);
+        Assert::instanceOf($a->tags->getPivot($a->tags[0]), TagContext::class);
+        Assert::instanceOf($a->tags->getPivot($a->tags[1]), TagContext::class);
+        Assert::instanceOf($b->tags->getPivot($b->tags[0]), TagContext::class);
 
-        \Testo\Assert::equals($a->tags->getPivot($a->tags[0])->as, 'primary');
-        \Testo\Assert::equals($a->tags->getPivot($a->tags[1])->as, 'secondary');
-        \Testo\Assert::equals($b->tags->getPivot($b->tags[0])->as, 'primary');
+        Assert::equals($a->tags->getPivot($a->tags[0])->as, 'primary');
+        Assert::equals($a->tags->getPivot($a->tags[1])->as, 'secondary');
+        Assert::equals($b->tags->getPivot($b->tags[0])->as, 'primary');
 
-        \Testo\Assert::equals($a->tags->getPivot($a->tags[0])->image->url, 'first.jpg');
-        \Testo\Assert::null($a->tags->getPivot($a->tags[1])->image);
-        \Testo\Assert::equals($b->tags->getPivot($b->tags[0])->image->url, 'second.png');
+        Assert::equals($a->tags->getPivot($a->tags[0])->image->url, 'first.jpg');
+        Assert::null($a->tags->getPivot($a->tags[1])->image);
+        Assert::equals($b->tags->getPivot($b->tags[0])->image->url, 'second.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateLoadedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -280,13 +282,14 @@ class ManyToManyDeepenedTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 1);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 1);
 
-        \Testo\Assert::instanceOf($a->tags, PivotedCollectionInterface::class);
-        \Testo\Assert::instanceOf($b->tags, PivotedCollectionInterface::class);
+        Assert::instanceOf($a->tags, PivotedCollectionInterface::class);
+        Assert::instanceOf($b->tags, PivotedCollectionInterface::class);
 
         $b->tags->getPivot($b->tags[0])->image->url = 'new.gif';
+
         QueryAssert::writes(1, function () use ($b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($b);
@@ -301,10 +304,10 @@ class ManyToManyDeepenedTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
-        \Testo\Assert::same($b->tags->getPivot($b->tags[0])->image->url, 'new.gif');
+        Assert::same($b->tags->getPivot($b->tags[0])->image->url, 'new.gif');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFilterByPivotedBranch(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -313,7 +316,7 @@ class ManyToManyDeepenedTest extends OrmTestCase
             ->where('tags.@.image.url', 'second.png')
             ->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 2,
                 'email' => 'another@world.com',
@@ -339,7 +342,7 @@ class ManyToManyDeepenedTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

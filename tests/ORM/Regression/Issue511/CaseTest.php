@@ -6,14 +6,16 @@ namespace Cycle\ORM\Tests\Regression\Issue511;
 
 use Cycle\ORM\Select;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * @link https://github.com/cycle/orm/issues/511
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         (new Select($this->orm, Entity\User::class))
@@ -22,10 +24,10 @@ class CaseTest extends OrmTestCase
             ->load('passport')
             ->fetchAll();
 
-        \Testo\Assert::true(true);
+        Assert::true(true);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

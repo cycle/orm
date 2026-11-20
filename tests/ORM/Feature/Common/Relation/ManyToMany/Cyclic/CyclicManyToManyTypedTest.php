@@ -12,11 +12,13 @@ use Cycle\ORM\Tests\Fixtures\TagContextTyped;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Core\Exception\SkipTest;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CyclicManyToManyTypedTest extends OrmTestCase
+final class CyclicManyToManyTypedTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreateCyclicWithExisting(): void
     {
         $u = new User();
@@ -34,11 +36,11 @@ class CyclicManyToManyTypedTest extends OrmTestCase
         $t->run();
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         if (!version_compare(PHP_VERSION, '7.4', '>=')) {
-            throw new \Testo\Core\Exception\SkipTest('PHP7.4 required');
+            throw new SkipTest('PHP7.4 required');
             return;
         }
         $this->makeTable('user', [

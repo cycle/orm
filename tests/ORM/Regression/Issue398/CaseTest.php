@@ -7,14 +7,16 @@ namespace Cycle\ORM\Tests\Regression\Issue398;
 use Cycle\Database\Injection\Fragment;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Issue398\Entity\Product;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Attribute\ExceptDriver;
 use Cycle\Testing\Database\Driver;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelectWithJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -23,10 +25,10 @@ class CaseTest extends OrmTestCase
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        \Testo\Assert::same($product->title, 'Product-2');
+        Assert::same($product->title, 'Product-2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectWithInnerJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -35,10 +37,10 @@ class CaseTest extends OrmTestCase
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        \Testo\Assert::same($product->title, 'Product-2');
+        Assert::same($product->title, 'Product-2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     #[ExceptDriver(Driver::SQLite)]
     public function testSelectWithRightJoin(): void
     {
@@ -48,10 +50,10 @@ class CaseTest extends OrmTestCase
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        \Testo\Assert::same($product->title, 'Product-2');
+        Assert::same($product->title, 'Product-2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectWithLeftJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -60,10 +62,10 @@ class CaseTest extends OrmTestCase
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        \Testo\Assert::same($product->title, 'Product-2');
+        Assert::same($product->title, 'Product-2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     #[ExceptDriver(Driver::SQLite, Driver::MySQL)]
     public function testSelectWithFullJoin(): void
     {
@@ -73,10 +75,10 @@ class CaseTest extends OrmTestCase
             ->where(new Fragment('fp.filter_id = ?', 5))
             ->fetchOne();
 
-        \Testo\Assert::same($product->title, 'Product-2');
+        Assert::same($product->title, 'Product-2');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTables();

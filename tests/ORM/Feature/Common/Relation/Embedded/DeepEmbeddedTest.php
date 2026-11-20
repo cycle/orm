@@ -12,17 +12,19 @@ use Cycle\ORM\Tests\Fixtures\Group;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class DeepEmbeddedTest extends OrmTestCase
+final class DeepEmbeddedTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, Group::class);
         $selector->load('users')->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'name' => 'first',
@@ -68,13 +70,13 @@ class DeepEmbeddedTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithRelationIgnoreEager(): void
     {
         $selector = new Select($this->orm, Group::class);
         $selector->with('users')->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'name' => 'first',
@@ -86,10 +88,10 @@ class DeepEmbeddedTest extends OrmTestCase
         ]);
 
         // only parent entity!
-        \Testo\Assert::count($selector->buildQuery()->getColumns(), 2);
+        Assert::count($selector->buildQuery()->getColumns(), 2);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchDataViaJoin(): void
     {
         $selector = new Select($this->orm, Group::class);
@@ -98,7 +100,7 @@ class DeepEmbeddedTest extends OrmTestCase
             ->orderBy('id', 'ASC')
             ->orderBy('users.id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'name' => 'first',
@@ -143,10 +145,10 @@ class DeepEmbeddedTest extends OrmTestCase
             ],
         ]);
 
-        \Testo\Assert::count($selector->buildQuery()->getColumns(), 8);
+        Assert::count($selector->buildQuery()->getColumns(), 8);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable(

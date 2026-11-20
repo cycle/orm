@@ -13,20 +13,22 @@ use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class InverseRelationTest extends OrmTestCase
+final class InverseRelationTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = (new Select($this->orm, User::class))
             ->load('profile.user')
             ->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -60,7 +62,7 @@ class InverseRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelfReferenceEntity(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -68,11 +70,11 @@ class InverseRelationTest extends OrmTestCase
 
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::same($a->profile->user, $a);
-        \Testo\Assert::same($b->profile->user, $b);
+        Assert::same($a->profile->user, $a);
+        Assert::same($b->profile->user, $b);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCyclicThoughtInverse(): void
     {
         $u = new User();
@@ -83,24 +85,25 @@ class InverseRelationTest extends OrmTestCase
 
         // cyclic
         $u->profile->user = $u;
+
         QueryAssert::writes(2, function () use ($u): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
             $tr->run();
         });
 
-        \Testo\Assert::equals($u->id, 3);
-        \Testo\Assert::equals($u->profile->id, 4);
+        Assert::equals($u->id, 3);
+        Assert::equals($u->profile->id, 4);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('profile.user')->wherePK(3)->fetchOne();
 
-        \Testo\Assert::same($u->profile->user, $u);
+        Assert::same($u->profile->user, $u);
 
         $this->orm = $this->orm->withHeap(new Heap());
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

@@ -20,14 +20,18 @@ use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
 use Cycle\Testing\Database\Memory;
 use Cycle\Testing\Database\Schema\TableBuilder;
+use Testo\Assert;
+use Testo\Assert\ExpectNoAssertions;
+use Testo\Expect;
+use Testo\Test;
 
-class BulkLoaderTest
+#[Test]
+final class BulkLoaderTest
 {
     /**
      * Test that BulkLoader throws exception when no entities are provided
      */
-    #[\Testo\Test]
-    #[\Testo\Assert\ExpectNoAssertions]
+    #[ExpectNoAssertions]
     public function testCollectThrowsExceptionWhenNoEntitiesProvided(): void
     {
         $orm = $this->createORM();
@@ -39,10 +43,9 @@ class BulkLoaderTest
     /**
      * Test that BulkLoader throws exception when entities have different roles
      */
-    #[\Testo\Test]
     public function testCollectThrowsExceptionWhenEntitiesHaveDifferentRoles(): void
     {
-        \Testo\Expect::exception(\InvalidArgumentException::class)->withMessageContaining('All entities must belong to the same role.');
+        Expect::exception(\InvalidArgumentException::class)->withMessageContaining('All entities must belong to the same role.');
 
         $orm = $this->createORM();
 
@@ -56,10 +59,9 @@ class BulkLoaderTest
     /**
      * Test run throws exception when entity node not found in heap
      */
-    #[\Testo\Test]
     public function testRunThrowsExceptionWhenEntityNodeNotFoundInHeap(): void
     {
-        \Testo\Expect::exception(\LogicException::class)->withMessageContaining('Entity node not found in the heap.');
+        Expect::exception(\LogicException::class)->withMessageContaining('Entity node not found in the heap.');
 
         $orm = $this->createORM();
         $entity = new User();
@@ -72,7 +74,6 @@ class BulkLoaderTest
     /**
      * Test collect with a single entity
      */
-    #[\Testo\Test]
     public function testCollectWithSingleEntity(): void
     {
         $orm = $this->createORM();
@@ -81,13 +82,12 @@ class BulkLoaderTest
         $loader = new BulkLoader($orm);
         $result = $loader->collect($entity);
 
-        \Testo\Assert::instanceOf($result, BulkLoader::class);
+        Assert::instanceOf($result, BulkLoader::class);
     }
 
     /**
      * Test collect with multiple entities of the same role
      */
-    #[\Testo\Test]
     public function testCollectWithMultipleEntitiesOfSameRole(): void
     {
         $orm = $this->createORM();
@@ -99,13 +99,12 @@ class BulkLoaderTest
         $loader = new BulkLoader($orm);
         $result = $loader->collect($entity1, $entity2, $entity3);
 
-        \Testo\Assert::instanceOf($result, BulkLoader::class);
+        Assert::instanceOf($result, BulkLoader::class);
     }
 
     /**
      * Test collect returns a new instance (immutability)
      */
-    #[\Testo\Test]
     public function testCollectReturnsNewInstance(): void
     {
         $orm = $this->createORM();
@@ -114,13 +113,12 @@ class BulkLoaderTest
         $entity = new User();
         $loader2 = $loader1->collect($entity);
 
-        \Testo\Assert::notSame($loader2, $loader1, 'collect() should return a new instance');
+        Assert::notSame($loader2, $loader1, 'collect() should return a new instance');
     }
 
     /**
      * Test chaining multiple collect calls
      */
-    #[\Testo\Test]
     public function testChainingMultipleCollectCalls(): void
     {
         $orm = $this->createORM();
@@ -132,21 +130,20 @@ class BulkLoaderTest
         $loader1 = $loader->collect($entity1);
         $loader2 = $loader1->collect($entity2);
 
-        \Testo\Assert::notSame($loader1, $loader);
-        \Testo\Assert::notSame($loader2, $loader1);
-        \Testo\Assert::instanceOf($loader2, BulkLoader::class);
+        Assert::notSame($loader1, $loader);
+        Assert::notSame($loader2, $loader1);
+        Assert::instanceOf($loader2, BulkLoader::class);
     }
 
     /**
      * Test collect with empty array (edge case)
      */
-    #[\Testo\Test]
     public function testCollectWithEmptyArrayUnpacking(): void
     {
         $orm = $this->createORM();
         $loader = (new BulkLoader($orm))->collect();
 
-        \Testo\Assert::instanceOf($loader, RelationLoaderInterface::class);
+        Assert::instanceOf($loader, RelationLoaderInterface::class);
         $loader->load('profile');
         $loader->run();
     }
@@ -154,7 +151,6 @@ class BulkLoaderTest
     /**
      * Test that collect merges entities from multiple calls
      */
-    #[\Testo\Test]
     public function testCollectMergesEntities(): void
     {
         $orm = $this->createORM();
@@ -168,13 +164,12 @@ class BulkLoaderTest
         $loader = $loader->collect($entity2, $entity3);
 
         // Should not throw exception - all entities should be collected
-        \Testo\Assert::instanceOf($loader, BulkLoader::class);
+        Assert::instanceOf($loader, BulkLoader::class);
     }
 
     /**
      * Test load returns the same instance (fluent interface)
      */
-    #[\Testo\Test]
     public function testLoadReturnsSameInstance(): void
     {
         $orm = $this->createORM();
@@ -184,13 +179,12 @@ class BulkLoaderTest
         $loader = $loader->collect($entity);
         $loaderAfterLoad = $loader->load('profile');
 
-        \Testo\Assert::same($loaderAfterLoad, $loader, 'load() should return the same instance');
+        Assert::same($loaderAfterLoad, $loader, 'load() should return the same instance');
     }
 
     /**
      * Test chaining load calls
      */
-    #[\Testo\Test]
     public function testChainingLoadCalls(): void
     {
         $orm = $this->createORM();
@@ -200,13 +194,12 @@ class BulkLoaderTest
         $loader = $loader->collect($entity);
         $result = $loader->load('profile')->load('profile'); // Load same relation twice
 
-        \Testo\Assert::same($result, $loader);
+        Assert::same($result, $loader);
     }
 
     /**
      * Test load with custom options
      */
-    #[\Testo\Test]
     public function testLoadWithCustomOptions(): void
     {
         $orm = $this->createORM();
@@ -216,13 +209,12 @@ class BulkLoaderTest
         $loader = $loader->collect($entity);
         $result = $loader->load('profile', ['where' => ['id' => 1]]);
 
-        \Testo\Assert::same($result, $loader);
+        Assert::same($result, $loader);
     }
 
     /**
      * Test load with LoadOptions DTO
      */
-    #[\Testo\Test]
     public function testLoadWithLoadOptionsDTO(): void
     {
         $orm = $this->createORM();
@@ -232,13 +224,12 @@ class BulkLoaderTest
         $loader = $loader->collect($entity);
         $result = $loader->load('profile', new LoadOptions());
 
-        \Testo\Assert::same($result, $loader);
+        Assert::same($result, $loader);
     }
 
     /**
      * Test load with HasOneLoadOptions DTO
      */
-    #[\Testo\Test]
     public function testLoadWithHasOneLoadOptionsDTO(): void
     {
         $orm = $this->createORM();
@@ -250,21 +241,20 @@ class BulkLoaderTest
             where: ['id' => 1],
         ));
 
-        \Testo\Assert::same($result, $loader);
+        Assert::same($result, $loader);
     }
 
     /**
      * Test empty collect returns loader that accepts LoadOptions DTO
      */
-    #[\Testo\Test]
     public function testEmptyCollectLoadAcceptsLoadOptionsDTO(): void
     {
         $orm = $this->createORM();
         $loader = (new BulkLoader($orm))->collect();
 
-        \Testo\Assert::instanceOf($loader, RelationLoaderInterface::class);
+        Assert::instanceOf($loader, RelationLoaderInterface::class);
         $result = $loader->load('profile', new HasOneLoadOptions());
-        \Testo\Assert::same($result, $loader);
+        Assert::same($result, $loader);
 
         $loader->run();
     }
@@ -276,8 +266,7 @@ class BulkLoaderTest
      * but NOT UncastableInterface. So mapper->uncast() returns data with UuidPrimaryKey objects.
      * BulkLoader::indexEntity() must handle Stringable objects instead of rejecting them via is_scalar().
      */
-    #[\Testo\Test]
-    #[\Testo\Assert\ExpectNoAssertions]
+    #[ExpectNoAssertions]
     public function testRunWithStringablePkAndOneWayTypecast(): void
     {
         $schema = new Schema([

@@ -11,21 +11,24 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Core\Exception\SkipTest;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * Common Enum store test
  */
-class EnumTest extends OrmTestCase
+final class EnumTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRawData(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        \Testo\Assert::equals($selector->fetchData(typecast: false), [
+        Assert::equals($selector->fetchData(typecast: false), [
             [
                 'id' => '1',
                 'balance' => 56,
@@ -47,12 +50,12 @@ class EnumTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'balance' => 56,
@@ -74,7 +77,7 @@ class EnumTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testStoreData(): void
     {
         try {
@@ -86,13 +89,15 @@ class EnumTest extends OrmTestCase
                     'type_int' => TypeIntEnum::User,
                 ],
             );
+
             QueryAssert::writes(1, fn() => $this->save($user));
+
         } catch (\Throwable) {
-            throw new \Testo\Core\Exception\SkipTest("Can't save a Enum value because it is not supported yet.");
+            throw new SkipTest("Can't save a Enum value because it is not supported yet.");
         }
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

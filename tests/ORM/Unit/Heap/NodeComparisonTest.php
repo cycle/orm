@@ -7,9 +7,12 @@ namespace Cycle\ORM\Tests\Unit\Heap;
 use Cycle\Database\Injection\ValueInterface;
 use Cycle\ORM\Heap\Node;
 use DateTime;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
-class NodeComparisonTest
+#[Test]
+final class NodeComparisonTest
 {
     public function equalValuesProvider(): iterable
     {
@@ -123,18 +126,16 @@ class NodeComparisonTest
         ];
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('notEqualValuesProvider')]
+    #[DataProvider('notEqualValuesProvider')]
     public function testCompareNotEqual(mixed $a, mixed $b): void
     {
-        \Testo\Assert::notSame(Node::compare($a, $b), 0, 'Shouldn\'t be same: ' . $this->exportVars($a, $b));
+        Assert::notSame(Node::compare($a, $b), 0, 'Shouldn\'t be same: ' . $this->exportVars($a, $b));
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('equalValuesProvider')]
+    #[DataProvider('equalValuesProvider')]
     public function testCompareEqual(mixed $a, mixed $b): void
     {
-        \Testo\Assert::same(Node::compare($a, $b), 0, 'Should be same: ' . $this->exportVars($a, $b));
+        Assert::same(Node::compare($a, $b), 0, 'Should be same: ' . $this->exportVars($a, $b));
     }
 
     private function exportVars(mixed $a, mixed $b): string

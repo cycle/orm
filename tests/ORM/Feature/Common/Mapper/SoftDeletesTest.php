@@ -13,11 +13,13 @@ use Cycle\ORM\Tests\Fixtures\SoftDeletedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class SoftDeletesTest extends OrmTestCase
+final class SoftDeletesTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $u = new User();
@@ -29,10 +31,10 @@ class SoftDeletesTest extends OrmTestCase
         $s = new Select($this->orm->withHeap(new Heap()), User::class);
         $data = $s->fetchData();
 
-        \Testo\Assert::null($data[0]['deleted_at']);
+        Assert::null($data[0]['deleted_at']);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testDelete(): void
     {
         $u = new User();
@@ -49,26 +51,26 @@ class SoftDeletesTest extends OrmTestCase
         // must be deleted
         $orm = $this->orm->withHeap(new Heap());
         $s = $orm->getRepository(User::class);
-        \Testo\Assert::null($s->findOne());
+        Assert::null($s->findOne());
 
-        \Testo\Assert::same($orm->getRepository(User::class), $s);
+        Assert::same($orm->getRepository(User::class), $s);
 
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $s->scope(new NotDeletedScope());
-        \Testo\Assert::null($s->fetchOne());
+        Assert::null($s->fetchOne());
 
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $s->scope(null);
-        \Testo\Assert::notNull($s->fetchOne());
+        Assert::notNull($s->fetchOne());
     }
 
     /**
      * Demonstrates the historic problem: a plain scope that adds a top-level
      * WHERE is bypassed by a user-added orWhere due to AND-over-OR precedence.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testScopeBypassedByOrWhereWithoutWrapWhere(): void
     {
         $this->seedAliceDeletedAndBobAlive();
@@ -84,17 +86,17 @@ class SoftDeletesTest extends OrmTestCase
         // SQL: WHERE {id} = ? OR {id} = ? AND {deleted_at} IS NULL
         //    ≡ WHERE {id} = 1 OR ({id} = 2 AND {deleted_at} IS NULL)
         // Alice (id=1) is returned despite being soft-deleted — scope is bypassed.
-        \Testo\Assert::count($rows, 2);
+        Assert::count($rows, 2);
         $emails = \array_map(static fn($u) => $u->email, $rows);
         \sort($emails);
-        \Testo\Assert::same($emails, ['alice@test.com', 'bob@test.com']);
+        Assert::same($emails, ['alice@test.com', 'bob@test.com']);
     }
 
     /**
      * Same query as above but the scope calls wrapWhere() before adding its
      * condition. The user OR is enclosed in a group, the scope stays effective.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testScopeProtectedByWrapWhereAgainstOrWhere(): void
     {
         $this->seedAliceDeletedAndBobAlive();
@@ -108,8 +110,8 @@ class SoftDeletesTest extends OrmTestCase
 
         // SQL: WHERE ({id} = ? OR {id} = ?) AND {deleted_at} IS NULL
         // Only Bob (id=2, alive) survives the scope.
-        \Testo\Assert::count($rows, 1);
-        \Testo\Assert::same($rows[0]->email, 'bob@test.com');
+        Assert::count($rows, 1);
+        Assert::same($rows[0]->email, 'bob@test.com');
     }
 
     /**
@@ -117,7 +119,7 @@ class SoftDeletesTest extends OrmTestCase
      * wrapWhere() short-circuits on empty token state, scope's own condition is the
      * only thing left.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testWrappedScopeWithNoUserWhere(): void
     {
         $this->seedAliceDeletedAndBobAlive();
@@ -128,11 +130,11 @@ class SoftDeletesTest extends OrmTestCase
             ->fetchAll();
 
         // SQL: WHERE {deleted_at} IS NULL
-        \Testo\Assert::count($rows, 1);
-        \Testo\Assert::same($rows[0]->email, 'bob@test.com');
+        Assert::count($rows, 1);
+        Assert::same($rows[0]->email, 'bob@test.com');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

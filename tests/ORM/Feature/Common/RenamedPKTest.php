@@ -9,15 +9,16 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Identity;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
 use Cycle\Testing\Database\Attribute\ExceptDriver;
 use Cycle\Testing\Database\Driver;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Test;
 
-class RenamedPKTest extends OrmTestCase
+final class RenamedPKTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreateEmpty(): void
     {
         $this->createTable1();
@@ -27,10 +28,10 @@ class RenamedPKTest extends OrmTestCase
 
         $this->save($u);
 
-        \Testo\Assert::int($u->getId());
+        Assert::int($u->getId());
     }
 
-    #[\Testo\Test]
+    #[Test]
     #[ExceptDriver(Driver::SQLServer)]
     public function testCreateWithPredefinedId(): void
     {
@@ -46,12 +47,12 @@ class RenamedPKTest extends OrmTestCase
         $s = new Select($this->orm->withHeap(new Heap()), Identity::class);
         $data = $s->fetchData();
 
-        \Testo\Assert::int(current($data)['id']);
-        \Testo\Assert::same($u->getId(), 2);
-        \Testo\Assert::same($u->getKey(), 42);
+        Assert::int(current($data)['id']);
+        Assert::same($u->getId(), 2);
+        Assert::same($u->getKey(), 42);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangePK(): void
     {
         $this->createTable2();
@@ -66,16 +67,17 @@ class RenamedPKTest extends OrmTestCase
         $this->orm = $this->orm->withHeap(new Heap());
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
-        \Testo\Assert::count($data, 1);
+        Assert::count($data, 1);
         $u = $data[0];
         $u->setId(8);
+
         QueryAssert::writes(1, fn() => $this->save($u));
 
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();
 
-        \Testo\Assert::count($data, 1);
-        \Testo\Assert::same($data[0]->getId(), 8);
+        Assert::count($data, 1);
+        Assert::same($data[0]->getId(), 8);
     }
 
     private function createTable2(): void

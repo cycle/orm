@@ -6,13 +6,15 @@ namespace Cycle\ORM\Tests\Regression\Case3;
 
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Case3\Entity\Currency;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSave(): void
     {
         // Get entity
@@ -27,10 +29,10 @@ class CaseTest extends OrmTestCase
         $user = (new Select($this->orm, Entity\User::class))
             ->wherePK(1)
             ->fetchOne();
-        \Testo\Assert::same($user->currency->code, 'eur');
+        Assert::same($user->currency->code, 'eur');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

@@ -5,20 +5,22 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Unit\Mapper\ProxyEntityMapper\Hydrator;
 
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ClassPropertiesExtractorTest
+#[Test]
+final class ClassPropertiesExtractorTest
 {
     private ClassPropertiesExtractor $extractor;
 
-    #[\Testo\Test]
     public function testPropertyFromBaseClassShouldBeExtracted(): void
     {
         $class = User::class;
 
         $map = $this->extractor->extract($class, []);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
                 'comments' => 'comments',
@@ -29,18 +31,17 @@ class ClassPropertiesExtractorTest
             ],
         ]);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
         ]);
     }
 
-    #[\Testo\Test]
     public function testPropertyFromBaseClassWithRelationsShouldBeExtracted(): void
     {
         $class = User::class;
 
         $map = $this->extractor->extract($class, ['comments']);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
             ],
@@ -50,21 +51,20 @@ class ClassPropertiesExtractorTest
             ],
         ]);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
             '' => [
                 'comments' => 'comments',
             ],
         ]);
     }
 
-    #[\Testo\Test]
     public function testPropertyFromExtendedClassShouldBeExtracted(): void
     {
         $class = SuperUser::class;
 
         $map = $this->extractor->extract($class, []);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
                 'age' => 'age',
@@ -85,18 +85,17 @@ class ClassPropertiesExtractorTest
             ],
         ]);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
         ]);
     }
 
-    #[\Testo\Test]
     public function testPropertyFromExtendedClassWithRelationsShouldBeExtracted(): void
     {
         $class = SuperUser::class;
 
         $map = $this->extractor->extract($class, ['comments', 'tags']);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_FIELDS]->getProperties(), [
             '' => [
                 'id' => 'id',
                 'age' => 'age',
@@ -115,7 +114,7 @@ class ClassPropertiesExtractorTest
             ],
         ]);
 
-        \Testo\Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
+        Assert::equals($map[ClassPropertiesExtractor::KEY_RELATIONS]->getProperties(), [
             '' => [
                 'comments' => 'comments',
             ],
@@ -125,7 +124,7 @@ class ClassPropertiesExtractorTest
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     protected function setUp(): void
     {
         $this->extractor = new ClassPropertiesExtractor();

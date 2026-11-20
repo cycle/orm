@@ -5,51 +5,50 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Unit\Mapper\ProxyEntityMapper\Hydrator;
 
 use Cycle\ORM\Mapper\Proxy\Hydrator\PropertyMap;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class PropertyMapTest
+#[Test]
+final class PropertyMapTest
 {
     private PropertyMap $properties;
 
-    #[\Testo\Test]
     public function testGetsPropertyClass(): void
     {
-        \Testo\Assert::equals($this->properties->getPropertyClass('id'), '');
-        \Testo\Assert::equals($this->properties->getPropertyClass('username'), '');
+        Assert::equals($this->properties->getPropertyClass('id'), '');
+        Assert::equals($this->properties->getPropertyClass('username'), '');
 
-        \Testo\Assert::equals($this->properties->getPropertyClass('is_verified'), 'Test\User\ExtendedUser');
-        \Testo\Assert::equals($this->properties->getPropertyClass('has_avatar'), 'Test\User\ExtendedUser');
+        Assert::equals($this->properties->getPropertyClass('is_verified'), 'Test\User\ExtendedUser');
+        Assert::equals($this->properties->getPropertyClass('has_avatar'), 'Test\User\ExtendedUser');
 
-        \Testo\Assert::equals($this->properties->getPropertyClass('is_admin'), 'Test\User\SuperUser');
-        \Testo\Assert::equals($this->properties->getPropertyClass('is_blocked'), 'Test\User\SuperUser');
+        Assert::equals($this->properties->getPropertyClass('is_admin'), 'Test\User\SuperUser');
+        Assert::equals($this->properties->getPropertyClass('is_blocked'), 'Test\User\SuperUser');
     }
 
-    #[\Testo\Test]
     public function testCheckPropertyPublicity(): void
     {
-        \Testo\Assert::true($this->properties->isPublicProperty('id'));
-        \Testo\Assert::true($this->properties->isPublicProperty('username'));
+        Assert::true($this->properties->isPublicProperty('id'));
+        Assert::true($this->properties->isPublicProperty('username'));
 
-        \Testo\Assert::false($this->properties->isPublicProperty('is_verified'));
-        \Testo\Assert::false($this->properties->isPublicProperty('has_avatar'));
+        Assert::false($this->properties->isPublicProperty('is_verified'));
+        Assert::false($this->properties->isPublicProperty('has_avatar'));
 
-        \Testo\Assert::false($this->properties->isPublicProperty('is_admin'));
-        \Testo\Assert::false($this->properties->isPublicProperty('is_blocked'));
+        Assert::false($this->properties->isPublicProperty('is_admin'));
+        Assert::false($this->properties->isPublicProperty('is_blocked'));
     }
 
-    #[\Testo\Test]
     public function testGetsProperties(): void
     {
-        \Testo\Assert::array($this->properties->getProperties());
+        Assert::array($this->properties->getProperties());
     }
 
-    #[\Testo\Test]
     public function testGetsClass(): void
     {
-        \Testo\Assert::equals($this->properties->getClass(), 'User');
+        Assert::equals($this->properties->getClass(), 'User');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     protected function setUp(): void
     {
         $this->properties = new PropertyMap('User', [

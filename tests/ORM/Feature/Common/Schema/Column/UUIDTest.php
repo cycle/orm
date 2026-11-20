@@ -12,35 +12,39 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\Uuid;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class UUIDTest extends OrmTestCase
+final class UUIDTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $e = new User();
         $e->email = 'test@email.com';
         $e->uuid = Uuid::create();
         $e->balance = 300;
+
         QueryAssert::writes(1, fn() => $this->save($e));
+
         QueryAssert::writes(0, fn() => $this->save($e));
 
-        \Testo\Assert::equals($e->id, 1);
+        Assert::equals($e->id, 1);
 
-        \Testo\Assert::true($this->orm->getHeap()->has($e));
-        \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
+        Assert::true($this->orm->getHeap()->has($e));
+        Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $result = $selector->fetchOne();
 
-        \Testo\Assert::instanceOf($result->uuid, Uuid::class);
-        \Testo\Assert::equals($result->uuid->toString(), $e->uuid->toString());
+        Assert::instanceOf($result->uuid, Uuid::class);
+        Assert::equals($result->uuid->toString(), $e->uuid->toString());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchData(): void
     {
         $e = new User();
@@ -50,17 +54,17 @@ class UUIDTest extends OrmTestCase
 
         $this->save($e);
 
-        \Testo\Assert::equals($e->id, 1);
+        Assert::equals($e->id, 1);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchData();
 
-        \Testo\Assert::instanceOf($result[0]['uuid'], Uuid::class);
-        \Testo\Assert::equals($result[0]['uuid']->toString(), $e->uuid->toString());
+        Assert::instanceOf($result[0]['uuid'], Uuid::class);
+        Assert::equals($result[0]['uuid']->toString(), $e->uuid->toString());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdate(): void
     {
         $e = new User();
@@ -72,14 +76,14 @@ class UUIDTest extends OrmTestCase
         $tr->persist($e);
         $tr->run();
 
-        \Testo\Assert::equals($e->id, 1);
+        Assert::equals($e->id, 1);
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
 
-        \Testo\Assert::instanceOf($result->uuid, Uuid::class);
-        \Testo\Assert::equals($result->uuid->toString(), $e->uuid->toString());
+        Assert::instanceOf($result->uuid, Uuid::class);
+        Assert::equals($result->uuid->toString(), $e->uuid->toString());
 
         $result->uuid = Uuid::create();
 
@@ -90,11 +94,11 @@ class UUIDTest extends OrmTestCase
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $result2 = $selector->fetchOne();
 
-        \Testo\Assert::instanceOf($result2->uuid, Uuid::class);
-        \Testo\Assert::equals($result2->uuid->toString(), $result->uuid->toString());
+        Assert::instanceOf($result2->uuid, Uuid::class);
+        Assert::equals($result2->uuid->toString(), $result->uuid->toString());
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

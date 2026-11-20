@@ -8,11 +8,15 @@ use Cycle\Database\Exception\StatementException\ConstrainException;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Tests\Regression\Issue380\Entity\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testInsertOnce(): void
     {
         /** @var User $user */
@@ -34,7 +38,7 @@ class CaseTest extends OrmTestCase
 
         $em->run();
 
-        \Testo\Assert::same([
+        Assert::same([
             'alias' => $this->fetchFromTable('user_alias'),
             'email' => $this->fetchFromTable('user_email'),
             'phone' => $this->fetchFromTable('user_phone'),
@@ -54,8 +58,8 @@ class CaseTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('dataMatrix')]
+    #[Test]
+    #[DataProvider('dataMatrix')]
     public function testInsertMatrix(int $cnt1, int $cnt2, int $cnt3): void
     {
         /** @var User $user */
@@ -83,7 +87,7 @@ class CaseTest extends OrmTestCase
         }
         $em->run();
 
-        \Testo\Assert::same([
+        Assert::same([
             'alias' => $this->fetchFromTable('user_alias'),
             'email' => $this->fetchFromTable('user_email'),
             'phone' => $this->fetchFromTable('user_phone'),
@@ -97,10 +101,10 @@ class CaseTest extends OrmTestCase
         yield [1, 7, 4];
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFailOnInsertUniqueDuplicate(): void
     {
-        \Testo\Expect::exception(ConstrainException::class);
+        Expect::exception(ConstrainException::class);
 
         /** @var User $user */
         $user = $this->orm->getRepository(User::class)->findOne(['id' => 1]);
@@ -114,7 +118,7 @@ class CaseTest extends OrmTestCase
             ->run();
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testDeleteAndInsertFainOnDuplicateUniqueKey(): void
     {
         /** @var User $user */
@@ -134,9 +138,9 @@ class CaseTest extends OrmTestCase
             ->persist($p1 = new User\Phone($user, '2'));
         $em->run();
 
-        \Testo\Assert::count(\array_intersect([1, 2], [$a0->id, $a1->id]), 2);
-        \Testo\Assert::count(\array_intersect([1, 2], [$e0->id, $e1->id]), 2);
-        \Testo\Assert::count(\array_intersect([1, 2], [$p0->id, $p1->id]), 2);
+        Assert::count(\array_intersect([1, 2], [$a0->id, $a1->id]), 2);
+        Assert::count(\array_intersect([1, 2], [$e0->id, $e1->id]), 2);
+        Assert::count(\array_intersect([1, 2], [$p0->id, $p1->id]), 2);
         unset($a0, $a1, $e0, $e1, $p0, $p1);
 
         $this->orm->getHeap()->clean();
@@ -179,10 +183,10 @@ class CaseTest extends OrmTestCase
 
         $em->run();
 
-        \Testo\Assert::true(true);
+        Assert::true(true);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

@@ -8,13 +8,15 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Case2\Entity\MarkCriterionResult;
 use Cycle\ORM\Tests\Regression\Case2\Entity\MarkSubcriterionResult;
 use Cycle\ORM\Tests\Regression\Case2\Entity\StudentProgress;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testRun(): void
     {
         $markCriterionResult = (new Select($this->orm, MarkCriterionResult::class))
@@ -27,19 +29,20 @@ class CaseTest extends OrmTestCase
             ->filter(static fn(MarkSubcriterionResult $item) => $item->id === 'subcriterion-1')
             ->first();
         $aspect = $sub->markAspectResults->first();
-        \Testo\Assert::notSame($aspect, false);
+        Assert::notSame($aspect, false);
         $student = $aspect->student;
         $student->studentProgresses->add(new StudentProgress('new-progress-42'));
+
         QueryAssert::writes(1, fn() => $this->save($markCriterionResult, $sub, $aspect));
 
         $this->orm->getHeap()->clean();
         $studentProgress = (new Select($this->orm, StudentProgress::class))
             ->wherePK('new-progress-42')
             ->fetchOne();
-        \Testo\Assert::notNull($studentProgress);
+        Assert::notNull($studentProgress);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

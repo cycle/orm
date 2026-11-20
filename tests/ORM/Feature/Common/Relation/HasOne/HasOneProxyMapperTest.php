@@ -14,19 +14,21 @@ use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HasOneProxyMapperTest extends OrmTestCase
+final class HasOneProxyMapperTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('profile');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -46,7 +48,7 @@ class HasOneProxyMapperTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchPromises(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -56,20 +58,21 @@ class HasOneProxyMapperTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        \Testo\Assert::instanceOf($a->profile, Profile::class);
-        \Testo\Assert::null($b->profile);
+        Assert::instanceOf($a->profile, Profile::class);
+        Assert::null($b->profile);
+
         QueryAssert::reads(0, function () use ($a, $b): void {
-            \Testo\Assert::same($a->profile, $a->profile);
-            \Testo\Assert::null($b->profile);
+            Assert::same($a->profile, $a->profile);
+            Assert::null($b->profile);
         });
 
-        \Testo\Assert::equals($a->profile->image, 'image.png');
+        Assert::equals($a->profile->image, 'image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOnePromiseLoaded(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -77,15 +80,15 @@ class HasOneProxyMapperTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        \Testo\Assert::false($aData['profile']->hasValue());
-        \Testo\Assert::instanceOf($a->profile, Profile::class);
-        \Testo\Assert::true($aData['profile']->hasValue());
+        Assert::false($aData['profile']->hasValue());
+        Assert::instanceOf($a->profile, Profile::class);
+        Assert::true($aData['profile']->hasValue());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOnePromiseRole(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -93,13 +96,13 @@ class HasOneProxyMapperTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        \Testo\Assert::same($aData['profile']->getRole(), 'profile');
+        Assert::same($aData['profile']->getRole(), 'profile');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOnePromiseScope(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -107,13 +110,13 @@ class HasOneProxyMapperTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
-        \Testo\Assert::equals($aData['profile']->getScope(), ['user_id' => 1]);
+        Assert::equals($aData['profile']->getScope(), ['user_id' => 1]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchPromisesFromHeap(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
@@ -121,23 +124,26 @@ class HasOneProxyMapperTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['profile'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($aData['profile'], ReferenceInterface::class);
+        Assert::instanceOf($bData['profile'], ReferenceInterface::class);
 
         // warm up
         (new Select($this->orm, Profile::class))->fetchAll();
-        QueryAssert::reads(0, fn() => \Testo\Assert::same($a->profile, $a->profile));
-        // invalid object can't be cached
-        QueryAssert::reads(1, fn() => \Testo\Assert::null($b->profile));
 
-        \Testo\Assert::equals($a->profile->image, 'image.png');
+        QueryAssert::reads(0, fn() => Assert::same($a->profile, $a->profile));
+
+        // invalid object can't be cached
+        QueryAssert::reads(1, fn() => Assert::null($b->profile));
+
+        Assert::equals($a->profile->image, 'image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWriteOperations(): void
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
+
         QueryAssert::writes(0, function () use ($u): void {
             $tr = new Transaction($this->orm);
             $tr->persist($u);
@@ -145,24 +151,25 @@ class HasOneProxyMapperTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveAssignment(): void
     {
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $a->profile = null;
+
         QueryAssert::count(1, 1, fn() => $this->save($a));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
-        \Testo\Assert::null($a->profile);
-        \Testo\Assert::null($b->profile);
+        Assert::null($a->profile);
+        Assert::null($b->profile);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnotherUser(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))
@@ -171,17 +178,18 @@ class HasOneProxyMapperTest extends OrmTestCase
 
         $b->profile = $a->profile;
         $a->profile = null;
+
         QueryAssert::count(1, 1, fn() => $this->save($a, $b));
 
         $this->orm->getHeap()->clean();
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
-        \Testo\Assert::null($a->profile);
-        \Testo\Assert::equals($b->profile->id, 1);
+        Assert::null($a->profile);
+        Assert::equals($b->profile->id, 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnotherUserPartial(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))
@@ -190,17 +198,18 @@ class HasOneProxyMapperTest extends OrmTestCase
 
         $b->profile = $a->profile;
         $a->profile = null;
+
         QueryAssert::count(1, 1, fn() => $this->save($b));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         [$a, $b] = $selector->orderBy('user.id')->load('profile')->fetchAll();
 
-        \Testo\Assert::null($a->profile);
-        \Testo\Assert::equals($b->profile->id, 1);
+        Assert::null($a->profile);
+        Assert::equals($b->profile->id, 1);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

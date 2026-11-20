@@ -8,144 +8,144 @@ use Cycle\ORM\Exception\RunnerException;
 use Cycle\ORM\Tests\Fixtures\TestCommand;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Assert\ExpectException;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class RunnerTest extends OrmTestCase
+final class RunnerTest extends OrmTestCase
 {
-
     // Mode OPEN_TRANSACTION
 
-    #[\Testo\Test]
+    #[Test]
     public function testInnerTransactionRun(): void
     {
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
 
         Runner::innerTransaction()->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     /**
      * The opened transaction should be commited
      */
-    #[\Testo\Test]
+    #[Test]
     public function testInnerTransactionComplete(): void
     {
         $runner = Runner::innerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner->complete();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
     }
 
     /**
      * The opened transaction should be rollbacked
      */
-    #[\Testo\Test]
+    #[Test]
     public function testInnerTransactionRollback(): void
     {
         $runner = Runner::innerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner->rollback();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
     }
 
     // Mode CONTINUE_TRANSACTION
 
-    #[\Testo\Test]
+    #[Test]
     public function testContinueTransactionRun(): void
     {
         $this->database->getDriver()->beginTransaction();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         Runner::outerTransaction()->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
+    #[ExpectException(RunnerException::class)]
     public function testContinueTransactionWithNotOpenedTransaction(): void
     {
-        \Testo\Expect::exception(RunnerException::class);
-
         Runner::outerTransaction()->run(new TestCommand($this->getDatabase()));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testContinueTransactionComplete(): void
     {
         $this->database->getDriver()->beginTransaction();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->complete();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testContinueTransactionRollback(): void
     {
         $this->database->getDriver()->beginTransaction();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->rollback();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     // Mode IGNORE_TRANSACTION
 
-    #[\Testo\Test]
+    #[Test]
     public function testIgnoreTransactionRun(): void
     {
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
 
         Runner::outerTransaction(strict: false)->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testIgnoreTransactionComplete(): void
     {
         $this->database->getDriver()->beginTransaction();
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction(strict: false);
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->complete();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testIgnoreTransactionRollback(): void
     {
         $this->database->getDriver()->beginTransaction();
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction(strict: false);
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->rollback();
 
-        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
+        Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
-    public function setUp(): void
-    {
-    }
+    #[BeforeTest]
+    public function setUp(): void {}
 }

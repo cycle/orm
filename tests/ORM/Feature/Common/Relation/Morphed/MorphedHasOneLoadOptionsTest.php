@@ -15,43 +15,45 @@ use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class MorphedHasOneLoadOptionsTest extends OrmTestCase
+final class MorphedHasOneLoadOptionsTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->load('image', new MorphedHasOneLoadOptions(
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->image->url, 'user-image.png');
-        \Testo\Assert::same($b->image->url, 'user-2-image.png');
+        Assert::same($a->image->url, 'user-image.png');
+        Assert::same($b->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->load('image', new MorphedHasOneLoadOptions(
             method: LoadMethod::OuterQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->image->url, 'user-image.png');
-        \Testo\Assert::same($b->image->url, 'user-2-image.png');
+        Assert::same($a->image->url, 'user-image.png');
+        Assert::same($b->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithDefaultOptions(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->load('image', new MorphedHasOneLoadOptions())
             ->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->image->url, 'user-image.png');
-        \Testo\Assert::same($b->image->url, 'user-2-image.png');
+        Assert::same($a->image->url, 'user-image.png');
+        Assert::same($b->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('image_archive', [
@@ -73,11 +75,11 @@ class MorphedHasOneLoadOptionsTest extends OrmTestCase
             table: 'image_archive',
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->image->url, 'archived-user-image.png');
-        \Testo\Assert::same($b->image->url, 'archived-user-2-image.png');
+        Assert::same($a->image->url, 'archived-user-image.png');
+        Assert::same($b->image->url, 'archived-user-2-image.png');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

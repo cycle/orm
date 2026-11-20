@@ -8,8 +8,10 @@ use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\NullHeap;
 use Cycle\ORM\Tests\Fixtures\User;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
+#[Test]
 final class NullHeapTest
 {
     protected const INDEX_FIELDS_1 = 'id';
@@ -33,7 +35,6 @@ final class NullHeapTest
         self::INDEX_FIELDS_2 => self::INDEX_VALUES_2_2,
     ];
 
-    #[\Testo\Test]
     public function testAttachAndFind(): void
     {
         $heap = $this->createHeap();
@@ -44,12 +45,11 @@ final class NullHeapTest
         $heap->attach($entity1, $node1, [self::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [self::INDEX_FIELDS_1]);
 
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_1_2));
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_1_BAD));
-        \Testo\Assert::null($heap->find('user', []));
+        Assert::null($heap->find('user', self::INDEX_FIND_1_2));
+        Assert::null($heap->find('user', self::INDEX_FIND_1_BAD));
+        Assert::null($heap->find('user', []));
     }
 
-    #[\Testo\Test]
     public function testIndexAsArray(): void
     {
         $heap = $this->createHeap();
@@ -57,10 +57,9 @@ final class NullHeapTest
         $entity = new User();
         $heap->attach($entity, $node, [(array) self::INDEX_FIELDS_1]);
 
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_1_1));
+        Assert::null($heap->find('user', self::INDEX_FIND_1_1));
     }
 
-    #[\Testo\Test]
     public function testFindByNotExistingIndex(): void
     {
         $heap = $this->createHeap();
@@ -68,10 +67,9 @@ final class NullHeapTest
         $entity = new User();
         $heap->attach($entity, $node, [self::INDEX_FIELDS_1]);
 
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_2_1));
+        Assert::null($heap->find('user', self::INDEX_FIND_2_1));
     }
 
-    #[\Testo\Test]
     public function testAttachWithEmptyIndex(): void
     {
         $heap = $this->createHeap();
@@ -79,11 +77,10 @@ final class NullHeapTest
         $entity = new User();
         $heap->attach($entity, $node, [[], self::INDEX_FIELDS_1]);
 
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_1_1));
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_2_1));
+        Assert::null($heap->find('user', self::INDEX_FIND_1_1));
+        Assert::null($heap->find('user', self::INDEX_FIND_2_1));
     }
 
-    #[\Testo\Test]
     public function testAttachWithBadIndex(): void
     {
         $heap = $this->createHeap();
@@ -91,14 +88,13 @@ final class NullHeapTest
         $entity = new User();
         $heap->attach($entity, $node, [self::INDEX_FIELDS_BAD, self::INDEX_FIELDS_2]);
 
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_BAD));
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_2_1));
+        Assert::null($heap->find('user', self::INDEX_FIND_BAD));
+        Assert::null($heap->find('user', self::INDEX_FIND_2_1));
 
         // No error
         $heap->detach($entity);
     }
 
-    #[\Testo\Test]
     public function testFindWithBadIndex(): void
     {
         $heap = $this->createHeap();
@@ -106,19 +102,17 @@ final class NullHeapTest
         $entity = new User();
         $heap->attach($entity, $node, [self::INDEX_FIELDS_2]);
 
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_BAD));
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_2_1));
+        Assert::null($heap->find('user', self::INDEX_FIND_BAD));
+        Assert::null($heap->find('user', self::INDEX_FIND_2_1));
     }
 
-    #[\Testo\Test]
     public function testFindBadRole(): void
     {
         $heap = $this->createHeap();
 
-        \Testo\Assert::null($heap->find('bad_role', self::INDEX_FIND_BAD));
+        Assert::null($heap->find('bad_role', self::INDEX_FIND_BAD));
     }
 
-    #[\Testo\Test]
     public function testFindEmptyCriteria(): void
     {
         $heap = $this->createHeap();
@@ -126,10 +120,9 @@ final class NullHeapTest
         $entity = new User();
         $heap->attach($entity, $node, [self::INDEX_FIELDS_2]);
 
-        \Testo\Assert::null($heap->find('user', []));
+        Assert::null($heap->find('user', []));
     }
 
-    #[\Testo\Test]
     public function testDetach(): void
     {
         $heap = $this->createHeap();
@@ -143,13 +136,12 @@ final class NullHeapTest
         $heap->detach($entity1);
         $heap->detach($entity2);
 
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_1_1));
-        \Testo\Assert::null($heap->find('user', self::INDEX_FIND_1_2));
-        \Testo\Assert::false($heap->has($entity1));
-        \Testo\Assert::false($heap->has($entity2));
+        Assert::null($heap->find('user', self::INDEX_FIND_1_1));
+        Assert::null($heap->find('user', self::INDEX_FIND_1_2));
+        Assert::false($heap->has($entity1));
+        Assert::false($heap->has($entity2));
     }
 
-    #[\Testo\Test]
     public function testGet(): void
     {
         $heap = $this->createHeap();
@@ -160,16 +152,15 @@ final class NullHeapTest
         $heap->attach($entity1, $node1, [self::INDEX_FIELDS_1]);
         $heap->attach($entity2, $node2, [self::INDEX_FIELDS_1]);
 
-        \Testo\Assert::null($heap->get($entity1));
-        \Testo\Assert::null($heap->get($entity2));
+        Assert::null($heap->get($entity1));
+        Assert::null($heap->get($entity2));
     }
 
-    #[\Testo\Test]
     public function testClean(): void
     {
         $this->createHeap()->clean();
 
-        \Testo\Assert::true(true, 'There are no exceptions');
+        Assert::true(true, 'There are no exceptions');
     }
 
     protected function createHeap(): HeapInterface

@@ -16,27 +16,29 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ManyToManyNonPivotedCollectionTest extends OrmTestCase
+final class ManyToManyNonPivotedCollectionTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testInitRelation(): void
     {
         $u = $this->orm->make(User::class);
-        \Testo\Assert::array($u->tags);
-        \Testo\Assert::count($u->tags, 0);
+        Assert::array($u->tags);
+        Assert::count($u->tags, 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -84,16 +86,16 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithNoColumns(): void
     {
         $selector = new Select($this->orm, User::class);
         $data = $selector->with('tags')->buildQuery()->fetchAll();
 
-        \Testo\Assert::count($data[0], 3);
+        Assert::count($data[0], 3);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelationInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -102,7 +104,7 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
             'scope' => new Select\QueryScope([], ['id' => 'ASC']),
         ])->orderBy(['id' => 'ASC']);
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -150,7 +152,7 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectArray(): void
     {
         /**
@@ -159,14 +161,14 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
          */
         [$a, $b] = (new Select($this->orm, User::class))->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 1);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 1);
 
-        \Testo\Assert::array($a->tags);
-        \Testo\Assert::array($b->tags);
+        Assert::array($a->tags);
+        Assert::array($b->tags);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithManyToManyCascadeNoContext(): void
     {
         $u = new User();
@@ -179,17 +181,18 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         $u->tags->add($t);
 
         $this->save($u);
+
         QueryAssert::writes(0, fn() => $this->save($u));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
 
-        \Testo\Assert::same($u->email, 'many@email.com');
-        \Testo\Assert::count($u->tags, 1);
-        \Testo\Assert::same($u->tags[0]->name, 'my tag');
+        Assert::same($u->email, 'many@email.com');
+        Assert::count($u->tags, 1);
+        Assert::same($u->tags[0]->name, 'my tag');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithManyToMany2(): void
     {
         $schemaArray = $this->getSchemaArray();
@@ -207,18 +210,19 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         $u->tags = [$t1, $t2];
 
         $this->save($u);
+
         QueryAssert::writes(0, fn() => $this->save($u));
 
         $u = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('tags')->wherePK(3)->fetchOne();
 
-        \Testo\Assert::same($u->email, 'many@email.com');
-        \Testo\Assert::count($u->tags, 2);
-        \Testo\Assert::same($u->tags[0]->name, 'my tag 1');
-        \Testo\Assert::same($u->tags[1]->name, 'my tag 2');
+        Assert::same($u->email, 'many@email.com');
+        Assert::count($u->tags, 2);
+        Assert::same($u->tags[0]->name, 'my tag 1');
+        Assert::same($u->tags[1]->name, 'my tag 2');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUnlinkManyToManyAndReplaceSome(): void
     {
         /**
@@ -234,7 +238,9 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         $t->name = 'new tag';
 
         $b->tags = [$t];
+
         QueryAssert::writes(5, fn() => $this->save($a, $b));
+
         QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         /**
@@ -243,15 +249,15 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
          */
         [$a, $b] = (new Select($this->orm->withHeap(new Heap()), User::class))->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::same($a->tags[0]->name, 'tag b');
-        \Testo\Assert::same($a->tags[1]->name, 'tag c');
+        Assert::count($a->tags, 2);
+        Assert::same($a->tags[0]->name, 'tag b');
+        Assert::same($a->tags[1]->name, 'tag c');
 
-        \Testo\Assert::count($b->tags, 1);
-        \Testo\Assert::same($b->tags[0]->name, 'new tag');
+        Assert::count($b->tags, 1);
+        Assert::same($b->tags[0]->name, 'new tag');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testReassign(): void
     {
         $tagSelect = new Select($this->orm, Tag::class);
@@ -259,6 +265,7 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
 
         /** @var User $user */
         $user = $userSelect->load('tags')->fetchOne(['id' => 1]);
+
         QueryAssert::writes(0, fn() => $this->save($user));
 
         $wantTags = ['tag a', 'tag c'];
@@ -288,12 +295,12 @@ class ManyToManyNonPivotedCollectionTest extends OrmTestCase
         $this->orm = $this->orm->withHeap(new Heap());
 
         $user = (new Select($this->orm, User::class))->fetchOne(['id' => 1]);
-        \Testo\Assert::count($user->tags, 2);
-        \Testo\Assert::same($user->tags[0]->name, 'tag a');
-        \Testo\Assert::same($user->tags[1]->name, 'tag c');
+        Assert::count($user->tags, 2);
+        Assert::same($user->tags[0]->name, 'tag a');
+        Assert::same($user->tags[1]->name, 'tag c');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

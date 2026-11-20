@@ -9,10 +9,11 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
+use Testo\Lifecycle\BeforeTest;
 
 class RefersToProxyMapperRenamedFieldTest extends RefersToProxyMapperTest
 {
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
 

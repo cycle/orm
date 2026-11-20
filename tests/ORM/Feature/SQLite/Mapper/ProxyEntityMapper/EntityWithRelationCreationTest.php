@@ -8,10 +8,13 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class EntityWithRelationCreationTest extends OrmTestCase
+final class EntityWithRelationCreationTest extends OrmTestCase
 {
-    #[\Testo\Test]
+    #[Test]
     public function testProxyEntityRelationPropertiesShouldBeUnsetAfterCreation(): void
     {
         $mapper = $this->orm->getMapper(EntityWithRelationCreationUser::class);
@@ -23,13 +26,13 @@ class EntityWithRelationCreationTest extends OrmTestCase
         $profileProperty = $refl->getProperty('profile');
         PHP_VERSION_ID < 80100 and $profileProperty->setAccessible(true);
 
-        \Testo\Assert::false($profileProperty->isInitialized($emptyObject));
-        \Testo\Assert::equals($emptyObject->id, 123);
-        \Testo\Assert::equals($emptyObject->getUsername(), 'test');
-        \Testo\Assert::equals($emptyObject->getEmail(), 'test@site.com');
+        Assert::false($profileProperty->isInitialized($emptyObject));
+        Assert::equals($emptyObject->id, 123);
+        Assert::equals($emptyObject->getUsername(), 'test');
+        Assert::equals($emptyObject->getEmail(), 'test@site.com');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->orm = $this->withSchema(

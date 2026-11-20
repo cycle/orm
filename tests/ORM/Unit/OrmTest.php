@@ -12,55 +12,52 @@ use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Util\SimpleFactory;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Test;
 
+#[Test]
 final class OrmTest
 {
-    #[\Testo\Test]
     public function testPrepareServicesTwice(): void
     {
         $orm = $this->createOrm();
         $orm->prepareServices();
         $orm->prepareServices();
-        \Testo\Assert::true(true, 'There aren\'t any errors.');
+        Assert::true(true, 'There aren\'t any errors.');
     }
 
-    #[\Testo\Test]
     public function testORMClone(): void
     {
         $orm = $this->createOrm();
         $new = $orm->withFactory($orm->getFactory());
-        \Testo\Assert::notSame($new, $orm);
+        Assert::notSame($new, $orm);
     }
 
-    #[\Testo\Test]
     public function testORMCloneWithSchema(): void
     {
         $orm = $this->createOrm();
         $new = $orm->with(new Schema([]));
 
-        \Testo\Assert::notSame($orm, $new);
-        \Testo\Assert::notSame($orm->getSchema(), $new->getSchema());
+        Assert::notSame($orm, $new);
+        Assert::notSame($orm->getSchema(), $new->getSchema());
     }
 
-    #[\Testo\Test]
     public function testORMCloneWithFactory(): void
     {
         $orm = $this->createOrm();
         $new = $orm->with(factory: new Factory(new DatabaseManager(new DatabaseConfig([]))));
 
-        \Testo\Assert::notSame($new, $orm);
-        \Testo\Assert::notSame($orm->getFactory(), $new->getFactory());
+        Assert::notSame($new, $orm);
+        Assert::notSame($orm->getFactory(), $new->getFactory());
     }
 
-    #[\Testo\Test]
     public function testORMCloneWithHeap(): void
     {
         $orm = $this->createOrm();
         $new = $orm->with(heap: new Heap());
 
-        \Testo\Assert::notSame($orm, $new);
-        \Testo\Assert::notSame($orm->getHeap(), $new->getHeap());
+        Assert::notSame($orm, $new);
+        Assert::notSame($orm->getHeap(), $new->getHeap());
     }
 
     private function createOrm(): ORM

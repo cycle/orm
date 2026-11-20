@@ -13,13 +13,15 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class MorphedHasOnePromiseTest extends OrmTestCase
+final class MorphedHasOnePromiseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -28,24 +30,26 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['image'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['image'], ReferenceInterface::class);
+        Assert::instanceOf($aData['image'], ReferenceInterface::class);
+        Assert::instanceOf($bData['image'], ReferenceInterface::class);
+
         QueryAssert::reads(2, function () use ($a, $b): void {
-            \Testo\Assert::same($a->image->url, 'user-image.png');
-            \Testo\Assert::same($b->image->url, 'user-2-image.png');
+            Assert::same($a->image->url, 'user-image.png');
+            Assert::same($b->image->url, 'user-2-image.png');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
+
         QueryAssert::writes(0, fn() => $this->save($a, $b));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSetNull(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -53,7 +57,9 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         [$a, $b] = $selector->fetchAll();
 
         $a->image = null;
+
         QueryAssert::writes(1, fn() => $this->save($a, $b));
+
         QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -64,20 +70,23 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['image'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['image'], ReferenceInterface::class);
-        \Testo\Assert::same($b->image->url, 'user-2-image.png');
+        Assert::instanceOf($aData['image'], ReferenceInterface::class);
+        Assert::instanceOf($bData['image'], ReferenceInterface::class);
+        Assert::same($b->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testExchangeParentsSameTypeUsingReferences(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
+
         QueryAssert::reads(0, fn() => [$a->image, $b->image] = [$bData['image'], $aData['image']]);
+
         QueryAssert::count(2, 2, fn() => $this->save($a, $b));
+
         // consecutive
         QueryAssert::count(0, 0, fn() => $this->save($a, $b));
 
@@ -86,28 +95,30 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::same($b->image->url, 'user-image.png');
-        \Testo\Assert::same($a->image->url, 'user-2-image.png');
+        Assert::same($b->image->url, 'user-image.png');
+        Assert::same($a->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testExchangeParentsSameType(): void
     {
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
         [$a->image, $b->image] = [$b->image, $a->image];
+
         QueryAssert::count(0, 2, fn() => $this->save($a, $b));
+
         // consecutive
         QueryAssert::count(0, 0, fn() => $this->save($a, $b));
 
         $this->orm = $this->orm->withHeap(new Heap());
         [$a, $b] = (new Select($this->orm, User::class))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($b->image->url, 'user-image.png');
-        \Testo\Assert::same($a->image->url, 'user-2-image.png');
+        Assert::same($b->image->url, 'user-image.png');
+        Assert::same($a->image->url, 'user-2-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testReplaceExisted(): void
     {
         $count = (new Select($this->orm, Image::class))->count();
@@ -117,7 +128,9 @@ class MorphedHasOnePromiseTest extends OrmTestCase
 
         $u->image = new Image();
         $u->image->url = 'new.png';
+
         QueryAssert::writes(2, fn() => $this->save($u));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($u));
 
@@ -125,11 +138,11 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
 
-        \Testo\Assert::same($u->image->url, 'new.png');
-        \Testo\Assert::same((new Select($this->orm, Image::class))->count(), $count);
+        Assert::same($u->image->url, 'new.png');
+        Assert::same((new Select($this->orm, Image::class))->count(), $count);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithRelated(): void
     {
         $schemaArray = $this->getSchemaArray();
@@ -142,7 +155,9 @@ class MorphedHasOnePromiseTest extends OrmTestCase
 
         $p->image = new Image();
         $p->image->url = 'new-post.png';
+
         QueryAssert::writes(2, fn() => $this->save($p));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($p));
 
@@ -150,22 +165,24 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $p = (new Select($this->orm, Post::class))
             ->wherePK(5)->fetchOne();
 
-        \Testo\Assert::same($p->title, 'post title');
-        \Testo\Assert::same($p->image->url, 'new-post.png');
+        Assert::same($p->title, 'post title');
+        Assert::same($p->image->url, 'new-post.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnotherParent(): void
     {
         /** @var User $u */
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         /** @var Post $p */
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
+
         QueryAssert::reads(1, function () use ($u, $p): void {
             $u->image = $p->image;
             $p->image = null;
         });
         QueryAssert::count(1, 2, fn() => $this->save($u, $p));
+
         QueryAssert::count(0, 0, fn() => $this->save($u, $p));
 
         $this->orm = $this->orm->withHeap(new Heap());
@@ -173,11 +190,11 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 1]);
 
-        \Testo\Assert::same($u->image->url, 'post-image.png');
-        \Testo\Assert::null($p->image);
+        Assert::same($u->image->url, 'post-image.png');
+        Assert::null($p->image);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParentsUsingReferences(): void
     {
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
@@ -185,8 +202,11 @@ class MorphedHasOnePromiseTest extends OrmTestCase
 
         $uData = $this->extractEntity($u);
         $pData = $this->extractEntity($p);
+
         QueryAssert::reads(0, fn() => [$u->image, $p->image] = [$pData['image'], $uData['image']]);
+
         QueryAssert::count(2, 2, fn() => $this->save($u, $p));
+
         // no changes expected
         QueryAssert::count(0, 0, fn() => $this->save($u, $p));
 
@@ -195,18 +215,20 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
-        \Testo\Assert::same($u->image->url, 'post-2-image.png');
-        \Testo\Assert::same($p->image->url, 'user-image.png');
+        Assert::same($u->image->url, 'post-2-image.png');
+        Assert::same($p->image->url, 'user-image.png');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParents(): void
     {
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
         [$u->image, $p->image] = [$p->image, $u->image];
+
         QueryAssert::count(0, 2, fn() => $this->save($u, $p));
+
         // no changes expected
         QueryAssert::count(0, 0, fn() => $this->save($u, $p));
 
@@ -215,11 +237,11 @@ class MorphedHasOnePromiseTest extends OrmTestCase
         $u = (new Select($this->orm, User::class))->fetchOne(['user.id' => 1]);
         $p = (new Select($this->orm, Post::class))->fetchOne(['post.id' => 2]);
 
-        \Testo\Assert::same($u->image->url, 'post-2-image.png');
-        \Testo\Assert::same($p->image->url, 'user-image.png');
+        Assert::same($u->image->url, 'post-2-image.png');
+        Assert::same($p->image->url, 'user-image.png');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

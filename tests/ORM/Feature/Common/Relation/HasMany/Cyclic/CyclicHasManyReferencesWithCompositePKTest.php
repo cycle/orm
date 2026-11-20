@@ -11,13 +11,15 @@ use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Document;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Preference;
 use Cycle\ORM\Tests\Fixtures\CyclicRef2\Tenant;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CyclicHasManyReferencesWithCompositePKTest extends OrmTestCase
+final class CyclicHasManyReferencesWithCompositePKTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $t = new Tenant();
@@ -29,14 +31,15 @@ class CyclicHasManyReferencesWithCompositePKTest extends OrmTestCase
 
         $t->setPreference($p);
         $p->tenant = $t;
+
         QueryAssert::writes(3, fn() => $this->save($t));
 
-        \Testo\Assert::notNull($p->tenant_id);
+        Assert::notNull($p->tenant_id);
         // no changes!
         QueryAssert::writes(0, fn() => $this->save($t));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('tenants', [

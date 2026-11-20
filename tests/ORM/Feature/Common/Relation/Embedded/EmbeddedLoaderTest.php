@@ -13,16 +13,18 @@ use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class EmbeddedLoaderTest extends OrmTestCase
+final class EmbeddedLoaderTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadDataNoRelation(): void
     {
         $selector = new Select($this->orm, User::class);
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -36,13 +38,13 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadDataLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('credentials');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -66,7 +68,7 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadDataLoadAutomatically(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -107,7 +109,7 @@ class EmbeddedLoaderTest extends OrmTestCase
 
         $selector = new Select($this->orm, User::class);
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -131,7 +133,7 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadDataLoadTypecast(): void
     {
         $this->orm = $this->withSchema(new Schema([
@@ -179,7 +181,7 @@ class EmbeddedLoaderTest extends OrmTestCase
 
         $selector = new Select($this->orm, User::class);
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -203,13 +205,13 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFilterByEmbeddedDoNotLoad(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->where('credentials.username', 'user1');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -218,7 +220,7 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFilterAndLoad(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -226,7 +228,7 @@ class EmbeddedLoaderTest extends OrmTestCase
             ->where('credentials.username', 'user2')
             ->load('credentials');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 2,
                 'email' => 'another@world.com',
@@ -240,7 +242,7 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testDeduplicate(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -248,7 +250,7 @@ class EmbeddedLoaderTest extends OrmTestCase
             ->load('comments')
             ->load('credentials');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -291,7 +293,7 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testDeduplicateInload(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -299,7 +301,7 @@ class EmbeddedLoaderTest extends OrmTestCase
             ->load('comments', ['method' => Select\JoinableLoader::INLOAD])
             ->load('credentials');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -342,7 +344,7 @@ class EmbeddedLoaderTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

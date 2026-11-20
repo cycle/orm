@@ -15,13 +15,17 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\RbacItemAbstract;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\RbacPermission;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\RbacRole;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ManyToManyTest extends StiBaseTest
+final class ManyToManyTest extends StiBaseTest
 {
     protected const PARENT_MAPPER = Mapper::class;
     protected const CHILD_MAPPER = StdMapper::class;
 
-    #[\Testo\Test]
+    #[Test]
     public function testStore(): void
     {
         $role = new RbacRole('superAdmin');
@@ -38,13 +42,13 @@ class ManyToManyTest extends StiBaseTest
             ->load('children')
             ->wherePK('superAdmin')->fetchOne();
 
-        \Testo\Assert::instanceOf($fetchedRole, RbacRole::class);
-        \Testo\Assert::count($fetchedRole->children, 1);
-        \Testo\Assert::instanceOf($fetchedRole->children->first(), RbacPermission::class);
-        \Testo\Assert::same($fetchedRole->children->first()->name, 'writeUser');
+        Assert::instanceOf($fetchedRole, RbacRole::class);
+        Assert::count($fetchedRole->children, 1);
+        Assert::instanceOf($fetchedRole->children->first(), RbacPermission::class);
+        Assert::same($fetchedRole->children->first()->name, 'writeUser');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testClearAndFillRelation(): void
     {
         $role = new RbacRole('superAdmin');
@@ -81,28 +85,28 @@ class ManyToManyTest extends StiBaseTest
 
         $this->save($fetchedRole);
 
-        \Testo\Assert::true(true);
+        Assert::true(true);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMakeEntityUsingRole(): void
     {
-        \Testo\Assert::instanceOf($this->orm->make('rbac_role'), RbacRole::class);
-        \Testo\Assert::instanceOf($this->orm->make('rbac_permission'), RbacPermission::class);
-        \Testo\Assert::instanceOf($this->orm->make('rbac_item_inheritance'), \stdClass::class);
+        Assert::instanceOf($this->orm->make('rbac_role'), RbacRole::class);
+        Assert::instanceOf($this->orm->make('rbac_permission'), RbacPermission::class);
+        Assert::instanceOf($this->orm->make('rbac_item_inheritance'), \stdClass::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMakeUndefinedChildRole(): void
     {
         $mapper = $this->orm->getMapper('rbac_item');
 
-        \Testo\Expect::exception(SchemaException::class)->withMessageMatchingRegex('/`some_undefined_role`.+not found/');
+        Expect::exception(SchemaException::class)->withMessageMatchingRegex('/`some_undefined_role`.+not found/');
 
         $mapper->init([], 'some_undefined_role');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNotTriggersRehydrate(): void
     {
         $role = new RbacRole('superAdmin', 'description');
@@ -131,12 +135,12 @@ class ManyToManyTest extends StiBaseTest
         $fetchedRole->children->removeElement($fetchedPermission);
         $fetchedPermission->parents->removeElement($fetchedRole);
 
-        \Testo\Assert::same($fetchedRole->description, 'updated description');
+        Assert::same($fetchedRole->description, 'updated description');
 
         $this->orm = $this->orm->withHeap(new Heap());
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         parent::setUp();
@@ -168,7 +172,7 @@ class ManyToManyTest extends StiBaseTest
                     'role' => RbacRole::class,
                     'permission' => RbacPermission::class,
                 ],
-                SchemaInterface::MAPPER => static::PARENT_MAPPER,
+                SchemaInterface::MAPPER => self::PARENT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'rbac_item',
                 SchemaInterface::PRIMARY_KEY => 'name',
@@ -212,7 +216,7 @@ class ManyToManyTest extends StiBaseTest
             ],
             'rbac_item_inheritance' => [
                 SchemaInterface::ROLE => 'rbac_item_inheritance',
-                SchemaInterface::MAPPER => static::CHILD_MAPPER,
+                SchemaInterface::MAPPER => self::CHILD_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'rbac_item_inheritance',
                 SchemaInterface::PRIMARY_KEY => 'id',

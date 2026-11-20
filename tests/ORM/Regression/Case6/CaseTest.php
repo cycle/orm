@@ -7,11 +7,14 @@ namespace Cycle\ORM\Tests\Regression\Case6;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Case6\Entity\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         /** @var User $model */
@@ -19,13 +22,13 @@ class CaseTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::same($model->getLogin(), 'foo');
-        \Testo\Expect::exception(\Error::class)->withMessageContaining('Cannot access non-public property ' . User::class . '::$login');
+        Assert::same($model->getLogin(), 'foo');
+        Expect::exception(\Error::class)->withMessageContaining('Cannot access non-public property ' . User::class . '::$login');
 
         $model->login = 'new login';
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

@@ -12,11 +12,13 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class SelectorTest extends OrmTestCase
+final class SelectorTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testStableStatement(): void
     {
         $s = new Select($this->orm, User::class);
@@ -25,10 +27,10 @@ class SelectorTest extends OrmTestCase
         $s2 = new Select($this->orm, User::class);
         $s2->load('comments', ['method' => JoinableLoader::INLOAD]);
 
-        \Testo\Assert::same($s2->sqlStatement(), $s->sqlStatement());
+        Assert::same($s2->sqlStatement(), $s->sqlStatement());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectCustomSQL(): void
     {
         $s = new Select($this->orm, User::class);
@@ -42,7 +44,7 @@ class SelectorTest extends OrmTestCase
 
         $result = $query->fetchAll();
 
-        \Testo\Assert::equals($result, [
+        Assert::equals($result, [
             [
                 'id' => 1,
                 'balance' => 400.0,
@@ -56,7 +58,7 @@ class SelectorTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

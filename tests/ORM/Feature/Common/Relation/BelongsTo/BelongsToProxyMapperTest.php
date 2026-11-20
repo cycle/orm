@@ -13,19 +13,21 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 class BelongsToProxyMapperTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $selector->orderBy('profile.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -44,7 +46,7 @@ class BelongsToProxyMapperTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchPromises(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -54,20 +56,21 @@ class BelongsToProxyMapperTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['user'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['user'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($a->user, User::class);
-        \Testo\Assert::null($b->user);
-        \Testo\Assert::null($c->user);
+        Assert::instanceOf($aData['user'], ReferenceInterface::class);
+        Assert::instanceOf($bData['user'], ReferenceInterface::class);
+        Assert::instanceOf($a->user, User::class);
+        Assert::null($b->user);
+        Assert::null($c->user);
+
         QueryAssert::reads(0, function () use ($a, $b): void {
-            \Testo\Assert::same($a->user, $a->user);
-            \Testo\Assert::null($b->user);
+            Assert::same($a->user, $a->user);
+            Assert::null($b->user);
         });
 
-        \Testo\Assert::equals($a->user->email, 'hello@world.com');
+        Assert::equals($a->user->email, 'hello@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchPromisesFromHeap(): void
     {
         $selector = new Select($this->orm, Profile::class);
@@ -77,27 +80,30 @@ class BelongsToProxyMapperTest extends OrmTestCase
         $aData = $this->extractEntity($a);
         $bData = $this->extractEntity($b);
 
-        \Testo\Assert::instanceOf($aData['user'], ReferenceInterface::class);
-        \Testo\Assert::instanceOf($bData['user'], ReferenceInterface::class);
-        \Testo\Assert::null($c->user);
+        Assert::instanceOf($aData['user'], ReferenceInterface::class);
+        Assert::instanceOf($bData['user'], ReferenceInterface::class);
+        Assert::null($c->user);
 
         // warm up
         (new Select($this->orm, User::class))->fetchAll();
-        QueryAssert::reads(0, function () use ($a): void {
-            \Testo\Assert::instanceOf($a->user, User::class);
-            \Testo\Assert::same($a->user, $a->user);
-        });
-        // invalid object can't be cached
-        QueryAssert::reads(1, fn() => \Testo\Assert::null($b->user));
 
-        \Testo\Assert::equals($a->user->email, 'hello@world.com');
+        QueryAssert::reads(0, function () use ($a): void {
+            Assert::instanceOf($a->user, User::class);
+            Assert::same($a->user, $a->user);
+        });
+
+        // invalid object can't be cached
+        QueryAssert::reads(1, fn() => Assert::null($b->user));
+
+        Assert::equals($a->user->email, 'hello@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWriteOperations(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
+
         QueryAssert::writes(0, function () use ($p): void {
             $tr = new Transaction($this->orm);
             $tr->persist($p);
@@ -105,41 +111,44 @@ class BelongsToProxyMapperTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAssignPromiseAsRelation(): void
     {
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
 
         $pData = $this->extractEntity($p);
-        \Testo\Assert::instanceOf($pData['user'], ReferenceInterface::class);
+        Assert::instanceOf($pData['user'], ReferenceInterface::class);
 
         $np = new Profile();
         $np->image = 'new image';
+
         QueryAssert::reads(0, fn() => $np->user = $pData['user']);
+
         QueryAssert::count(0, 1, fn() => $this->save($np));
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))->wherePK(4)->fetchOne();
 
-        \Testo\Assert::instanceOf($p->user, User::class);
-        \Testo\Assert::equals($p->user->email, 'hello@world.com');
+        Assert::instanceOf($p->user, User::class);
+        Assert::equals($p->user->email, 'hello@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testEditPromised(): void
     {
         $p = (new Select($this->orm, Profile::class))
             ->wherePK(1)->fetchOne();
         $p->user->balance = 400;
+
         QueryAssert::count(0, 1, fn() => $this->save($p));
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
             ->wherePK(1)->fetchOne();
 
-        \Testo\Assert::same((int) $p->user->balance, 400);
+        Assert::same((int) $p->user->balance, 400);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

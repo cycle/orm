@@ -9,6 +9,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Options;
 use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Image;
@@ -16,50 +17,53 @@ use Cycle\ORM\Tests\Fixtures\ImagedInterface;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
-use Cycle\ORM\Relation\BulkLoader;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 // Belongs to morphed relation does not support eager loader, this relation can only work using lazy loading
 // and promises.
-class BelongsToMorphedRelationTest extends OrmTestCase
+final class BelongsToMorphedRelationTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testGetParent(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $cData = $this->extractEntity($c);
 
-        \Testo\Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+        Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+
         QueryAssert::reads(1, function () use ($c): void {
-            \Testo\Assert::instanceOf($c->parent, User::class);
-            \Testo\Assert::same($c->parent->email, 'hello@world.com');
+            Assert::instanceOf($c->parent, User::class);
+            Assert::same($c->parent->email, 'hello@world.com');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWritesNotLoaded(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $cData = $this->extractEntity($c);
 
-        \Testo\Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+        Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+
         QueryAssert::writes(0, fn() => $this->save($c));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testGetParentLoaded(): void
     {
         $u = $this->orm->getRepository(User::class)->findByPK(1);
 
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
 
-        \Testo\Assert::instanceOf($c->parent, User::class);
-        \Testo\Assert::same($c->parent->email, 'hello@world.com');
+        Assert::instanceOf($c->parent, User::class);
+        Assert::same($c->parent->email, 'hello@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWritesLoaded(): void
     {
         // $schemaArray = $this->getSchemaArray();
@@ -69,28 +73,30 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $cData = $this->extractEntity($c);
 
-        \Testo\Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+        Assert::instanceOf($cData['parent'], ReferenceInterface::class);
 
-        \Testo\Assert::instanceOf($c->parent, User::class);
+        Assert::instanceOf($c->parent, User::class);
+
         QueryAssert::writes(0, fn() => $this->save($c));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testGetParentPostloaded(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $cData = $this->extractEntity($c);
 
-        \Testo\Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+        Assert::instanceOf($cData['parent'], ReferenceInterface::class);
 
         $u = $this->orm->getRepository(User::class)->findByPK(1);
+
         QueryAssert::reads(0, function () use ($c): void {
-            \Testo\Assert::instanceOf($c->parent, User::class);
-            \Testo\Assert::same($c->parent->email, 'hello@world.com');
+            Assert::instanceOf($c->parent, User::class);
+            Assert::same($c->parent->email, 'hello@world.com');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithMorphedExistedParent(): void
     {
         $schemaArray = $this->getNullableMorphedSchemaArray();
@@ -100,7 +106,9 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $c->url = 'test.png';
 
         $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
+
         QueryAssert::writes(1, fn() => $this->save($c));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($c));
 
@@ -109,14 +117,15 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $c = $this->orm->getRepository(Image::class)->findByPK(6);
         $cData = $this->extractEntity($c);
 
-        \Testo\Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+        Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+
         QueryAssert::reads(1, function () use ($c): void {
-            \Testo\Assert::instanceOf($c->parent, User::class);
-            \Testo\Assert::same($c->parent->email, 'hello@world.com');
+            Assert::instanceOf($c->parent, User::class);
+            Assert::same($c->parent->email, 'hello@world.com');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithNewParent(): void
     {
         $schemaArray = $this->getSchemaArray();
@@ -129,7 +138,9 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $c->parent = new Post();
         $c->parent->title = 'post title';
         $c->parent->content = 'post content';
+
         QueryAssert::writes(2, fn() => $this->save($c));
+
         // consecutive
         QueryAssert::writes(0, fn() => $this->save($c));
 
@@ -138,14 +149,15 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $c = $this->orm->getRepository(Image::class)->findByPK(6);
         $cData = $this->extractEntity($c);
 
-        \Testo\Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+        Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+
         QueryAssert::reads(1, function () use ($c): void {
-            \Testo\Assert::instanceOf($c->parent, Post::class);
-            \Testo\Assert::same($c->parent->title, 'post title');
+            Assert::instanceOf($c->parent, Post::class);
+            Assert::same($c->parent->title, 'post title');
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSetParentAndUpdateParent(): void
     {
         $c = new Image();
@@ -153,11 +165,13 @@ class BelongsToMorphedRelationTest extends OrmTestCase
 
         $c->parent = $this->orm->getRepository(User::class)->findByPK(1);
         $c->parent->balance = 777;
+
         QueryAssert::writes(2, function () use (&$tr, $c): void {
             $tr = new Transaction($this->orm);
             $tr->persist($c);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $c): void {
             $tr = new Transaction($this->orm);
@@ -170,52 +184,55 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $c = $this->orm->getRepository(Image::class)->findByPK(6);
         $cData = $this->extractEntity($c);
 
-        \Testo\Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+        Assert::instanceOf($cData['parent'], ReferenceInterface::class);
+
         QueryAssert::reads(1, function () use ($c): void {
-            \Testo\Assert::instanceOf($c->parent, User::class);
-            \Testo\Assert::same($c->parent->email, 'hello@world.com');
-            \Testo\Assert::equals($c->parent->balance, 777);
+            Assert::instanceOf($c->parent, User::class);
+            Assert::same($c->parent->email, 'hello@world.com');
+            Assert::equals($c->parent->balance, 777);
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParentWithLoading(): void
     {
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
-        \Testo\Assert::instanceOf($c1->parent, User::class);
-        \Testo\Assert::instanceOf($c2->parent, Post::class);
+        Assert::instanceOf($c1->parent, User::class);
+        Assert::instanceOf($c2->parent, Post::class);
 
         [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
+
         QueryAssert::writes(2, fn() => $this->save($c1, $c2));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
-        \Testo\Assert::instanceOf($c1->parent, Post::class);
-        \Testo\Assert::instanceOf($c2->parent, User::class);
+        Assert::instanceOf($c1->parent, Post::class);
+        Assert::instanceOf($c2->parent, User::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParentWithoutLoading(): void
     {
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
         [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
+
         QueryAssert::writes(2, fn() => $this->save($c1, $c2));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
-        \Testo\Assert::instanceOf($c1->parent, Post::class);
-        \Testo\Assert::instanceOf($c2->parent, User::class);
+        Assert::instanceOf($c1->parent, Post::class);
+        Assert::instanceOf($c2->parent, User::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParentLoadedAfter(): void
     {
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
@@ -225,17 +242,18 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $this->orm->getRepository(Post::class)->findByPK(1);
 
         [$c1->parent, $c2->parent] = [$c2->parent, $c1->parent];
+
         QueryAssert::writes(2, fn() => $this->save($c1, $c2));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c1 = $this->orm->getRepository(Image::class)->findByPK(1);
         $c2 = $this->orm->getRepository(Image::class)->findByPK(2);
 
-        \Testo\Assert::instanceOf($c1->parent, Post::class);
-        \Testo\Assert::instanceOf($c2->parent, User::class);
+        Assert::instanceOf($c1->parent, Post::class);
+        Assert::instanceOf($c2->parent, User::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSetNull(): void
     {
         $schemaArray = $this->getNullableMorphedSchemaArray();
@@ -243,18 +261,19 @@ class BelongsToMorphedRelationTest extends OrmTestCase
 
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
         $c->parent = null;
+
         QueryAssert::writes(1, fn() => $this->save($c));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        \Testo\Assert::null($c->parent);
+        Assert::null($c->parent);
     }
 
     /**
      * When setting a morphed relation to null, both parent_id AND parent_type
      * should be cleared in the database.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testSetNullShouldClearMorphType(): void
     {
         $schemaArray = $this->getNullableMorphedSchemaArray();
@@ -264,8 +283,8 @@ class BelongsToMorphedRelationTest extends OrmTestCase
 
         // Verify the image initially has a parent_type
         $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
-        \Testo\Assert::same($row[0]['parent_type'], 'user');
-        \Testo\Assert::notNull($row[0]['parent_id']);
+        Assert::same($row[0]['parent_type'], 'user');
+        Assert::notNull($row[0]['parent_id']);
         $this->save($c);
 
         $c->parent = null;
@@ -273,15 +292,15 @@ class BelongsToMorphedRelationTest extends OrmTestCase
 
         // After setting parent to null, both parent_id and parent_type should be NULL
         $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
-        \Testo\Assert::null($row[0]['parent_id'], 'parent_id should be NULL after setting relation to null');
-        \Testo\Assert::null($row[0]['parent_type'], 'parent_type should be NULL after setting relation to null');
+        Assert::null($row[0]['parent_id'], 'parent_id should be NULL after setting relation to null');
+        Assert::null($row[0]['parent_type'], 'parent_type should be NULL after setting relation to null');
     }
 
     /**
      * When creating a new entity without setting the morphed relation,
      * parent_type should not be written to the database.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithoutParentShouldNotSetMorphType(): void
     {
         $schemaArray = $this->getNullableMorphedSchemaArray();
@@ -293,11 +312,11 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $this->save($c);
 
         $row = $this->getDatabase()->table('image')->select()->where('id', 6)->fetchAll();
-        \Testo\Assert::null($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
-        \Testo\Assert::null($row[0]['parent_type'], 'parent_type should be NULL for entity without parent');
+        Assert::null($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
+        Assert::null($row[0]['parent_type'], 'parent_type should be NULL for entity without parent');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUsingFactoryCreateWithoutRelatedButSetMorphTypeManually(): void
     {
         $schemaArray = $this->getNullableMorphedSchemaArray();
@@ -313,11 +332,11 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $this->save($c);
 
         $row = $this->getDatabase()->table('image')->select()->where('id', $c->id)->fetchAll();
-        \Testo\Assert::null($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
-        \Testo\Assert::same($row[0]['parent_type'], 'user', 'parent_type should be NULL for entity without parent');
+        Assert::null($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
+        Assert::same($row[0]['parent_type'], 'user', 'parent_type should be NULL for entity without parent');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateWithoutRelatedButSetMorphTypeManually(): void
     {
         $schemaArray = $this->getNullableMorphedSchemaArray();
@@ -332,18 +351,20 @@ class BelongsToMorphedRelationTest extends OrmTestCase
         $this->save($c);
 
         $row = $this->getDatabase()->table('image')->select()->where('id', $c->id)->fetchAll();
-        \Testo\Assert::null($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
-        \Testo\Assert::same($row[0]['parent_type'], 'user', 'parent_type should be NULL for entity without parent');
+        Assert::null($row[0]['parent_id'], 'parent_id should be NULL for entity without parent');
+        Assert::same($row[0]['parent_type'], 'user', 'parent_type should be NULL for entity without parent');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateRelation(): void
     {
         $images = QueryAssert::reads(1, fn() => (new Select($this->orm, Image::class))->fetchAll());
+
         QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))->collect(...$images)->load('parent')->run());
+
         QueryAssert::reads(0, function () use ($images): void {
             foreach ($images as $image) {
-                \Testo\Assert::notNull($image->parent);
+                Assert::notNull($image->parent);
             }
         });
     }
@@ -352,40 +373,42 @@ class BelongsToMorphedRelationTest extends OrmTestCase
      * With ignoreUninitializedRelations = true (BaseTest default) unsetting the relation property
      * must leave both the outer key and the morph key untouched.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testUnsetParentKeepsMorphWhenIgnoringUninitialized(): void
     {
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        \Testo\Assert::instanceOf($c->parent, User::class);
+        Assert::instanceOf($c->parent, User::class);
         unset($c->parent);
+
         QueryAssert::writes(0, fn() => $this->save($c));
 
         $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
-        \Testo\Assert::same((string) $row[0]['parent_id'], '1');
-        \Testo\Assert::same($row[0]['parent_type'], 'user');
+        Assert::same((string) $row[0]['parent_id'], '1');
+        Assert::same($row[0]['parent_type'], 'user');
     }
 
     /**
      * With ignoreUninitializedRelations = false an unset relation is treated as null, so both the
      * outer key and the morph key must be cleared.
      */
-    #[\Testo\Test]
+    #[Test]
     public function testUnsetParentClearsMorphWithoutIgnoreUninitialized(): void
     {
         $this->orm = $this->withSchema(new Schema($this->getNullableMorphedSchemaArray()))
             ->with(options: (new Options())->withIgnoreUninitializedRelations(false));
 
         $c = $this->orm->getRepository(Image::class)->findByPK(1);
-        \Testo\Assert::instanceOf($c->parent, User::class);
+        Assert::instanceOf($c->parent, User::class);
         unset($c->parent);
+
         QueryAssert::writes(1, fn() => $this->save($c));
 
         $row = $this->getDatabase()->table('image')->select()->where('id', 1)->fetchAll();
-        \Testo\Assert::null($row[0]['parent_id'], 'parent_id should be NULL when the unset relation is treated as null');
-        \Testo\Assert::null($row[0]['parent_type'], 'parent_type should be NULL when the unset relation is treated as null');
+        Assert::null($row[0]['parent_id'], 'parent_id should be NULL when the unset relation is treated as null');
+        Assert::null($row[0]['parent_type'], 'parent_type should be NULL when the unset relation is treated as null');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

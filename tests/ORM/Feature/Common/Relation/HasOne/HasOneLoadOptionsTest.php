@@ -16,11 +16,13 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HasOneLoadOptionsTest extends OrmTestCase
+final class HasOneLoadOptionsTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithSingleQueryMethod(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -29,11 +31,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 1');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithOuterQueryMethod(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -42,11 +44,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             method: LoadMethod::OuterQuery,
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 1');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithCustomWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -58,11 +60,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             where: ['@.level' => 1],
         ))->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 1');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithCustomWhereAndSingleQuery(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -75,11 +77,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             where: ['@.level' => 1],
         ))->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 1');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithOrderBy(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -92,11 +94,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             orderBy: ['@.level' => 'ASC'],
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 1');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithScopeDisabled(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -107,11 +109,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             scope: false,
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 1');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithCustomScope(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -120,11 +122,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             scope: new Select\QueryScope(['@.level' => ['>=' => 3]], ['@.level' => 'DESC']),
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 4');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.3');
+        Assert::same($a->firstComment->message, 'msg 4');
+        Assert::same($b->firstComment->message, 'msg 2.3');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithSingleQueryAndScopeAndWhere(): void
     {
         $this->orm = $this->withCommentsSchema([
@@ -142,14 +144,14 @@ class HasOneLoadOptionsTest extends OrmTestCase
             method: LoadMethod::SingleQuery,
         ))->orderBy('user.id', 'DESC')->fetchAll();
 
-        \Testo\Assert::count($res, 2);
-        \Testo\Assert::same($res[0]->email, $expected[0]->email);
-        \Testo\Assert::same($res[1]->email, $expected[1]->email);
-        \Testo\Assert::same($res[0]->firstComment->message, $expected[0]->firstComment->message);
-        \Testo\Assert::same($res[1]->firstComment->message, $expected[1]->firstComment->message);
+        Assert::count($res, 2);
+        Assert::same($res[0]->email, $expected[0]->email);
+        Assert::same($res[1]->email, $expected[1]->email);
+        Assert::same($res[0]->firstComment->message, $expected[0]->firstComment->message);
+        Assert::same($res[1]->firstComment->message, $expected[1]->firstComment->message);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadWithDefaultOptions(): void
     {
         $this->orm = $this->withCommentsSchema([]);
@@ -157,11 +159,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
         [$a, $b] = (new Select($this->orm, User::class))->load('firstComment', new HasOneLoadOptions())
             ->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'msg 1');
-        \Testo\Assert::same($b->firstComment->message, 'msg 2.1');
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadFromArchiveTable(): void
     {
         $this->makeTable('comment_archive', [
@@ -185,11 +187,11 @@ class HasOneLoadOptionsTest extends OrmTestCase
             table: 'comment_archive',
         ))->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::same($a->firstComment->message, 'archived 1');
-        \Testo\Assert::same($b->firstComment->message, 'archived 2.1');
+        Assert::same($a->firstComment->message, 'archived 1');
+        Assert::same($b->firstComment->message, 'archived 2.1');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

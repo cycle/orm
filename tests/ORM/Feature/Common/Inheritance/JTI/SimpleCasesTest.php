@@ -14,6 +14,9 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
 use Cycle\ORM\Transaction;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 class SimpleCasesTest extends JtiBaseTest
 {
@@ -63,149 +66,149 @@ class SimpleCasesTest extends JtiBaseTest
 
     // Select
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEmployeeHierarchyByPK(): void
     {
         $entity = (new Select($this->orm, static::EMPLOYEE_ROLE))
             ->wherePK(static::EMPLOYEE_2_PK)
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($entity, Programator::class);
+        Assert::instanceOf($entity, Programator::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEmployeeAllDataWithInheritance(): void
     {
         $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))->orderBy(static::EMPLOYEE_DEFAULT_SORTING);
 
-        \Testo\Assert::equals($selector->fetchData(), static::EMPLOYEE_INHERITED_LOADED);
+        Assert::equals($selector->fetchData(), static::EMPLOYEE_INHERITED_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEmployeeAllDataWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))
             ->loadSubclasses(false);
 
-        \Testo\Assert::equals($selector->fetchData(), static::EMPLOYEE_ALL_LOADED);
+        Assert::equals($selector->fetchData(), static::EMPLOYEE_ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEmployeeDataFirstWithInheritance(): void
     {
         $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))
             ->orderBy(static::EMPLOYEE_DEFAULT_SORTING)
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::MANAGER_1_LOADED);
+        Assert::equals($selector->fetchData()[0], static::MANAGER_1_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEmployeeDataFirstWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, static::EMPLOYEE_ROLE))
             ->loadSubclasses(false)
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::EMPLOYEE_1_LOADED);
+        Assert::equals($selector->fetchData()[0], static::EMPLOYEE_1_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerAllDataWithInheritance(): void
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE));
 
-        \Testo\Assert::equals($selector->fetchData(), static::PROGRAMATOR_ALL_LOADED);
+        Assert::equals($selector->fetchData(), static::PROGRAMATOR_ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerAllDataWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false);
 
-        \Testo\Assert::equals($selector->fetchData(), static::ENGINEER_ALL_LOADED);
+        Assert::equals($selector->fetchData(), static::ENGINEER_ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerDataFirstWithInheritance(): void
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_2_LOADED);
+        Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_2_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerDataFirstWithoutInheritance(): void
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
             ->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::ENGINEER_2_LOADED);
+        Assert::equals($selector->fetchData()[0], static::ENGINEER_2_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectEngineerEntityFirstWithInheritance(): void
     {
         $selector = (new Select($this->orm, static::ENGINEER_ROLE))->limit(1);
 
-        \Testo\Assert::instanceOf($selector->fetchOne(), Programator::class);
+        Assert::instanceOf($selector->fetchOne(), Programator::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectProgramatorAllData(): void
     {
         $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE));
 
-        \Testo\Assert::equals($selector->fetchData(), static::PROGRAMATOR_ALL_LOADED);
+        Assert::equals($selector->fetchData(), static::PROGRAMATOR_ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectProgramatorDataFirst(): void
     {
         $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_2_LOADED);
+        Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_2_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectManagerAllData(): void
     {
         $selector = (new Select($this->orm, static::MANAGER_ROLE));
 
-        \Testo\Assert::equals($selector->fetchData(), static::MANAGER_ALL_LOADED);
+        Assert::equals($selector->fetchData(), static::MANAGER_ALL_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectManagerDataFirst(): void
     {
         $selector = (new Select($this->orm, static::MANAGER_ROLE))->limit(1);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::MANAGER_1_LOADED);
+        Assert::equals($selector->fetchData()[0], static::MANAGER_1_LOADED);
     }
 
     // Select using Where condition
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectProgramatorUsingParentField(): void
     {
         $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->where('level', '>=', 10);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_4_LOADED);
+        Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_4_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectProgramatorUsingParentParentField(): void
     {
         $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->where('name', '=', 'Valeriy');
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_4_LOADED);
+        Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_4_LOADED);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectProgramatorUsingParentsFields(): void
     {
         $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))
@@ -216,46 +219,49 @@ class SimpleCasesTest extends JtiBaseTest
                 ],
             ]);
 
-        \Testo\Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_4_LOADED);
+        Assert::equals($selector->fetchData()[0], static::PROGRAMATOR_4_LOADED);
     }
 
     // Order by
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectProgramatorsWithSortingByParentField(): void
     {
         $selector = (new Select($this->orm, static::PROGRAMATOR_ROLE))->orderBy('age', 'ASC');
 
-        \Testo\Assert::equals($selector->fetchData(), \array_reverse(static::PROGRAMATOR_ALL_LOADED));
+        Assert::equals($selector->fetchData(), \array_reverse(static::PROGRAMATOR_ALL_LOADED));
     }
 
     // Persist
 
-    #[\Testo\Test]
+    #[Test]
     public function testProgramatorNoChanges(): void
     {
         $programator = (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
+
         QueryAssert::writes(0, fn() => $this->save($programator));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeAndPersistProgramator(): void
     {
         /** @var Programator $programator */
         $programator = (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
         $programator->language = 'Kotlin';
+
         QueryAssert::writes(1, fn() => $this->save($programator));
+
         QueryAssert::writes(0, fn() => $this->save($programator));
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->with(heap: new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
-        \Testo\Assert::same($programator->language, 'Kotlin');
+        Assert::same($programator->language, 'Kotlin');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testChangeParentsFieldsAndPersistProgramator(): void
     {
         /** @var Programator $programator */
@@ -264,59 +270,65 @@ class SimpleCasesTest extends JtiBaseTest
         $programator->language = 'Kotlin';
         $programator->level = 99;
         $programator->name = 'Thomas';
+
         QueryAssert::writes(3, fn() => $this->save($programator));
+
         QueryAssert::writes(0, fn() => $this->save($programator));
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)->fetchOne();
-        \Testo\Assert::same($programator->language, 'Kotlin');
-        \Testo\Assert::same($programator->level, 99);
-        \Testo\Assert::same($programator->name, 'Thomas');
+        Assert::same($programator->language, 'Kotlin');
+        Assert::same($programator->level, 99);
+        Assert::same($programator->name, 'Thomas');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateProgramator(): void
     {
         $programator = new Programator();
         $programator->name = 'Merlin';
         $programator->level = 50;
         $programator->language = 'VanillaJS';
+
         QueryAssert::writes(3, fn() => $this->save($programator));
+
         QueryAssert::writes(0, fn() => $this->save($programator));
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
             ->wherePK($programator->id)
             ->fetchOne();
-        \Testo\Assert::same($programator->name, 'Merlin');
-        \Testo\Assert::same($programator->level, 50);
-        \Testo\Assert::same($programator->language, 'VanillaJS');
+        Assert::same($programator->name, 'Merlin');
+        Assert::same($programator->level, 50);
+        Assert::same($programator->language, 'VanillaJS');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRemoveEngineer(): void
     {
         /** @var Engineer $entity */
         $entity = (new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
             ->wherePK(static::ENGINEER_2_PK)->fetchOne();
+
         QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($entity)->run());
+
         QueryAssert::writes(0, fn() => (new Transaction($this->orm))->delete($entity)->run());
 
         // todo load without inheritance
-        \Testo\Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))
+        Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(static::PROGRAMATOR_2_PK)
             ->fetchOne());
-        \Testo\Assert::null((new Select($this->orm, static::ENGINEER_ROLE))
+        Assert::null((new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
             ->wherePK(static::ENGINEER_2_PK)->fetchOne());
-        \Testo\Assert::notNull((new Select($this->orm, static::EMPLOYEE_ROLE))
+        Assert::notNull((new Select($this->orm, static::EMPLOYEE_ROLE))
             ->loadSubclasses(false)
             ->wherePK(static::EMPLOYEE_2_PK)->fetchOne());
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         parent::setUp();

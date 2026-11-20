@@ -13,13 +13,16 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ManyToManyScopeTest extends OrmTestCase
+final class ManyToManyScopeTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrdered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -34,20 +37,20 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedDesc(): void
     {
         $this->orm = $this->withTagSchema([
@@ -62,20 +65,20 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[3]->name, 'tag a');
-        \Testo\Assert::same($a->tags[2]->name, 'tag b');
-        \Testo\Assert::same($a->tags[1]->name, 'tag d');
-        \Testo\Assert::same($a->tags[0]->name, 'tag e');
+        Assert::same($a->tags[3]->name, 'tag a');
+        Assert::same($a->tags[2]->name, 'tag b');
+        Assert::same($a->tags[1]->name, 'tag d');
+        Assert::same($a->tags[0]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[2]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[0]->name, 'tag f');
+        Assert::same($b->tags[2]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[0]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -92,20 +95,20 @@ class ManyToManyScopeTest extends OrmTestCase
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByAndScopeOrdered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -121,20 +124,20 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByAsc(): void
     {
         $this->orm = $this->withTagSchema([
@@ -149,20 +152,20 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByDesc(): void
     {
         $this->orm = $this->withTagSchema([
@@ -177,20 +180,20 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[3]->name, 'tag a');
-        \Testo\Assert::same($a->tags[2]->name, 'tag b');
-        \Testo\Assert::same($a->tags[1]->name, 'tag d');
-        \Testo\Assert::same($a->tags[0]->name, 'tag e');
+        Assert::same($a->tags[3]->name, 'tag a');
+        Assert::same($a->tags[2]->name, 'tag b');
+        Assert::same($a->tags[1]->name, 'tag d');
+        Assert::same($a->tags[0]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[2]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[0]->name, 'tag f');
+        Assert::same($b->tags[2]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[0]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -207,20 +210,20 @@ class ManyToManyScopeTest extends OrmTestCase
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByPostload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -237,20 +240,20 @@ class ManyToManyScopeTest extends OrmTestCase
             'method' => Select\JoinableLoader::POSTLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
@@ -264,22 +267,23 @@ class ManyToManyScopeTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
+
         QueryAssert::reads(2, function () use ($a, $b): void {
-            \Testo\Assert::count($a->tags, 4);
-            \Testo\Assert::count($b->tags, 3);
+            Assert::count($a->tags, 4);
+            Assert::count($b->tags, 3);
         });
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByAltered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -294,20 +298,20 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags', ['orderBy' => ['@.level' => 'ASC']])->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedDESCInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -324,20 +328,20 @@ class ManyToManyScopeTest extends OrmTestCase
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 4);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[3]->name, 'tag a');
-        \Testo\Assert::same($a->tags[2]->name, 'tag b');
-        \Testo\Assert::same($a->tags[1]->name, 'tag d');
-        \Testo\Assert::same($a->tags[0]->name, 'tag e');
+        Assert::same($a->tags[3]->name, 'tag a');
+        Assert::same($a->tags[2]->name, 'tag b');
+        Assert::same($a->tags[1]->name, 'tag d');
+        Assert::same($a->tags[0]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[2]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[0]->name, 'tag f');
+        Assert::same($b->tags[2]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[0]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedPromisedASC(): void
     {
         $this->orm = $this->withTagSchema([
@@ -351,22 +355,23 @@ class ManyToManyScopeTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
+
         QueryAssert::reads(2, function () use ($a, $b): void {
-            \Testo\Assert::count($a->tags, 4);
-            \Testo\Assert::count($b->tags, 3);
+            Assert::count($a->tags, 4);
+            Assert::count($b->tags, 3);
         });
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
-        \Testo\Assert::same($a->tags[1]->name, 'tag b');
-        \Testo\Assert::same($a->tags[2]->name, 'tag d');
-        \Testo\Assert::same($a->tags[3]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[1]->name, 'tag b');
+        Assert::same($a->tags[2]->name, 'tag d');
+        Assert::same($a->tags[3]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedPromisedDESC(): void
     {
         $this->orm = $this->withTagSchema([
@@ -380,22 +385,23 @@ class ManyToManyScopeTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
+
         QueryAssert::reads(2, function () use ($a, $b): void {
-            \Testo\Assert::count($a->tags, 4);
-            \Testo\Assert::count($b->tags, 3);
+            Assert::count($a->tags, 4);
+            Assert::count($b->tags, 3);
         });
 
-        \Testo\Assert::same($a->tags[3]->name, 'tag a');
-        \Testo\Assert::same($a->tags[2]->name, 'tag b');
-        \Testo\Assert::same($a->tags[1]->name, 'tag d');
-        \Testo\Assert::same($a->tags[0]->name, 'tag e');
+        Assert::same($a->tags[3]->name, 'tag a');
+        Assert::same($a->tags[2]->name, 'tag b');
+        Assert::same($a->tags[1]->name, 'tag d');
+        Assert::same($a->tags[0]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[2]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[0]->name, 'tag f');
+        Assert::same($b->tags[2]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[0]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -411,18 +417,18 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag d');
-        \Testo\Assert::same($a->tags[1]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag d');
+        Assert::same($a->tags[1]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithOrderByAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -440,18 +446,18 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag d');
-        \Testo\Assert::same($a->tags[1]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag d');
+        Assert::same($a->tags[1]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedDESCAndWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -467,18 +473,18 @@ class ManyToManyScopeTest extends OrmTestCase
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[1]->name, 'tag d');
-        \Testo\Assert::same($a->tags[0]->name, 'tag e');
+        Assert::same($a->tags[1]->name, 'tag d');
+        Assert::same($a->tags[0]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[2]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[0]->name, 'tag f');
+        Assert::same($b->tags[2]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[0]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -496,18 +502,18 @@ class ManyToManyScopeTest extends OrmTestCase
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag d');
-        \Testo\Assert::same($a->tags[1]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag d');
+        Assert::same($a->tags[1]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedDESCAndWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -525,18 +531,18 @@ class ManyToManyScopeTest extends OrmTestCase
             'method' => Select\JoinableLoader::INLOAD,
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 2);
-        \Testo\Assert::count($b->tags, 3);
+        Assert::count($a->tags, 2);
+        Assert::count($b->tags, 3);
 
-        \Testo\Assert::same($a->tags[1]->name, 'tag d');
-        \Testo\Assert::same($a->tags[0]->name, 'tag e');
+        Assert::same($a->tags[1]->name, 'tag d');
+        Assert::same($a->tags[0]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[2]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[0]->name, 'tag f');
+        Assert::same($b->tags[2]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[0]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScopeOrderedAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
@@ -551,20 +557,21 @@ class ManyToManyScopeTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
+
         QueryAssert::reads(2, function () use ($a, $b): void {
-            \Testo\Assert::count($a->tags, 2);
-            \Testo\Assert::count($b->tags, 3);
+            Assert::count($a->tags, 2);
+            Assert::count($b->tags, 3);
         });
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag d');
-        \Testo\Assert::same($a->tags[1]->name, 'tag e');
+        Assert::same($a->tags[0]->name, 'tag d');
+        Assert::same($a->tags[1]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[0]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[2]->name, 'tag f');
+        Assert::same($b->tags[0]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[2]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testOrderedDESCAndWherePromise(): void
     {
         $this->orm = $this->withTagSchema([
@@ -579,20 +586,21 @@ class ManyToManyScopeTest extends OrmTestCase
          * @var User $b
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
+
         QueryAssert::reads(2, function () use ($a, $b): void {
-            \Testo\Assert::count($a->tags, 2);
-            \Testo\Assert::count($b->tags, 3);
+            Assert::count($a->tags, 2);
+            Assert::count($b->tags, 3);
         });
 
-        \Testo\Assert::same($a->tags[1]->name, 'tag d');
-        \Testo\Assert::same($a->tags[0]->name, 'tag e');
+        Assert::same($a->tags[1]->name, 'tag d');
+        Assert::same($a->tags[0]->name, 'tag e');
 
-        \Testo\Assert::same($b->tags[2]->name, 'tag c');
-        \Testo\Assert::same($b->tags[1]->name, 'tag d');
-        \Testo\Assert::same($b->tags[0]->name, 'tag f');
+        Assert::same($b->tags[2]->name, 'tag c');
+        Assert::same($b->tags[1]->name, 'tag d');
+        Assert::same($b->tags[0]->name, 'tag f');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCustomWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -610,13 +618,13 @@ class ManyToManyScopeTest extends OrmTestCase
             'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 1);
-        \Testo\Assert::count($b->tags, 0);
+        Assert::count($a->tags, 1);
+        Assert::count($b->tags, 0);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[0]->name, 'tag a');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCustomWhereInload(): void
     {
         $this->orm = $this->withTagSchema([
@@ -635,12 +643,12 @@ class ManyToManyScopeTest extends OrmTestCase
             'where' => ['@.level' => 1],
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($a->tags, 1);
+        Assert::count($a->tags, 1);
 
-        \Testo\Assert::same($a->tags[0]->name, 'tag a');
+        Assert::same($a->tags[0]->name, 'tag a');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithWhere(): void
     {
         $this->orm = $this->withTagSchema([
@@ -651,11 +659,11 @@ class ManyToManyScopeTest extends OrmTestCase
 
         $res = $selector->with('tags')->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($res, 1);
-        \Testo\Assert::same($res[0]->email, 'another@world.com');
+        Assert::count($res, 1);
+        Assert::same($res[0]->email, 'another@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testWithWhereAltered(): void
     {
         $this->orm = $this->withTagSchema([
@@ -668,12 +676,12 @@ class ManyToManyScopeTest extends OrmTestCase
             'where' => ['@.level' => ['>=' => 5]],
         ])->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($res, 2);
-        \Testo\Assert::same($res[0]->email, 'hello@world.com');
-        \Testo\Assert::same($res[1]->email, 'another@world.com');
+        Assert::count($res, 2);
+        Assert::same($res[0]->email, 'hello@world.com');
+        Assert::same($res[1]->email, 'another@world.com');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLimitParentSelection(): void
     {
         $this->orm = $this->withTagSchema([]);
@@ -686,15 +694,15 @@ class ManyToManyScopeTest extends OrmTestCase
             ->limit(1)
             ->orderBy('user.id')->fetchAll();
 
-        \Testo\Assert::count($res, 1);
-        \Testo\Assert::same($res[0]->email, 'hello@world.com');
-        \Testo\Assert::count($res[0]->tags, 4);
+        Assert::count($res, 1);
+        Assert::same($res[0]->email, 'hello@world.com');
+        Assert::count($res[0]->tags, 4);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLimitParentSelectionError(): void
     {
-        \Testo\Expect::exception(LoaderException::class);
+        Expect::exception(LoaderException::class);
 
         $this->orm = $this->withTagSchema([]);
 
@@ -707,10 +715,10 @@ class ManyToManyScopeTest extends OrmTestCase
             ->orderBy('user.id')->fetchAll();
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testInvalidOrderBy(): void
     {
-        \Testo\Expect::exception(StatementException::class);
+        Expect::exception(StatementException::class);
 
         $this->orm = $this->withTagSchema([
             Schema::SCOPE => new Select\QueryScope([], ['@.column' => 'ASC']),
@@ -721,7 +729,7 @@ class ManyToManyScopeTest extends OrmTestCase
         $res = $selector->with('tags')->orderBy('user.id')->fetchAll();
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

@@ -9,32 +9,37 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\OptimisticLockMapper;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Transaction;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Expect;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class OptimisticLockTest extends OrmTestCase
+final class OptimisticLockTest extends OrmTestCase
 {
-
     /**
      * Check the mapper works fine in a normal create and update cases
      */
-    #[\Testo\Test]
+    #[Test]
     public function testCreateAndUpdate(): void
     {
         $entity = new Post();
         $entity->title = 'Test title';
         $entity->content = 'Test content';
         $entity->lock = microtime();
+
         QueryAssert::writes(1, fn() => $this->save($entity));
 
         $oldLock = $entity->lock;
         $entity->title = 'new title';
+
         QueryAssert::writes(1, fn() => $this->save($entity));
 
-        \Testo\Assert::notSame($entity->lock, $oldLock);
+        Assert::notSame($entity->lock, $oldLock);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateLocked(): void
     {
         $entity = new Post();
@@ -45,7 +50,7 @@ class OptimisticLockTest extends OrmTestCase
 
         $this->getDatabase()->update('post', ['lock' => microtime()], ['id' => $entity->id])->run();
 
-        \Testo\Expect::exception(\RuntimeException::class)->withMessageContaining('The `post` record is locked.');
+        Expect::exception(\RuntimeException::class)->withMessageContaining('The `post` record is locked.');
 
         try {
             $entity->title = 'new title';
@@ -58,7 +63,7 @@ class OptimisticLockTest extends OrmTestCase
     /**
      * Check the mapper works fine in a normal delete case
      */
-    #[\Testo\Test]
+    #[Test]
     public function testCreateAndDelete(): void
     {
         $entity = new Post();
@@ -66,10 +71,11 @@ class OptimisticLockTest extends OrmTestCase
         $entity->content = 'Test content';
         $entity->lock = microtime();
         $this->save($entity);
+
         QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($entity)->run());
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateAndDeleteLocked(): void
     {
         $entity = new Post();
@@ -80,7 +86,7 @@ class OptimisticLockTest extends OrmTestCase
 
         $this->getDatabase()->update('post', ['lock' => microtime()], ['id' => $entity->id])->run();
 
-        \Testo\Expect::exception(\RuntimeException::class)->withMessageContaining('The `post` record is locked.');
+        Expect::exception(\RuntimeException::class)->withMessageContaining('The `post` record is locked.');
 
         try {
             (new Transaction($this->orm))->delete($entity)->run();
@@ -89,7 +95,7 @@ class OptimisticLockTest extends OrmTestCase
         }
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('post', [

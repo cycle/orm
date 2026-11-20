@@ -7,27 +7,29 @@ namespace Cycle\ORM\Tests\Feature\Common\Relation\Morphed;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
+use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Doctrine\Common\Collections\Collection;
-use Cycle\Testing\ORM\OrmTestCase;
-use Cycle\ORM\Relation\BulkLoader;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Doctrine\Common\Collections\Collection;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class MorphedHasManyRelationTest extends OrmTestCase
+final class MorphedHasManyRelationTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -64,13 +66,13 @@ class MorphedHasManyRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchAnother(): void
     {
         $selector = new Select($this->orm, Post::class);
         $selector->load('comments')->orderBy('post.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'user_id' => 1,
@@ -128,7 +130,7 @@ class MorphedHasManyRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testLoadOverlapping(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -137,7 +139,7 @@ class MorphedHasManyRelationTest extends OrmTestCase
             ->load('comments')
             ->orderBy('user.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -230,30 +232,31 @@ class MorphedHasManyRelationTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::instanceOf($a->comments, Collection::class);
-        \Testo\Assert::instanceOf($b->comments, Collection::class);
+        Assert::instanceOf($a->comments, Collection::class);
+        Assert::instanceOf($b->comments, Collection::class);
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 0);
 
-        \Testo\Assert::same($a->comments[0]->message, 'first comment');
-        \Testo\Assert::same($a->comments[1]->message, 'second comment');
-        \Testo\Assert::same($a->comments[2]->message, 'third comment');
+        Assert::same($a->comments[0]->message, 'first comment');
+        Assert::same($a->comments[1]->message, 'second comment');
+        Assert::same($a->comments[2]->message, 'third comment');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
+
         QueryAssert::writes(0, function () use ($a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
@@ -262,7 +265,7 @@ class MorphedHasManyRelationTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testDeleteComment(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -270,12 +273,14 @@ class MorphedHasManyRelationTest extends OrmTestCase
         [$a, $b] = $selector->fetchAll();
 
         $a->comments->remove(0);
+
         QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
             $tr->persist($b);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
@@ -289,11 +294,11 @@ class MorphedHasManyRelationTest extends OrmTestCase
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::count($a->comments, 2);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 2);
+        Assert::count($b->comments, 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnotherParent(): void
     {
         /**
@@ -314,6 +319,7 @@ class MorphedHasManyRelationTest extends OrmTestCase
             $tr->persist($b);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
@@ -327,15 +333,15 @@ class MorphedHasManyRelationTest extends OrmTestCase
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::count($a->comments, 2);
-        \Testo\Assert::count($b->comments, 1);
+        Assert::count($a->comments, 2);
+        Assert::count($b->comments, 1);
 
-        \Testo\Assert::same($b->comments[0]->message, 'first comment');
-        \Testo\Assert::same($a->comments[0]->message, 'second comment');
-        \Testo\Assert::same($a->comments[1]->message, 'third comment');
+        Assert::same($b->comments[0]->message, 'first comment');
+        Assert::same($a->comments[0]->message, 'second comment');
+        Assert::same($a->comments[1]->message, 'third comment');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnother(): void
     {
         /**
@@ -347,12 +353,14 @@ class MorphedHasManyRelationTest extends OrmTestCase
 
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
+
         QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
             $tr->persist($b);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
@@ -365,34 +373,35 @@ class MorphedHasManyRelationTest extends OrmTestCase
         $a = (new Select($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
         $b = (new Select($this->orm, Post::class))->wherePK(1)->load('comments')->fetchOne();
 
-        \Testo\Assert::count($a->comments, 2);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 2);
+        Assert::count($b->comments, 3);
 
-        \Testo\Assert::true($a->comments->exists(function ($i, $c) {
+        Assert::true($a->comments->exists(function ($i, $c) {
             return $c->message == 'third comment';
         }));
 
-        \Testo\Assert::true($a->comments->exists(function ($i, $c) {
+        Assert::true($a->comments->exists(function ($i, $c) {
             return $c->message == 'second comment';
         }));
 
-        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
+        Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'first comment';
         }));
 
-        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
+        Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'post 1 comment';
         }));
 
-        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
+        Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'post 1.1 comment';
         }));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateRelationSortedById(): void
     {
         $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('comments', [
                 'orderBy' => ['id' => 'DESC'],
@@ -400,18 +409,18 @@ class MorphedHasManyRelationTest extends OrmTestCase
         QueryAssert::reads(0, function () use ($users): void {
             $checked = false;
             foreach ($users as $user) {
-                \Testo\Assert::iterable($user->comments);
+                Assert::iterable($user->comments);
                 // Check order
                 if (\count($user->comments) > 1) {
-                    \Testo\Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
+                    Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
                     $checked = true;
                 }
             }
-            \Testo\Assert::true($checked, 'No comments to check order.');
+            Assert::true($checked, 'No comments to check order.');
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

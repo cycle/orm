@@ -17,23 +17,25 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class ManyToManyLoophpPivotTest extends OrmTestCase
+final class ManyToManyLoophpPivotTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testPivotedCollection(): void
     {
         $data = (new Select($this->orm, User::class))->load('tags')->fetchAll();
 
-        \Testo\Assert::instanceOf($data[0]->tags, LoophpPivotedCollection::class);
-        \Testo\Assert::instanceOf($data[1]->tags, LoophpPivotedCollection::class);
+        Assert::instanceOf($data[0]->tags, LoophpPivotedCollection::class);
+        Assert::instanceOf($data[1]->tags, LoophpPivotedCollection::class);
 
-        \Testo\Assert::same($data[0]->tags->count(), 4);
-        \Testo\Assert::same($data[1]->tags->count(), 3);
+        Assert::same($data[0]->tags->count(), 4);
+        Assert::same($data[1]->tags->count(), 3);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

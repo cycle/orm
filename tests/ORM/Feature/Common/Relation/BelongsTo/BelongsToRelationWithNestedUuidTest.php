@@ -11,13 +11,15 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\UserWithUUIDPrimaryKey;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
-use Ramsey\Uuid\Uuid;
 use Cycle\Testing\ORM\OrmTestCase;
+use Ramsey\Uuid\Uuid;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class BelongsToRelationWithNestedUuidTest extends OrmTestCase
+final class BelongsToRelationWithNestedUuidTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testNestedWithUuidPK(): void
     {
         $uuid = Uuid::uuid4();
@@ -43,17 +45,17 @@ class BelongsToRelationWithNestedUuidTest extends OrmTestCase
         $first = $this->orm->getRepository(Comment::class)->findOne(['message' => 'foo']);
         $second = $this->orm->getRepository(Comment::class)->findOne(['message' => 'bar']);
 
-        \Testo\Assert::instanceOf($this->orm->getRepository(UserWithUUIDPrimaryKey::class)->findOne(), UserWithUUIDPrimaryKey::class);
+        Assert::instanceOf($this->orm->getRepository(UserWithUUIDPrimaryKey::class)->findOne(), UserWithUUIDPrimaryKey::class);
 
-        \Testo\Assert::instanceOf($first, Comment::class);
-        \Testo\Assert::instanceOf($first->userWithUuid, UserWithUUIDPrimaryKey::class);
-        \Testo\Assert::null($first->parent);
-        \Testo\Assert::instanceOf($second, Comment::class);
-        \Testo\Assert::instanceOf($second->userWithUuid, UserWithUUIDPrimaryKey::class);
-        \Testo\Assert::instanceOf($second->parent, Comment::class);
+        Assert::instanceOf($first, Comment::class);
+        Assert::instanceOf($first->userWithUuid, UserWithUUIDPrimaryKey::class);
+        Assert::null($first->parent);
+        Assert::instanceOf($second, Comment::class);
+        Assert::instanceOf($second->userWithUuid, UserWithUUIDPrimaryKey::class);
+        Assert::instanceOf($second->parent, Comment::class);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user_with_uuid_pk', [

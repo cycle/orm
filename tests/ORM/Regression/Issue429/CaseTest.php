@@ -9,11 +9,13 @@ use Cycle\ORM\Tests\Regression\Issue429\Entity\Order;
 use Cycle\ORM\Tests\Regression\Issue429\Entity\PurchaseOrder;
 use Cycle\ORM\Tests\Regression\Issue429\Entity\PurchaseOrderItem;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         // Order 1
@@ -23,8 +25,8 @@ class CaseTest extends OrmTestCase
             ->fetchOne();
 
         // Check result
-        \Testo\Assert::instanceOf($order, Order::class);
-        \Testo\Assert::count($order->items, 2);
+        Assert::instanceOf($order, Order::class);
+        Assert::count($order->items, 2);
 
         // Order 2
         $order = (new Select($this->orm, Order::class))
@@ -33,11 +35,11 @@ class CaseTest extends OrmTestCase
             ->fetchOne();
 
         // Check result
-        \Testo\Assert::instanceOf($order, Order::class);
-        \Testo\Assert::count($order->items, 1);
+        Assert::instanceOf($order, Order::class);
+        Assert::count($order->items, 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSave(): void
     {
         /** @var Order $order */
@@ -60,7 +62,7 @@ class CaseTest extends OrmTestCase
         $this->save($purchaseOrder, ...$orderItems);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreate(): void
     {
         $order = new Order('O0101');
@@ -78,7 +80,7 @@ class CaseTest extends OrmTestCase
         $this->save($order, $purchaseOrder, ...$orderItems);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

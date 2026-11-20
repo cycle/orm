@@ -7,19 +7,21 @@ namespace Cycle\ORM\Tests\Regression\Issue322;
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Regression\Issue322\Entity\PostTag;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * @link https://github.com/cycle/orm/issues/322
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
     /**
      * There pivoted collection is replaced with new one but one target is from old collection
      */
-    #[\Testo\Test]
+    #[Test]
     public function testPivotedCollectionUniqueIndex(): void
     {
         // Get entity
@@ -28,23 +30,24 @@ class CaseTest extends OrmTestCase
             ->load('tags')
             ->fetchOne();
 
-        \Testo\Assert::count($post->tags, 3);
+        Assert::count($post->tags, 3);
 
         $tag1 = (new Select($this->orm, Entity\Tag::class))
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::same($post->tags[0], $tag1);
+        Assert::same($post->tags[0], $tag1);
 
         $post->tags = new PivotedCollection();
         $post->tags->add($tag1);
+
         QueryAssert::writes(2, fn() => $this->save($post));
     }
 
     /**
      * There pivoted collection is replaced with new one and one target is from old collection has a different pivot
      */
-    #[\Testo\Test]
+    #[Test]
     public function testPivotedCollectionUniqueIndexWithNewPivot(): void
     {
         // Get entity
@@ -53,20 +56,21 @@ class CaseTest extends OrmTestCase
             ->load('tags')
             ->fetchOne();
 
-        \Testo\Assert::count($post->tags, 3);
+        Assert::count($post->tags, 3);
 
         $tag1 = (new Select($this->orm, Entity\Tag::class))
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::same($post->tags[0], $tag1);
+        Assert::same($post->tags[0], $tag1);
 
         $post->tags = new PivotedCollection();
         $post->tags->setPivot($tag1, new PostTag());
+
         QueryAssert::writes(3, fn() => $this->save($post));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

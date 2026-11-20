@@ -6,16 +6,18 @@ namespace Cycle\ORM\Tests\Regression\Issue356;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * Test belongs to morphed loader
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelectOne(): void
     {
         // Eager load morphed relation
@@ -24,10 +26,10 @@ class CaseTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne());
         // Check result
-        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($log, Entity\LogRecord::class));
+        QueryAssert::reads(0, fn() => Assert::instanceOf($log, Entity\LogRecord::class));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateOne(): void
     {
         // Eager load morphed relation
@@ -39,10 +41,10 @@ class CaseTest extends OrmTestCase
             ->load('actor')
             ->run());
         // Check result
-        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($log->actor, Entity\Actor::class));
+        QueryAssert::reads(0, fn() => Assert::instanceOf($log->actor, Entity\Actor::class));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectAll(): void
     {
         // Eager load morphed relation for multiple entities
@@ -52,15 +54,15 @@ class CaseTest extends OrmTestCase
         // Check result
         QueryAssert::reads(0, function () use ($logs): void {
             foreach ($logs as $log) {
-                \Testo\Assert::instanceOf($log, Entity\LogRecord::class);
+                Assert::instanceOf($log, Entity\LogRecord::class);
                 \in_array($log->lid, [9], true)
-                    ? \Testo\Assert::null($log->actor)
-                    : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
+                    ? Assert::null($log->actor)
+                    : Assert::instanceOf($log->actor, Entity\Actor::class);
             }
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateMany(): void
     {
         // Eager load morphed relation
@@ -74,13 +76,13 @@ class CaseTest extends OrmTestCase
         QueryAssert::reads(0, function () use ($logs): void {
             foreach ($logs as $log) {
                 \in_array($log->lid, [9], true)
-                    ? \Testo\Assert::null($log->actor)
-                    : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
+                    ? Assert::null($log->actor)
+                    : Assert::instanceOf($log->actor, Entity\Actor::class);
             }
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testScoped(): void
     {
         // Eager load morphed relation
@@ -89,15 +91,15 @@ class CaseTest extends OrmTestCase
             ->wherePK(9, 10)
             ->orderBy('l_id')
             ->fetchAll());
-        \Testo\Assert::count($logs, 2);
+        Assert::count($logs, 2);
         // Check result
         QueryAssert::reads(0, function () use ($logs): void {
-            \Testo\Assert::null($logs[0]->actor);
-            \Testo\Assert::instanceOf($logs[1]->actor, Entity\Tenant::class);
+            Assert::null($logs[0]->actor);
+            Assert::instanceOf($logs[1]->actor, Entity\Tenant::class);
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

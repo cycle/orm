@@ -11,12 +11,14 @@ use Cycle\ORM\Tests\Fixtures\TransactionTestMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class TransactionTest extends OrmTestCase
+final class TransactionTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
-    public function testTransactionRollbackShouldResetEntityState()
+    #[Test]
+    public function testTransactionRollbackShouldResetEntityState(): void
     {
         $t = new Transaction($this->orm);
 
@@ -50,29 +52,29 @@ class TransactionTest extends OrmTestCase
         try {
             $t->run();
         } catch (\Exception $e) {
-            \Testo\Assert::same($log->countWrites() - $writes, 3);
-            \Testo\Assert::null($u->id);
+            Assert::same($log->countWrites() - $writes, 3);
+            Assert::null($u->id);
         }
 
         try {
             $t1->run();
         } catch (\Exception $e) {
-            \Testo\Assert::same($log->countWrites() - $writes, 3);
-            \Testo\Assert::null($u->id);
+            Assert::same($log->countWrites() - $writes, 3);
+            Assert::null($u->id);
         }
 
         try {
             $t2->run();
         } catch (\Exception $e) {
-            \Testo\Assert::same($log->countWrites() - $writes, 3);
-            \Testo\Assert::null($u->id);
+            Assert::same($log->countWrites() - $writes, 3);
+            Assert::null($u->id);
         }
 
         $this->orm->getHeap()->clean();
     }
 
-    #[\Testo\Test]
-    public function testRollbackDatabaseTransactionAfterRunORMTransaction()
+    #[Test]
+    public function testRollbackDatabaseTransactionAfterRunORMTransaction(): void
     {
         $dbal = $this->orm->getFactory()->database();
 
@@ -106,19 +108,19 @@ class TransactionTest extends OrmTestCase
 
             $dbal->commit();
         } catch (\Throwable $e) {
-            \Testo\Assert::same($e->getMessage(), 'Something went wrong outside transaction');
+            Assert::same($e->getMessage(), 'Something went wrong outside transaction');
             $dbal->rollback();
         }
 
         $this->orm->getHeap()->clean();
 
-        \Testo\Assert::same((new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance, 100);
-        \Testo\Assert::notNull((new Select($this->orm, User::class))->wherePK(2)->fetchOne());
-        \Testo\Assert::null((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne());
+        Assert::same((new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance, 100);
+        Assert::notNull((new Select($this->orm, User::class))->wherePK(2)->fetchOne());
+        Assert::null((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne());
     }
 
-    #[\Testo\Test]
-    public function testRollbackDatabaseTransactionDuringRunORMTransaction()
+    #[Test]
+    public function testRollbackDatabaseTransactionDuringRunORMTransaction(): void
     {
         $dbal = $this->orm->getFactory()->database();
 
@@ -141,7 +143,7 @@ class TransactionTest extends OrmTestCase
 
             $t->run();
 
-            \Testo\Assert::same((new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne()->balance, 150);
+            Assert::same((new Select($this->orm->withHeap(new Heap()), User::class))->wherePK(1)->fetchOne()->balance, 150);
 
             // For user with ID 3 Mapper should throw an exception
             $t->delete($u3);
@@ -151,24 +153,24 @@ class TransactionTest extends OrmTestCase
 
             $t->run();
 
-            \Testo\Assert::fail('Exception should be thrown.');
+            Assert::fail('Exception should be thrown.');
 
             $dbal->commit();
         } catch (\Throwable $e) {
-            \Testo\Assert::same($e->getMessage(), 'Something went wrong');
+            Assert::same($e->getMessage(), 'Something went wrong');
 
             $dbal->rollback();
         }
 
         $this->orm->getHeap()->clean();
 
-        \Testo\Assert::same((new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance, 100);
-        \Testo\Assert::notNull((new Select($this->orm, User::class))->wherePK(3)->fetchOne());
-        \Testo\Assert::null((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne());
+        Assert::same((new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance, 100);
+        Assert::notNull((new Select($this->orm, User::class))->wherePK(3)->fetchOne());
+        Assert::null((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne());
     }
 
-    #[\Testo\Test]
-    public function testCommitDatabaseTransactionAfterORMTransaction()
+    #[Test]
+    public function testCommitDatabaseTransactionAfterORMTransaction(): void
     {
         $dbal = $this->orm->getFactory()->database();
 
@@ -201,12 +203,12 @@ class TransactionTest extends OrmTestCase
 
         $this->orm->getHeap()->clean();
 
-        \Testo\Assert::same((new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance, 150);
-        \Testo\Assert::null((new Select($this->orm, User::class))->wherePK(2)->fetchOne());
-        \Testo\Assert::same((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne()->balance, 350);
+        Assert::same((new Select($this->orm, User::class))->wherePK(1)->fetchOne()->balance, 150);
+        Assert::null((new Select($this->orm, User::class))->wherePK(2)->fetchOne());
+        Assert::same((new Select($this->orm, User::class))->wherePK($newU->id)->fetchOne()->balance, 350);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', ['id' => 'primary', 'email' => 'string', 'balance' => 'float',]);

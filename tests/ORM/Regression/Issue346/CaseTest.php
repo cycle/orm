@@ -6,11 +6,13 @@ namespace Cycle\ORM\Tests\Regression\Issue346;
 
 use Cycle\ORM\Select;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         /** @var Entity\Post $post */
@@ -18,18 +20,18 @@ class CaseTest extends OrmTestCase
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::same($post->user->id, 1);
+        Assert::same($post->user->id, 1);
 
         $post->user_id = 2;
 
         $this->save($post);
 
-        \Testo\Assert::same($post->user_id, 2);
-        \Testo\Assert::same($post->user->id, 2);
+        Assert::same($post->user_id, 2);
+        Assert::same($post->user->id, 2);
         $this->orm->getHeap()->clean();
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

@@ -12,8 +12,11 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class SimpleTest extends StiBaseTest
+final class SimpleTest extends StiBaseTest
 {
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';
@@ -65,32 +68,32 @@ class SimpleTest extends StiBaseTest
 
     // Basics
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchBaseData(): void
     {
         $selector = new Select($this->orm, Employee::class);
 
-        \Testo\Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
+        Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testEntityClass(): void
     {
         $selector = new Select($this->orm, Employee::class);
         [$a, $b, $c, $d] = $selector->orderBy('id')->fetchAll();
 
-        \Testo\Assert::instanceOf($a, Manager::class);
+        Assert::instanceOf($a, Manager::class);
 
-        \Testo\Assert::instanceOf($b, Employee::class);
-        \Testo\Assert::false($b instanceof Manager);
+        Assert::instanceOf($b, Employee::class);
+        Assert::false($b instanceof Manager);
 
-        \Testo\Assert::instanceOf($c, Manager::class);
+        Assert::instanceOf($c, Manager::class);
 
-        \Testo\Assert::instanceOf($d, Employee::class);
-        \Testo\Assert::false($d instanceof Manager);
+        Assert::instanceOf($d, Employee::class);
+        Assert::false($d instanceof Manager);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testAutomaticallyStoreDiscriminatorValue(): void
     {
         $employee = new Employee();
@@ -107,41 +110,41 @@ class SimpleTest extends StiBaseTest
 
         $fetchedEmployee = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($employee->id)->fetchOne();
-        \Testo\Assert::instanceOf($fetchedEmployee, Employee::class);
-        \Testo\Assert::false($fetchedEmployee instanceof Manager);
+        Assert::instanceOf($fetchedEmployee, Employee::class);
+        Assert::false($fetchedEmployee instanceof Manager);
 
         $fetchedManager = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($manager->id)->fetchOne();
-        \Testo\Assert::instanceOf($fetchedManager, Manager::class);
+        Assert::instanceOf($fetchedManager, Manager::class);
     }
 
     // Using of child role
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectUsingBaseRole(): void
     {
-        $selector = new Select($this->orm, static::BASE_ROLE);
+        $selector = new Select($this->orm, self::BASE_ROLE);
 
-        \Testo\Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
+        Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectUsingChildClass(): void
     {
         $selector = new Select($this->orm, Manager::class);
 
-        \Testo\Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
+        Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSelectUsingChildRole(): void
     {
-        $selector = new Select($this->orm, static::MANAGER_ROLE);
+        $selector = new Select($this->orm, self::MANAGER_ROLE);
 
-        \Testo\Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
+        Assert::equals($selector->fetchData(), self::EMPLOYEE_LOADED_ALL);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMakeUsingRole(): void
     {
         $employee = new Employee();
@@ -158,44 +161,46 @@ class SimpleTest extends StiBaseTest
 
         $fetchedEmployee = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($employee->id)->fetchOne();
-        \Testo\Assert::instanceOf($fetchedEmployee, Employee::class);
-        \Testo\Assert::false($fetchedEmployee instanceof Manager);
+        Assert::instanceOf($fetchedEmployee, Employee::class);
+        Assert::false($fetchedEmployee instanceof Manager);
 
         $fetchedManager = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($manager->id)->fetchOne();
-        \Testo\Assert::instanceOf($fetchedManager, Manager::class);
+        Assert::instanceOf($fetchedManager, Manager::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMultipleDiscriminaorValueOnOneRole(): void
     {
         $schemaArray = $this->getSchemaArray();
-        $schemaArray[static::BASE_ROLE][SchemaInterface::CHILDREN][static::MANAGER_VALUE . '_two'] = Manager::class;
+        $schemaArray[self::BASE_ROLE][SchemaInterface::CHILDREN][self::MANAGER_VALUE . '_two'] = Manager::class;
         $this->orm = $this->withSchema(new Schema($schemaArray));
 
-        $entity = $this->orm->make(static::BASE_ROLE, [
-            '_type' => static::MANAGER_VALUE . '_two',
+        $entity = $this->orm->make(self::BASE_ROLE, [
+            '_type' => self::MANAGER_VALUE . '_two',
             'name' => 'Senya',
             'email' => 'sene4ka@hamster.me',
             'age' => 12,
         ]);
 
-        \Testo\Assert::instanceOf($entity, Manager::class);
+        Assert::instanceOf($entity, Manager::class);
+
         QueryAssert::writes(1, fn() => $this->save($entity));
+
         QueryAssert::writes(0, fn() => $this->save($entity));
 
         $loadedEntity = (new Select($this->orm->withHeap(new Heap()), Employee::class))
             ->wherePK($entity->id)->fetchData();
-        \Testo\Assert::same($loadedEntity[0]['_type'], static::MANAGER_VALUE . '_two');
+        Assert::same($loadedEntity[0]['_type'], self::MANAGER_VALUE . '_two');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         parent::setUp();
 
         $this->makeTable('employee_table', [
-            static::$discriminator => 'string,nullable',
+            self::$discriminator => 'string,nullable',
             'id' => 'primary',
             'name' => 'string',
             'email' => 'string',
@@ -203,7 +208,7 @@ class SimpleTest extends StiBaseTest
         ]);
 
         $this->getDatabase()->table('employee_table')->insertMultiple(
-            [static::$discriminator, 'name', 'email', 'age'],
+            [self::$discriminator, 'name', 'email', 'age'],
             [self::EMPLOYEE_1, self::EMPLOYEE_2, self::EMPLOYEE_3, self::EMPLOYEE_4],
         );
 
@@ -213,16 +218,16 @@ class SimpleTest extends StiBaseTest
     protected function getSchemaArray(): array
     {
         return [
-            static::BASE_ROLE => [
+            self::BASE_ROLE => [
                 SchemaInterface::ENTITY => Employee::class,
                 SchemaInterface::CHILDREN => [
-                    static::MANAGER_VALUE => Manager::class,
+                    self::MANAGER_VALUE => Manager::class,
                 ],
                 SchemaInterface::MAPPER => Mapper::class,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'employee_table',
                 SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', '_type' => static::$discriminator, 'name', 'email', 'age'],
+                SchemaInterface::COLUMNS => ['id', '_type' => self::$discriminator, 'name', 'email', 'age'],
                 SchemaInterface::TYPECAST => ['id' => 'int', 'age' => 'int'],
                 SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [],

@@ -8,10 +8,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\STI\SimpleTest;
+use Testo\Assert;
+use Testo\Test;
 
-Feature/Postgres/Inheritance/JTI/CursorTest.phpclass CursorTest extends SimpleTest
+final class CursorTest extends SimpleTest
 {
-    #[\Testo\Test]
+    #[Test]
     public function testCursorReturnsCorrectSubclassInstances(): void
     {
         $entities = $this->getDatabase()->transaction(function (): array {
@@ -22,18 +24,18 @@ Feature/Postgres/Inheritance/JTI/CursorTest.phpclass CursorTest extends SimpleTe
             return $out;
         });
 
-        \Testo\Assert::count($entities, 4);
+        Assert::count($entities, 4);
 
-        \Testo\Assert::instanceOf($entities[0], Manager::class);
+        Assert::instanceOf($entities[0], Manager::class);
 
-        \Testo\Assert::instanceOf($entities[1], Employee::class);
-        \Testo\Assert::false($entities[1] instanceof Manager);
+        Assert::instanceOf($entities[1], Employee::class);
+        Assert::false($entities[1] instanceof Manager);
 
-        \Testo\Assert::instanceOf($entities[2], Manager::class);
+        Assert::instanceOf($entities[2], Manager::class);
 
-        \Testo\Assert::instanceOf($entities[3], Employee::class);
-        \Testo\Assert::false($entities[3] instanceof Manager);
+        Assert::instanceOf($entities[3], Employee::class);
+        Assert::false($entities[3] instanceof Manager);
 
-        \Testo\Assert::same(\array_map(fn($e) => $e->id, $entities), [1, 2, 3, 4]);
+        Assert::same(\array_map(fn($e) => $e->id, $entities), [1, 2, 3, 4]);
     }
 }

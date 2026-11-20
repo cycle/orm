@@ -13,17 +13,19 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CyclicManyToManyTest extends OrmTestCase
+final class CyclicManyToManyTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testLoadRelation(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->load('tags')->orderBy('id', 'ASC');
 
-        \Testo\Assert::same($selector->fetchData(), [
+        Assert::same($selector->fetchData(), [
             [
                 'id' => 1,
                 'email' => 'hello@world.com',
@@ -71,7 +73,7 @@ class CyclicManyToManyTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateFromUser(): void
     {
         $u = new User();
@@ -87,11 +89,11 @@ class CyclicManyToManyTest extends OrmTestCase
 
         $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
-        \Testo\Assert::same($u2->tags->get(0)->id, $tag->id);
-        \Testo\Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
+        Assert::same($u2->tags->get(0)->id, $tag->id);
+        Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateFromTag(): void
     {
         $u = new User();
@@ -107,11 +109,11 @@ class CyclicManyToManyTest extends OrmTestCase
 
         $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
-        \Testo\Assert::same($u2->tags->get(0)->id, $tag->id);
-        \Testo\Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
+        Assert::same($u2->tags->get(0)->id, $tag->id);
+        Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateCyclic(): void
     {
         $u = new User();
@@ -128,11 +130,11 @@ class CyclicManyToManyTest extends OrmTestCase
 
         $u2 = $this->orm->withHeap(new Heap())->get(User::class, ['id' => $u->id]);
 
-        \Testo\Assert::same($u2->tags->get(0)->id, $tag->id);
-        \Testo\Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
+        Assert::same($u2->tags->get(0)->id, $tag->id);
+        Assert::same($u2->tags->get(0)->users->get(0)->id, $u->id);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateCyclicWithExisting(): void
     {
         $u = new User();
@@ -161,7 +163,7 @@ class CyclicManyToManyTest extends OrmTestCase
         // $this->assertTrue($found);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable(

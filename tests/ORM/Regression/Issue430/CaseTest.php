@@ -6,16 +6,18 @@ namespace Cycle\ORM\Tests\Regression\Issue430;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Ramsey\Uuid\UuidInterface;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Ramsey\Uuid\UuidInterface;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
 /**
  * BulkLoader with UUID object primary keys.
  */
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
     private const USER_1 = '550e8400-e29b-41d4-a716-446655440001';
     private const USER_2 = '550e8400-e29b-41d4-a716-446655440002';
     private const USER_3 = '550e8400-e29b-41d4-a716-446655440003';
@@ -27,14 +29,14 @@ class CaseTest extends OrmTestCase
     private const COMMENT_2 = '770e8400-e29b-41d4-a716-446655440002';
     private const COMMENT_3 = '770e8400-e29b-41d4-a716-446655440003';
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadHasMany(): void
     {
         $users = (new Select($this->orm, Entity\User::class))
             ->orderBy('login')
             ->fetchAll();
 
-        \Testo\Assert::count($users, 3);
+        Assert::count($users, 3);
         // Bulk load posts for all users — single query
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$users)
@@ -48,19 +50,19 @@ class CaseTest extends OrmTestCase
             }
         });
 
-        \Testo\Assert::same($postCounts[self::USER_1], 1);
-        \Testo\Assert::same($postCounts[self::USER_2], 2);
-        \Testo\Assert::same($postCounts[self::USER_3], 1);
+        Assert::same($postCounts[self::USER_1], 1);
+        Assert::same($postCounts[self::USER_2], 2);
+        Assert::same($postCounts[self::USER_3], 1);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadBelongsTo(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->orderBy('title')
             ->fetchAll();
 
-        \Testo\Assert::count($posts, 4);
+        Assert::count($posts, 4);
         // Bulk load user for all posts — single query
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
@@ -69,8 +71,8 @@ class CaseTest extends OrmTestCase
         // Verify users are loaded without additional queries
         QueryAssert::reads(0, function () use ($posts, &$post): void {
             foreach ($posts as $post) {
-                \Testo\Assert::instanceOf($post->user, Entity\User::class);
-                \Testo\Assert::instanceOf($post->user->uuid, UuidInterface::class);
+                Assert::instanceOf($post->user, Entity\User::class);
+                Assert::instanceOf($post->user->uuid, UuidInterface::class);
             }
         });
 
@@ -79,19 +81,19 @@ class CaseTest extends OrmTestCase
         foreach ($posts as $post) {
             $postsByUuid[$post->uuid->toString()] = $post;
         }
-        \Testo\Assert::same($postsByUuid[self::POST_1]->user->uuid->toString(), self::USER_1);
-        \Testo\Assert::same($postsByUuid[self::POST_2]->user->uuid->toString(), self::USER_2);
-        \Testo\Assert::same($postsByUuid[self::POST_3]->user->uuid->toString(), self::USER_2);
-        \Testo\Assert::same($postsByUuid[self::POST_4]->user->uuid->toString(), self::USER_3);
+        Assert::same($postsByUuid[self::POST_1]->user->uuid->toString(), self::USER_1);
+        Assert::same($postsByUuid[self::POST_2]->user->uuid->toString(), self::USER_2);
+        Assert::same($postsByUuid[self::POST_3]->user->uuid->toString(), self::USER_2);
+        Assert::same($postsByUuid[self::POST_4]->user->uuid->toString(), self::USER_3);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadMultipleRelations(): void
     {
         $posts = (new Select($this->orm, Entity\Post::class))
             ->fetchAll();
 
-        \Testo\Assert::count($posts, 4);
+        Assert::count($posts, 4);
         // Load both user and comments in one BulkLoader call
         QueryAssert::reads(3, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
@@ -102,35 +104,36 @@ class CaseTest extends OrmTestCase
         // Verify all relations loaded without queries
         QueryAssert::reads(0, function () use ($posts): void {
             foreach ($posts as $post) {
-                \Testo\Assert::instanceOf($post->user, Entity\User::class);
-                \Testo\Assert::array($post->comments);
+                Assert::instanceOf($post->user, Entity\User::class);
+                Assert::array($post->comments);
             }
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadForSingleEntity(): void
     {
         $user = (new Select($this->orm, Entity\User::class))
             ->where('login', 'user-2')
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($user, Entity\User::class);
+        Assert::instanceOf($user, Entity\User::class);
+
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect($user)
             ->load('posts')
             ->run());
-        QueryAssert::reads(0, fn() => \Testo\Assert::count($user->posts, 2));
+        QueryAssert::reads(0, fn() => Assert::count($user->posts, 2));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testBulkLoadBelongsToOnComments(): void
     {
         // Comment has eager-loaded user and promise-loaded post
         $comments = (new Select($this->orm, Entity\Comment::class))
             ->fetchAll();
 
-        \Testo\Assert::count($comments, 3);
+        Assert::count($comments, 3);
         // Bulk load the lazy post relation
         QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$comments)
@@ -138,13 +141,13 @@ class CaseTest extends OrmTestCase
             ->run());
         QueryAssert::reads(0, function () use ($comments): void {
             foreach ($comments as $comment) {
-                \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
-                \Testo\Assert::instanceOf($comment->post->uuid, UuidInterface::class);
+                Assert::instanceOf($comment->post, Entity\Post::class);
+                Assert::instanceOf($comment->post->uuid, UuidInterface::class);
             }
         });
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTables();

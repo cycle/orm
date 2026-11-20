@@ -13,37 +13,40 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
-use Doctrine\Common\Collections\Collection;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Doctrine\Common\Collections\Collection;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class MorphedHasManyPromiseTest extends OrmTestCase
+final class MorphedHasManyPromiseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testAccessEntity(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::instanceOf($a->comments, Collection::class);
-        \Testo\Assert::instanceOf($b->comments, Collection::class);
+        Assert::instanceOf($a->comments, Collection::class);
+        Assert::instanceOf($b->comments, Collection::class);
 
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 3);
+        Assert::count($b->comments, 0);
 
-        \Testo\Assert::same($a->comments[0]->message, 'first comment');
-        \Testo\Assert::same($a->comments[1]->message, 'second comment');
-        \Testo\Assert::same($a->comments[2]->message, 'third comment');
+        Assert::same($a->comments[0]->message, 'first comment');
+        Assert::same($a->comments[1]->message, 'second comment');
+        Assert::same($a->comments[2]->message, 'third comment');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoWrite(): void
     {
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
+
         QueryAssert::writes(0, function () use ($a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
@@ -52,7 +55,7 @@ class MorphedHasManyPromiseTest extends OrmTestCase
         });
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testDeleteComment(): void
     {
         $selector = new Select($this->orm, User::class);
@@ -60,12 +63,14 @@ class MorphedHasManyPromiseTest extends OrmTestCase
         [$a, $b] = $selector->fetchAll();
 
         $a->comments->remove(0);
+
         QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
             $tr->persist($b);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
@@ -79,11 +84,11 @@ class MorphedHasManyPromiseTest extends OrmTestCase
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::count($a->comments, 2);
-        \Testo\Assert::count($b->comments, 0);
+        Assert::count($a->comments, 2);
+        Assert::count($b->comments, 0);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnotherParent(): void
     {
         /**
@@ -104,6 +109,7 @@ class MorphedHasManyPromiseTest extends OrmTestCase
             $tr->persist($b);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
@@ -117,15 +123,15 @@ class MorphedHasManyPromiseTest extends OrmTestCase
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
 
-        \Testo\Assert::count($a->comments, 2);
-        \Testo\Assert::count($b->comments, 1);
+        Assert::count($a->comments, 2);
+        Assert::count($b->comments, 1);
 
-        \Testo\Assert::same($b->comments[0]->message, 'first comment');
-        \Testo\Assert::same($a->comments[0]->message, 'second comment');
-        \Testo\Assert::same($a->comments[1]->message, 'third comment');
+        Assert::same($b->comments[0]->message, 'first comment');
+        Assert::same($a->comments[0]->message, 'second comment');
+        Assert::same($a->comments[1]->message, 'third comment');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMoveToAnother(): void
     {
         /**
@@ -137,12 +143,14 @@ class MorphedHasManyPromiseTest extends OrmTestCase
 
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
+
         QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
             $tr->persist($a);
             $tr->persist($b);
             $tr->run();
         });
+
         // consecutive
         QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
             $tr = new Transaction($this->orm);
@@ -155,32 +163,32 @@ class MorphedHasManyPromiseTest extends OrmTestCase
         $a = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
         $b = (new Select($this->orm, Post::class))->wherePK(1)->fetchOne();
 
-        \Testo\Assert::count($a->comments, 2);
-        \Testo\Assert::count($b->comments, 3);
+        Assert::count($a->comments, 2);
+        Assert::count($b->comments, 3);
 
 
-        \Testo\Assert::true($a->comments->exists(function ($i, $c) {
+        Assert::true($a->comments->exists(function ($i, $c) {
             return $c->message == 'third comment';
         }));
 
-        \Testo\Assert::true($a->comments->exists(function ($i, $c) {
+        Assert::true($a->comments->exists(function ($i, $c) {
             return $c->message == 'second comment';
         }));
 
-        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
+        Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'first comment';
         }));
 
-        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
+        Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'post 1 comment';
         }));
 
-        \Testo\Assert::true($b->comments->exists(function ($i, $c) {
+        Assert::true($b->comments->exists(function ($i, $c) {
             return $c->message == 'post 1.1 comment';
         }));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

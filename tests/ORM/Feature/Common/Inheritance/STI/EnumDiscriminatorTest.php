@@ -13,35 +13,38 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\EmployeeType;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class EnumDiscriminatorTest extends StiBaseTest
+final class EnumDiscriminatorTest extends StiBaseTest
 {
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';
 
     protected static string $discriminator = 'discriminator_value';
 
-    #[\Testo\Test]
+    #[Test]
     public function testChildClassResolvedFromScalarInDatabase(): void
     {
         $selector = new Select($this->orm, Employee::class);
         [$first, $second] = $selector->orderBy('id')->fetchAll();
 
-        \Testo\Assert::instanceOf($first, Manager::class);
-        \Testo\Assert::instanceOf($second, Employee::class);
-        \Testo\Assert::false($second instanceof Manager);
+        Assert::instanceOf($first, Manager::class);
+        Assert::instanceOf($second, Employee::class);
+        Assert::false($second instanceof Manager);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchedDataExposesEnumCaseAtDiscriminatorColumn(): void
     {
         $rows = (new Select($this->orm, Employee::class))->orderBy('id')->fetchData();
 
-        \Testo\Assert::same($rows[0]['_type'], EmployeeType::Manager);
-        \Testo\Assert::same($rows[1]['_type'], EmployeeType::Employee);
+        Assert::same($rows[0]['_type'], EmployeeType::Manager);
+        Assert::same($rows[1]['_type'], EmployeeType::Employee);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testPersistedChildWritesScalarToDatabase(): void
     {
         $manager = new Manager();
@@ -57,10 +60,10 @@ class EnumDiscriminatorTest extends StiBaseTest
             ->where('id', $manager->id)
             ->fetchAll()[0];
 
-        \Testo\Assert::same($row[static::$discriminator], 'manager');
+        Assert::same($row[self::$discriminator], 'manager');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testRoundTripChildEntity(): void
     {
         $manager = new Manager();
@@ -74,38 +77,39 @@ class EnumDiscriminatorTest extends StiBaseTest
             ->wherePK($manager->id)
             ->fetchOne();
 
-        \Testo\Assert::instanceOf($loaded, Manager::class);
+        Assert::instanceOf($loaded, Manager::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testMakeResolvesChildClassFromEnumInputData(): void
     {
         // Defensive: explicit BackedEnum passed as discriminator value should still resolve.
-        $entity = $this->orm->make(static::BASE_ROLE, [
+        $entity = $this->orm->make(self::BASE_ROLE, [
             '_type' => EmployeeType::Manager,
             'name' => 'Senya',
             'email' => 'sene4ka@hamster.me',
             'age' => 12,
         ]);
 
-        \Testo\Assert::instanceOf($entity, Manager::class);
+        Assert::instanceOf($entity, Manager::class);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testNoExtraWritesAfterLoadAndResave(): void
     {
         /** @var Manager $manager */
         $manager = (new Select($this->orm, Employee::class))->orderBy('id')->fetchOne();
-        \Testo\Assert::instanceOf($manager, Manager::class);
+        Assert::instanceOf($manager, Manager::class);
+
         QueryAssert::writes(0, fn() => $this->save($manager));
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateChildEntityKeepsScalarDiscriminatorInDatabase(): void
     {
         /** @var Manager $manager */
         $manager = (new Select($this->orm, Employee::class))->orderBy('id')->fetchOne();
-        \Testo\Assert::instanceOf($manager, Manager::class);
+        Assert::instanceOf($manager, Manager::class);
 
         $manager->name = 'Renamed';
         $this->save($manager);
@@ -116,17 +120,17 @@ class EnumDiscriminatorTest extends StiBaseTest
             ->where('id', $manager->id)
             ->fetchAll()[0];
 
-        \Testo\Assert::same($row[static::$discriminator], 'manager');
-        \Testo\Assert::same($row['name'], 'Renamed');
+        Assert::same($row[self::$discriminator], 'manager');
+        Assert::same($row['name'], 'Renamed');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         parent::setUp();
 
         $this->makeTable('employee_table', [
-            static::$discriminator => 'string,nullable',
+            self::$discriminator => 'string,nullable',
             'id' => 'primary',
             'name' => 'string',
             'email' => 'string',
@@ -134,7 +138,7 @@ class EnumDiscriminatorTest extends StiBaseTest
         ]);
 
         $this->getDatabase()->table('employee_table')->insertMultiple(
-            [static::$discriminator, 'name', 'email', 'age'],
+            [self::$discriminator, 'name', 'email', 'age'],
             [
                 ['_type' => 'manager', 'name' => 'John', 'email' => 'captain@black.sea', 'age' => 38],
                 ['_type' => 'employee', 'name' => 'Anton', 'email' => 'antonio@mail.org', 'age' => 35],
@@ -147,7 +151,7 @@ class EnumDiscriminatorTest extends StiBaseTest
     protected function getSchemaArray(): array
     {
         return [
-            static::BASE_ROLE => [
+            self::BASE_ROLE => [
                 SchemaInterface::ENTITY => Employee::class,
                 SchemaInterface::CHILDREN => [
                     'manager' => Manager::class,
@@ -156,7 +160,7 @@ class EnumDiscriminatorTest extends StiBaseTest
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'employee_table',
                 SchemaInterface::PRIMARY_KEY => 'id',
-                SchemaInterface::COLUMNS => ['id', '_type' => static::$discriminator, 'name', 'email', 'age'],
+                SchemaInterface::COLUMNS => ['id', '_type' => self::$discriminator, 'name', 'email', 'age'],
                 SchemaInterface::TYPECAST => ['id' => 'int', 'age' => 'int', '_type' => EmployeeType::class],
                 SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [],

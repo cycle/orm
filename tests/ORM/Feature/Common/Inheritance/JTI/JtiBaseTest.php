@@ -10,13 +10,13 @@ use Cycle\ORM\Factory;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Lifecycle\BeforeTest;
 
 abstract class JtiBaseTest extends OrmTestCase
 {
-
     protected const DEFAULT_MAPPER = Mapper::class;
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $factory = new Factory(

@@ -10,19 +10,21 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class HasOneCyclicTest extends OrmTestCase
+final class HasOneCyclicTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testFetchCyclic(): void
     {
         $selector = new Select($this->orm, Cyclic::class);
         $selector->load('cyclic')->orderBy('cyclic.id');
 
-        \Testo\Assert::equals($selector->fetchData(), [
+        Assert::equals($selector->fetchData(), [
             [
                 'id' => '1',
                 'parent_id' => null,
@@ -52,23 +54,23 @@ class HasOneCyclicTest extends OrmTestCase
         ]);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testFetchCyclicRelation(): void
     {
         $selector = new Select($this->orm, Cyclic::class);
         [$a, $b, $c] = $selector->load('cyclic')->orderBy('cyclic.id')->fetchAll();
 
-        \Testo\Assert::same($a->cyclic, $b);
-        \Testo\Assert::null($b->cyclic);
-        \Testo\Assert::same($c->cyclic, $c);
+        Assert::same($a->cyclic, $b);
+        Assert::null($b->cyclic);
+        Assert::same($c->cyclic, $c);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testUpdateCyclic(): void
     {
         $c = (new Select($this->orm, Cyclic::class))
             ->load('cyclic')->wherePK(3)->fetchOne();
-        \Testo\Assert::equals($c->name, 'self-reference');
+        Assert::equals($c->name, 'self-reference');
 
         $c->name = 'updated';
 
@@ -77,34 +79,35 @@ class HasOneCyclicTest extends OrmTestCase
         $c = (new Select($this->orm->withHeap(new Heap()), Cyclic::class))
             ->load('cyclic')->wherePK(3)->fetchOne();
 
-        \Testo\Assert::equals($c->name, 'updated');
-        \Testo\Assert::same($c->cyclic, $c);
+        Assert::equals($c->name, 'updated');
+        Assert::same($c->cyclic, $c);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCyclicWithoutLoad(): void
     {
         $c = (new Select($this->orm, Cyclic::class))->wherePK(3)->fetchOne();
-        \Testo\Assert::equals($c->name, 'self-reference');
-        \Testo\Assert::same($c->cyclic, $c);
+        Assert::equals($c->name, 'self-reference');
+        Assert::same($c->cyclic, $c);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testCreateCyclic(): void
     {
         $c = new Cyclic();
         $c->name = 'new';
         $c->cyclic = $c;
+
         QueryAssert::writes(2, fn() => $this->save($c));
 
         $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(4)->fetchOne();
 
-        \Testo\Assert::equals($c->name, 'new');
-        \Testo\Assert::same($c->cyclic, $c);
+        Assert::equals($c->name, 'new');
+        Assert::same($c->cyclic, $c);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('cyclic', [

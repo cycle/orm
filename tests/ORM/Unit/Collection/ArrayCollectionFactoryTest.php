@@ -6,23 +6,26 @@ namespace Cycle\ORM\Tests\Unit\Collection;
 
 use Cycle\ORM\Collection\ArrayCollectionFactory;
 use Cycle\ORM\Collection\CollectionFactoryInterface;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
-class ArrayCollectionFactoryTest extends BaseTest
+final class ArrayCollectionFactoryTest extends BaseTest
 {
-    #[\Testo\Test]
+    #[Test]
     public function testGetInterface(): void
     {
-        \Testo\Assert::null($this->getFactory()->getInterface());
+        Assert::null($this->getFactory()->getInterface());
     }
 
     /**
      * @param mixed $data
      */
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('collectionDataProvider')]
+    #[Test]
+    #[DataProvider('collectionDataProvider')]
     public function testCollectShouldReturnArray($data): void
     {
-        \Testo\Assert::same($this->getFactory()->collect($data), [
+        Assert::same($this->getFactory()->collect($data), [
             'foo' => 'bar',
             'baz' => 'bar',
         ]);

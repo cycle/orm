@@ -8,14 +8,18 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\ManagerWithCredentials;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
+use Cycle\ORM\Tests\Fixtures\UserCredentials;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Skip;
+use Testo\Test;
 
-class EmbeddedRelationsTest extends JtiBaseTest
+final class EmbeddedRelationsTest extends JtiBaseTest
 {
     protected const EMPLOYEE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager_with_credentials';
@@ -29,7 +33,7 @@ class EmbeddedRelationsTest extends JtiBaseTest
     /**
      * Parent's relation should be initialized
      */
-    #[\Testo\Test]
+    #[Test]
     public function testInsertToEmbeddedFieldsForJtiChildEntity(): void
     {
         /** @var ManagerWithCredentials $entity */
@@ -39,21 +43,22 @@ class EmbeddedRelationsTest extends JtiBaseTest
 
         $entity->credentials->username = 'roquie';
         $entity->credentials->password = 'secret';
+
         QueryAssert::writes(1, fn() => $this->save($entity));
 
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
             ->wherePK(1)
             ->fetchOne();
 
-        \Testo\Assert::same($entity->credentials->username, 'roquie');
-        \Testo\Assert::same($entity->credentials->password, 'secret');
+        Assert::same($entity->credentials->username, 'roquie');
+        Assert::same($entity->credentials->password, 'secret');
     }
 
     /**
      * Parent's relation should be initialized
      */
-    #[\Testo\Test]
-    #[\Testo\Skip('TODO: Must be fixed. When we create new embedded object, we should update entity\'s node in heap')]
+    #[Test]
+    #[Skip('TODO: Must be fixed. When we create new embedded object, we should update entity\'s node in heap')]
     public function testInsertToCreatingNewEmbeddedObjectForJtiChildEntity(): void
     {
         /** @var ManagerWithCredentials $entity */
@@ -66,6 +71,7 @@ class EmbeddedRelationsTest extends JtiBaseTest
         $credentials->password = 'secret';
 
         $entity->credentials = $credentials;
+
         QueryAssert::writes(1, fn() => $this->save($entity));
 
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
@@ -73,11 +79,11 @@ class EmbeddedRelationsTest extends JtiBaseTest
             ->fetchOne();
 
 
-        \Testo\Assert::same($entity->credentials->username, 'roquie');
-        \Testo\Assert::same($entity->credentials->password, 'secret');
+        Assert::same($entity->credentials->username, 'roquie');
+        Assert::same($entity->credentials->password, 'secret');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         parent::setUp();
@@ -98,7 +104,7 @@ class EmbeddedRelationsTest extends JtiBaseTest
         ], pk: ['id']);
 
         $this->getDatabase()->table('employee')->insertMultiple(
-            array_keys(static::EMPLOYEE_1),
+            array_keys(self::EMPLOYEE_1),
             [
                 self::EMPLOYEE_1,
                 self::EMPLOYEE_2,
@@ -107,7 +113,7 @@ class EmbeddedRelationsTest extends JtiBaseTest
             ],
         );
         $this->getDatabase()->table('manager_with_credentials')->insertMultiple(
-            array_keys(static::MANAGER_1),
+            array_keys(self::MANAGER_1),
             [
                 self::MANAGER_1,
                 self::MANAGER_3,
@@ -118,9 +124,9 @@ class EmbeddedRelationsTest extends JtiBaseTest
     protected function getSchemaArray(): array
     {
         return [
-            static::EMPLOYEE_ROLE => [
+            self::EMPLOYEE_ROLE => [
                 SchemaInterface::ENTITY => Employee::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'employee',
                 SchemaInterface::PRIMARY_KEY => 'id',
@@ -129,12 +135,12 @@ class EmbeddedRelationsTest extends JtiBaseTest
                 SchemaInterface::SCHEMA => [],
                 SchemaInterface::RELATIONS => [],
             ],
-            static::MANAGER_ROLE => [
+            self::MANAGER_ROLE => [
                 SchemaInterface::ENTITY => Manager::class,
-                SchemaInterface::MAPPER => static::DEFAULT_MAPPER,
+                SchemaInterface::MAPPER => self::DEFAULT_MAPPER,
                 SchemaInterface::DATABASE => 'default',
                 SchemaInterface::TABLE => 'manager_with_credentials',
-                SchemaInterface::PARENT => static::EMPLOYEE_ROLE,
+                SchemaInterface::PARENT => self::EMPLOYEE_ROLE,
                 SchemaInterface::PRIMARY_KEY => 'id',
                 SchemaInterface::COLUMNS => ['id', 'rank'],
                 SchemaInterface::TYPECAST => ['id' => 'int'],

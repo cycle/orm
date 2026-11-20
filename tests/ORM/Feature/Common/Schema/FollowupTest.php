@@ -7,46 +7,51 @@ namespace Cycle\ORM\Tests\Feature\Common\Schema;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserSnapshotMapper;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class FollowupTest extends OrmTestCase
+final class FollowupTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSnapUser(): void
     {
         $u = new User();
         $u->email = 'email';
         $u->balance = 100;
+
         QueryAssert::writes(2, fn() => $this->save($u));
 
         $snap = $this->getSnap($u);
-        \Testo\Assert::same($snap['action'], 'create');
-        \Testo\Assert::same($snap['email'], 'email');
+        Assert::same($snap['action'], 'create');
+        Assert::same($snap['email'], 'email');
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSnapAgain(): void
     {
         $u = new User();
         $u->email = 'email';
         $u->balance = 100;
+
         QueryAssert::writes(2, fn() => $this->save($u));
 
         $snap = $this->getSnap($u);
-        \Testo\Assert::same($snap['action'], 'create');
-        \Testo\Assert::same($snap['email'], 'email');
+        Assert::same($snap['action'], 'create');
+        Assert::same($snap['email'], 'email');
 
         $u->email = 'new-email';
+
         QueryAssert::writes(2, fn() => $this->save($u));
 
         $snap = $this->getSnap($u);
-        \Testo\Assert::same($snap['action'], 'update');
-        \Testo\Assert::same($snap['email'], 'new-email');
+        Assert::same($snap['action'], 'update');
+        Assert::same($snap['email'], 'new-email');
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         $this->makeTable('user', [

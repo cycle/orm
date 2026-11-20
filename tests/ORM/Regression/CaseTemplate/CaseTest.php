@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\CaseTemplate;
 
 use Cycle\ORM\Select;
-use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class CaseTest extends OrmTestCase
+final class CaseTest extends OrmTestCase
 {
-
-    #[\Testo\Test]
+    #[Test]
     public function testSelect(): void
     {
         // Get entity
@@ -21,11 +23,11 @@ class CaseTest extends OrmTestCase
             ->fetchOne();
 
         // Check result
-        \Testo\Assert::instanceOf($user, Entity\User::class);
-        \Testo\Assert::count($user->posts, 2);
+        Assert::instanceOf($user, Entity\User::class);
+        Assert::count($user->posts, 2);
     }
 
-    #[\Testo\Test]
+    #[Test]
     public function testSave(): void
     {
         // Get entity
@@ -38,7 +40,7 @@ class CaseTest extends OrmTestCase
         QueryAssert::writes(1, fn() => $this->save($user));
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Init DB

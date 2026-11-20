@@ -16,28 +16,28 @@ use Cycle\ORM\MapperInterface;
 use Cycle\ORM\Tests\Fixtures\TestInsertCommand;
 use Cycle\ORM\Tests\Fixtures\TestInsertCommandWithReturning;
 use Mockery as m;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class InsertCommandTest
+#[Test]
+final class InsertCommandTest
 {
     private Insert $cmd;
     private m\LegacyMockInterface|m\MockInterface|DatabaseInterface $db;
     private m\LegacyMockInterface|m\MockInterface|MapperInterface $mapper;
     private State $state;
 
-    #[\Testo\Test]
     public function testDatabase(): void
     {
-        \Testo\Assert::same($this->cmd->getDatabase(), $this->db);
+        Assert::same($this->cmd->getDatabase(), $this->db);
     }
 
-    #[\Testo\Test]
     public function testIsReady(): void
     {
-        \Testo\Assert::true($this->cmd->isReady());
+        Assert::true($this->cmd->isReady());
     }
 
-    #[\Testo\Test]
     public function testCommandWithoutReturningInterfaceShouldNotUseIt(): void
     {
         $table = 'table';
@@ -76,11 +76,10 @@ class InsertCommandTest
         $this->db->shouldReceive('insert')->once()->with($table)->andReturn($insertQuery);
         $this->cmd->execute();
 
-        \Testo\Assert::same($this->state->getValue('id'), 234);
+        Assert::same($this->state->getValue('id'), 234);
     }
 
-    #[\Testo\Test]
-    public function testCommandWithReturningInterfaceWithoutPkColumnShouldNotUseIt()
+    public function testCommandWithReturningInterfaceWithoutPkColumnShouldNotUseIt(): void
     {
         $class = new \ReflectionClass($this->cmd);
         $property = $class->getProperty('pkColumn');
@@ -113,11 +112,10 @@ class InsertCommandTest
         $insertQuery->shouldReceive('run')->once()->andReturn(345);
         $this->cmd->execute();
 
-        \Testo\Assert::same($this->state->getValue('id'), 234);
+        Assert::same($this->state->getValue('id'), 234);
     }
 
-    #[\Testo\Test]
-    public function testCommandWithReturningInterfaceShouldUseIt()
+    public function testCommandWithReturningInterfaceShouldUseIt(): void
     {
         $table = 'table';
 
@@ -152,10 +150,10 @@ class InsertCommandTest
 
         $this->cmd->execute();
 
-        \Testo\Assert::same($this->state->getValue('id'), 324);
+        Assert::same($this->state->getValue('id'), 324);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     protected function setUp(): void
     {
         $this->mapper = m::mock(MapperInterface::class);

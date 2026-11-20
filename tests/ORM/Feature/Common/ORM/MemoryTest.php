@@ -16,10 +16,13 @@ use Cycle\ORM\Service\RepositoryProviderInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
 
-class MemoryTest extends OrmTestCase
+final class MemoryTest extends OrmTestCase
 {
-
     private const ACTION_CLONE = 'clone';
     private const ACTION_UNSET = 'unset';
     private const ACTION_WITH = 'with';
@@ -55,8 +58,8 @@ class MemoryTest extends OrmTestCase
         ];
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('configProvider')]
+    #[Test]
+    #[DataProvider('configProvider')]
     public function testOrm(string $action, bool $garbage, bool $warmupOrm, bool $loadLinks, bool $loadRoles): void
     {
         // Create ORM
@@ -81,12 +84,12 @@ class MemoryTest extends OrmTestCase
         // Collect cyclic references
         $garbage and \gc_collect_cycles();
         // check weak references
-        $loadLinks and \Testo\Assert::count($map, 0);
+        $loadLinks and Assert::count($map, 0);
         // Check main orm reference
-        \Testo\Assert::true($link->get() === null);
+        Assert::true($link->get() === null);
     }
 
-    #[\Testo\Lifecycle\BeforeTest]
+    #[BeforeTest]
     public function setUp(): void
     {
         // Load all relations instances

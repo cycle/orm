@@ -8,14 +8,14 @@ use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Parser\UncastableInterface;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery as m;
-use PHPUnit\Framework\TestCase;
+use Testo\Assert;
+use Testo\Data\DataProvider;
+use Testo\Test;
 
-class CompositeTypecastTest
+#[Test]
+final class CompositeTypecastTest
 {
-    use MockeryPHPUnitIntegration;
-
     private const RULES_INITIAL = [
         'foo' => 'bar',
         'baz' => 'bar',
@@ -87,8 +87,7 @@ class CompositeTypecastTest
         ];
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('typecastProvider')]
+    #[DataProvider('typecastProvider')]
     public function testSetRules(array $casters): void
     {
         $rules = self::RULES_INITIAL;
@@ -107,11 +106,10 @@ class CompositeTypecastTest
             ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
-        \Testo\Assert::same($typecast->setRules(self::RULES_INITIAL), self::RULES_RESULT);
+        Assert::same($typecast->setRules(self::RULES_INITIAL), self::RULES_RESULT);
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('typecastProvider')]
+    #[DataProvider('typecastProvider')]
     public function testCast(array $casters): void
     {
         $values = self::CAST_INITIAL;
@@ -133,11 +131,10 @@ class CompositeTypecastTest
             ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
-        \Testo\Assert::same($typecast->cast(self::CAST_INITIAL), self::CAST_RESULT);
+        Assert::same($typecast->cast(self::CAST_INITIAL), self::CAST_RESULT);
     }
 
-    #[\Testo\Test]
-    #[\Testo\Data\DataProvider('typecastProvider')]
+    #[DataProvider('typecastProvider')]
     public function testUncast(array $casters): void
     {
         $values = self::UNCAST_INITIAL;
@@ -160,12 +157,6 @@ class CompositeTypecastTest
             ...array_map(static fn(array $data) => $data[self::OPT_TYPECAST], $casters),
         );
 
-        \Testo\Assert::same($typecast->uncast(self::UNCAST_INITIAL), self::UNCAST_RESULT);
-    }
-
-    #[\Testo\Lifecycle\AfterTest]
-    public function tearDown(): void
-    {
-        m::close();
+        Assert::same($typecast->uncast(self::UNCAST_INITIAL), self::UNCAST_RESULT);
     }
 }

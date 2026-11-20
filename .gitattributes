@@ -1,7 +1,23 @@
-/.*      export-ignore
-/tests   export-ignore
-/vendor-bin export-ignore
-/*.xml   export-ignore
-/*.yml   export-ignore
-/*.lock  export-ignore
-/*.dist  export-ignore
+# Line-ending normalization for text files.
+* text=auto
+
+# PHP-aware hunk headers in `git diff`.
+*.php diff=php
+
+# List-like manifests: concurrent additions to the same list merge instead of conflicting.
+/composer.json merge=union
+
+# Default: nothing goes into the dist archive. Re-include only what the installed package needs.
+* export-ignore
+
+# Manifest and top-level documentation.
+/composer.json   -export-ignore
+/LICENSE         -export-ignore
+/README.md       -export-ignore
+/CHANGELOG.md    -export-ignore
+
+# Autoloaded source code and runtime resources.
+/src             -export-ignore
+/src/**          -export-ignore
+/resources       -export-ignore
+/resources/**    -export-ignore

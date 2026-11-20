@@ -11,6 +11,8 @@ use Cycle\ORM\Mapper\Proxy\Hydrator\ClassPropertiesExtractor;
 use Cycle\ORM\Mapper\Proxy\Hydrator\ClosureHydrator;
 use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
 use Cycle\ORM\ORM;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\Relation\ActiveRelationInterface;
 use Cycle\ORM\RelationMap;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
@@ -38,6 +40,26 @@ final class ProxyEntityFactoryTest
         Expect::exception(\RuntimeException::class)->withMessageContaining('The entity `hello-world` class does not exist. Proxy factory can not create classless entities.');
 
         $this->factory->create(RelationMap::build($this->orm, 'user'), 'hello-world');
+    }
+
+    public function testExtractRelationsOfNotProxiedEntityReturnsOnlyRelations(): void
+    {
+        $schema = \Mockery::mock(SchemaInterface::class);
+        $schema->allows('getOuterRelations')->andReturn([]);
+        $schema->allows('getInnerRelations')->andReturn(['profile' => []]);
+        $schema->allows('define')->andReturn(null);
+        $factory = \Mockery::mock(FactoryInterface::class);
+        $factory->allows('relation')->andReturn(\Mockery::mock(ActiveRelationInterface::class));
+        $orm = \Mockery::mock(ORMInterface::class);
+        $orm->allows('getSchema')->andReturn($schema);
+        $orm->allows('getFactory')->andReturn($factory);
+        $user = new User();
+        $user->email = 'foo@bar';
+        $user->profile = 'profile';
+
+        $relations = $this->factory->extractRelations(RelationMap::build($orm, 'user'), $user);
+
+        Assert::same($relations, ['profile' => 'profile']);
     }
 
     #[BeforeTest]

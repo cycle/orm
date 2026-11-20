@@ -38,7 +38,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: none
+          coverage: pcov
           extensions: mbstring, pdo, pdo_sqlite
 
       - name: 📥 Install dependencies with composer
@@ -47,10 +47,18 @@ jobs:
           dependency-versions: ${{ matrix.dependencies }}
 
       - name: 🚀 Unit tests
-        run: composer test:unit
+        run: composer test:unit -- --coverage-clover=runtime/clover-unit.xml
 
       - name: 🚀 SQLite tests
-        run: composer test:sqlite
+        run: composer test:sqlite -- --coverage-clover=runtime/clover-sqlite.xml
+
+      - name: Upload coverage to Codecov
+        continue-on-error: true # if is fork
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./runtime/clover-unit.xml,./runtime/clover-sqlite.xml
+          flags: sqlite
 
   database:
     name: ${{ matrix.driver }}, PHP ${{ matrix.php-version }}
@@ -93,7 +101,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: none
+          coverage: pcov
           tools: pecl
           extensions: mbstring, pdo, ${{ matrix.extensions }}
 
@@ -104,4 +112,12 @@ jobs:
         run: composer db:up -- ${{ matrix.driver }}
 
       - name: 🚀 Execute tests
-        run: composer test:${{ matrix.driver }}
+        run: composer test:${{ matrix.driver }} -- --coverage-clover=runtime/clover.xml
+
+      - name: Upload coverage to Codecov
+        continue-on-error: true # if is fork
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./runtime/clover.xml
+          flags: ${{ matrix.driver }}

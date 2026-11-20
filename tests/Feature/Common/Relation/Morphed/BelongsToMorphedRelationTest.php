@@ -15,6 +15,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\ImagedInterface;
 use Cycle\ORM\Tests\Fixtures\Post;
+use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
 use Cycle\Testing\ORM\OrmTestCase;
@@ -432,6 +433,44 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
         Assert::null($row[0]['parent_type'], 'parent_type should be NULL when the unset relation is treated as null');
     }
 
+    #[Test]
+    public function loadedParentsFollowTheGivenScope(): void
+    {
+        $rows = (new Select($this->orm, Image::class))
+            ->load('parent', ['scope' => new Select\QueryScope(['@.id' => 1])])
+            ->orderBy('image.id')
+            ->fetchData();
+
+        Assert::same($this->parentIds($rows), [1, 1]);
+        Assert::null($rows[2]['parent']);
+    }
+
+    #[Test]
+    public function loadedParentsTakeAScopeClassName(): void
+    {
+        $rows = (new Select($this->orm, Image::class))
+            ->load('parent', ['scope' => SortByIDScope::class])
+            ->orderBy('image.id')
+            ->fetchData();
+
+        Assert::same($this->parentIds($rows), [1, 1, 2, 2, 3]);
+    }
+
+    #[Test]
+    public function loadedParentsIgnoreTheSourceScopeWhenDisabled(): void
+    {
+        $schema = $this->getSchemaArray();
+        $schema[User::class][Schema::SCOPE] = new Select\QueryScope(['@.id' => 0]);
+        $this->orm = $this->withSchema(new Schema($schema));
+
+        $rows = (new Select($this->orm, Image::class))
+            ->load('parent', ['scope' => false])
+            ->orderBy('image.id')
+            ->fetchData();
+
+        Assert::same($rows[0]['parent']['email'], 'hello@world.com');
+    }
+
     #[BeforeTest]
     public function setUp(): void
     {
@@ -485,6 +524,16 @@ final class BelongsToMorphedRelationTest extends OrmTestCase
         );
 
         $this->orm = $this->withSchema(new Schema($this->getSchemaArray()));
+    }
+
+    /**
+     * Ids of the loaded parents; the parent roles have no typecast, so some drivers return strings.
+     *
+     * @return list<int>
+     */
+    private function parentIds(array $rows): array
+    {
+        return \array_map('intval', \array_column(\array_column($rows, 'parent'), 'id'));
     }
 
     private function getNullableMorphedSchemaArray(): array

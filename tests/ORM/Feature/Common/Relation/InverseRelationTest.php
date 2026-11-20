@@ -12,13 +12,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class InverseRelationTest extends BaseTest
+class InverseRelationTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -84,14 +83,11 @@ abstract class InverseRelationTest extends BaseTest
 
         // cyclic
         $u->profile->user = $u;
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, function () use ($u): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->run();
+        });
 
         \Testo\Assert::equals($u->id, 3);
         \Testo\Assert::equals($u->profile->id, 4);
@@ -107,8 +103,6 @@ abstract class InverseRelationTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

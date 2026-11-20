@@ -6,20 +6,16 @@ namespace Cycle\ORM\Tests\Regression\Issue71;
 
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
 use Cycle\ORM\Tests\Regression\Issue71\Entity\Tag;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
 /**
  * Loading a HasMany relation of entities that are loaded through a ManyToMany relation.
  *
  * @link https://github.com/cycle/orm/issues/71
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     public static function loadMethodProvider(): iterable
     {
@@ -83,7 +79,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

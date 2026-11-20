@@ -5,19 +5,15 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\Issue427;
 
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Regression\Issue427\Entity\Buyer;
 use Cycle\ORM\Tests\Regression\Issue427\Entity\User;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
 /**
  * @link https://github.com/cycle/orm/issues/427
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelect(): void
@@ -48,8 +44,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
-
         // Make tables
         $this->makeTable('case_5_users', [
             'id' => 'string,primary',

@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\Case3;
 
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Regression\Case3\Entity\Currency;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSave(): void
@@ -24,13 +21,8 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
         // Change data
         $user->currency = new Currency('eur', 'EURO');
-
         // Store changes and calc write queries
-        $this->captureWriteQueries();
-        $this->save($user);
-
-        // Check write queries count
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($user));
 
         $user = (new Select($this->orm, Entity\User::class))
             ->wherePK(1)
@@ -42,7 +34,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

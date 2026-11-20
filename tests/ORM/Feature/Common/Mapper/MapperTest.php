@@ -13,13 +13,12 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Admin as User;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class MapperTest extends BaseTest
+class MapperTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchData(): void
@@ -178,13 +177,11 @@ abstract class MapperTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($result);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($result): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($result);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -246,15 +243,8 @@ abstract class MapperTest extends BaseTest
         $e->balance = 300;
         $e->setProtectedRelation([]);
         $e->setPrivateRelation([]);
-
-        $this->captureWriteQueries();
-
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         \Testo\Assert::equals($e->id, 3);
 
@@ -270,17 +260,12 @@ abstract class MapperTest extends BaseTest
         $e->balance = 300;
         $e->setProtectedRelation([]);
         $e->setPrivateRelation([]);
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-
-        $e->balance = 400;
-
-        $tr->run();
-
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $e->balance = 400;
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
         \Testo\Assert::true($this->orm->getHeap()->has($e));
@@ -345,10 +330,7 @@ abstract class MapperTest extends BaseTest
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
         \Testo\Assert::same($u3->email, 'hello@world.com');
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository(User::class)->findByPK(1);
         \Testo\Assert::same($u4->email, 'test@email.com');
@@ -360,24 +342,22 @@ abstract class MapperTest extends BaseTest
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         \Testo\Assert::equals((float) $u->balance, 100.0);
         $u->balance = 0.0;
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository(User::class)->findByPK(1);
         \Testo\Assert::equals((float) $u->balance, 0.0);
 
         $u->balance = null;
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository(User::class)->findByPK(1);
@@ -387,8 +367,6 @@ abstract class MapperTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'user',
             [

@@ -11,15 +11,13 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
- * @requires PHP >= 8.1
  */
-abstract class TypecastEnumTest extends BaseTest
+class TypecastEnumTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchData(): void
@@ -37,14 +35,8 @@ abstract class TypecastEnumTest extends BaseTest
         $e->balance = 304;
         $e->enum_string = TypeStringEnum::Admin;
         $e->enum_int = TypeIntEnum::Admin;
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
     }
 
     #[\Testo\Test]
@@ -99,8 +91,6 @@ abstract class TypecastEnumTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'user',
             [

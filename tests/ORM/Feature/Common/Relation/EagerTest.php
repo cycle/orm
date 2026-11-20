@@ -11,12 +11,10 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class EagerTest extends BaseTest
+class EagerTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchEager(): void
@@ -51,8 +49,6 @@ abstract class EagerTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

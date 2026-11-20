@@ -14,14 +14,13 @@ use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserWithUUIDPrimaryKey;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Ramsey\Uuid\Uuid;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CommonTest extends BaseTest
+class CommonTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchAll(): void
@@ -157,18 +156,16 @@ abstract class CommonTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
         $e->active = true;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
+        QueryAssert::writes(0, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         \Testo\Assert::same($e->id, 3);
 
@@ -183,17 +180,12 @@ abstract class CommonTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
         $e->active = true;
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-
-        $e->balance = 400;
-
-        $tr->run();
-
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $e->balance = 400;
+            $tr->run();
+        });
 
         \Testo\Assert::same($e->id, 3);
         \Testo\Assert::true($this->orm->getHeap()->has($e));
@@ -250,8 +242,6 @@ abstract class CommonTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'active' => 'bool',

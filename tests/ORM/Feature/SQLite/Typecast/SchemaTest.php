@@ -17,16 +17,15 @@ use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\InvalidTypecaster;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Typecaster;
 use Cycle\ORM\Tests\Util\SimpleFactory;
 use Spiral\Core\Container;
+use Cycle\Testing\ORM\OrmTestCase;
 
-final class SchemaTest extends BaseTest
+final class SchemaTest extends OrmTestCase
 {
-    public const DRIVER = 'sqlite';
     private const PRIMARY_ROLE = 'book';
 
     private ?Container $container;

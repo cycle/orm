@@ -13,7 +13,7 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\EmployeeKind;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 
-abstract class IntEnumDiscriminatorTest extends StiBaseTest
+class IntEnumDiscriminatorTest extends StiBaseTest
 {
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';

@@ -10,13 +10,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class DoubleLinkedTest extends BaseTest
+class DoubleLinkedTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreateDoubleLink(): void
@@ -29,23 +28,13 @@ abstract class DoubleLinkedTest extends BaseTest
 
         $c1->cyclic = $c2;
         $c2->cyclic = $c1;
-
-        $this->captureWriteQueries();
-        $this->save($c1, $c2);
-        // 2 inserts + 1 update
-        $this->assertNumWrites(3);
+        QueryAssert::writes(3, fn() => $this->save($c1, $c2));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         [$a, $b] = $selector->orderBy('id')->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($a->cyclic, $b);
-        $this->assertNumReads(0);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::reads(0, fn() => \Testo\Assert::same($a->cyclic, $b));
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
     }
 
     #[\Testo\Test]
@@ -62,23 +51,15 @@ abstract class DoubleLinkedTest extends BaseTest
         $c2->cyclic = $c1;
         $c1->other = $c2;
         $c2->other = $c1;
-
-        $this->captureWriteQueries();
-        $this->save($c1, $c2);
-        // 2 inserts, 1 update
-        $this->assertNumWrites(3);
-
-        $this->captureWriteQueries();
-        $this->save($c1, $c2);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(3, fn() => $this->save($c1, $c2));
+        QueryAssert::writes(0, fn() => $this->save($c1, $c2));
 
         $this->orm = $this->orm->withHeap(new Heap());
         [$a, $b] = (new Select($this->orm, Cyclic::class))->orderBy('id')->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($b->cyclic, $a);
-        \Testo\Assert::same($a->cyclic, $b);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($b, $a): void {
+            \Testo\Assert::same($b->cyclic, $a);
+            \Testo\Assert::same($a->cyclic, $b);
+        });
     }
 
     #[\Testo\Test]
@@ -90,28 +71,24 @@ abstract class DoubleLinkedTest extends BaseTest
         $c1->name = 'self-reference';
         $c1->cyclic = $c1;
         $c1->other = $c1;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->run();
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, function () use ($c1): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($c1);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
         $a = $selector->orderBy('id')->fetchOne();
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($a->cyclic, $a);
-        \Testo\Assert::same($a->other, $a);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a): void {
+            \Testo\Assert::same($a->cyclic, $a);
+            \Testo\Assert::same($a->other, $a);
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('cyclic', [
             'id' => 'primary',
             'name' => 'string',

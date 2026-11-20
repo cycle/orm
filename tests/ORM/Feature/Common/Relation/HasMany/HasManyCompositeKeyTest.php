@@ -13,15 +13,14 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasManyCompositeKeyTest extends BaseTest
+class HasManyCompositeKeyTest extends OrmTestCase
 {
-    use TableTrait;
 
     protected const CHILD_CONTAINER = 'children';
     protected const PARENT_1 = ['key1' => 1, 'key2' => 1, 'key3' => 101];
@@ -110,13 +109,10 @@ abstract class HasManyCompositeKeyTest extends BaseTest
          * @var CompositePK $b
          */
         [$a, $b] = $selector->load(self::CHILD_CONTAINER)->orderBy('parent_entity.key3')->fetchAll();
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))
+        QueryAssert::writes(0, fn() => (new Transaction($this->orm))
             ->persist($a)
             ->persist($b)
-            ->run();
-        $this->assertNumWrites(0);
+            ->run());
     }
 
     #[\Testo\Test]
@@ -134,15 +130,9 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         $e->children[1]->key1 = 921;
         $e->children[1]->key2 = 922;
         $e->children[1]->key3 = 'bar14';
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($e)->run();
-        $this->assertNumWrites(3);
-
+        QueryAssert::writes(3, fn() => (new Transaction($this->orm))->persist($e)->run());
         // consecutive test
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($e)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($e)->run());
 
         \Testo\Assert::true($this->orm->getHeap()->has($e));
         \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -261,15 +251,9 @@ abstract class HasManyCompositeKeyTest extends BaseTest
         $c->key2 = 90;
         $c->key3 = 'fiz';
         $e->children->add($c);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, fn() => $this->save($e));
         // consecutive test
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         $selector = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER);
@@ -310,15 +294,9 @@ abstract class HasManyCompositeKeyTest extends BaseTest
 
         \Testo\Assert::count($a->children, 1);
         \Testo\Assert::count($d->children, 2);
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($d)->run();
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, fn() => (new Transaction($this->orm))->persist($a)->persist($d)->run());
         // consecutive
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($a)->persist($d)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($a)->persist($d)->run());
 
         $selector = new Select($this->orm->withHeap(new Heap()), CompositePK::class);
 
@@ -347,8 +325,6 @@ abstract class HasManyCompositeKeyTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'parent_entity',
             [

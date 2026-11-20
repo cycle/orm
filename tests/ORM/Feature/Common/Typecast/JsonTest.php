@@ -13,13 +13,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Admin;
 use Cycle\ORM\Tests\Fixtures\JsonSerializableClass;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\JsonTypecast;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class JsonTest extends BaseTest
+class JsonTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchAll(): void
@@ -47,10 +46,7 @@ abstract class JsonTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($result);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($result));
     }
 
     #[\Testo\Test]
@@ -60,14 +56,8 @@ abstract class JsonTest extends BaseTest
         $e->email = 'test@email.com';
         $e->settings = ['theme' => 'light'];
         $e->settingsNullable = ['some' => 'data'];
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         \Testo\Assert::true($this->orm->getHeap()->has($e));
         \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -91,14 +81,8 @@ abstract class JsonTest extends BaseTest
         $e->email = 'test@email.com';
         $e->settings = [];
         $e->settingsNullable = [];
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         \Testo\Assert::true($this->orm->getHeap()->has($e));
         \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -119,14 +103,8 @@ abstract class JsonTest extends BaseTest
         $e->email = 'test@email.com';
         $e->settings = [];
         $e->settingsNullable = null;
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         \Testo\Assert::true($this->orm->getHeap()->has($e));
         \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -150,14 +128,8 @@ abstract class JsonTest extends BaseTest
         $e->email = 'test@email.com';
         $e->settings = ['theme' => 'light'];
         $e->jsonSerializable = new JsonSerializableClass();
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         \Testo\Assert::true($this->orm->getHeap()->has($e));
         \Testo\Assert::same($this->orm->getHeap()->get($e)->getStatus(), Node::MANAGED);
@@ -173,14 +145,8 @@ abstract class JsonTest extends BaseTest
     {
         $e = $this->orm->get('user', ['id' => 1]);
         $e->settings = ['theme' => 'light'];
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         $this->orm->getHeap()->clean();
 
@@ -200,10 +166,7 @@ abstract class JsonTest extends BaseTest
         $e = new Admin();
         $e->email = 'test@email.com';
         $e->settings = ['theme' => 'light'];
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($e));
 
         $this->orm->getHeap()->clean();
 
@@ -214,8 +177,6 @@ abstract class JsonTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(table: 'users', columns: [
             'id' => 'primary',
             'email' => 'string',

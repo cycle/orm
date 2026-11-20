@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\Case2;
 
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Regression\Case2\Entity\MarkCriterionResult;
 use Cycle\ORM\Tests\Regression\Case2\Entity\MarkSubcriterionResult;
 use Cycle\ORM\Tests\Regression\Case2\Entity\StudentProgress;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testRun(): void
@@ -33,10 +30,7 @@ abstract class CaseTest extends BaseTest
         \Testo\Assert::notSame($aspect, false);
         $student = $aspect->student;
         $student->studentProgresses->add(new StudentProgress('new-progress-42'));
-
-        $this->captureWriteQueries();
-        $this->save($markCriterionResult, $sub, $aspect);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($markCriterionResult, $sub, $aspect));
 
         $this->orm->getHeap()->clean();
         $studentProgress = (new Select($this->orm, StudentProgress::class))
@@ -49,8 +43,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
-
         // Make tables
         $this->makeTable('students', [
             'id' => 'string,primary',

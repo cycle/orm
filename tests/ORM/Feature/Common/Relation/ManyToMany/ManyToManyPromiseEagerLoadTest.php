@@ -9,12 +9,10 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
+class ManyToManyPromiseEagerLoadTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchData(): void
@@ -260,8 +258,6 @@ abstract class ManyToManyPromiseEagerLoadTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('distributions', [
             'id' => 'primary',
             'name' => 'string',

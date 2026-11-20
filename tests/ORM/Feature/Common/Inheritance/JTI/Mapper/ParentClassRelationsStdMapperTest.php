@@ -9,8 +9,9 @@ use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\Relation\ParentClassRelationsTest;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTest
+class ParentClassRelationsStdMapperTest extends ParentClassRelationsTest
 {
     protected const DEFAULT_MAPPER = StdMapper::class;
 
@@ -21,14 +22,8 @@ abstract class ParentClassRelationsStdMapperTest extends ParentClassRelationsTes
         $programator->name = 'Merlin';
         $programator->level = 50;
         $programator->language = 'VanillaJS';
-
-        $this->captureWriteQueries();
-        $this->save($programator);
-        $this->assertNumWrites(3);
-
-        $this->captureWriteQueries();
-        $this->save($programator);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(3, fn() => $this->save($programator));
+        QueryAssert::writes(0, fn() => $this->save($programator));
 
         $programator = (new Select($this->orm->withHeap(new Heap()), static::PROGRAMATOR_ROLE))
             ->wherePK($programator->id)

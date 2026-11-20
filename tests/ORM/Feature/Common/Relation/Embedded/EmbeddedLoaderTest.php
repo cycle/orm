@@ -12,12 +12,10 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class EmbeddedLoaderTest extends BaseTest
+class EmbeddedLoaderTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testLoadDataNoRelation(): void
@@ -347,8 +345,6 @@ abstract class EmbeddedLoaderTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

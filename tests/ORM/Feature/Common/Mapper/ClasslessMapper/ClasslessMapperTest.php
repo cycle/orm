@@ -9,13 +9,12 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\ClasslessMapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\Mapper\BaseMapperTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ClasslessMapperTest extends BaseMapperTest
+class ClasslessMapperTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchData(): void
@@ -114,13 +113,11 @@ abstract class ClasslessMapperTest extends BaseMapperTest
     {
         $selector = new Select($this->orm, 'user');
         $result = $selector->fetchOne();
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($result);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($result): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($result);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -177,19 +174,16 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $e = $this->orm->make('user');
         $e->email = 'test@email.com';
         $e->balance = 300;
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
+        QueryAssert::writes(0, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
 
@@ -203,17 +197,12 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $e = $this->orm->make('user');
         $e->email = 'test@email.com';
         $e->balance = 300;
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-
-        $e->balance = 400;
-
-        $tr->run();
-
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $e->balance = 400;
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
         \Testo\Assert::true($this->orm->getHeap()->has($e));
@@ -280,12 +269,11 @@ abstract class ClasslessMapperTest extends BaseMapperTest
 
         $u3 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
         \Testo\Assert::same($u3->email, 'hello@world.com');
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $u4 = $this->orm->withHeap(new Heap())->getRepository('user')->findByPK(1);
         \Testo\Assert::same($u4->email, 'test@email.com');
@@ -297,24 +285,22 @@ abstract class ClasslessMapperTest extends BaseMapperTest
         $u = $this->orm->getRepository('user')->findByPK(1);
         \Testo\Assert::equals((float) $u->balance, 100.0);
         $u->balance = 0.0;
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository('user')->findByPK(1);
         \Testo\Assert::equals((float) $u->balance, 0.0);
 
         $u->balance = null;
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u = $this->orm->getRepository('user')->findByPK(1);
@@ -324,8 +310,6 @@ abstract class ClasslessMapperTest extends BaseMapperTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'user',
             [

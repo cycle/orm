@@ -11,11 +11,8 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\SimpleCasesTest;
 
-#[\Testo\Filter\Group('driver', 'driver-postgres')]
 class CursorTest extends SimpleCasesTest
 {
-    public const DRIVER = 'postgres';
-
     #[\Testo\Test]
     public function testCursorReturnsCorrectHierarchyInstances(): void
     {

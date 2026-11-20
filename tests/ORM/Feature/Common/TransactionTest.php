@@ -9,12 +9,11 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\TransactionTestMapper;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class TransactionTest extends BaseTest
+class TransactionTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testTransactionRollbackShouldResetEntityState()
@@ -45,25 +44,27 @@ abstract class TransactionTest extends BaseTest
         $t1 = clone $t;
         $t2 = clone $t1;
 
+        // Every run fails at the same point, so the write count stays at the first run's three writes.
+        $log = $this->context->queryLog();
+        $writes = $log->countWrites();
         try {
-            $this->captureWriteQueries();
             $t->run();
         } catch (\Exception $e) {
-            $this->assertNumWrites(3);
+            \Testo\Assert::same($log->countWrites() - $writes, 3);
             \Testo\Assert::null($u->id);
         }
 
         try {
             $t1->run();
         } catch (\Exception $e) {
-            $this->assertNumWrites(3);
+            \Testo\Assert::same($log->countWrites() - $writes, 3);
             \Testo\Assert::null($u->id);
         }
 
         try {
             $t2->run();
         } catch (\Exception $e) {
-            $this->assertNumWrites(3);
+            \Testo\Assert::same($log->countWrites() - $writes, 3);
             \Testo\Assert::null($u->id);
         }
 
@@ -208,8 +209,6 @@ abstract class TransactionTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', ['id' => 'primary', 'email' => 'string', 'balance' => 'float',]);
         $this->getDatabase()->table('user')->insertMultiple(
             ['email', 'balance'],

@@ -6,15 +6,12 @@ namespace Cycle\ORM\Tests\Regression\Issue482;
 
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\QueryBuilder;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
 use Cycle\ORM\Tests\Regression\Issue482\Entity\Country;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\SqlAssert;
 
-abstract class AbstractTestCase extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelect(): void
@@ -49,7 +46,20 @@ abstract class AbstractTestCase extends BaseTest
                 'using' => 'trans',
             ]);
 
-        $this->assertExpectedSql($select);
+        SqlAssert::same(
+            (string) $select->buildQuery(),
+            <<<SQL
+                SELECT {country}.{id} AS {c0}, {country}.{name} AS {c1}, {country}.{code} AS {c2}, {country}.{is_friendly} AS {c3}, {trans}.{id} AS {c4}, {trans}.{country_id} AS {c5}, {trans}.{locale_id}
+                AS {c6}, {trans}.{title} AS {c7}
+                FROM {country} AS {country}
+                LEFT JOIN {translation} AS {trans}
+                    ON {trans}.{country_id} = {country}.{id}
+                LEFT JOIN {translation} AS {transEn}
+                    ON {transEn}.{country_id} = {country}.{id} AND {transEn}.{locale_id} = 1
+                WHERE {country}.{is_friendly} = TRUE AND ({country}.{code} LIKE '%eng%' OR {country}.{name} LIKE '%eng%' OR {trans}.{title} LIKE '%eng%'  )
+                ORDER BY {transEn}.{title} ASC
+                SQL,
+        );
 
         $data = $select->fetchData();
         \Testo\Assert::count($data, 3);
@@ -83,21 +93,10 @@ abstract class AbstractTestCase extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 
         $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
-    abstract protected function getExpectedSql(): string;
-
-    #[\Testo\Common\Attribute\AssertMethod]
-    private function assertExpectedSql(Select $select): void
-    {
-        $actual = (string) $select->buildQuery();
-        $expected = $this->getExpectedSql();
-        \Testo\Assert::same(\array_map('trim', \explode("\n", $actual)), \array_map('trim', \explode("\n", $expected)));
     }
 
     private function makeTables(): void

@@ -8,12 +8,12 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\Database\Attribute\OnlyDriver;
+use Cycle\Testing\Database\Driver;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class RepositoryTest extends BaseTest
+class RepositoryTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFindAll(): void
@@ -120,11 +120,26 @@ abstract class RepositoryTest extends BaseTest
         \Testo\Assert::equals($result[1]->balance, 200.0);
     }
 
+    /**
+     * Checks query tokens only, so one driver is enough.
+     */
+    #[\Testo\Test]
+    #[OnlyDriver(Driver::SQLite)]
+    public function testForUpdate(): void
+    {
+        $repository = $this->orm->getRepository(User::class);
+
+        \Testo\Assert::false($repository->select()->getBuilder()->getQuery()->getTokens()['forUpdate']);
+
+        $forUpdate = $repository->forUpdate();
+
+        \Testo\Assert::true($forUpdate->select()->getBuilder()->getQuery()->getTokens()['forUpdate']);
+        \Testo\Assert::notSame($forUpdate, $repository);
+    }
+
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

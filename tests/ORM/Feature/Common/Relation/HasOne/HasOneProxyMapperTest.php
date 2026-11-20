@@ -13,13 +13,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasOneProxyMapperTest extends BaseTest
+class HasOneProxyMapperTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -62,11 +61,10 @@ abstract class HasOneProxyMapperTest extends BaseTest
 
         \Testo\Assert::instanceOf($a->profile, Profile::class);
         \Testo\Assert::null($b->profile);
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($a->profile, $a->profile);
-        \Testo\Assert::null($b->profile);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a, $b): void {
+            \Testo\Assert::same($a->profile, $a->profile);
+            \Testo\Assert::null($b->profile);
+        });
 
         \Testo\Assert::equals($a->profile->image, 'image.png');
     }
@@ -128,15 +126,9 @@ abstract class HasOneProxyMapperTest extends BaseTest
 
         // warm up
         (new Select($this->orm, Profile::class))->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($a->profile, $a->profile);
-        $this->assertNumReads(0);
-
+        QueryAssert::reads(0, fn() => \Testo\Assert::same($a->profile, $a->profile));
         // invalid object can't be cached
-        $this->captureReadQueries();
-        \Testo\Assert::null($b->profile);
-        $this->assertNumReads(1);
+        QueryAssert::reads(1, fn() => \Testo\Assert::null($b->profile));
 
         \Testo\Assert::equals($a->profile->image, 'image.png');
     }
@@ -146,12 +138,11 @@ abstract class HasOneProxyMapperTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->wherePK(1)->fetchOne();
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($u): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -161,17 +152,7 @@ abstract class HasOneProxyMapperTest extends BaseTest
         [$a, $b] = $selector->orderBy('id')->fetchAll();
 
         $a->profile = null;
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-
-        $this->save($a);
-
-        // load related entity
-        $this->assertNumReads(1);
-
-        // Delete related entity
-        $this->assertNumWrites(1);
+        QueryAssert::count(1, 1, fn() => $this->save($a));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -190,17 +171,7 @@ abstract class HasOneProxyMapperTest extends BaseTest
 
         $b->profile = $a->profile;
         $a->profile = null;
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-
-        $this->save($a, $b);
-
-        // Load profile 2
-        $this->assertNumReads(1);
-
-        // delete related entity
-        $this->assertNumWrites(1);
+        QueryAssert::count(1, 1, fn() => $this->save($a, $b));
 
         $this->orm->getHeap()->clean();
         $selector = new Select($this->orm, User::class);
@@ -219,17 +190,7 @@ abstract class HasOneProxyMapperTest extends BaseTest
 
         $b->profile = $a->profile;
         $a->profile = null;
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-
-        $this->save($b);
-
-        // Load profile 2
-        $this->assertNumReads(1);
-
-        // delete related entity
-        $this->assertNumWrites(1);
+        QueryAssert::count(1, 1, fn() => $this->save($b));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -242,8 +203,6 @@ abstract class HasOneProxyMapperTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

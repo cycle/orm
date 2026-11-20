@@ -10,13 +10,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class DeepCyclicTest extends BaseTest
+class DeepCyclicTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreateDeepCyclic(): void
@@ -35,12 +34,7 @@ abstract class DeepCyclicTest extends BaseTest
         $c2->other = $c3;
         $c3->other = $c4;
         $c4->other = $c2;
-
-        $this->captureWriteQueries();
-        $this->save($c1, $c2, $c3, $c4, $c5);
-
-        // 5 inserts and 2 loops
-        $this->assertNumWrites(7);
+        QueryAssert::writes(7, fn() => $this->save($c1, $c2, $c3, $c4, $c5));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
@@ -82,15 +76,12 @@ abstract class DeepCyclicTest extends BaseTest
         $c2->other = $c3;
         $c3->other = $c4;
         $c4->other = $c2;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->run();
-
-        // 5 inserts and 2 loops
-        $this->assertNumWrites(7);
+        QueryAssert::writes(7, function () use ($c1, $c2): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($c1);
+            $tr->persist($c2);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
@@ -132,15 +123,12 @@ abstract class DeepCyclicTest extends BaseTest
         $c2->other = $c3;
         $c3->other = $c4;
         $c4->other = $c2;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c5);
-        $tr->persist($c4);
-        $tr->run();
-
-        // 5 inserts and 2 loops
-        $this->assertNumWrites(7);
+        QueryAssert::writes(7, function () use ($c5, $c4): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($c5);
+            $tr->persist($c4);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
@@ -184,18 +172,15 @@ abstract class DeepCyclicTest extends BaseTest
         $c4->other = $c1;
         $c1->other = $c5;
         $c5->other = $c2;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->persist($c3);
-        $tr->persist($c4);
-        $tr->persist($c5);
-        $tr->run();
-
-        // 5 inserts and 2 loops
-        $this->assertNumWrites(7);
+        QueryAssert::writes(7, function () use ($c1, $c2, $c3, $c4, $c5): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($c1);
+            $tr->persist($c2);
+            $tr->persist($c3);
+            $tr->persist($c4);
+            $tr->persist($c5);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Cyclic::class);
@@ -224,8 +209,6 @@ abstract class DeepCyclicTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('cyclic', [
             'id' => 'primary',
             'name' => 'string',

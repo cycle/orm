@@ -15,8 +15,9 @@ use Cycle\ORM\Tests\Fixtures\DifferentSource;
 use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserRepository;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class FactoryTest extends BaseTest
+class FactoryTest extends OrmTestCase
 {
     /**
      * @var Factory
@@ -132,8 +133,6 @@ abstract class FactoryTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->orm = $this->withSchema(new Schema([
             User::class => [
                 Schema::ROLE => 'user',

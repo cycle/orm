@@ -9,13 +9,12 @@ use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ClasslessHasOneCyclicTest extends BaseTest
+class ClasslessHasOneCyclicTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchCyclic(): void
@@ -98,14 +97,8 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
         $c = $this->orm->make('cyclic');
         $c->name = 'new';
         $c->cyclic = $c;
-
-        $this->captureWriteQueries();
-        $this->save($c);
-        $this->assertNumWrites(2);
-
-        $this->captureWriteQueries();
-        $this->save($c);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(2, fn() => $this->save($c));
+        QueryAssert::writes(0, fn() => $this->save($c));
 
         $selector = new Select($this->orm->withHeap(new Heap()), 'cyclic');
         $c = $selector->load('cyclic')->wherePK($c->id)->fetchOne();
@@ -116,8 +109,6 @@ abstract class ClasslessHasOneCyclicTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('cyclic', [
             'id' => 'primary',
             'name' => 'string',

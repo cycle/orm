@@ -11,26 +11,19 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\UserWithUUIDPrimaryKey;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Ramsey\Uuid\Uuid;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class UUIDTest extends BaseTest
+class UUIDTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
     {
         $e = new UserWithUUIDPrimaryKey(new UuidPrimaryKey(Uuid::uuid4()->toString()), 'hello@world.com', 500);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
     }
 
     #[\Testo\Test]
@@ -80,8 +73,6 @@ abstract class UUIDTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'user_with_uuid_primary_key',
             [

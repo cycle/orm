@@ -11,13 +11,11 @@ use Cycle\ORM\Tests\Fixtures\NotDeletedScope;
 use Cycle\ORM\Tests\Fixtures\NotDeletedWrappedScope;
 use Cycle\ORM\Tests\Fixtures\SoftDeletedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class SoftDeletesTest extends BaseTest
+class SoftDeletesTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
@@ -137,8 +135,6 @@ abstract class SoftDeletesTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

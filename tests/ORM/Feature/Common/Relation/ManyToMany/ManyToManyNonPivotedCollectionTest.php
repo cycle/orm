@@ -16,12 +16,11 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
+class ManyToManyNonPivotedCollectionTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testInitRelation(): void
@@ -180,10 +179,7 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
         $u->tags->add($t);
 
         $this->save($u);
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
@@ -211,10 +207,7 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
         $u->tags = [$t1, $t2];
 
         $this->save($u);
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
 
         $u = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('tags')->wherePK(3)->fetchOne();
@@ -241,14 +234,8 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
         $t->name = 'new tag';
 
         $b->tags = [$t];
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(5);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(5, fn() => $this->save($a, $b));
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         /**
          * @var User $a
@@ -272,10 +259,7 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
 
         /** @var User $user */
         $user = $userSelect->load('tags')->fetchOne(['id' => 1]);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($user));
 
         $wantTags = ['tag a', 'tag c'];
 
@@ -299,10 +283,7 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
         array_filter($user->tags, function ($t) use ($wantTags) {
             return in_array($t->name, $wantTags);
         });
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($user));
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -315,8 +296,6 @@ abstract class ManyToManyNonPivotedCollectionTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

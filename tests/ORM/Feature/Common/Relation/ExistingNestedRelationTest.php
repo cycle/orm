@@ -12,13 +12,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ExistingNestedRelationTest extends BaseTest
+class ExistingNestedRelationTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreateForExisting(): void
@@ -26,14 +25,11 @@ abstract class ExistingNestedRelationTest extends BaseTest
         $u = new User();
         $u->email = 'test@email.com';
         $u->balance = 1000;
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use (&$tr, $u): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -46,19 +42,16 @@ abstract class ExistingNestedRelationTest extends BaseTest
         $c->message = 'hello world';
 
         $u->addComment($c);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use (&$tr, $u): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->run();
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

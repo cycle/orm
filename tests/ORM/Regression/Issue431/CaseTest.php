@@ -6,9 +6,8 @@ namespace Cycle\ORM\Tests\Regression\Issue431;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * BulkLoader with object primary keys and one-way typecast (CastableInterface only, no UncastableInterface).
@@ -17,10 +16,8 @@ use Cycle\ORM\Tests\Traits\TableTrait;
  * Post uses OneWayValueInterfaceTypecast → ValueInterfaceUuid (ValueInterface + Stringable,
  *   where rawValue() returns the DB string and __toString() returns a different format).
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     private const USER_1 = '550e8400-e29b-41d4-a716-446655440001';
     private const USER_2 = '550e8400-e29b-41d4-a716-446655440002';
@@ -45,21 +42,17 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($users, 3);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('posts')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $postCounts = [];
-        foreach ($users as $user) {
-            \Testo\Assert::instanceOf($user->id, Typecast\StringableUuid::class);
-            $postCounts[$user->id->toString()] = \count($user->posts);
-        }
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, function () use (&$postCounts, $users): void {
+            $postCounts = [];
+            foreach ($users as $user) {
+                \Testo\Assert::instanceOf($user->id, Typecast\StringableUuid::class);
+                $postCounts[$user->id->toString()] = \count($user->posts);
+            }
+        });
 
         \Testo\Assert::same($postCounts[self::USER_1], 1);
         \Testo\Assert::same($postCounts[self::USER_2], 2);
@@ -74,17 +67,11 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         \Testo\Assert::instanceOf($user, Entity\User::class);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect($user)
             ->load('posts')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($user->posts, 2);
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, fn() => \Testo\Assert::count($user->posts, 2));
     }
 
     // =============================================
@@ -104,19 +91,16 @@ abstract class CaseTest extends BaseTest
         foreach ($posts as $post) {
             \Testo\Assert::instanceOf($post->id, Typecast\ValueInterfaceUuid::class);
         }
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('comments')
-            ->run();
-        $this->assertNumReads(2); // 1 comments + 1 eager comment.user
-
-        $this->captureReadQueries();
-        foreach ($posts as $post) {
-            \Testo\Assert::array($post->comments);
-        }
-        $this->assertNumReads(0);
+            ->run());
+        // 1 comments + 1 eager comment.user
+        QueryAssert::reads(0, function () use ($posts, &$post): void {
+            foreach ($posts as $post) {
+                \Testo\Assert::array($post->comments);
+            }
+        });
     }
 
     #[\Testo\Test]
@@ -127,19 +111,15 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($posts, 4);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        foreach ($posts as $post) {
-            \Testo\Assert::instanceOf($post->user, Entity\User::class);
-        }
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, function () use ($posts): void {
+            foreach ($posts as $post) {
+                \Testo\Assert::instanceOf($post->user, Entity\User::class);
+            }
+        });
     }
 
     #[\Testo\Test]
@@ -149,21 +129,18 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($posts, 4);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(3, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
             ->load('comments')
-            ->run();
-        $this->assertNumReads(3); // 1 users + 1 comments + 1 eager comment.user
-
-        $this->captureReadQueries();
-        foreach ($posts as $post) {
-            \Testo\Assert::instanceOf($post->user, Entity\User::class);
-            \Testo\Assert::array($post->comments);
-        }
-        $this->assertNumReads(0);
+            ->run());
+        // 1 users + 1 comments + 1 eager comment.user
+        QueryAssert::reads(0, function () use ($posts): void {
+            foreach ($posts as $post) {
+                \Testo\Assert::instanceOf($post->user, Entity\User::class);
+                \Testo\Assert::array($post->comments);
+            }
+        });
     }
 
     // =============================================
@@ -177,26 +154,21 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($comments, 3);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$comments)
             ->load('post')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        foreach ($comments as $comment) {
-            \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
-            \Testo\Assert::instanceOf($comment->post->id, Typecast\ValueInterfaceUuid::class);
-        }
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, function () use ($comments): void {
+            foreach ($comments as $comment) {
+                \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
+                \Testo\Assert::instanceOf($comment->post->id, Typecast\ValueInterfaceUuid::class);
+            }
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

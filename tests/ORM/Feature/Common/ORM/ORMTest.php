@@ -8,22 +8,18 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ORMTest extends BaseTest
+class ORMTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testORMGet(): void
     {
         \Testo\Assert::null($this->orm->get(User::class, ['id' => 1], false));
         \Testo\Assert::instanceOf($this->orm->get(User::class, ['id' => 1], true), User::class);
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($this->orm->get(User::class, ['id' => 1]), User::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($this->orm->get(User::class, ['id' => 1]), User::class));
 
         \Testo\Assert::count($this->orm->getSchema()->getRoles(), 1);
     }
@@ -33,17 +29,12 @@ abstract class ORMTest extends BaseTest
     {
         \Testo\Assert::null($this->orm->get('user', ['id' => 1], false));
         \Testo\Assert::instanceOf($this->orm->get('user', ['id' => 1], true), User::class);
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($this->orm->get('user', ['id' => 1]), User::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($this->orm->get('user', ['id' => 1]), User::class));
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

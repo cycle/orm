@@ -20,8 +20,9 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Page;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Tool;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HierarchyInRelationTest extends JtiBaseTest
+class HierarchyInRelationTest extends JtiBaseTest
 {
     protected const HUMAN_ROLE = 'human';
     protected const EMPLOYEE_ROLE = 'employee';
@@ -154,15 +155,9 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
     #[\Testo\Test]
     public function testInnerLoadParentClassRelation(): void
     {
-        $this->captureReadQueries();
-
-        /** @var MarkdownPage $entity */
-        $entity = (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
+        $entity = QueryAssert::reads(2, fn() => (new Select($this->orm, static::MARKDOWN_PAGE_ROLE))
             ->load('owner', ['method' => Select::SINGLE_QUERY])
-            ->wherePK(1)->fetchOne();
-
-        $this->assertNumReads(2);
-
+            ->wherePK(1)->fetchOne());
         \Testo\Assert::instanceOf($entity, MarkdownPage::class);
         \Testo\Assert::instanceOf($entity->owner, Programator::class);
     }
@@ -186,26 +181,18 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
     #[\Testo\Test]
     public function testLoadTwoInheritancesInSingleQuery(): void
     {
-        $this->captureReadQueries();
-
-        /** @var Programator $entity */
-        $entity = (new Select($this->orm, static::PROGRAMATOR_ROLE))
+        $entity = QueryAssert::reads(1, fn() => (new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->load('book', ['method' => Select::SINGLE_QUERY])
             ->load('tech_book', ['method' => Select::SINGLE_QUERY])
             ->load('tech_book.pages', ['method' => Select::SINGLE_QUERY])
-            ->wherePK(2)->fetchOne();
-
-        $this->assertNumReads(1);
-        $this->captureReadQueries();
-
-        \Testo\Assert::instanceOf($entity->book, EBook::class);
-        \Testo\Assert::same($entity->book->id, 4);
-        \Testo\Assert::instanceOf($entity->tech_book, EBook::class);
-        \Testo\Assert::same($entity->tech_book->id, 3);
-        \Testo\Assert::notBlank($entity->tech_book->pages);
-
-        // Don't use promises
-        $this->assertNumReads(0);
+            ->wherePK(2)->fetchOne());
+        QueryAssert::reads(0, function () use ($entity): void {
+            \Testo\Assert::instanceOf($entity->book, EBook::class);
+            \Testo\Assert::same($entity->book->id, 4);
+            \Testo\Assert::instanceOf($entity->tech_book, EBook::class);
+            \Testo\Assert::same($entity->tech_book->id, 3);
+            \Testo\Assert::notBlank($entity->tech_book->pages);
+        });
     }
 
     #[\Testo\Test]
@@ -223,10 +210,7 @@ abstract class HierarchyInRelationTest extends JtiBaseTest
             $this->orm->make(Page::class, ['title' => 'page 2', 'content' => '...', 'owner_id' => 1]),
             $this->orm->make(MarkdownPage::class, ['title' => 'page 3', 'content' => '...', 'owner_id' => 2]),
         ];
-
-        $this->captureWriteQueries();
-        $this->save($entity);
-        $this->assertNumWrites(6);
+        QueryAssert::writes(6, fn() => $this->save($entity));
 
         // Relations are not non-rewritable on sync hydration
         // This behavior can be changed

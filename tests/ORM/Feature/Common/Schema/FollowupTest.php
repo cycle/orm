@@ -7,12 +7,11 @@ namespace Cycle\ORM\Tests\Feature\Common\Schema;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserSnapshotMapper;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class FollowupTest extends BaseTest
+class FollowupTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSnapUser(): void
@@ -20,10 +19,7 @@ abstract class FollowupTest extends BaseTest
         $u = new User();
         $u->email = 'email';
         $u->balance = 100;
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($u));
 
         $snap = $this->getSnap($u);
         \Testo\Assert::same($snap['action'], 'create');
@@ -36,20 +32,14 @@ abstract class FollowupTest extends BaseTest
         $u = new User();
         $u->email = 'email';
         $u->balance = 100;
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($u));
 
         $snap = $this->getSnap($u);
         \Testo\Assert::same($snap['action'], 'create');
         \Testo\Assert::same($snap['email'], 'email');
 
         $u->email = 'new-email';
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($u));
 
         $snap = $this->getSnap($u);
         \Testo\Assert::same($snap['action'], 'update');
@@ -59,8 +49,6 @@ abstract class FollowupTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

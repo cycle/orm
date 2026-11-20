@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Regression\Issue318;
 
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Ramsey\Uuid\Uuid;
+use Cycle\Testing\ORM\OrmTestCase;
 
 /**
  * @link https://github.com/cycle/orm/issues/318
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelect(): void
@@ -47,7 +43,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
 
         $this->loadSchema(__DIR__ . '/schema.php');

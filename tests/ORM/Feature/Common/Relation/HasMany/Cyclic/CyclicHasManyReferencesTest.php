@@ -12,12 +12,11 @@ use Cycle\ORM\Tests\Fixtures\CyclicRef\Comment;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\Post;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\CyclicRef\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CyclicHasManyReferencesTest extends BaseTest
+class CyclicHasManyReferencesTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
@@ -34,15 +33,9 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
         $c->message = 'hello hello';
 
         $p->addComment($c);
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(4);
-
+        QueryAssert::writes(4, fn() => $this->save($p));
         // no changes!
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, Post::class);
@@ -82,21 +75,14 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
 
         $p->addComment($c1);
         $p->addComment($c2);
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(6);
+        QueryAssert::writes(6, fn() => $this->save($p));
 
         $c3 = new Comment();
         $c3->user = $u2;
         $c3->message = 'hello again 2';
 
         $p->addComment($c3);
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        // Insert new comment, update post.lastComment
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($p));
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -119,8 +105,6 @@ abstract class CyclicHasManyReferencesTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

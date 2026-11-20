@@ -9,11 +9,13 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Identity;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
+use Cycle\Testing\Database\Attribute\ExceptDriver;
+use Cycle\Testing\Database\Driver;
 
-abstract class RenamedPKTest extends BaseTest
+class RenamedPKTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreateEmpty(): void
@@ -29,6 +31,7 @@ abstract class RenamedPKTest extends BaseTest
     }
 
     #[\Testo\Test]
+    #[ExceptDriver(Driver::SQLServer)]
     public function testCreateWithPredefinedId(): void
     {
         $this->createTable1();
@@ -66,10 +69,7 @@ abstract class RenamedPKTest extends BaseTest
         \Testo\Assert::count($data, 1);
         $u = $data[0];
         $u->setId(8);
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $data = (new Select($this->orm, Identity::class))
             ->fetchAll();

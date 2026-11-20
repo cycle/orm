@@ -11,13 +11,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\WithConstructor;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\ArrayCollection;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class InstantiatorTest extends BaseTest
+class InstantiatorTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testInitRelation(): void
@@ -45,8 +44,6 @@ abstract class InstantiatorTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

@@ -13,13 +13,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Favorite;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CyclicReferencesTest extends BaseTest
+class CyclicReferencesTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
@@ -34,21 +33,17 @@ abstract class CyclicReferencesTest extends BaseTest
 
         $u->addComment($c);
         $u->favorites->add($c);
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
-        $this->assertNumWrites(4);
-
+        QueryAssert::writes(4, function () use (&$tr, $u): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->run();
+        });
         // no changes!
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $u): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -87,15 +82,9 @@ abstract class CyclicReferencesTest extends BaseTest
         $u->addComment($c);
         $u->favorites->add($c);
         $u2->favorites->add($c);
-
-        $this->captureWriteQueries();
-        $this->save($u, $u2);
-        $this->assertNumWrites(6);
-
+        QueryAssert::writes(6, fn() => $this->save($u, $u2));
         // no changes!
-        $this->captureWriteQueries();
-        $this->save($u, $u2);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u, $u2));
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -159,30 +148,24 @@ abstract class CyclicReferencesTest extends BaseTest
         $u2->favorites->add($c);
         $u->favorites->add($c);
         $u2->favorites->add($c2);
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($u2);
-        $tr->run();
-
-        $this->assertNumWrites(10);
-
+        QueryAssert::writes(10, function () use (&$tr, $u, $u2): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->persist($u2);
+            $tr->run();
+        });
         // no changes!
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->persist($u2);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $u, $u2): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->persist($u2);
+            $tr->run();
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

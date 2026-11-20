@@ -13,12 +13,12 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\ORM\Relation\BulkLoader;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasManyNestedConditionTest extends BaseTest
+class HasManyNestedConditionTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -253,36 +253,27 @@ abstract class HasManyNestedConditionTest extends BaseTest
     #[\Testo\Test]
     public function testUpdateNestedRelation(): void
     {
-        $this->captureReadQueries();
-        /** @var list<User> $users */
-        $users = (new Select($this->orm, User::class))->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $this->bulkLoader(...$users)
+        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('posts.comments')
-            ->run();
-        $this->assertNumReads(2);
-
-        $this->captureReadQueries();
-        foreach ($users as $user) {
-            \Testo\Assert::iterable($user->posts);
-            foreach ($user->posts as $post) {
-                \Testo\Assert::iterable($post->comments);
-                // Verify comments are loaded
-                foreach ($post->comments as $comment) {
-                    \Testo\Assert::notNull($comment->message);
+            ->run());
+        QueryAssert::reads(0, function () use ($users): void {
+            foreach ($users as $user) {
+                \Testo\Assert::iterable($user->posts);
+                foreach ($user->posts as $post) {
+                    \Testo\Assert::iterable($post->comments);
+                    // Verify comments are loaded
+                    foreach ($post->comments as $comment) {
+                        \Testo\Assert::notNull($comment->message);
+                    }
                 }
             }
-        }
-        $this->assertNumReads(0);
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

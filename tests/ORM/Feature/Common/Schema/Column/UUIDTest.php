@@ -11,13 +11,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\Uuid;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class UUIDTest extends BaseTest
+class UUIDTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
@@ -26,14 +25,8 @@ abstract class UUIDTest extends BaseTest
         $e->email = 'test@email.com';
         $e->uuid = Uuid::create();
         $e->balance = 300;
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         \Testo\Assert::equals($e->id, 1);
 
@@ -104,8 +97,6 @@ abstract class UUIDTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'uuid' => 'binary(16)',

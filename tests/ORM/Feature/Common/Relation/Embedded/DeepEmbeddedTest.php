@@ -11,12 +11,10 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Group;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class DeepEmbeddedTest extends BaseTest
+class DeepEmbeddedTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchData(): void
@@ -151,8 +149,6 @@ abstract class DeepEmbeddedTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'group',
             [

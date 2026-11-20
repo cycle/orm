@@ -10,12 +10,11 @@ use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ClasslessCyclicReferencesTest extends BaseTest
+class ClasslessCyclicReferencesTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
@@ -31,15 +30,9 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $u->lastComment = $c;
         $u->comments[] = $c;
         $u->favorites->add($c);
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(4);
-
+        QueryAssert::writes(4, fn() => $this->save($u));
         // no changes!
-        $this->captureWriteQueries();
-        $this->save($u, $c);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u, $c));
 
         $this->orm = $this->orm->withHeap(new Heap());
         $u1 = (new Select($this->orm, 'user'))
@@ -79,15 +72,9 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $u->comments[] = $c;
         $u->favorites->add($c);
         $u2->favorites->add($c);
-
-        $this->captureWriteQueries();
-        $this->save($u, $u2);
-        $this->assertNumWrites(6);
-
+        QueryAssert::writes(6, fn() => $this->save($u, $u2));
         // no changes!
-        $this->captureWriteQueries();
-        $this->save($u, $u2);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u, $u2));
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -156,22 +143,14 @@ abstract class ClasslessCyclicReferencesTest extends BaseTest
         $u2->favorites->add($c);
         $u->favorites->add($c);
         $u2->favorites->add($c2);
-
-        $this->captureWriteQueries();
-        $this->save($u, $u2);
-        $this->assertNumWrites(10);
-
+        QueryAssert::writes(10, fn() => $this->save($u, $u2));
         // no changes!
-        $this->captureWriteQueries();
-        $this->save($u, $u2);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u, $u2));
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

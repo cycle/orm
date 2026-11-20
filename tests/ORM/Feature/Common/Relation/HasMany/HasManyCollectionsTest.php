@@ -19,12 +19,11 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\CustomCollection;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasManyCollectionsTest extends BaseTest
+class HasManyCollectionsTest extends OrmTestCase
 {
-    use TableTrait;
 
     /**
      * @var CollectionFactoryInterface[]
@@ -63,14 +62,8 @@ abstract class HasManyCollectionsTest extends BaseTest
         ]);
         $user = $this->orm->make(User::class, ['email' => 'new-test@mail', 'balance' => 101]);
         $user->comments = $comments;
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(5);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(5, fn() => $this->save($user));
+        QueryAssert::writes(0, fn() => $this->save($user));
     }
 
     public function collectionFactoryProvider(): array
@@ -115,8 +108,6 @@ abstract class HasManyCollectionsTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->collectionFactory = [];
 
         $this->makeTable('user', [

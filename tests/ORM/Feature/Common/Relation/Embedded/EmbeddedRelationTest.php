@@ -13,13 +13,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserCredentials;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class EmbeddedRelationTest extends BaseTest
+class EmbeddedRelationTest extends OrmTestCase
 {
-    use TableTrait;
 
     protected const NULLABLE = false;
 
@@ -84,10 +83,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u->balance = 900;
         $u->credentials->username = 'user3';
         $u->credentials->password = 'pass3';
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         \Testo\Assert::same((int) $u->id, 3);
 
@@ -103,12 +99,11 @@ abstract class EmbeddedRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('credentials')->orderBy('id', 'ASC')->fetchOne();
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
     }
 
     #[\Testo\Test]
@@ -129,18 +124,16 @@ abstract class EmbeddedRelationTest extends BaseTest
                 'id' => $u->id,
             ],
         )->run();
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
+        QueryAssert::writes(0, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -156,12 +149,11 @@ abstract class EmbeddedRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
     }
 
     #[\Testo\Test]
@@ -172,20 +164,18 @@ abstract class EmbeddedRelationTest extends BaseTest
             ->orderBy('id', 'ASC')
             ->load('credentials')
             ->fetchOne();
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u->credentials);
-        $t->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u->credentials);
+            $t->run();
+        });
 
         $u->credentials->username = 'altered';
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u->credentials);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use (&$t, $u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u->credentials);
+            $t->run();
+        });
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -210,12 +200,11 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
 
         $u->credentials->username = 'user3';
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -229,14 +218,11 @@ abstract class EmbeddedRelationTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $u = $selector->orderBy('id', 'ASC')->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(0);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 0, function () use ($u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
     }
 
     #[\Testo\Test]
@@ -250,12 +236,7 @@ abstract class EmbeddedRelationTest extends BaseTest
 
         $u2Data = $this->extractEntity($u2);
         $u->credentials = $u2Data['credentials'];
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
-        $this->assertNumReads(1);
+        QueryAssert::count(1, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
@@ -285,12 +266,7 @@ abstract class EmbeddedRelationTest extends BaseTest
         $promise->setValue($this->orm->get($promise->getRole(), $promise->getScope(), true));
 
         $u->credentials = $promise;
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')->wherePK($u->id)->fetchOne();
@@ -316,14 +292,11 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u2 = $selector->load('credentials')->orderBy('id', 'ASC')->wherePK(2)->fetchOne();
 
         $u->credentials = clone $u2->credentials;
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 1, function () use ($u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u3 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -357,12 +330,11 @@ abstract class EmbeddedRelationTest extends BaseTest
         $u->credentials = new UserCredentials();
         $u->credentials->username = 'abc';
         $u->credentials->password = 'new-pass';
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($u): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->run();
+        });
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $u2 = $selector->load('credentials')->wherePK($u->id)->fetchOne();
@@ -382,10 +354,7 @@ abstract class EmbeddedRelationTest extends BaseTest
             ->fetchOne();
 
         $u->credentials = null;
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), User::class))
             ->load('credentials')
@@ -408,10 +377,7 @@ abstract class EmbeddedRelationTest extends BaseTest
             ->with('credentials')->fetchOne();
 
         unset($user->credentials);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($user));
     }
 
     // Embedded Relation doesn't support null yet
@@ -472,8 +438,6 @@ abstract class EmbeddedRelationTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

@@ -9,18 +9,15 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Options\LoadOptions;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * Lazy-loaded embedded (same-row) relations: end-to-end coverage for `Select::load()`,
  * promise resolution on property access, and `BulkLoader::load()`.
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelectLoadEmbedded(): void
@@ -93,14 +90,13 @@ abstract class CaseTest extends BaseTest
             ->collect($user)
             ->load('credentials')
             ->run();
-
         // After BulkLoader the relation is hydrated; reading the fields must not query the DB.
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
-        \Testo\Assert::same($user->credentials->username, 'user1');
-        \Testo\Assert::same($user->credentials->password, 'pass1');
-        \Testo\Assert::same($user->credentials->numLogins, 0);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($user): void {
+            \Testo\Assert::instanceOf($user->credentials, Entity\UserCredentials::class);
+            \Testo\Assert::same($user->credentials->username, 'user1');
+            \Testo\Assert::same($user->credentials->password, 'pass1');
+            \Testo\Assert::same($user->credentials->numLogins, 0);
+        });
     }
 
     #[\Testo\Test]
@@ -119,13 +115,12 @@ abstract class CaseTest extends BaseTest
             ->collect(...$users)
             ->load('credentials')
             ->run();
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($users[0]->credentials->username, 'user1');
-        \Testo\Assert::same($users[1]->credentials->username, 'user2');
-        \Testo\Assert::same($users[0]->credentials->numLogins, 0);
-        \Testo\Assert::same($users[1]->credentials->numLogins, 1);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($users): void {
+            \Testo\Assert::same($users[0]->credentials->username, 'user1');
+            \Testo\Assert::same($users[1]->credentials->username, 'user2');
+            \Testo\Assert::same($users[0]->credentials->numLogins, 0);
+            \Testo\Assert::same($users[1]->credentials->numLogins, 1);
+        });
     }
 
     #[\Testo\Test]
@@ -143,13 +138,12 @@ abstract class CaseTest extends BaseTest
             ->load('credentials')
             ->load('comments')
             ->run();
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($users[0]->credentials->username, 'user1');
-        \Testo\Assert::same($users[1]->credentials->username, 'user2');
-        \Testo\Assert::count($users[0]->comments, 2);
-        \Testo\Assert::count($users[1]->comments, 1);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($users): void {
+            \Testo\Assert::same($users[0]->credentials->username, 'user1');
+            \Testo\Assert::same($users[1]->credentials->username, 'user2');
+            \Testo\Assert::count($users[0]->comments, 2);
+            \Testo\Assert::count($users[1]->comments, 1);
+        });
     }
 
     #[\Testo\Test]
@@ -161,24 +155,20 @@ abstract class CaseTest extends BaseTest
         $users = (new Select($this->orm, Entity\User::class))
             ->orderBy('id')
             ->fetchAll();
-
         // All embedded relations share the parent table, so loading any number of them
         // must collapse into one SQL query.
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('credentials')
             ->load('profile')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($users[0]->credentials->username, 'user1');
-        \Testo\Assert::same($users[1]->credentials->username, 'user2');
-        \Testo\Assert::same($users[0]->profile->bio, 'bio 1');
-        \Testo\Assert::same($users[1]->profile->bio, 'bio 2');
-        \Testo\Assert::same($users[0]->profile->image, 'image1.png');
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, function () use ($users): void {
+            \Testo\Assert::same($users[0]->credentials->username, 'user1');
+            \Testo\Assert::same($users[1]->credentials->username, 'user2');
+            \Testo\Assert::same($users[0]->profile->bio, 'bio 1');
+            \Testo\Assert::same($users[1]->profile->bio, 'bio 2');
+            \Testo\Assert::same($users[0]->profile->image, 'image1.png');
+        });
     }
 
     #[\Testo\Test]
@@ -235,22 +225,18 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($orders, 3);
-
         // Composite PK: BulkLoader must build (tenant_id, number) tuples and pass them
         // through Select::wherePK's composite branch.
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$orders)
             ->load('shipping')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($orders[0]->shipping->address, 'Addr A');
-        \Testo\Assert::same($orders[0]->shipping->recipient, 'Alice');
-        \Testo\Assert::same($orders[1]->shipping->address, 'Addr B');
-        \Testo\Assert::same($orders[2]->shipping->address, 'Addr C');
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, function () use ($orders): void {
+            \Testo\Assert::same($orders[0]->shipping->address, 'Addr A');
+            \Testo\Assert::same($orders[0]->shipping->recipient, 'Alice');
+            \Testo\Assert::same($orders[1]->shipping->address, 'Addr B');
+            \Testo\Assert::same($orders[2]->shipping->address, 'Addr C');
+        });
     }
 
     #[\Testo\Test]
@@ -279,7 +265,6 @@ abstract class CaseTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

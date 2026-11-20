@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Unit\Select;
 
 use Cycle\Database\Query\SelectQuery;
-use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\QueryBuilder;
-use PHPUnit\Framework\TestCase;
+use Cycle\ORM\Tests\Unit\Select\Fixture\StubLoader;
 
 /**
  * Reproduces a TypeError thrown by {@see QueryBuilder::targetFunc()} on PHP 8.3+:
@@ -44,7 +43,7 @@ final class QueryBuilderTest
         // routes through __call() -> targetFunc(), tripping the return-type check.
         $builder->where('id', 1);
 
-        $this->assertNotEmpty($builder->getQuery()->getTokens()['where']);
+        \Testo\Assert::notBlank($builder->getQuery()->getTokens()['where']);
     }
 
     #[\Testo\Test]
@@ -64,11 +63,7 @@ final class QueryBuilderTest
         // does NOT touch it under the forwarded routing.
         $query->where('users.active', true);
 
-        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
-        $loader->shouldReceive('fieldAlias')->andReturn(null);
-        $loader->shouldReceive('getAlias')->andReturn('users');
-        $loader->shouldReceive('getTarget')->andReturn('user');
-        $loader->shouldReceive('getParentLoader')->andReturn(null);
+        $loader = new StubLoader();
 
         $builder = (new QueryBuilder($query, $loader))->withForward('onWhere');
 
@@ -99,11 +94,7 @@ final class QueryBuilderTest
             ->orWhere('users.id', 2)
             ->leftJoin('posts')->on('posts.user_id', 'users.id')->onWhere('posts.published', true);
 
-        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
-        $loader->shouldReceive('fieldAlias')->andReturn(null);
-        $loader->shouldReceive('getAlias')->andReturn('users');
-        $loader->shouldReceive('getTarget')->andReturn('user');
-        $loader->shouldReceive('getParentLoader')->andReturn(null);
+        $loader = new StubLoader();
 
         $builder = new QueryBuilder($query, $loader); // no forward
 
@@ -127,12 +118,9 @@ final class QueryBuilderTest
     {
         $query = new SelectQuery(['users']);
 
-        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
-        $loader->shouldReceive('fieldAlias')->andReturn(null);
-        $loader->shouldReceive('getAlias')->andReturn('users');
-        $loader->shouldReceive('getTarget')->andReturn('user');
-        $loader->shouldReceive('getParentLoader')->andReturn(null);
+        $loader = new StubLoader();
 
         return new QueryBuilder($query, $loader);
     }
+
 }

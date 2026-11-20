@@ -11,12 +11,11 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class EntityManagerTest extends BaseTest
+class EntityManagerTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testClean(): void
@@ -36,11 +35,10 @@ abstract class EntityManagerTest extends BaseTest
         $em->persist($entity2);
 
         $em->clean();
-
-        $this->captureWriteQueries();
-        $result = $em->run();
-        \Testo\Assert::true($result->isSuccess());
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($em): void {
+            $result = $em->run();
+            \Testo\Assert::true($result->isSuccess());
+        });
         \Testo\Assert::true($this->orm->getHeap()->has($entity0));
         \Testo\Assert::true($this->orm->getHeap()->has($entity1));
     }
@@ -63,11 +61,10 @@ abstract class EntityManagerTest extends BaseTest
         $em->persist($entity2);
 
         $em->clean(true);
-
-        $this->captureWriteQueries();
-        $result = $em->run();
-        \Testo\Assert::true($result->isSuccess());
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($em): void {
+            $result = $em->run();
+            \Testo\Assert::true($result->isSuccess());
+        });
 
         \Testo\Assert::false($this->orm->getHeap()->has($entity0));
         \Testo\Assert::false($this->orm->getHeap()->has($entity1));
@@ -87,12 +84,10 @@ abstract class EntityManagerTest extends BaseTest
 
         $em->persist($entity);
         $entity->title = 'changed title';
-
-        $this->captureWriteQueries();
-        $result = $em->run();
-
-        \Testo\Assert::true($result->isSuccess());
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($em): void {
+            $result = $em->run();
+            \Testo\Assert::true($result->isSuccess());
+        });
 
         $this->orm->getHeap()->clean();
         $stored = (new Select($this->orm, Post::class))->wherePK($entity->id)->fetchOne();
@@ -114,12 +109,10 @@ abstract class EntityManagerTest extends BaseTest
 
         $em->persistState($entity);
         $entity->title = 'changed title';
-
-        $this->captureWriteQueries();
-        $result = $em->run();
-
-        \Testo\Assert::true($result->isSuccess());
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($em): void {
+            $result = $em->run();
+            \Testo\Assert::true($result->isSuccess());
+        });
         \Testo\Assert::notNull($entity->id);
 
         $this->orm->getHeap()->clean();
@@ -142,12 +135,10 @@ abstract class EntityManagerTest extends BaseTest
         $entity->title = 'Title 2';
         $em->persistState($entity);
         $entity->title = 'Title 3';
-
-        $this->captureWriteQueries();
-        $result = $em->run();
-
-        \Testo\Assert::true($result->isSuccess());
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($em): void {
+            $result = $em->run();
+            \Testo\Assert::true($result->isSuccess());
+        });
         \Testo\Assert::notNull($entity->id);
 
         $this->orm->getHeap()->clean();
@@ -171,12 +162,10 @@ abstract class EntityManagerTest extends BaseTest
         $entity->title = 'Title 3';
         $em->persistState($entity);
         $entity->title = 'Title 4';
-
-        $this->captureWriteQueries();
-        $result = $em->run();
-
-        \Testo\Assert::true($result->isSuccess());
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($em): void {
+            $result = $em->run();
+            \Testo\Assert::true($result->isSuccess());
+        });
         \Testo\Assert::notNull($entity->id);
 
         $this->orm->getHeap()->clean();
@@ -197,15 +186,9 @@ abstract class EntityManagerTest extends BaseTest
             'title' => 'Test title',
             'content' => 'Test content',
         ]);
-
-        $this->captureWriteQueries();
-        $em->persistState($entity)->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $em->persistState($entity)->run());
         \Testo\Assert::notNull($entity->id);
-
-        $this->captureWriteQueries();
-        $em->persistState($entity)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $em->persistState($entity)->run());
     }
 
     #[\Testo\Test]
@@ -241,8 +224,6 @@ abstract class EntityManagerTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('post', [
             'id' => 'primary',
             'title' => 'string',

@@ -6,18 +6,15 @@ namespace Cycle\ORM\Tests\Regression\Issue322;
 
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
 use Cycle\ORM\Tests\Regression\Issue322\Entity\PostTag;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * @link https://github.com/cycle/orm/issues/322
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     /**
      * There pivoted collection is replaced with new one but one target is from old collection
@@ -41,11 +38,7 @@ abstract class CaseTest extends BaseTest
 
         $post->tags = new PivotedCollection();
         $post->tags->add($tag1);
-
-        $this->captureWriteQueries();
-        $this->save($post);
-        // Just delete two pivots
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($post));
     }
 
     /**
@@ -70,18 +63,13 @@ abstract class CaseTest extends BaseTest
 
         $post->tags = new PivotedCollection();
         $post->tags->setPivot($tag1, new PostTag());
-
-        $this->captureWriteQueries();
-        $this->save($post);
-        // Delete all previous pivots and add new one
-        $this->assertNumWrites(3);
+        QueryAssert::writes(3, fn() => $this->save($post));
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

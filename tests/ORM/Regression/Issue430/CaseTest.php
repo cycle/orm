@@ -6,18 +6,15 @@ namespace Cycle\ORM\Tests\Regression\Issue430;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Ramsey\Uuid\UuidInterface;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * BulkLoader with UUID object primary keys.
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     private const USER_1 = '550e8400-e29b-41d4-a716-446655440001';
     private const USER_2 = '550e8400-e29b-41d4-a716-446655440002';
@@ -38,22 +35,18 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($users, 3);
-
         // Bulk load posts for all users — single query
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$users)
             ->load('posts')
-            ->run();
-        $this->assertNumReads(1);
-
+            ->run());
         // Verify posts are loaded without additional queries
-        $this->captureReadQueries();
-        $postCounts = [];
-        foreach ($users as $user) {
-            $postCounts[$user->uuid->toString()] = \count($user->posts);
-        }
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use (&$postCounts, $users): void {
+            $postCounts = [];
+            foreach ($users as $user) {
+                $postCounts[$user->uuid->toString()] = \count($user->posts);
+            }
+        });
 
         \Testo\Assert::same($postCounts[self::USER_1], 1);
         \Testo\Assert::same($postCounts[self::USER_2], 2);
@@ -68,22 +61,18 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($posts, 4);
-
         // Bulk load user for all posts — single query
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
-            ->run();
-        $this->assertNumReads(1);
-
+            ->run());
         // Verify users are loaded without additional queries
-        $this->captureReadQueries();
-        foreach ($posts as $post) {
-            \Testo\Assert::instanceOf($post->user, Entity\User::class);
-            \Testo\Assert::instanceOf($post->user->uuid, UuidInterface::class);
-        }
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($posts, &$post): void {
+            foreach ($posts as $post) {
+                \Testo\Assert::instanceOf($post->user, Entity\User::class);
+                \Testo\Assert::instanceOf($post->user->uuid, UuidInterface::class);
+            }
+        });
 
         // Verify correct user assignment
         $postsByUuid = [];
@@ -103,23 +92,20 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($posts, 4);
-
         // Load both user and comments in one BulkLoader call
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(3, fn() => (new BulkLoader($this->orm))
             ->collect(...$posts)
             ->load('user')
             ->load('comments')
-            ->run();
-        $this->assertNumReads(3); // 1 for users + 1 for comments + 1 for eager-loaded comment.user
-
+            ->run());
+        // 1 for users + 1 for comments + 1 for eager-loaded comment.user
         // Verify all relations loaded without queries
-        $this->captureReadQueries();
-        foreach ($posts as $post) {
-            \Testo\Assert::instanceOf($post->user, Entity\User::class);
-            \Testo\Assert::array($post->comments);
-        }
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($posts): void {
+            foreach ($posts as $post) {
+                \Testo\Assert::instanceOf($post->user, Entity\User::class);
+                \Testo\Assert::array($post->comments);
+            }
+        });
     }
 
     #[\Testo\Test]
@@ -130,17 +116,11 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
 
         \Testo\Assert::instanceOf($user, Entity\User::class);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect($user)
             ->load('posts')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($user->posts, 2);
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, fn() => \Testo\Assert::count($user->posts, 2));
     }
 
     #[\Testo\Test]
@@ -151,27 +131,22 @@ abstract class CaseTest extends BaseTest
             ->fetchAll();
 
         \Testo\Assert::count($comments, 3);
-
         // Bulk load the lazy post relation
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect(...$comments)
             ->load('post')
-            ->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        foreach ($comments as $comment) {
-            \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
-            \Testo\Assert::instanceOf($comment->post->uuid, UuidInterface::class);
-        }
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, function () use ($comments): void {
+            foreach ($comments as $comment) {
+                \Testo\Assert::instanceOf($comment->post, Entity\Post::class);
+                \Testo\Assert::instanceOf($comment->post->uuid, UuidInterface::class);
+            }
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

@@ -9,14 +9,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 
-abstract class RefersToRelationRenamedFieldsTest extends RefersToRelationTest
+class RefersToRelationRenamedFieldsTest extends RefersToRelationTest
 {
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        BaseTest::setUp();
 
         $this->makeTable('user', [
             'id' => 'primary',

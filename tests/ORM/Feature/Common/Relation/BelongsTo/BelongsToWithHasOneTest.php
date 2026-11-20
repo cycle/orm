@@ -15,13 +15,13 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\ORM\Relation\BulkLoader;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class BelongsToWithHasOneTest extends BaseTest
+class BelongsToWithHasOneTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -308,10 +308,7 @@ abstract class BelongsToWithHasOneTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $p = (new Select($this->orm, Profile::class))->load('user')->wherePK(4)->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($p));
     }
 
     #[\Testo\Test]
@@ -396,13 +393,8 @@ abstract class BelongsToWithHasOneTest extends BaseTest
             ->load('user')->fetchAll();
 
         [$a->user, $b->user] = [$b->user, $a->user];
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(2);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(2, fn() => $this->save($a, $b));
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
@@ -443,14 +435,8 @@ abstract class BelongsToWithHasOneTest extends BaseTest
         $n->profile->user = new User();
         $n->profile->user->email = 'new@email.com';
         $n->profile->user->balance = 999;
-
-        $this->captureWriteQueries();
-        $this->save($n);
-        $this->assertNumWrites(3);
-
-        $this->captureWriteQueries();
-        $this->save($n);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(3, fn() => $this->save($n));
+        QueryAssert::writes(0, fn() => $this->save($n));
 
         $n = (new Select($this->orm->withHeap(new Heap()), Nested::class))
             ->wherePK(2)->load('profile.user')->fetchOne();
@@ -485,31 +471,22 @@ abstract class BelongsToWithHasOneTest extends BaseTest
     #[\Testo\Test]
     public function testUpdateNestedRelation(): void
     {
-        $this->captureReadQueries();
-        /** @var list<Nested> $nested */
-        $nested = (new Select($this->orm, Nested::class))->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $this->bulkLoader(...$nested)
+        $nested = QueryAssert::reads(1, fn() => (new Select($this->orm, Nested::class))->fetchAll());
+        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))->collect(...$nested)
             ->load('profile.user')
-            ->run();
-        $this->assertNumReads(2);
-
-        $this->captureReadQueries();
-        foreach ($nested as $item) {
-            \Testo\Assert::notNull($item->profile);
-            \Testo\Assert::notNull($item->profile->user);
-            \Testo\Assert::instanceOf($item->profile->user, User::class);
-        }
-        $this->assertNumReads(0);
+            ->run());
+        QueryAssert::reads(0, function () use ($nested): void {
+            foreach ($nested as $item) {
+                \Testo\Assert::notNull($item->profile);
+                \Testo\Assert::notNull($item->profile->user);
+                \Testo\Assert::instanceOf($item->profile->user, User::class);
+            }
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

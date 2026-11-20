@@ -14,12 +14,10 @@ use Cycle\ORM\Select\Options\ManyToManyLoadOptions;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class ManyToManyLoadOptionsTest extends BaseTest
+class ManyToManyLoadOptionsTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
@@ -255,8 +253,6 @@ abstract class ManyToManyLoadOptionsTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

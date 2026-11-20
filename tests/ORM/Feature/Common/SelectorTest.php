@@ -11,11 +11,10 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class SelectorTest extends BaseTest
+class SelectorTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testStableStatement(): void
@@ -26,7 +25,7 @@ abstract class SelectorTest extends BaseTest
         $s2 = new Select($this->orm, User::class);
         $s2->load('comments', ['method' => JoinableLoader::INLOAD]);
 
-        $this->assertSQL($s->sqlStatement(), $s2->sqlStatement());
+        \Testo\Assert::same($s2->sqlStatement(), $s->sqlStatement());
     }
 
     #[\Testo\Test]
@@ -60,8 +59,6 @@ abstract class SelectorTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

@@ -8,12 +8,10 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserPersistRepository;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class PersistRepositoryTest extends BaseTest
+class PersistRepositoryTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testPersist(): void
@@ -36,8 +34,6 @@ abstract class PersistRepositoryTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

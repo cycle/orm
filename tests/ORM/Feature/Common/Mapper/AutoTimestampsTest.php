@@ -10,13 +10,12 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class AutoTimestampsTest extends BaseTest
+class AutoTimestampsTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
@@ -46,10 +45,7 @@ abstract class AutoTimestampsTest extends BaseTest
         $orm = $this->orm->withHeap(new Heap());
         $s = new Select($orm, User::class);
         $u = $s->fetchOne();
-
-        $this->captureWriteQueries();
-        (new Transaction($orm))->persist($u)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => (new Transaction($orm))->persist($u)->run());
     }
 
     #[\Testo\Test]
@@ -67,17 +63,12 @@ abstract class AutoTimestampsTest extends BaseTest
         $u = $s->fetchOne();
 
         $u->balance = 200;
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'user',
             [

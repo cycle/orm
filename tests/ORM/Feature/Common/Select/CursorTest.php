@@ -14,14 +14,10 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
-use Cycle\ORM\Tests\Util\DontGenerateAttribute;
+use Cycle\Testing\ORM\OrmTestCase;
 
-#[DontGenerateAttribute]
-abstract class CursorTest extends BaseTest
+class CursorTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCursorYieldsAllRowsInOrder(): void
@@ -423,8 +419,6 @@ abstract class CursorTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

@@ -12,13 +12,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class BelongsToProxyMapperTest extends BaseTest
+class BelongsToProxyMapperTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -60,12 +59,10 @@ abstract class BelongsToProxyMapperTest extends BaseTest
         \Testo\Assert::instanceOf($a->user, User::class);
         \Testo\Assert::null($b->user);
         \Testo\Assert::null($c->user);
-
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($a->user, $a->user);
-        \Testo\Assert::null($b->user);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a, $b): void {
+            \Testo\Assert::same($a->user, $a->user);
+            \Testo\Assert::null($b->user);
+        });
 
         \Testo\Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -86,16 +83,12 @@ abstract class BelongsToProxyMapperTest extends BaseTest
 
         // warm up
         (new Select($this->orm, User::class))->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($a->user, User::class);
-        \Testo\Assert::same($a->user, $a->user);
-        $this->assertNumReads(0);
-
+        QueryAssert::reads(0, function () use ($a): void {
+            \Testo\Assert::instanceOf($a->user, User::class);
+            \Testo\Assert::same($a->user, $a->user);
+        });
         // invalid object can't be cached
-        $this->captureReadQueries();
-        \Testo\Assert::null($b->user);
-        $this->assertNumReads(1);
+        QueryAssert::reads(1, fn() => \Testo\Assert::null($b->user));
 
         \Testo\Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -105,12 +98,11 @@ abstract class BelongsToProxyMapperTest extends BaseTest
     {
         $selector = new Select($this->orm, Profile::class);
         $p = $selector->wherePK(1)->fetchOne();
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($p);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($p): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($p);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -124,18 +116,8 @@ abstract class BelongsToProxyMapperTest extends BaseTest
 
         $np = new Profile();
         $np->image = 'new image';
-
-        $this->captureReadQueries();
-        $np->user = $pData['user'];
-        $this->assertNumReads(0);
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-
-        $this->save($np);
-
-        $this->assertNumWrites(1);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, fn() => $np->user = $pData['user']);
+        QueryAssert::count(0, 1, fn() => $this->save($np));
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))->wherePK(4)->fetchOne();
 
@@ -149,14 +131,7 @@ abstract class BelongsToProxyMapperTest extends BaseTest
         $p = (new Select($this->orm, Profile::class))
             ->wherePK(1)->fetchOne();
         $p->user->balance = 400;
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-
-        $this->save($p);
-
-        $this->assertNumWrites(1);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 1, fn() => $this->save($p));
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
             ->wherePK(1)->fetchOne();
@@ -167,8 +142,6 @@ abstract class BelongsToProxyMapperTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

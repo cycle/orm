@@ -10,12 +10,10 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class SelectFromTest extends BaseTest
+class SelectFromTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFromOverridesSchemaTable(): void
@@ -108,8 +106,6 @@ abstract class SelectFromTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id_int' => 'primary',
             'email_str' => 'string',

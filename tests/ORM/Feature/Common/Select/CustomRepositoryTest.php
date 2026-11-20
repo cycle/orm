@@ -9,12 +9,10 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UserRepository;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class CustomRepositoryTest extends BaseTest
+class CustomRepositoryTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFindAll(): void
@@ -136,8 +134,6 @@ abstract class CustomRepositoryTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

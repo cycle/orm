@@ -12,17 +12,17 @@ use Cycle\ORM\Tests\Fixtures\Image;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\ORM\Relation\BulkLoader;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * This tests provides ability to create deep linked trees using pivoted entity.
  * We did not plan to have such functionality
  * but the side effect of having pivot loader to behave as normal made it possible.
  */
-abstract class ManyToManyLoadingTest extends BaseTest
+class ManyToManyLoadingTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testLoadSortedByPivot(): void
@@ -144,38 +144,29 @@ abstract class ManyToManyLoadingTest extends BaseTest
     #[\Testo\Test]
     public function testUpdateRelationSortedByPivot(): void
     {
-        $this->captureReadQueries();
-        /** @var list<User> $users */
-        $users = (new Select($this->orm, User::class))->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $this->bulkLoader(...$users)
+        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('tags', [
                 // 'load' => function (Select\QueryBuilder $q): void {
                 //     $q->orderBy('@.@.as', 'DESC');
                 // },
                 'orderBy' => ['@.@.as' => 'DESC'],
-            ])->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        foreach ($users as $user) {
-            \Testo\Assert::iterable($user->tags);
-            $this->assertNotEmpty($user->tags);
-            // Check order
-            if (\count($user->tags) > 1) {
-                \Testo\Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan($user->tags->offsetGet(1)->id);
+            ])->run());
+        QueryAssert::reads(0, function () use ($users): void {
+            foreach ($users as $user) {
+                \Testo\Assert::iterable($user->tags);
+                \Testo\Assert::notBlank($user->tags);
+                // Check order
+                if (\count($user->tags) > 1) {
+                    \Testo\Assert::numeric($user->tags->offsetGet(0)->id)->greaterThan($user->tags->offsetGet(1)->id);
+                }
             }
-        }
-        $this->assertNumReads(0);
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

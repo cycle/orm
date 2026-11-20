@@ -12,12 +12,11 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class EmbeddedCompositeKeyTest extends BaseTest
+class EmbeddedCompositeKeyTest extends OrmTestCase
 {
-    use TableTrait;
 
     protected const CHILD_CONTAINER = 'child_entity';
     protected const CHILD_ROLE = 'parent_entity:' . self::CHILD_CONTAINER;
@@ -82,10 +81,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         $u->key3 = 900;
         $u->child_entity = new CompositePKChild();
         $u->child_entity->key3 = 'user3';
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -106,10 +102,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
             ->load(self::CHILD_CONTAINER)
             ->orderBy('key3', 'ASC')
             ->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
     }
 
     #[\Testo\Test]
@@ -130,14 +123,8 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
                 'pField2' => $u->key2,
             ],
         )->run();
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($u));
+        QueryAssert::writes(0, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -155,10 +142,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
     {
         $u = (new Select($this->orm, CompositePK::class))
             ->orderBy('key3', 'ASC')->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
     }
 
     #[\Testo\Test]
@@ -168,16 +152,10 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
             ->orderBy('key3', 'ASC')
             ->load(self::CHILD_CONTAINER)
             ->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($u->child_entity);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u->child_entity));
 
         $u->child_entity->key3 = 'altered';
-
-        $this->captureWriteQueries();
-        $this->save($u->child_entity);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u->child_entity));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -208,10 +186,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
             ->fetchOne();
 
         $u->child_entity->key3 = 'user3';
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -228,12 +203,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
     {
         $selector = new Select($this->orm, CompositePK::class);
         $u = $selector->orderBy('key3', 'ASC')->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
     #[\Testo\Test]
@@ -251,12 +221,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
         $u2Data = $this->extractEntity($u2);
 
         $u->child_entity = $u2Data['child_entity'];
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
-        $this->assertNumReads(1);
+        QueryAssert::count(1, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -293,12 +258,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
             ->fetchOne();
 
         $u->child_entity = clone $u2->child_entity;
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 1, fn() => $this->save($u));
 
         $u3 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)
@@ -341,10 +301,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
 
         $u->child_entity = new CompositePKChild();
         $u->child_entity->key3 = 'abc';
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();
@@ -363,10 +320,7 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
             ->orderBy('key3', 'ASC')->fetchOne();
 
         $u->child_entity = null;
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $u2 = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
             ->load(self::CHILD_CONTAINER)->wherePK([$u->key1, $u->key2])->fetchOne();
@@ -379,8 +333,6 @@ abstract class EmbeddedCompositeKeyTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'parent_entity',
             [

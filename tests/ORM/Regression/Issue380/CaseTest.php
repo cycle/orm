@@ -6,15 +6,11 @@ namespace Cycle\ORM\Tests\Regression\Issue380;
 
 use Cycle\Database\Exception\StatementException\ConstrainException;
 use Cycle\ORM\EntityManager;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
 use Cycle\ORM\Tests\Regression\Issue380\Entity\User;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testInsertOnce(): void
@@ -190,7 +186,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

@@ -8,16 +8,12 @@ use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\Options;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\JoinableLoader;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
 use Cycle\ORM\Tests\Regression\Issue528\Entity\Country;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Spiral\Pagination\Paginator;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testLoadWherePagination(): void
@@ -149,7 +145,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->orm = $this->orm->with(
             options: (new Options())->withGroupByToDeduplicate(true),
         );

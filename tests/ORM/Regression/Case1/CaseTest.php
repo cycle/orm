@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Regression\Case1;
 
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Regression\Case1\Entity\Comment;
 use Cycle\ORM\Tests\Regression\Case1\Entity\Post;
 use Cycle\ORM\Tests\Regression\Case1\Entity\Tag;
 use Cycle\ORM\Tests\Regression\Case1\Entity\User;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     /** @var User[] */
     private array $users = [];
@@ -66,8 +62,6 @@ abstract class CaseTest extends BaseTest
         $this->resetState();
 
         // Init DB
-        parent::setUp();
-
         // Make tables
         $this->makeTable('user', [
             'id' => 'primary',

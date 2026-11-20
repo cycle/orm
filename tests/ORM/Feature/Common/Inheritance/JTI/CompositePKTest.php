@@ -12,8 +12,9 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Engineer;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CompositePKTest extends SimpleCasesTest
+class CompositePKTest extends SimpleCasesTest
 {
     protected const EMPLOYEE_DEFAULT_SORTING = ['id' => 'ASC', 'employee_id' => 'ASC'];
     protected const EMPLOYEE_1 = ['id' => 1, 'employee_id' => 2, 'name' => 'John', 'age' => 38];
@@ -144,14 +145,8 @@ abstract class CompositePKTest extends SimpleCasesTest
         $programator->name = 'Merlin';
         $programator->level = 50;
         $programator->language = 'VanillaJS';
-
-        $this->captureWriteQueries();
-        $this->save($programator);
-        $this->assertNumWrites(3);
-
-        $this->captureWriteQueries();
-        $this->save($programator);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(3, fn() => $this->save($programator));
+        QueryAssert::writes(0, fn() => $this->save($programator));
 
         /** @var Programator $programator */
         $programator = (new Select($this->orm->with(heap: new Heap()), Programator::class))

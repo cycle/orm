@@ -12,13 +12,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ClasslessHasManyPromiseTest extends BaseTest
+class ClasslessHasManyPromiseTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testInitRelation(): void
@@ -71,14 +70,13 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
 
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($u->comments, Promise::class);
-        \Testo\Assert::false($u->comments->hasValue());
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($u): void {
+            \Testo\Assert::instanceOf($u->comments, Promise::class);
+            \Testo\Assert::false($u->comments->hasValue());
+        });
 
         // Resolve promise
-        $resolved = $u->comments->fetch();
-        $this->assertNumReads(1);
+        $resolved = QueryAssert::reads(1, fn() => $u->comments->fetch());
 
         \Testo\Assert::true($u->comments->hasValue());
         \Testo\Assert::count($resolved, 3);
@@ -89,10 +87,9 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($p = $u->comments, Promise::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use (&$p, $u): void {
+            \Testo\Assert::instanceOf($p = $u->comments, Promise::class);
+        });
 
         /** @var Promise $p */
         \Testo\Assert::false($p->hasValue());
@@ -106,10 +103,9 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(1)->fetchOne();
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($p = $u->comments, Promise::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use (&$p, $u): void {
+            \Testo\Assert::instanceOf($p = $u->comments, Promise::class);
+        });
 
         /** @var Promise $p */
         \Testo\Assert::same($p->getRole(), 'comment');
@@ -120,10 +116,9 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     {
         $u = (new Select($this->orm, 'user'))
             ->wherePK(1)->fetchOne();
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($r = $u->comments, ReferenceInterface::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use (&$r, $u): void {
+            \Testo\Assert::instanceOf($r = $u->comments, ReferenceInterface::class);
+        });
 
         /** @var ReferenceInterface $r */
         \Testo\Assert::equals($r->getScope(), [
@@ -137,25 +132,19 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
 
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($u->comments, Promise::class);
-        \Testo\Assert::false($u->comments->hasValue());
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($u): void {
+            \Testo\Assert::instanceOf($u->comments, Promise::class);
+            \Testo\Assert::false($u->comments->hasValue());
+        });
 
-        \Testo\Assert::count($u->comments->fetch(), 0);
-        $this->assertNumReads(1);
+        \Testo\Assert::count(QueryAssert::reads(1, fn() => $u->comments->fetch()), 0);
     }
 
     #[\Testo\Test]
     public function testNoChanges(): void
     {
         $u = (new Select($this->orm, 'user'))->wherePK(1)->fetchOne();
-
-        $this->captureReadQueries();
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
     #[\Testo\Test]
@@ -163,12 +152,7 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     {
         $selector = new Select($this->orm, 'user');
         $u = $selector->wherePK(2)->fetchOne();
-
-        $this->captureReadQueries();
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
-        $this->assertNumReads(0);
+        QueryAssert::count(0, 0, fn() => $this->save($u));
     }
 
     #[\Testo\Test]
@@ -237,15 +221,9 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
 
         \Testo\Assert::count($a->comments, 1);
         \Testo\Assert::count($b->comments, 2);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, fn() => $this->save($a, $b));
         // consecutive
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         [$a, $b] = (new Select($this->orm->withHeap(new Heap()), 'user'))
             ->load('comments', [
@@ -267,8 +245,6 @@ abstract class ClasslessHasManyPromiseTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

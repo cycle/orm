@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Feature\Common\Relation\HasOne;
 
-abstract class HasOneOptionalRelationTest extends HasOneRelationTest
+class HasOneOptionalRelationTest extends HasOneRelationTest
 {
     protected const NULLABLE = true;
 }

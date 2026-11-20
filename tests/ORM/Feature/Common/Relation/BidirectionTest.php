@@ -11,13 +11,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class BidirectionTest extends BaseTest
+class BidirectionTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchData(): void
@@ -86,10 +85,7 @@ abstract class BidirectionTest extends BaseTest
         \Testo\Assert::count($u->comments, 2);
 
         $u->comments[0]->user = null;
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         $this->orm->getHeap()->clean();
         $u = (new Select($this->orm, User::class))
@@ -133,13 +129,12 @@ abstract class BidirectionTest extends BaseTest
         $c = $u->comments[0];
         $c->user = null;
         $u->comments->removeElement($c);
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($u);
-        $t->persist($c);
-        $t->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($u, $c): void {
+            $t = new Transaction($this->orm);
+            $t->persist($u);
+            $t->persist($c);
+            $t->run();
+        });
 
         $select = new Select($this->orm->withHeap(new Heap()), User::class);
         $u = $select->load('comments')->wherePK(1)->fetchOne();
@@ -150,8 +145,6 @@ abstract class BidirectionTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

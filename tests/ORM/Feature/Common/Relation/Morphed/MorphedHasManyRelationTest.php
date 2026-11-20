@@ -12,14 +12,14 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\ORM\Relation\BulkLoader;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class MorphedHasManyRelationTest extends BaseTest
+class MorphedHasManyRelationTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -254,13 +254,12 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->load('comments')->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -271,21 +270,19 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         [$a, $b] = $selector->fetchAll();
 
         $a->comments->remove(0);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(1);
-
+        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
         // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -311,21 +308,19 @@ abstract class MorphedHasManyRelationTest extends BaseTest
         foreach ($b->comments as $c) {
             $a->comments->removeElement($c);
         }
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(1);
-
+        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
         // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -352,21 +347,19 @@ abstract class MorphedHasManyRelationTest extends BaseTest
 
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(1);
-
+        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
         // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $a = (new Select($this->orm, User::class))->wherePK(1)->load('comments')->fetchOne();
@@ -399,38 +392,28 @@ abstract class MorphedHasManyRelationTest extends BaseTest
     #[\Testo\Test]
     public function testUpdateRelationSortedById(): void
     {
-        $this->captureReadQueries();
-        /** @var list<User> $users */
-        $users = (new Select($this->orm, User::class))->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $this->bulkLoader(...$users)
+        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('comments', [
                 'orderBy' => ['id' => 'DESC'],
-            ])->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $checked = false;
-        foreach ($users as $user) {
-            \Testo\Assert::iterable($user->comments);
-            // Check order
-            if (\count($user->comments) > 1) {
-                \Testo\Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
-                $checked = true;
+            ])->run());
+        QueryAssert::reads(0, function () use ($users): void {
+            $checked = false;
+            foreach ($users as $user) {
+                \Testo\Assert::iterable($user->comments);
+                // Check order
+                if (\count($user->comments) > 1) {
+                    \Testo\Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
+                    $checked = true;
+                }
             }
-        }
-
-        \Testo\Assert::true($checked, 'No comments to check order.');
-        $this->assertNumReads(0);
+            \Testo\Assert::true($checked, 'No comments to check order.');
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

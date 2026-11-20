@@ -8,12 +8,10 @@ use Cycle\ORM\Exception\MapperException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Tests\Feature\Common\Mapper\BaseMapperTest;
+use Cycle\Testing\ORM\OrmTestCase;
 
-class EntityHydrationTest extends BaseMapperTest
+class EntityHydrationTest extends OrmTestCase
 {
-    public const DRIVER = 'sqlite';
-
     #[\Testo\Test]
     public function testDataForBaseClassShouldBeExtracted(): void
     {
@@ -153,8 +151,6 @@ class EntityHydrationTest extends BaseMapperTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->orm = $this->withSchema(
             new Schema(
                 [

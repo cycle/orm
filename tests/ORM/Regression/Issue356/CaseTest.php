@@ -6,134 +6,101 @@ namespace Cycle\ORM\Tests\Regression\Issue356;
 
 use Cycle\ORM\Relation\BulkLoader;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * Test belongs to morphed loader
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelectOne(): void
     {
         // Eager load morphed relation
-        $this->captureReadQueries();
-        $log = (new Select($this->orm, Entity\LogRecord::class))
+        $log = QueryAssert::reads(2, fn() => (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
             ->wherePK(1)
-            ->fetchOne();
-        $this->assertNumReads(2);
-
+            ->fetchOne());
         // Check result
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($log, Entity\LogRecord::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($log, Entity\LogRecord::class));
     }
 
     #[\Testo\Test]
     public function testUpdateOne(): void
     {
         // Eager load morphed relation
-        $this->captureReadQueries();
-        $log = (new Select($this->orm, Entity\LogRecord::class))
+        $log = QueryAssert::reads(1, fn() => (new Select($this->orm, Entity\LogRecord::class))
             ->wherePK(1)
-            ->fetchOne();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+            ->fetchOne());
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))
             ->collect($log)
             ->load('actor')
-            ->run();
-        $this->assertNumReads(1);
-
+            ->run());
         // Check result
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, fn() => \Testo\Assert::instanceOf($log->actor, Entity\Actor::class));
     }
 
     #[\Testo\Test]
     public function testSelectAll(): void
     {
         // Eager load morphed relation for multiple entities
-        $this->captureReadQueries();
-        $logs = (new Select($this->orm, Entity\LogRecord::class))
+        $logs = QueryAssert::reads(3, fn() => (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
-            ->fetchAll();
-        $this->assertNumReads(3);
-
+            ->fetchAll());
         // Check result
-        $this->captureReadQueries();
-        foreach ($logs as $log) {
-            \Testo\Assert::instanceOf($log, Entity\LogRecord::class);
-            \in_array($log->lid, [9], true)
-                ? \Testo\Assert::null($log->actor)
-                : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
-        }
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($logs): void {
+            foreach ($logs as $log) {
+                \Testo\Assert::instanceOf($log, Entity\LogRecord::class);
+                \in_array($log->lid, [9], true)
+                    ? \Testo\Assert::null($log->actor)
+                    : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
+            }
+        });
     }
 
     #[\Testo\Test]
     public function testUpdateMany(): void
     {
         // Eager load morphed relation
-        $this->captureReadQueries();
-        /** @var list<Entity\LogRecord> $logs */
-        $logs = (new Select($this->orm, Entity\LogRecord::class))
-            ->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        (new BulkLoader($this->orm))
+        $logs = QueryAssert::reads(1, fn() => (new Select($this->orm, Entity\LogRecord::class))
+            ->fetchAll());
+        QueryAssert::reads(2, fn() => (new BulkLoader($this->orm))
             ->collect(...$logs)
             ->load('actor')
-            ->run();
-        // 2 queries: one for users, one for tenants
-        $this->assertNumReads(2);
-
+            ->run());
         // Check result
-        $this->captureReadQueries();
-        foreach ($logs as $log) {
-            \in_array($log->lid, [9], true)
-                ? \Testo\Assert::null($log->actor)
-                : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
-        }
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($logs): void {
+            foreach ($logs as $log) {
+                \in_array($log->lid, [9], true)
+                    ? \Testo\Assert::null($log->actor)
+                    : \Testo\Assert::instanceOf($log->actor, Entity\Actor::class);
+            }
+        });
     }
 
     #[\Testo\Test]
     public function testScoped(): void
     {
         // Eager load morphed relation
-        $this->captureReadQueries();
-        /** @var array<int, Entity\LogRecord> $logs */
-        $logs = (new Select($this->orm, Entity\LogRecord::class))
+        $logs = QueryAssert::reads(3, fn() => (new Select($this->orm, Entity\LogRecord::class))
             ->load('actor')
             ->wherePK(9, 10)
             ->orderBy('l_id')
-            ->fetchAll();
-        $this->assertNumReads(3);
-
+            ->fetchAll());
         \Testo\Assert::count($logs, 2);
-
         // Check result
-        $this->captureReadQueries();
-        \Testo\Assert::null($logs[0]->actor);
-        \Testo\Assert::instanceOf($logs[1]->actor, Entity\Tenant::class);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($logs): void {
+            \Testo\Assert::null($logs[0]->actor);
+            \Testo\Assert::instanceOf($logs[1]->actor, Entity\Tenant::class);
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

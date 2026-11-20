@@ -6,28 +6,24 @@ namespace Cycle\ORM\Tests\Regression\Issue575;
 
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * Changing the order of a nullable HasMany collection must not detach the children that stay in it.
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testReorderKeepsChildren(): void
     {
         $user = $this->fetchUser();
         $user->comments = \array_reverse($user->comments);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3']);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($user): void {
+            $this->save($user);
+            $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3']);
+        });
     }
 
     #[\Testo\Test]
@@ -37,11 +33,10 @@ abstract class CaseTest extends BaseTest
         $comment = new Entity\Comment('comment 4');
         $comment->user = $user;
         \array_unshift($user->comments, $comment);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3', 'comment 4']);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($user): void {
+            $this->save($user);
+            $this->assertOwnedComments(['comment 1', 'comment 2', 'comment 3', 'comment 4']);
+        });
     }
 
     #[\Testo\Test]
@@ -52,11 +47,10 @@ abstract class CaseTest extends BaseTest
         $comment = new Entity\Comment('comment 4');
         $comment->user = $user;
         $user->comments[1] = $comment;
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertOwnedComments(['comment 1', 'comment 3', 'comment 4']);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, function () use ($user): void {
+            $this->save($user);
+            $this->assertOwnedComments(['comment 1', 'comment 3', 'comment 4']);
+        });
         \Testo\Assert::same($this->getDatabase()->table('comment')
             ->select('content')
             ->where('user_id', null)
@@ -67,7 +61,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

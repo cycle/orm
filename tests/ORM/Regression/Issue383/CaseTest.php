@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Regression\Issue383;
 
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Database\Config\DatabaseConfig;
+use Cycle\Database\DatabaseManager;
+use Cycle\Testing\ORM\OrmFactory;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class CaseTest extends BaseTest
+
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function test1WithClean(): void
@@ -39,24 +39,17 @@ abstract class CaseTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => true]);
+        // A connection that keeps microseconds in datetime values
+        $this->database = $this->db(driverConfig: ['options' => ['withDatetimeMicroseconds' => true]]);
+        $dbal = new DatabaseManager(new DatabaseConfig());
+        $dbal->addDatabase($this->database);
+        $this->orm = (new OrmFactory())($dbal, $this->orm->getSchema());
 
         // Init DB
-        parent::setUp();
-
         $this->makeTables();
         $this->fillData();
 
         $this->loadSchema(__DIR__ . '/schema.php');
-    }
-
-    #[\Testo\Lifecycle\AfterTest]
-    public function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->applyDriverOptions(static::$config[static::DRIVER], ['withDatetimeMicroseconds' => false]);
-        $this->driver = null;
     }
 
     private function makeTables(): void

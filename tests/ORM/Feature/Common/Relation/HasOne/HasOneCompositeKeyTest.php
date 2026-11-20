@@ -15,13 +15,12 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Tests\Fixtures\CompositePKNested;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasOneCompositeKeyTest extends BaseTest
+class HasOneCompositeKeyTest extends OrmTestCase
 {
-    use TableTrait;
 
     protected const CHILD_CONTAINER = 'child_entity';
     protected const NESTED_CONTAINER = 'nested';
@@ -186,14 +185,8 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         \Testo\Assert::same($e->child_entity->key3, 'foo');
 
         $e->child_entity->key3 = 'bar';
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($e));
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         // Re-select
         $this->orm = $this->orm->withHeap(new Heap());
@@ -216,14 +209,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         $e->child_entity->key1 = 900;
         $e->child_entity->key2 = 800;
         $e->child_entity->key3 = 'foo foo';
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        // Update Child PK and Nested related keys
-        // todo: test same without foreign keys: nested should be updated
-        // todo: optimize if foreign keys are exists
-        // todo: 2 or 1 queries? (should update nested entity?)
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($e));
 
         // Re-select
         $this->orm = $this->orm->withHeap(new Heap());
@@ -248,10 +234,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->fetchOne();
         $e->child_entity = null;
         \Testo\Assert::same((new Select($this->orm, CompositePKChild::class))->count(), 3);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($e));
 
         /** @var CompositePK $e */
         $e = (new Select($this->orm->withHeap(new Heap()), CompositePK::class))
@@ -442,10 +425,7 @@ abstract class HasOneCompositeKeyTest extends BaseTest
             ->wherePK([1, 1])
             ->load('child_entity.nested')
             ->fetchOne();
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($e)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($e)->run());
     }
 
     #[\Testo\Test]
@@ -568,18 +548,12 @@ abstract class HasOneCompositeKeyTest extends BaseTest
         \Testo\Assert::same($u2, $u);
         // Relation was not overwritten
         \Testo\Assert::same($u2->child_entity->key3, 'new');
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        // Add a new pivot and delete the old one
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($u));
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'parent_entity',
             [

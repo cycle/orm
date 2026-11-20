@@ -11,7 +11,6 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Book2;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookNestedStates;
@@ -22,11 +21,12 @@ use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\ParentTypecast;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\User;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\UuidTypecast;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Wrapper;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Attribute\ExceptDriver;
+use Cycle\Testing\Database\Driver;
 
-abstract class TypecastTest extends BaseTest
+class TypecastTest extends OrmTestCase
 {
-    use TableTrait;
 
     // Insert command
 
@@ -46,6 +46,7 @@ abstract class TypecastTest extends BaseTest
     // ORM::make()
 
     #[\Testo\Test]
+    #[ExceptDriver(Driver::SQLServer)]
     public function testOrmMakePreparedDataCastFlag(): void
     {
         $idValue = new Wrapper(100);
@@ -64,6 +65,7 @@ abstract class TypecastTest extends BaseTest
     }
 
     #[\Testo\Test]
+    #[ExceptDriver(Driver::SQLServer)]
     public function testOrmMakeRawDataCastFlag(): void
     {
         $user = $this->orm->make(User::class, [
@@ -80,6 +82,7 @@ abstract class TypecastTest extends BaseTest
     }
 
     #[\Testo\Test]
+    #[ExceptDriver(Driver::SQLServer)]
     public function testOrmMakeRehydrateRawDataCastFlag(): void
     {
         $user1 = $this->orm->make(User::class, [
@@ -179,8 +182,6 @@ abstract class TypecastTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

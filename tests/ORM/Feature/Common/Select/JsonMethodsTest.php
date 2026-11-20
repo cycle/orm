@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Feature\Common\Select;
 
+use Cycle\Database\Exception\DriverException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\Database\Driver;
+use Cycle\Testing\ORM\OrmTestCase;
+use Testo\Expect;
 
-abstract class JsonMethodsTest extends BaseTest
+class JsonMethodsTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testWhereJson(): void
@@ -66,6 +67,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testWhereJsonContains(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, User::class);
         $users = $selector->whereJsonContains('settings->foo', ['bar', 'baz'])->fetchAll();
 
@@ -76,6 +79,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testWhereJsonContainsWithRelation(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, Post::class);
         $posts = $selector->whereJsonContains('user.settings->foo', ['bar', 'baz'])->fetchAll();
 
@@ -86,6 +91,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testOrWhereJsonContains(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, User::class);
         $users = $selector
             ->where('id', 100)
@@ -99,6 +106,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testOrWhereJsonContainsWithRelation(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, Post::class);
         $posts = $selector
             ->where('id', 100)
@@ -112,6 +121,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testWhereJsonDoesntContain(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, User::class);
         $users = $selector->whereJsonDoesntContain('settings->theme', 'light')->fetchAll();
 
@@ -122,6 +133,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testWhereJsonDoesntContainWithRelation(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, Post::class);
         $posts = $selector->whereJsonDoesntContain('user.settings->theme', 'light')->fetchAll();
 
@@ -132,6 +145,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testOrWhereJsonDoesntContain(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, User::class);
         $users = $selector
             ->where('id', 100)
@@ -145,6 +160,8 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Test]
     public function testOrWhereJsonDoesntContainWithRelation(): void
     {
+        $this->expectDriverExceptionOnSQLite();
+
         $selector = new Select($this->orm, Post::class);
         $posts = $selector
             ->where('id', 100)
@@ -296,8 +313,6 @@ abstract class JsonMethodsTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('users', ['id' => 'primary', 'user_settings' => 'json,nullable']);
         $this->makeTable('posts', ['id' => 'primary', 'title' => 'string', 'user_id' => 'integer']);
 
@@ -341,5 +356,13 @@ abstract class JsonMethodsTest extends BaseTest
                 ],
             ],
         ]));
+    }
+
+    /**
+     * SQLite has no JSON containment functions: the query fails with a driver exception there.
+     */
+    private function expectDriverExceptionOnSQLite(): void
+    {
+        $this->driver === Driver::SQLite and Expect::exception(DriverException::class);
     }
 }

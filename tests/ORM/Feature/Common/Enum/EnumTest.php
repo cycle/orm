@@ -11,17 +11,14 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Enum\EnumUser as User;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeIntEnum;
 use Cycle\ORM\Tests\Fixtures\Enum\TypeStringEnum;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * Common Enum store test
- *
- * @requires PHP >= 8.1
  */
-abstract class EnumTest extends BaseTest
+class EnumTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRawData(): void
@@ -89,10 +86,7 @@ abstract class EnumTest extends BaseTest
                     'type_int' => TypeIntEnum::User,
                 ],
             );
-
-            $this->captureWriteQueries();
-            $this->save($user);
-            $this->assertNumWrites(1);
+            QueryAssert::writes(1, fn() => $this->save($user));
         } catch (\Throwable) {
             throw new \Testo\Core\Exception\SkipTest("Can't save a Enum value because it is not supported yet.");
         }
@@ -101,8 +95,6 @@ abstract class EnumTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'balance' => 'int',

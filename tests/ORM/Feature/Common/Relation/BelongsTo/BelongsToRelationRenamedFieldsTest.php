@@ -10,14 +10,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 
-abstract class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
+class BelongsToRelationRenamedFieldsTest extends BelongsToRelationTest
 {
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        BaseTest::setUp();
 
         $this->makeTable('user', [
             'user_pk' => 'primary',

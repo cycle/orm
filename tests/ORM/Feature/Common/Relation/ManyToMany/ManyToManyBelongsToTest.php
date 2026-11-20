@@ -14,19 +14,17 @@ use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Cycle\Testing\ORM\OrmTestCase;
 
 /**
  * This tests provides ability to create deep linked trees using pivoted entity.
  * We did not plan to have such functionality
  * but the side effect of having pivot loader to behave as normal made it possible.
  */
-abstract class ManyToManyBelongsToTest extends BaseTest
+class ManyToManyBelongsToTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreate(): void
@@ -105,8 +103,6 @@ abstract class ManyToManyBelongsToTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

@@ -18,7 +18,8 @@ use Cycle\ORM\Tests\Fixtures\OneWayUuidTypecast;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
-use PHPUnit\Framework\TestCase;
+use Cycle\Testing\Database\Memory;
+use Cycle\Testing\Database\Schema\TableBuilder;
 
 class BulkLoaderTest
 {
@@ -26,13 +27,13 @@ class BulkLoaderTest
      * Test that BulkLoader throws exception when no entities are provided
      */
     #[\Testo\Test]
+    #[\Testo\Assert\ExpectNoAssertions]
     public function testCollectThrowsExceptionWhenNoEntitiesProvided(): void
     {
         $orm = $this->createORM();
         $loader = new BulkLoader($orm);
         $loader->collect();
 
-        $this->expectNotToPerformAssertions();
     }
 
     /**
@@ -276,10 +277,9 @@ class BulkLoaderTest
      * BulkLoader::indexEntity() must handle Stringable objects instead of rejecting them via is_scalar().
      */
     #[\Testo\Test]
+    #[\Testo\Assert\ExpectNoAssertions]
     public function testRunWithStringablePkAndOneWayTypecast(): void
     {
-        $this->expectNotToPerformAssertions();
-
         $schema = new Schema([
             User::class => [
                 Schema::ROLE => 'user',
@@ -315,10 +315,14 @@ class BulkLoaderTest
             ],
         ]);
 
-        $orm = new ORM(
-            new Factory(\Mockery::mock(\Cycle\Database\DatabaseProviderInterface::class)->shouldIgnoreMissing()),
-            $schema,
-        );
+        // The relation query runs against an empty in-memory table.
+        $dbal = Memory::manager();
+        (new TableBuilder($dbal->database()))->makeTable('profile', [
+            'id' => 'primary',
+            'user_id' => 'string',
+            'image' => 'string',
+        ]);
+        $orm = new ORM(new Factory($dbal), $schema);
 
         $entity = new User();
 

@@ -9,11 +9,10 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
+class BelongsToNullableRelationTest extends BelongsToRelationTest
 {
-    use TableTrait;
 
     protected const NULLABLE = true;
 
@@ -41,20 +40,11 @@ abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
             ->with('user')->fetchOne();
 
         \Testo\Assert::instanceOf($profile->user, User::class);
-
-        $this->captureWriteQueries();
-        $this->save($profile);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($profile));
 
         $profile->user = null;
-
-        $this->captureWriteQueries();
-        $this->save($profile);
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $this->save($profile);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => $this->save($profile));
+        QueryAssert::writes(0, fn() => $this->save($profile));
 
         $this->orm->getHeap()->clean();
         $profile = (new Select($this->orm, Profile::class))
@@ -76,9 +66,6 @@ abstract class BelongsToNullableRelationTest extends BelongsToRelationTest
             ->wherePK(1)->load('user')->fetchOne();
 
         unset($profile->user);
-
-        $this->captureWriteQueries();
-        $this->save($profile);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($profile));
     }
 }

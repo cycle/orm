@@ -16,8 +16,9 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Tool;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\SimpleCasesTest;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ParentClassRelationsTest extends SimpleCasesTest
+class ParentClassRelationsTest extends SimpleCasesTest
 {
     protected const TOOL_1 = ['id' => 1, 'engineer_id' => 2, 'title' => 'Hammer'];
     protected const TOOL_2 = ['id' => 2, 'engineer_id' => 2, 'title' => 'Notebook'];
@@ -86,14 +87,8 @@ abstract class ParentClassRelationsTest extends SimpleCasesTest
         $engineer = (new Select($this->orm, static::ENGINEER_ROLE))
             ->loadSubclasses(false)
             ->wherePK(2)->fetchOne();
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($engineer)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($engineer)->run());
+        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->delete($engineer)->run());
 
         \Testo\Assert::null((new Select($this->orm, static::PROGRAMATOR_ROLE))
             ->wherePK(2)

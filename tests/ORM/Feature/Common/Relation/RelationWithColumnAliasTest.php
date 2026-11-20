@@ -15,14 +15,13 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class RelationWithColumnAliasTest extends BaseTest
+class RelationWithColumnAliasTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -301,13 +300,12 @@ abstract class RelationWithColumnAliasTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('comments')->orderBy('user.id')->fetchAll();
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -321,19 +319,17 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         $e->comments[0]->message = 'msg A';
         $e->comments[1]->message = 'msg B';
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(3);
-
+        QueryAssert::writes(3, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
         // consecutive test
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
 
@@ -413,19 +409,17 @@ abstract class RelationWithColumnAliasTest extends BaseTest
         $c = new Comment();
         $c->message = 'msg 4';
         $e->comments->add($c);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
         // consecutive test
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $selector->load('comments');
@@ -462,21 +456,19 @@ abstract class RelationWithColumnAliasTest extends BaseTest
 
         \Testo\Assert::count($a->comments, 1);
         \Testo\Assert::count($b->comments, 2);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
         // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
@@ -502,8 +494,6 @@ abstract class RelationWithColumnAliasTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id_int' => 'primary',
             'email_str' => 'string',

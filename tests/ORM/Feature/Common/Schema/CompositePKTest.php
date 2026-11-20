@@ -9,13 +9,12 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CompositePKTest extends BaseTest
+class CompositePKTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSimpleCreate(): void
@@ -54,10 +53,7 @@ abstract class CompositePKTest extends BaseTest
         $e->key1 = 2;
         $e->key2 = 3;
         $e->key3 = 9;
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($e));
 
         $e = (new Select($this->orm, CompositePK::class))
             ->fetchOne();
@@ -221,8 +217,7 @@ abstract class CompositePKTest extends BaseTest
     {
         $this->createTable1();
 
-        $this->expectExceptionMessage($exceptionMsg);
-        \Testo\Expect::exception(\InvalidArgumentException::class);
+        \Testo\Expect::exception(\InvalidArgumentException::class)->withMessageContaining($exceptionMsg);
 
         (new Select($this->orm, CompositePK::class))->wherePK($pk)->fetchOne();
     }

@@ -8,13 +8,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\OptimisticLockMapper;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class OptimisticLockTest extends BaseTest
+class OptimisticLockTest extends OrmTestCase
 {
-    use TableTrait;
 
     /**
      * Check the mapper works fine in a normal create and update cases
@@ -26,16 +25,11 @@ abstract class OptimisticLockTest extends BaseTest
         $entity->title = 'Test title';
         $entity->content = 'Test content';
         $entity->lock = microtime();
-
-        $this->captureWriteQueries();
-        $this->save($entity);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($entity));
 
         $oldLock = $entity->lock;
         $entity->title = 'new title';
-        $this->captureWriteQueries();
-        $this->save($entity);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($entity));
 
         \Testo\Assert::notSame($entity->lock, $oldLock);
     }
@@ -72,10 +66,7 @@ abstract class OptimisticLockTest extends BaseTest
         $entity->content = 'Test content';
         $entity->lock = microtime();
         $this->save($entity);
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->delete($entity)->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => (new Transaction($this->orm))->delete($entity)->run());
     }
 
     #[\Testo\Test]
@@ -101,8 +92,6 @@ abstract class OptimisticLockTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('post', [
             'id' => 'primary',
             'title' => 'string',

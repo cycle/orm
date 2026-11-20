@@ -10,12 +10,11 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Cyclic;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasOneCyclicTest extends BaseTest
+class HasOneCyclicTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchCyclic(): void
@@ -96,10 +95,7 @@ abstract class HasOneCyclicTest extends BaseTest
         $c = new Cyclic();
         $c->name = 'new';
         $c->cyclic = $c;
-
-        $this->captureWriteQueries();
-        $this->save($c);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($c));
 
         $selector = new Select($this->orm->withHeap(new Heap()), Cyclic::class);
         $c = $selector->load('cyclic')->wherePK(4)->fetchOne();
@@ -111,8 +107,6 @@ abstract class HasOneCyclicTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('cyclic', [
             'id' => 'primary',
             'name' => 'string',

@@ -14,12 +14,11 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class MorphedHasManyScopeTest extends BaseTest
+class MorphedHasManyScopeTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testOrdered(): void
@@ -318,11 +317,10 @@ abstract class MorphedHasManyScopeTest extends BaseTest
         ]);
 
         [$a, $b] = (new Select($this->orm, Post::class))->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($a->comments, 3);
-        \Testo\Assert::count($b->comments, 2);
-        $this->assertNumReads(2);
+        QueryAssert::reads(2, function () use ($a, $b): void {
+            \Testo\Assert::count($a->comments, 3);
+            \Testo\Assert::count($b->comments, 2);
+        });
 
         \Testo\Assert::same($a->comments[2]->message, 'p.msg 4');
         \Testo\Assert::same($a->comments[1]->message, 'p.msg 3');
@@ -538,8 +536,6 @@ abstract class MorphedHasManyScopeTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

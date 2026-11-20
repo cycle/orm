@@ -12,12 +12,11 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\LeveledHasManyScope;
 use Cycle\ORM\Tests\Fixtures\ShortLeveledHasManyScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasManySourceTest extends BaseTest
+class HasManySourceTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelectUsers(): void
@@ -84,11 +83,10 @@ abstract class HasManySourceTest extends BaseTest
         $res = $s->load('comments')->fetchAll();
 
         [$b, $a] = $res;
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($a->comments, 4);
-        \Testo\Assert::count($b->comments, 3);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a, $b): void {
+            \Testo\Assert::count($a->comments, 4);
+            \Testo\Assert::count($b->comments, 3);
+        });
 
         \Testo\Assert::same($a->comments[3]->message, 'msg 4');
         \Testo\Assert::same($a->comments[2]->message, 'msg 3');
@@ -395,8 +393,6 @@ abstract class HasManySourceTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

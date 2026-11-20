@@ -11,13 +11,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class DatetimeTest extends BaseTest
+class DatetimeTest extends OrmTestCase
 {
-    use TableTrait;
 
     /**
      * @var \DateTimeImmutable
@@ -64,13 +63,11 @@ abstract class DatetimeTest extends BaseTest
     {
         $selector = new Select($this->orm, User::class);
         $result = $selector->fetchOne();
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($result);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($result): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($result);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -80,18 +77,16 @@ abstract class DatetimeTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
         $e->time_created = new \DateTimeImmutable('tomorrow 10am');
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
+        QueryAssert::writes(0, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
 
@@ -111,18 +106,16 @@ abstract class DatetimeTest extends BaseTest
     {
         $e = $this->orm->get('user', ['id' => 1]);
         $e->time_created = new \DateTimeImmutable('tomorrow 10pm');
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
+        QueryAssert::writes(0, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -134,8 +127,6 @@ abstract class DatetimeTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

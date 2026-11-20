@@ -13,14 +13,13 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Tests\Fixtures\CompositePKPivot;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ManyToManyCompositeKeyTest extends BaseTest
+class ManyToManyCompositeKeyTest extends OrmTestCase
 {
-    use TableTrait;
 
     protected const CHILDREN_CONTAINER = 'pivoted';
     protected const PARENTS_CONTAINER = 'pivoted';
@@ -249,10 +248,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->load(self::CHILDREN_CONTAINER)
             ->wherePK([901, 902])
             ->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
     }
 
     #[\Testo\Test]
@@ -325,17 +321,8 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
 
         $b->pivoted->add($t);
         $b->pivoted->setPivot($t, $pc);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        // 3 Inserts (2 pivots, 1 child)
-        // 3 Deletes (1 from $a, 2 from $b)
-        // 1 Update
-        $this->assertNumWrites(7);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(7, fn() => $this->save($a, $b));
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         /**
          * @var CompositePK $a
@@ -365,10 +352,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
             ->fetchOne(['key1' => 1, 'key2' => 1]);
 
         \Testo\Assert::instanceOf($u->pivoted, Collection::class);
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($u)->run());
 
         $wantTags = [self::CHILD_1['key3'], self::CHILD_4['key3']];
 
@@ -391,12 +375,7 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
         $u->pivoted = $u->pivoted->filter(function ($t) use ($wantTags) {
             return in_array($t->key3, $wantTags);
         });
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($u)->run();
-        // Insert 1 pivot
-        // Delete 2 pivot (unlink child2 and child3)
-        $this->assertNumWrites(3);
+        QueryAssert::writes(3, fn() => (new Transaction($this->orm))->persist($u)->run());
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -411,8 +390,6 @@ abstract class ManyToManyCompositeKeyTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'parent_entity',
             [

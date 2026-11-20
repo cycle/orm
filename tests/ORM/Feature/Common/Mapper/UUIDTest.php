@@ -13,15 +13,14 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\SortByMsgScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Tests\Fixtures\UUIDMapper;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class UUIDTest extends BaseTest
+class UUIDTest extends OrmTestCase
 {
-    use TableTrait;
 
     private $u1;
     private $u2;
@@ -135,10 +134,7 @@ abstract class UUIDTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('comments')->orderBy('user.email')->fetchAll();
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
     }
 
     #[\Testo\Test]
@@ -152,15 +148,9 @@ abstract class UUIDTest extends BaseTest
 
         $e->comments[0]->message = 'msg A';
         $e->comments[1]->message = 'msg B';
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(3);
-
+        QueryAssert::writes(3, fn() => $this->save($e));
         // consecutive test
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         \Testo\Assert::string($e->id);
         \Testo\Assert::equals(strlen($e->id), 36);
@@ -241,15 +231,9 @@ abstract class UUIDTest extends BaseTest
         $c = new Comment();
         $c->message = 'msg 4';
         $e->comments->add($c);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, fn() => $this->save($e));
         // consecutive test
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($e));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
         $selector->load('comments');
@@ -286,15 +270,9 @@ abstract class UUIDTest extends BaseTest
 
         \Testo\Assert::count($a->comments, 1);
         \Testo\Assert::count($b->comments, 2);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, fn() => $this->save($a, $b));
         // consecutive
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         $selector = new Select($this->orm->withHeap(new Heap()), User::class);
 
@@ -321,8 +299,6 @@ abstract class UUIDTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'string(36),primary',
             'email' => 'string',

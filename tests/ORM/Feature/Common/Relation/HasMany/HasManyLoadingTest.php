@@ -10,12 +10,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\ORM\Relation\BulkLoader;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class HasManyLoadingTest extends BaseTest
+class HasManyLoadingTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -143,38 +143,28 @@ abstract class HasManyLoadingTest extends BaseTest
     #[\Testo\Test]
     public function testUpdateRelationSortedById(): void
     {
-        $this->captureReadQueries();
-        /** @var list<User> $users */
-        $users = (new Select($this->orm, User::class))->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $this->bulkLoader(...$users)
+        $users = QueryAssert::reads(1, fn() => (new Select($this->orm, User::class))->fetchAll());
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$users)
             ->load('comments', [
                 'orderBy' => ['id' => 'DESC'],
-            ])->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $checked = false;
-        foreach ($users as $user) {
-            \Testo\Assert::iterable($user->comments);
-            // Check order
-            if (\count($user->comments) > 1) {
-                \Testo\Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
-                $checked = true;
+            ])->run());
+        QueryAssert::reads(0, function () use ($users): void {
+            $checked = false;
+            foreach ($users as $user) {
+                \Testo\Assert::iterable($user->comments);
+                // Check order
+                if (\count($user->comments) > 1) {
+                    \Testo\Assert::numeric($user->comments->offsetGet(0)->id)->greaterThan($user->comments->offsetGet(1)->id);
+                    $checked = true;
+                }
             }
-        }
-
-        \Testo\Assert::true($checked, 'No comments to check order.');
-        $this->assertNumReads(0);
+            \Testo\Assert::true($checked, 'No comments to check order.');
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

@@ -11,13 +11,11 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\UserWithUUIDPrimaryKey;
 use Cycle\ORM\Tests\Fixtures\UuidPrimaryKey;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Ramsey\Uuid\Uuid;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
+class BelongsToRelationWithNestedUuidTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testNestedWithUuidPK(): void
@@ -58,8 +56,6 @@ abstract class BelongsToRelationWithNestedUuidTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user_with_uuid_pk', [
             'uuid' => 'string(36),primary',
             'email' => 'string',

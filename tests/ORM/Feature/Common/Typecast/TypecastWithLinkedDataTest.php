@@ -11,17 +11,15 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\Book;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookNestedStates;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\BookStates;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\IDCaster;
 use Cycle\ORM\Tests\Feature\Common\Typecast\Fixture\User;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class TypecastWithLinkedDataTest extends BaseTest
+class TypecastWithLinkedDataTest extends OrmTestCase
 {
-    use TableTrait;
 
     // Select
 
@@ -86,8 +84,6 @@ abstract class TypecastWithLinkedDataTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

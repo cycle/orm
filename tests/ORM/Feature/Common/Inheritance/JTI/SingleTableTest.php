@@ -12,8 +12,9 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Engineer;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class SingleTableTest extends SimpleCasesTest
+class SingleTableTest extends SimpleCasesTest
 {
     protected const EMPLOYEE_DEFAULT_SORTING = ['employee_id' => 'ASC'];
     protected const EMPLOYEE_1 = ['employee_id' => 1, 'name' => 'John', 'age' => 38];
@@ -162,14 +163,8 @@ abstract class SingleTableTest extends SimpleCasesTest
         $programator->name = 'Merlin';
         $programator->level = 50;
         $programator->language = 'VanillaJS';
-
-        $this->captureWriteQueries();
-        $this->save($programator);
-        $this->assertNumWrites(3);
-
-        $this->captureWriteQueries();
-        $this->save($programator);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(3, fn() => $this->save($programator));
+        QueryAssert::writes(0, fn() => $this->save($programator));
 
         \Testo\Assert::same($programator->employee_id, 5);
         \Testo\Assert::same($programator->role_id, 5);

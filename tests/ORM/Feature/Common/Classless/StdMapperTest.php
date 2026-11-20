@@ -9,13 +9,12 @@ use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\StdMapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class StdMapperTest extends BaseTest
+class StdMapperTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchData(): void
@@ -131,18 +130,16 @@ abstract class StdMapperTest extends BaseTest
 
         $e->email = 'test@email.com';
         $e->balance = 300;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(1);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(1, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
+        QueryAssert::writes(0, function () use (&$tr, $e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
 
@@ -156,17 +153,12 @@ abstract class StdMapperTest extends BaseTest
         $e = $this->orm->make('user');
         $e->email = 'test@email.com';
         $e->balance = 300;
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-
-        $e->balance = 400;
-
-        $tr->run();
-
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $e->balance = 400;
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
         \Testo\Assert::true($this->orm->getHeap()->has($e));
@@ -217,8 +209,6 @@ abstract class StdMapperTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

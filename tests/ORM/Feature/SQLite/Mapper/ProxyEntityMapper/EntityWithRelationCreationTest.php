@@ -7,12 +7,10 @@ namespace Cycle\ORM\Tests\Feature\SQLite\Mapper\ProxyEntityMapper;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Tests\Feature\Common\Mapper\BaseMapperTest;
+use Cycle\Testing\ORM\OrmTestCase;
 
-class EntityWithRelationCreationTest extends BaseMapperTest
+class EntityWithRelationCreationTest extends OrmTestCase
 {
-    public const DRIVER = 'sqlite';
-
     #[\Testo\Test]
     public function testProxyEntityRelationPropertiesShouldBeUnsetAfterCreation(): void
     {
@@ -34,8 +32,6 @@ class EntityWithRelationCreationTest extends BaseMapperTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->orm = $this->withSchema(
             new Schema(
                 [

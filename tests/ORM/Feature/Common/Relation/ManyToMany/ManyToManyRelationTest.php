@@ -12,14 +12,13 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ManyToManyRelationTest extends BaseTest
+class ManyToManyRelationTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testInitRelation(): void
@@ -285,10 +284,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
         $u = $selector->load('tags')->wherePK(3)->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
     }
 
     #[\Testo\Test]
@@ -349,14 +345,8 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $b->tags->add($t);
         $b->tags->setPivot($t, $pc);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(6);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(6, fn() => $this->save($a, $b));
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         /**
          * @var User $a
@@ -378,10 +368,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $a = (new Select($this->orm, User::class))->load('tags')->fetchOne();
 
         $a->tags->add((new Select($this->orm, Tag::class))->wherePK(3)->fetchOne());
-
-        $this->captureWriteQueries();
-        $this->save($a);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($a));
         \Testo\Assert::true(true);
     }
 
@@ -397,10 +384,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $user = $userSelect->load('tags')->fetchOne(['id' => 1]);
 
         \Testo\Assert::instanceOf($user->tags, Collection::class);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($user));
 
         $wantTags = ['tag a', 'tag c'];
 
@@ -423,12 +407,11 @@ abstract class ManyToManyRelationTest extends BaseTest
         $user->tags = $user->tags->filter(function ($t) use ($wantTags) {
             return in_array($t->name, $wantTags);
         });
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($user);
-        $tr->run();
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, function () use ($user): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($user);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
 
@@ -448,15 +431,9 @@ abstract class ManyToManyRelationTest extends BaseTest
         $e->email = 'test@email.com';
         $e->balance = 300;
         unset($e->tags);
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($e));
         \Testo\Assert::false(isset($e->tags));
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($e));
     }
 
     /**
@@ -468,10 +445,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
-
-        $this->captureWriteQueries();
-        $this->save($e);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($e));
         \Testo\Assert::iterable($e->tags);
 
         unset($e->tags);
@@ -489,18 +463,12 @@ abstract class ManyToManyRelationTest extends BaseTest
         $u->email = 'many@email.com';
         $u->balance = 900;
         unset($u->tags);
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($u));
 
         \Testo\Assert::false(isset($u->tags));
 
         $u->tags = [];
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($u));
     }
 
     /**
@@ -516,11 +484,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         \Testo\Assert::count($user->tags, 2);
 
         unset($user->tags);
-
         // Ignore uninitialized collection
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($user));
     }
 
     /**
@@ -534,20 +499,11 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         \Testo\Assert::instanceOf($user->tags, Collection::class);
         \Testo\Assert::count($user->tags, 2);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($user));
 
         $user->tags = null;
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(2);
-
-        $this->captureWriteQueries();
-        $this->save($user);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(2, fn() => $this->save($user));
+        QueryAssert::writes(0, fn() => $this->save($user));
 
         $this->orm->getHeap()->clean();
 
@@ -558,8 +514,6 @@ abstract class ManyToManyRelationTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

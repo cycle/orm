@@ -12,8 +12,9 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\EmployeeType;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class EnumDiscriminatorTest extends StiBaseTest
+class EnumDiscriminatorTest extends StiBaseTest
 {
     protected const BASE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager';
@@ -96,10 +97,7 @@ abstract class EnumDiscriminatorTest extends StiBaseTest
         /** @var Manager $manager */
         $manager = (new Select($this->orm, Employee::class))->orderBy('id')->fetchOne();
         \Testo\Assert::instanceOf($manager, Manager::class);
-
-        $this->captureWriteQueries();
-        $this->save($manager);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($manager));
     }
 
     #[\Testo\Test]

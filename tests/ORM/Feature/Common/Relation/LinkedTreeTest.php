@@ -12,13 +12,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class LinkedTreeTest extends BaseTest
+class LinkedTreeTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelations(): void
@@ -70,14 +69,12 @@ abstract class LinkedTreeTest extends BaseTest
 
         $u1->nested = $n;
         $u2->owned = $n;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($u1);
-        $tr->persist($u2);
-        $tr->run();
-
-        $this->assertNumWrites(3);
+        QueryAssert::writes(3, function () use ($u1, $u2): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u1);
+            $tr->persist($u2);
+            $tr->run();
+        });
 
         $selector = new Select($this->orm, User::class);
         $selector->load(['nested', 'owned'])->where('user.id', new Parameter([3, 4]))->orderBy('user.id');
@@ -120,8 +117,6 @@ abstract class LinkedTreeTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

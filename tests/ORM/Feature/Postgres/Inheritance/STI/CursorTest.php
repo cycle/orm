@@ -9,11 +9,8 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\STI\SimpleTest;
 
-#[\Testo\Filter\Group('driver', 'driver-postgres')]
-class CursorTest extends SimpleTest
+Feature/Postgres/Inheritance/JTI/CursorTest.phpclass CursorTest extends SimpleTest
 {
-    public const DRIVER = 'postgres';
-
     #[\Testo\Test]
     public function testCursorReturnsCorrectSubclassInstances(): void
     {

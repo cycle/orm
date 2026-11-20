@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Regression\CaseTemplate;
 
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelect(): void
@@ -37,20 +34,14 @@ abstract class CaseTest extends BaseTest
             ->fetchOne();
         // Change data
         $user->setPassword('new-password-42');
-
         // Store changes and calc write queries
-        $this->captureWriteQueries();
-        $this->save($user);
-
-        // Check write queries count
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($user));
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

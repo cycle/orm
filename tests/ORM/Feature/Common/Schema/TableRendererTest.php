@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Feature\Common\Schema;
 
 use Cycle\Database\Schema\AbstractTable;
-use Cycle\ORM\Exception\SchemaException;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Util\TableRenderer as Renderer;
+use Cycle\Database\Exception\SchemaException;
+use Cycle\Testing\Database\Schema\TableRenderer as Renderer;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class TableRendererTest extends BaseTest
+class TableRendererTest extends OrmTestCase
 {
     #[\Testo\Test]
     public function testRenderString(): void

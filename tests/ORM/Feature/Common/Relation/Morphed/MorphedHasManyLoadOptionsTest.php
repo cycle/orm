@@ -14,12 +14,10 @@ use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class MorphedHasManyLoadOptionsTest extends BaseTest
+class MorphedHasManyLoadOptionsTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
@@ -224,8 +222,6 @@ abstract class MorphedHasManyLoadOptionsTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

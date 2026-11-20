@@ -16,13 +16,13 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Nested;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\ORM\Relation\BulkLoader;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class BelongsToRelationTest extends BaseTest
+class BelongsToRelationTest extends OrmTestCase
 {
-    use TableTrait;
 
     protected const NULLABLE = false;
 
@@ -220,10 +220,7 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->orm = $this->orm->withHeap(new Heap());
         $p = (new Select($this->orm, Profile::class))->load('user')->wherePK(4)->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($p));
     }
 
     #[\Testo\Test]
@@ -308,13 +305,8 @@ abstract class BelongsToRelationTest extends BaseTest
             ->load('user')->fetchAll();
 
         [$a->user, $b->user] = [$b->user, $a->user];
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(2);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(2, fn() => $this->save($a, $b));
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         $s = new Select($this->orm->withHeap(new Heap()), Profile::class);
         [$a2, $b2] = $s->wherePK(new Parameter([1, 2]))->orderBy('profile.id')
@@ -354,14 +346,8 @@ abstract class BelongsToRelationTest extends BaseTest
         $n->profile->user = new User();
         $n->profile->user->email = 'new@email.com';
         $n->profile->user->balance = 999;
-
-        $this->captureWriteQueries();
-        $this->save($n);
-        $this->assertNumWrites(3);
-
-        $this->captureWriteQueries();
-        $this->save($n);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(3, fn() => $this->save($n));
+        QueryAssert::writes(0, fn() => $this->save($n));
 
         $n = (new Select($this->orm->withHeap(new Heap()), Nested::class))
             ->wherePK(2)->load('profile.user')->fetchOne();
@@ -404,10 +390,7 @@ abstract class BelongsToRelationTest extends BaseTest
             ->wherePK(1)->load('user')->fetchOne();
 
         unset($profile->user);
-
-        $this->captureWriteQueries();
-        $this->save($profile);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($profile));
     }
 
     /**
@@ -424,39 +407,31 @@ abstract class BelongsToRelationTest extends BaseTest
         unset($profile->user);
         \Testo\Expect::exception(NullException::class);
 
-        $this->captureWriteQueries();
+        $log = $this->context->queryLog();
+        $writes = $log->countWrites();
         try {
             $this->save($profile);
         } finally {
-            $this->assertNumWrites(0);
+            \Testo\Assert::same($log->countWrites() - $writes, 0);
         }
     }
 
     #[\Testo\Test]
     public function testUpdateRelation(): void
     {
-        $this->captureReadQueries();
-        /** @var list<Profile> $profiles */
-        $profiles = (new Select($this->orm, Profile::class))->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        $this->bulkLoader(...$profiles)->load('user')->run();
-        $this->assertNumReads(1);
-
-        $this->captureReadQueries();
-        foreach ($profiles as $profile) {
-            $profile->user; // force loading
-            static::NULLABLE or \Testo\Assert::notNull($profile->user);
-        }
-        $this->assertNumReads(0);
+        $profiles = QueryAssert::reads(1, fn() => (new Select($this->orm, Profile::class))->fetchAll());
+        QueryAssert::reads(1, fn() => (new BulkLoader($this->orm))->collect(...$profiles)->load('user')->run());
+        QueryAssert::reads(0, function () use ($profiles): void {
+            foreach ($profiles as $profile) {
+                $profile->user; // force loading
+                static::NULLABLE or \Testo\Assert::notNull($profile->user);
+            }
+        });
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

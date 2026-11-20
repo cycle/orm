@@ -11,26 +11,22 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class RefersToRelationMiniRowsetTest extends BaseTest
+class RefersToRelationMiniRowsetTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreateEmptyComment(): void
     {
         $c = new Comment();
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($c);
-        $tr->run();
-
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($c): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($c);
+            $tr->run();
+        });
 
         $s = new Select($this->orm->withHeap(new Heap()), Comment::class);
         $cd = $s->fetchData();
@@ -44,16 +40,13 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
         $c1 = new Comment();
         $c2 = new Comment();
         $c3 = new Comment();
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($c1);
-        $tr->persist($c2);
-        $tr->persist($c3);
-        $tr->run();
-
-        $this->assertNumWrites(3);
+        QueryAssert::writes(3, function () use ($c1, $c2, $c3): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($c1);
+            $tr->persist($c2);
+            $tr->persist($c3);
+            $tr->run();
+        });
 
         $cd = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
 
@@ -66,14 +59,11 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
     public function testCreateEmptyUser(): void
     {
         $u = new User();
-
-        $this->captureWriteQueries();
-
-        $tr = new Transaction($this->orm);
-        $tr->persist($u);
-        $tr->run();
-
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($u): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($u);
+            $tr->run();
+        });
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
 
@@ -86,10 +76,7 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
         $c = new Comment();
         $u = new User();
         $u->lastComment = $c;
-
-        $this->captureWriteQueries();
-        $this->save($c, $u);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($c, $u));
 
         $userData = (new Select($this->orm->withHeap(new Heap()), User::class))->fetchData();
         $commentData = (new Select($this->orm->withHeap(new Heap()), Comment::class))->fetchData();
@@ -101,8 +88,6 @@ abstract class RefersToRelationMiniRowsetTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'comment_id' => 'integer,nullable',

@@ -9,18 +9,14 @@ use Cycle\ORM\Collection\DoctrineCollectionFactory;
 use Cycle\ORM\Config\RelationConfig;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Schema;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class StiBaseTest extends BaseTest
+abstract class StiBaseTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $factory = (new Factory(
             $this->dbal,
             RelationConfig::getDefault(),

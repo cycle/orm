@@ -14,8 +14,9 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityA;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\EntityB;
 use Cycle\ORM\Tests\Fixtures\MorphedCyclic\MorphedInterface;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\ORM\Relation\BulkLoader;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * Cyclic dependencies via {@see Relation::REFERS_TO_MORPHED}:
@@ -27,9 +28,8 @@ use Cycle\ORM\Tests\Traits\TableTrait;
  * deferred way and therefore is able to persist a closed cycle within a single transaction.
  * The related entity is resolved lazily through a promise reference.
  */
-abstract class RefersToMorphedCyclicTest extends BaseTest
+class RefersToMorphedCyclicTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchSelfReference(): void
@@ -68,10 +68,7 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
         $a = $this->orm->getRepository(EntityA::class)->findByPK(1);
         // Not resolved yet — the relation is a promise reference.
         \Testo\Assert::instanceOf($this->extractEntity($a)['parent'], ReferenceInterface::class);
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($a->parent, $a);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, fn() => \Testo\Assert::same($a->parent, $a));
     }
 
     /**
@@ -83,17 +80,13 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
     {
         $a = $this->orm->getRepository(EntityA::class)->findByPK(2);
         \Testo\Assert::instanceOf($this->extractEntity($a)['parent'], ReferenceInterface::class);
-
         // entity_b #1 is not in the heap yet -> exactly one lazy query.
-        $this->captureReadQueries();
-        $b = $a->parent;
-        \Testo\Assert::instanceOf($b, EntityB::class);
-        $this->assertNumReads(1);
-
+        QueryAssert::reads(1, function () use (&$b, $a): void {
+            $b = $a->parent;
+            \Testo\Assert::instanceOf($b, EntityB::class);
+        });
         // The back-reference entity_a #2 is already in the heap -> no extra query.
-        $this->captureReadQueries();
-        \Testo\Assert::same($b->parent, $a);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, fn() => \Testo\Assert::same($b->parent, $a));
     }
 
     /**
@@ -108,14 +101,13 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
             ->load('parent')
             ->orderBy('entity_a.id')
             ->fetchAll();
-
-        $this->captureReadQueries();
-        // #1 references itself, #2 references entity_b #1 — both already loaded.
-        \Testo\Assert::instanceOf($all[0]->parent, EntityA::class);
-        \Testo\Assert::same($all[0]->parent, $all[0]);
-        \Testo\Assert::instanceOf($all[1]->parent, EntityB::class);
-        \Testo\Assert::same($all[1]->parent->name, 'b-1');
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($all): void {
+            // #1 references itself, #2 references entity_b #1 — both already loaded.
+            \Testo\Assert::instanceOf($all[0]->parent, EntityA::class);
+            \Testo\Assert::same($all[0]->parent, $all[0]);
+            \Testo\Assert::instanceOf($all[1]->parent, EntityB::class);
+            \Testo\Assert::same($all[1]->parent->name, 'b-1');
+        });
     }
 
     /**
@@ -125,19 +117,14 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
     #[\Testo\Test]
     public function testBulkLoadParent(): void
     {
-        $this->captureReadQueries();
-        /** @var list<EntityA> $all */
-        $all = (new Select($this->orm, EntityA::class))->orderBy('entity_a.id')->fetchAll();
-        $this->assertNumReads(1);
-
-        $this->bulkLoader(...$all)->load('parent')->run();
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($all[0]->parent, EntityA::class);
-        \Testo\Assert::same($all[0]->parent, $all[0]);
-        \Testo\Assert::instanceOf($all[1]->parent, EntityB::class);
-        \Testo\Assert::same($all[1]->parent->name, 'b-1');
-        $this->assertNumReads(0);
+        $all = QueryAssert::reads(1, fn() => (new Select($this->orm, EntityA::class))->orderBy('entity_a.id')->fetchAll());
+        (new BulkLoader($this->orm))->collect(...$all)->load('parent')->run();
+        QueryAssert::reads(0, function () use ($all): void {
+            \Testo\Assert::instanceOf($all[0]->parent, EntityA::class);
+            \Testo\Assert::same($all[0]->parent, $all[0]);
+            \Testo\Assert::instanceOf($all[1]->parent, EntityB::class);
+            \Testo\Assert::same($all[1]->parent->name, 'b-1');
+        });
     }
 
     #[\Testo\Test]
@@ -160,16 +147,9 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
         $a = new EntityA();
         $a->name = 'new-self';
         $a->parent = $a;
-
-        $this->captureWriteQueries();
-        $this->save($a);
-        // INSERT the row, then a deferred UPDATE with its own id + morph type
-        $this->assertNumWrites(2);
-
+        QueryAssert::writes(2, fn() => $this->save($a));
         // consecutive save does nothing
-        $this->captureWriteQueries();
-        $this->save($a);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($a));
 
         \Testo\Assert::same($a->parentId, $a->id);
         \Testo\Assert::same($a->parentType, 'entity_a');
@@ -195,16 +175,9 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
 
         $a->parent = $b;
         $b->parent = $a;
-
-        $this->captureWriteQueries();
-        $this->save($a);
-        // INSERT a, INSERT b, then a deferred UPDATE to close the cycle
-        $this->assertNumWrites(3);
-
+        QueryAssert::writes(3, fn() => $this->save($a));
         // consecutive save does nothing
-        $this->captureWriteQueries();
-        $this->save($a);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($a));
 
         \Testo\Assert::same($a->parentId, $b->id);
         \Testo\Assert::same($a->parentType, 'entity_b');
@@ -230,10 +203,7 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
         $a = $this->orm->getRepository(EntityA::class)->findByPK(1);
         \Testo\Assert::instanceOf($a->parent, EntityA::class);
         unset($a->parent);
-
-        $this->captureWriteQueries();
-        $this->save($a);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($a));
 
         $row = $this->getDatabase()->table('entity_a')->select()->where('id', 1)->fetchAll();
         \Testo\Assert::same((string) $row[0]['parent_id'], '1');
@@ -252,10 +222,7 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
         $a = $this->orm->getRepository(EntityA::class)->findByPK(1);
         \Testo\Assert::instanceOf($a->parent, EntityA::class);
         unset($a->parent);
-
-        $this->captureWriteQueries();
-        $this->save($a);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($a));
 
         $row = $this->getDatabase()->table('entity_a')->select()->where('id', 1)->fetchAll();
         \Testo\Assert::null($row[0]['parent_id'], 'parent_id should be NULL when the unset relation is treated as null');
@@ -265,8 +232,6 @@ abstract class RefersToMorphedCyclicTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('entity_a', [
             'id' => 'primary',
             'name' => 'string',

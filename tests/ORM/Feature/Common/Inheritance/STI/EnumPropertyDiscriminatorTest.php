@@ -12,13 +12,14 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\BossWithKind;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\EmployeeType;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\WorkerWithKind;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
 /**
  * STI scenario where the entity exposes the discriminator as a BackedEnum-typed property
  * (so `extractData` returns an enum case in the discriminator slot). Exercises the
  * enum -> scalar conversion performed by the BackedEnum uncaster in {@see \Cycle\ORM\Parser\Typecast::uncast()}.
  */
-abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
+class EnumPropertyDiscriminatorTest extends StiBaseTest
 {
     protected const WORKER_ROLE = 'worker';
     protected const BOSS_ROLE = 'boss';
@@ -103,10 +104,7 @@ abstract class EnumPropertyDiscriminatorTest extends StiBaseTest
         $loaded = (new Select($this->orm, WorkerWithKind::class))
             ->wherePK($boss->id)
             ->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($loaded);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($loaded));
     }
 
     #[\Testo\Lifecycle\BeforeTest]

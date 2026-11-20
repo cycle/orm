@@ -10,13 +10,11 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContextTyped;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class CyclicManyToManyTypedTest extends BaseTest
+class CyclicManyToManyTypedTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreateCyclicWithExisting(): void
@@ -43,9 +41,6 @@ abstract class CyclicManyToManyTypedTest extends BaseTest
             throw new \Testo\Core\Exception\SkipTest('PHP7.4 required');
             return;
         }
-
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

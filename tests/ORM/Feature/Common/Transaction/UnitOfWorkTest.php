@@ -13,14 +13,12 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Post;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction\Runner;
 use Cycle\ORM\Transaction\UnitOfWork;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class UnitOfWorkTest extends BaseTest
+class UnitOfWorkTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSuccessRetry(): void
@@ -37,7 +35,7 @@ abstract class UnitOfWorkTest extends BaseTest
         \Testo\Assert::false($result->isSuccess());
         \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
 
-        $this->getDriver()->beginTransaction();
+        $this->database->getDriver()->beginTransaction();
 
         $result = $result->retry();
 
@@ -63,7 +61,7 @@ abstract class UnitOfWorkTest extends BaseTest
         \Testo\Assert::false($result->isSuccess());
         \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
 
-        $this->getDriver()->beginTransaction();
+        $this->database->getDriver()->beginTransaction();
 
         $result = $result->retry();
 
@@ -217,7 +215,7 @@ abstract class UnitOfWorkTest extends BaseTest
         \Testo\Assert::false($result->isSuccess());
         \Testo\Assert::instanceOf($result->getLastError(), RunnerException::class);
 
-        $this->getDriver()->beginTransaction();
+        $this->database->getDriver()->beginTransaction();
 
         $result = $result->retry();
 
@@ -231,8 +229,6 @@ abstract class UnitOfWorkTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('post', [
             'id' => 'primary',
             'title' => 'string',

@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Regression\Case7;
 
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Regression\Case7\Entity\Post;
 use Cycle\ORM\Tests\Regression\Case7\Entity\PostTag;
 use Cycle\ORM\Tests\Regression\Case7\Entity\Tag;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
 /**
  * ManyToMany load=eager MUST load related entities.
  */
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreatePostEntity(): void
@@ -74,7 +70,6 @@ abstract class CaseTest extends BaseTest
     public function setUp(): void
     {
         // Init DB
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

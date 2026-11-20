@@ -13,12 +13,11 @@ use Cycle\ORM\Tests\Fixtures\SortByLevelScope;
 use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ManyToManyScopedTest extends BaseTest
+class ManyToManyScopedTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testOrderedByScope(): void
@@ -192,11 +191,10 @@ abstract class ManyToManyScopedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a, $b): void {
+            \Testo\Assert::count($a->tags, 4);
+            \Testo\Assert::count($b->tags, 3);
+        });
 
         \Testo\Assert::same($a->tags[0]->name, 'tag a');
         \Testo\Assert::same($a->tags[1]->name, 'tag b');
@@ -266,11 +264,10 @@ abstract class ManyToManyScopedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->load('tags')->orderBy('user.id')->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a, $b): void {
+            \Testo\Assert::count($a->tags, 4);
+            \Testo\Assert::count($b->tags, 3);
+        });
 
         \Testo\Assert::same($a->tags[3]->name, 'tag a');
         \Testo\Assert::same($a->tags[2]->name, 'tag b');
@@ -342,11 +339,10 @@ abstract class ManyToManyScopedTest extends BaseTest
         [$a, $b] = $selector->load('tags', [
             'scope' => new SortByLevelScope(),
         ])->orderBy('user.id')->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a, $b): void {
+            \Testo\Assert::count($a->tags, 4);
+            \Testo\Assert::count($b->tags, 3);
+        });
 
         \Testo\Assert::same($a->tags[0]->name, 'tag a');
         \Testo\Assert::same($a->tags[1]->name, 'tag b');
@@ -417,11 +413,10 @@ abstract class ManyToManyScopedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
-        $this->assertNumReads(2);
+        QueryAssert::reads(2, function () use ($a, $b): void {
+            \Testo\Assert::count($a->tags, 4);
+            \Testo\Assert::count($b->tags, 3);
+        });
 
         \Testo\Assert::same($a->tags[0]->name, 'tag a');
         \Testo\Assert::same($a->tags[1]->name, 'tag b');
@@ -492,11 +487,10 @@ abstract class ManyToManyScopedTest extends BaseTest
          * @var User $b
          */
         [$a, $b] = $selector->orderBy('user.id')->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::count($a->tags, 4);
-        \Testo\Assert::count($b->tags, 3);
-        $this->assertNumReads(2);
+        QueryAssert::reads(2, function () use ($a, $b): void {
+            \Testo\Assert::count($a->tags, 4);
+            \Testo\Assert::count($b->tags, 3);
+        });
 
         \Testo\Assert::same($a->tags[3]->name, 'tag a');
         \Testo\Assert::same($a->tags[2]->name, 'tag b');
@@ -511,8 +505,6 @@ abstract class ManyToManyScopedTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

@@ -12,12 +12,11 @@ use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class RefersToProxyMapperTest extends BaseTest
+class RefersToProxyMapperTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -59,11 +58,10 @@ abstract class RefersToProxyMapperTest extends BaseTest
 
         \Testo\Assert::instanceOf($a->user, User::class);
         \Testo\Assert::null($b->user);
-
-        $this->captureReadQueries();
-        \Testo\Assert::same($a->user, $a->user);
-        \Testo\Assert::null($b->user);
-        $this->assertNumReads(0);
+        QueryAssert::reads(0, function () use ($a, $b): void {
+            \Testo\Assert::same($a->user, $a->user);
+            \Testo\Assert::null($b->user);
+        });
 
         \Testo\Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -83,16 +81,12 @@ abstract class RefersToProxyMapperTest extends BaseTest
 
         // warm up
         (new Select($this->orm, User::class))->fetchAll();
-
-        $this->captureReadQueries();
-        \Testo\Assert::instanceOf($a->user, User::class);
-        \Testo\Assert::same($a->user, $a->user);
-        $this->assertNumReads(0);
-
+        QueryAssert::reads(0, function () use ($a): void {
+            \Testo\Assert::instanceOf($a->user, User::class);
+            \Testo\Assert::same($a->user, $a->user);
+        });
         // invalid object can't be cached
-        $this->captureReadQueries();
-        \Testo\Assert::null($b->user);
-        $this->assertNumReads(1);
+        QueryAssert::reads(1, fn() => \Testo\Assert::null($b->user));
 
         \Testo\Assert::equals($a->user->email, 'hello@world.com');
     }
@@ -101,10 +95,7 @@ abstract class RefersToProxyMapperTest extends BaseTest
     public function testNoWriteOperations(): void
     {
         $p = (new Select($this->orm, Profile::class))->wherePK(1)->fetchOne();
-
-        $this->captureWriteQueries();
-        $this->save($p);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => $this->save($p));
     }
 
     #[\Testo\Test]
@@ -118,16 +109,8 @@ abstract class RefersToProxyMapperTest extends BaseTest
 
         $np = new Profile();
         $np->image = 'new image';
-
-        $this->captureReadQueries();
-        $np->user = $p->user;
-        $this->assertNumReads(1);
-
-        $this->captureWriteQueries();
-        $this->captureReadQueries();
-        $this->save($np);
-        $this->assertNumWrites(1);
-        $this->assertNumReads(0);
+        QueryAssert::reads(1, fn() => $np->user = $p->user);
+        QueryAssert::count(0, 1, fn() => $this->save($np));
 
         $p = (new Select($this->orm->withHeap(new Heap()), Profile::class))
             ->wherePK(4)->fetchOne();
@@ -139,8 +122,6 @@ abstract class RefersToProxyMapperTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

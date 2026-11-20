@@ -13,8 +13,9 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\ManagerWithCredentials;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\JTI\JtiBaseTest;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class EmbeddedRelationsTest extends JtiBaseTest
+class EmbeddedRelationsTest extends JtiBaseTest
 {
     protected const EMPLOYEE_ROLE = 'employee';
     protected const MANAGER_ROLE = 'manager_with_credentials';
@@ -38,10 +39,7 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
 
         $entity->credentials->username = 'roquie';
         $entity->credentials->password = 'secret';
-
-        $this->captureWriteQueries();
-        $this->save($entity);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($entity));
 
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
             ->wherePK(1)
@@ -68,10 +66,7 @@ abstract class EmbeddedRelationsTest extends JtiBaseTest
         $credentials->password = 'secret';
 
         $entity->credentials = $credentials;
-
-        $this->captureWriteQueries();
-        $this->save($entity);
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, fn() => $this->save($entity));
 
         $entity = (new Select($this->orm, self::MANAGER_ROLE))
             ->wherePK(1)

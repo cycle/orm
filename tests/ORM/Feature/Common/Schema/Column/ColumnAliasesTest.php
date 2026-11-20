@@ -9,13 +9,12 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ColumnAliasesTest extends BaseTest
+class ColumnAliasesTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testStore(): void
@@ -23,12 +22,11 @@ abstract class ColumnAliasesTest extends BaseTest
         $e = new User();
         $e->email = 'test@email.com';
         $e->balance = 300;
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($e);
-        $tr->run();
-        $this->assertNumWrites(1);
+        QueryAssert::writes(1, function () use ($e): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($e);
+            $tr->run();
+        });
 
         \Testo\Assert::equals($e->id, 3);
 
@@ -144,8 +142,6 @@ abstract class ColumnAliasesTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id_int' => 'primary',
             'email_str' => 'string',

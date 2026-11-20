@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Unit\Select;
 
 use Cycle\Database\Query\SelectQuery;
-use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\QueryBuilder;
 use Cycle\ORM\Select\QueryScope;
-use PHPUnit\Framework\TestCase;
+use Cycle\ORM\Tests\Unit\Select\Fixture\StubLoader;
 
 final class QueryScopeTest
 {
@@ -80,12 +79,6 @@ final class QueryScopeTest
 
     private function makeBuilder(SelectQuery $query): QueryBuilder
     {
-        $loader = \Mockery::mock(AbstractLoader::class)->shouldIgnoreMissing();
-        $loader->shouldReceive('fieldAlias')->andReturn(null);
-        $loader->shouldReceive('getAlias')->andReturn('users');
-        $loader->shouldReceive('getTarget')->andReturn('user');
-        $loader->shouldReceive('getParentLoader')->andReturn(null);
-
-        return new QueryBuilder($query, $loader);
+        return new QueryBuilder($query, new StubLoader());
     }
 }

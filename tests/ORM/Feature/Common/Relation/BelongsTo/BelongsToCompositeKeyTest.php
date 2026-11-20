@@ -15,13 +15,12 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Tests\Fixtures\CompositePKNested;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class BelongsToCompositeKeyTest extends BaseTest
+class BelongsToCompositeKeyTest extends OrmTestCase
 {
-    use TableTrait;
 
     protected const PARENT_CONTAINER = 'parent';
     protected const CHILD_CONTAINER = 'child_entity';
@@ -166,10 +165,7 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->load(self::PARENT_CONTAINER)
             ->wherePK([201, 201])
             ->fetchOne();
-
-        $this->captureWriteQueries();
-        (new Transaction($this->orm))->persist($p)->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, fn() => (new Transaction($this->orm))->persist($p)->run());
     }
 
     #[\Testo\Test]
@@ -249,15 +245,8 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
             ->fetchAll();
 
         [$a->parent, $b->parent] = [$b->parent, $a->parent];
-
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(2);
-
-        $this->captureWriteQueries();
-        $this->save($a, $b);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(2, fn() => $this->save($a, $b));
+        QueryAssert::writes(0, fn() => $this->save($a, $b));
 
         $s = new Select($this->orm->withHeap(new Heap()), CompositePKChild::class);
         [$a2, $b2] = $s->wherePK([1, 1], [1, 2])
@@ -304,14 +293,8 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
         $n->parent->parent->key1 = 241;
         $n->parent->parent->key2 = 242;
         $n->parent->parent->key3 = 999;
-
-        $this->captureWriteQueries();
-        $this->save($n);
-        $this->assertNumWrites(3);
-
-        $this->captureWriteQueries();
-        $this->save($n);
-        $this->assertNumWrites(0);
+        QueryAssert::writes(3, fn() => $this->save($n));
+        QueryAssert::writes(0, fn() => $this->save($n));
 
         $n = (new Select($this->orm->withHeap(new Heap()), CompositePKNested::class))
             ->wherePK(new Parameter($n->key1))
@@ -349,8 +332,6 @@ abstract class BelongsToCompositeKeyTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'parent_entity',
             [

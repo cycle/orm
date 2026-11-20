@@ -12,12 +12,10 @@ use Cycle\ORM\Select\Options\BelongsToLoadOptions;
 use Cycle\ORM\Select\Options\LoadMethod;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class BelongsToLoadOptionsTest extends BaseTest
+class BelongsToLoadOptionsTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testLoadWithSingleQueryMethod(): void
@@ -174,8 +172,6 @@ abstract class BelongsToLoadOptionsTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

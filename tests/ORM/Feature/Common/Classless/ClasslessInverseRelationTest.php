@@ -10,12 +10,11 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\SortByIDScope;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class ClasslessInverseRelationTest extends BaseTest
+class ClasslessInverseRelationTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testFetchRelation(): void
@@ -80,10 +79,7 @@ abstract class ClasslessInverseRelationTest extends BaseTest
 
         // cyclic
         $u->profile->user = $u;
-
-        $this->captureWriteQueries();
-        $this->save($u);
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, fn() => $this->save($u));
 
         \Testo\Assert::equals($u->id, 3);
         \Testo\Assert::equals($u->profile->id, 4);
@@ -101,8 +97,6 @@ abstract class ClasslessInverseRelationTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

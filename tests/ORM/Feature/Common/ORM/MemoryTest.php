@@ -15,12 +15,10 @@ use Cycle\ORM\Service\RelationProviderInterface;
 use Cycle\ORM\Service\RepositoryProviderInterface;
 use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Service\TypecastProviderInterface;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class MemoryTest extends BaseTest
+class MemoryTest extends OrmTestCase
 {
-    use TableTrait;
 
     private const ACTION_CLONE = 'clone';
     private const ACTION_UNSET = 'unset';
@@ -91,7 +89,6 @@ abstract class MemoryTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
         // Load all relations instances
     }
 

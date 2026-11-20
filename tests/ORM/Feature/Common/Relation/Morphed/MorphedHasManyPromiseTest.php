@@ -12,14 +12,13 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Tests\Fixtures\Comment;
 use Cycle\ORM\Tests\Fixtures\Post;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
 use Doctrine\Common\Collections\Collection;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class MorphedHasManyPromiseTest extends BaseTest
+class MorphedHasManyPromiseTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testAccessEntity(): void
@@ -45,13 +44,12 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         $selector = new Select($this->orm, User::class);
         $selector->orderBy('user.id');
         [$a, $b] = $selector->fetchAll();
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use ($a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
     }
 
     #[\Testo\Test]
@@ -62,21 +60,19 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         [$a, $b] = $selector->fetchAll();
 
         $a->comments->remove(0);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(1);
-
+        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
         // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -102,21 +98,19 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
         foreach ($b->comments as $c) {
             $a->comments->removeElement($c);
         }
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(1);
-
+        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
         // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $selector = new Select($this->orm, User::class);
@@ -143,21 +137,19 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
 
         $b->comments->add($a->comments[0]);
         $a->comments->removeElement($a->comments[0]);
-
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(1);
-
+        QueryAssert::writes(1, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
         // consecutive
-        $this->captureWriteQueries();
-        $tr = new Transaction($this->orm);
-        $tr->persist($a);
-        $tr->persist($b);
-        $tr->run();
-        $this->assertNumWrites(0);
+        QueryAssert::writes(0, function () use (&$tr, $a, $b): void {
+            $tr = new Transaction($this->orm);
+            $tr->persist($a);
+            $tr->persist($b);
+            $tr->run();
+        });
 
         $this->orm = $this->orm->withHeap(new Heap());
         $a = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
@@ -191,8 +183,6 @@ abstract class MorphedHasManyPromiseTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', [
             'id' => 'primary',
             'email' => 'string',

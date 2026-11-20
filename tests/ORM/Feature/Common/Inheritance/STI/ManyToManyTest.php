@@ -16,7 +16,7 @@ use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\RbacItemAbstract;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\RbacPermission;
 use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\RbacRole;
 
-abstract class ManyToManyTest extends StiBaseTest
+class ManyToManyTest extends StiBaseTest
 {
     protected const PARENT_MAPPER = Mapper::class;
     protected const CHILD_MAPPER = StdMapper::class;

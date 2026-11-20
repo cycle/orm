@@ -11,16 +11,11 @@ use Cycle\ORM\Reference\ReferenceInterface;
 use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\Mapper\BaseMapperTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
 use PHPUnit\Framework\AssertionFailedError;
 
-class EntityWithRelationHydrationTest extends BaseMapperTest
+class EntityWithRelationHydrationTest extends OrmTestCase
 {
-    use TableTrait;
-
-    public const DRIVER = 'sqlite';
-
     #[\Testo\Test]
     public function testPrivateBelongsToRelationPropertyWithoutProxyShouldBeFilled(): void
     {
@@ -191,8 +186,6 @@ class EntityWithRelationHydrationTest extends BaseMapperTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable('user', ['id' => 'primary', 'email' => 'string', 'friend_id' => 'integer,nullable']);
         $this->makeTable('profile', ['id' => 'primary', 'name' => 'string', 'user_id' => 'integer']);
         $this->makeTable('tag', ['id' => 'primary', 'name' => 'string',]);

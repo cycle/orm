@@ -6,15 +6,13 @@ namespace Cycle\ORM\Tests\Regression\Issue398;
 
 use Cycle\Database\Injection\Fragment;
 use Cycle\ORM\Select;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 use Cycle\ORM\Tests\Regression\Issue398\Entity\Product;
-use Cycle\ORM\Tests\Regression\IntegrationTestTrait;
-use Cycle\ORM\Tests\Traits\TableTrait;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Attribute\ExceptDriver;
+use Cycle\Testing\Database\Driver;
 
-abstract class CaseTest extends BaseTest
+class CaseTest extends OrmTestCase
 {
-    use IntegrationTestTrait;
-    use TableTrait;
 
     #[\Testo\Test]
     public function testSelectWithJoin(): void
@@ -41,6 +39,7 @@ abstract class CaseTest extends BaseTest
     }
 
     #[\Testo\Test]
+    #[ExceptDriver(Driver::SQLite)]
     public function testSelectWithRightJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -65,6 +64,7 @@ abstract class CaseTest extends BaseTest
     }
 
     #[\Testo\Test]
+    #[ExceptDriver(Driver::SQLite, Driver::MySQL)]
     public function testSelectWithFullJoin(): void
     {
         $select = new Select($this->orm, Product::class);
@@ -79,7 +79,6 @@ abstract class CaseTest extends BaseTest
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
         $this->makeTables();
         $this->fillData();
 

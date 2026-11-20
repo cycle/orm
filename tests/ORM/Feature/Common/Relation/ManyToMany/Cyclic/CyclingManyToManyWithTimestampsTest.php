@@ -10,13 +10,12 @@ use Cycle\ORM\Tests\Fixtures\Tag;
 use Cycle\ORM\Tests\Fixtures\TagContext;
 use Cycle\ORM\Tests\Fixtures\TimestampedMapper;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\ORM\OrmTestCase;
+use Cycle\Testing\Database\Assert\QueryAssert;
 
-abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
+class CyclingManyToManyWithTimestampsTest extends OrmTestCase
 {
-    use TableTrait;
 
     #[\Testo\Test]
     public function testCreateCyclicWithExistingSingleTimestamp(): void
@@ -29,12 +28,11 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
 
         $tag->users->add($u);
         $u->tags->add($tag);
-
-        $this->captureWriteQueries();
-        $t = new Transaction($this->orm);
-        $t->persist($tag);
-        $t->run();
-        $this->assertNumWrites(2);
+        QueryAssert::writes(2, function () use ($tag): void {
+            $t = new Transaction($this->orm);
+            $t->persist($tag);
+            $t->run();
+        });
     }
 
     #[\Testo\Test]
@@ -49,17 +47,12 @@ abstract class CyclingManyToManyWithTimestampsTest extends BaseTest
 
         $tag->users->add($u);
         $u->tags->add($tag);
-
-        $this->captureWriteQueries();
-        $this->save($tag);
-        $this->assertNumWrites(3);
+        QueryAssert::writes(3, fn() => $this->save($tag));
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
-
         $this->makeTable(
             'user',
             [

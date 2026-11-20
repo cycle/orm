@@ -6,24 +6,22 @@ namespace Cycle\ORM\Tests\Feature\Common\Transaction;
 
 use Cycle\ORM\Exception\RunnerException;
 use Cycle\ORM\Tests\Fixtures\TestCommand;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
-use Cycle\ORM\Tests\Traits\TableTrait;
 use Cycle\ORM\Transaction\Runner;
+use Cycle\Testing\ORM\OrmTestCase;
 
-abstract class RunnerTest extends BaseTest
+class RunnerTest extends OrmTestCase
 {
-    use TableTrait;
 
     // Mode OPEN_TRANSACTION
 
     #[\Testo\Test]
     public function testInnerTransactionRun(): void
     {
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 0);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
 
         Runner::innerTransaction()->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     /**
@@ -35,11 +33,11 @@ abstract class RunnerTest extends BaseTest
         $runner = Runner::innerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner->complete();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 0);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
     }
 
     /**
@@ -51,11 +49,11 @@ abstract class RunnerTest extends BaseTest
         $runner = Runner::innerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner->rollback();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 0);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
     }
 
     // Mode CONTINUE_TRANSACTION
@@ -63,13 +61,13 @@ abstract class RunnerTest extends BaseTest
     #[\Testo\Test]
     public function testContinueTransactionRun(): void
     {
-        $this->getDriver()->beginTransaction();
+        $this->database->getDriver()->beginTransaction();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         Runner::outerTransaction()->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     #[\Testo\Test]
@@ -83,29 +81,29 @@ abstract class RunnerTest extends BaseTest
     #[\Testo\Test]
     public function testContinueTransactionComplete(): void
     {
-        $this->getDriver()->beginTransaction();
+        $this->database->getDriver()->beginTransaction();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->complete();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     #[\Testo\Test]
     public function testContinueTransactionRollback(): void
     {
-        $this->getDriver()->beginTransaction();
+        $this->database->getDriver()->beginTransaction();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction();
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->rollback();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     // Mode IGNORE_TRANSACTION
@@ -113,42 +111,41 @@ abstract class RunnerTest extends BaseTest
     #[\Testo\Test]
     public function testIgnoreTransactionRun(): void
     {
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 0);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
 
         Runner::outerTransaction(strict: false)->run(new TestCommand($this->getDatabase()));
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 0);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 0);
     }
 
     #[\Testo\Test]
     public function testIgnoreTransactionComplete(): void
     {
-        $this->getDriver()->beginTransaction();
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        $this->database->getDriver()->beginTransaction();
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction(strict: false);
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->complete();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     #[\Testo\Test]
     public function testIgnoreTransactionRollback(): void
     {
-        $this->getDriver()->beginTransaction();
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        $this->database->getDriver()->beginTransaction();
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
 
         $runner = Runner::outerTransaction(strict: false);
         $runner->run(new TestCommand($this->getDatabase()));
         $runner->rollback();
 
-        \Testo\Assert::same($this->getDriver()->getTransactionLevel(), 1);
+        \Testo\Assert::same($this->database->getDriver()->getTransactionLevel(), 1);
     }
 
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        parent::setUp();
     }
 }

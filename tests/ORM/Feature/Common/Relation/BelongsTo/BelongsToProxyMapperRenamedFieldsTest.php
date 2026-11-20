@@ -9,14 +9,12 @@ use Cycle\ORM\Relation;
 use Cycle\ORM\Schema;
 use Cycle\ORM\Tests\Fixtures\Profile;
 use Cycle\ORM\Tests\Fixtures\User;
-use Cycle\ORM\Tests\Feature\Common\BaseTest;
 
-abstract class BelongsToProxyMapperRenamedFieldsTest extends BelongsToProxyMapperTest
+class BelongsToProxyMapperRenamedFieldsTest extends BelongsToProxyMapperTest
 {
     #[\Testo\Lifecycle\BeforeTest]
     public function setUp(): void
     {
-        BaseTest::setUp();
 
         $this->makeTable('user', [
             'user_pk' => 'primary',

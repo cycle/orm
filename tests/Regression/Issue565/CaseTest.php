@@ -101,6 +101,31 @@ final class CaseTest extends OrmTestCase
     }
 
     #[Test]
+    public function testBulkLoadHydratesEmbeddedReference(): void
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+        $user = (new Select($this->orm, Entity\User::class))->wherePK(1)->fetchOne();
+
+        (new BulkLoader($this->orm))->collect($user)->load('credentials')->run();
+
+        Assert::instanceOf($this->extractEntity($user)['credentials'], Entity\UserCredentials::class);
+    }
+
+    #[Test]
+    public function testBulkLoadKeepsLoadedEmbeddedAndHydratesTheRest(): void
+    {
+        $this->orm = $this->orm->withHeap(new Heap());
+        $user = (new Select($this->orm, Entity\User::class))->load('credentials')->wherePK(1)->fetchOne();
+        $credentials = $user->credentials;
+
+        (new BulkLoader($this->orm))->collect($user)->load('credentials')->load('profile')->run();
+
+        $relations = $this->extractEntity($user);
+        Assert::same($relations['credentials'], $credentials);
+        Assert::instanceOf($relations['profile'], Entity\UserProfile::class);
+    }
+
+    #[Test]
     public function testBulkLoadLazyEmbeddedMultipleEntities(): void
     {
         $this->orm = $this->orm->withHeap(new Heap());

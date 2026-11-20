@@ -340,6 +340,20 @@ final class MorphedHasManyRelationTest extends OrmTestCase
     }
 
     #[Test]
+    public function testAddNewCommentSetsMorphKey(): void
+    {
+        $post = (new Select($this->orm, Post::class))->wherePK(2)->load('comments')->fetchOne();
+        $comment = new Comment();
+        $comment->message = 'new comment';
+        $post->comments->add($comment);
+
+        $this->save($post);
+
+        $row = $this->getDatabase()->table('comment')->select()->where('message', 'new comment')->fetchAll()[0];
+        Assert::same([(int) $row['parent_id'], $row['parent_type']], [2, 'post']);
+    }
+
+    #[Test]
     public function testMoveToAnother(): void
     {
         /**

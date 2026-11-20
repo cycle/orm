@@ -14,6 +14,8 @@ use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Tests\Fixtures\CompositePK;
 use Cycle\ORM\Tests\Fixtures\CompositePKChild;
 use Cycle\ORM\Transaction;
+use Cycle\Testing\Database\Attribute\ExceptDriver;
+use Cycle\Testing\Database\Driver;
 use Cycle\Testing\ORM\OrmTestCase;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -67,6 +69,24 @@ final class HasManyCompositeKeyTest extends OrmTestCase
         $selector->load(self::CHILD_CONTAINER, ['method' => JoinableLoader::INLOAD])->orderBy('parent_entity.key3');
 
         Assert::equals($selector->fetchData(), self::SET_FULL);
+    }
+
+    #[Test]
+    #[ExceptDriver(Driver::MySQL)]
+    public function testCursorChunksByWholeCompositeKey(): void
+    {
+        $select = (new Select($this->orm, CompositePK::class))->load(self::CHILD_CONTAINER);
+
+        $log = $this->getDatabase()->transaction(fn(): array => $this->context->queryLog()->capture(
+            static fn(): array => \iterator_to_array($select->cursor(1), false),
+        ));
+
+        Assert::count($log['result'], 4);
+        $childQueries = \array_filter(
+            $log['queries'],
+            static fn(string $sql): bool => \preg_match('/FROM\W+child_entity\W/i', $sql) === 1,
+        );
+        Assert::count($childQueries, 4);
     }
 
     #[Test]

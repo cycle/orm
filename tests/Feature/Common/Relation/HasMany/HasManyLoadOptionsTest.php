@@ -238,6 +238,29 @@ final class HasManyLoadOptionsTest extends OrmTestCase
     }
 
     #[Test]
+    public function testNullOptionsKeepRelationWhereAndOrderBy(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA => [
+                Relation::WHERE => ['@.level' => ['>=' => 2]],
+                Relation::ORDER_BY => ['@.level' => 'DESC'],
+            ],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->load('comments', ['where' => null, 'orderBy' => null])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same(\array_map(static fn(Comment $c): string => $c->message, [...$a->comments]), [
+            'msg 4',
+            'msg 3',
+            'msg 2',
+        ]);
+        Assert::count($b->comments, 2);
+    }
+
+    #[Test]
     public function testLoadFromArchiveTable(): void
     {
         // Create archive table with the same structure as comment

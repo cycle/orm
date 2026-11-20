@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cycle\ORM\Tests\Feature\Common\Relation\HasOne;
 
 use Cycle\Database\Injection\Parameter;
+use Cycle\ORM\Exception\RelationException;
 use Cycle\ORM\Heap\Heap;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Mapper\Mapper;
@@ -19,6 +20,7 @@ use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\ORM\Transaction;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
+use Testo\Expect;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
 
@@ -328,6 +330,18 @@ class HasOneRelationTest extends OrmTestCase
 
         Assert::notEquals($e->profile->id, $oP);
         Assert::same($e->profile->image, 'new.jpg');
+    }
+
+    #[Test]
+    public function testAssignEntityOfAnotherRole(): never
+    {
+        $e = (new Select($this->orm, User::class))->wherePK(1)->fetchOne();
+        $e->profile = new Nested();
+        $e->profile->label = 'nested';
+
+        Expect::exception(RelationException::class);
+
+        $this->save($e);
     }
 
     #[Test]

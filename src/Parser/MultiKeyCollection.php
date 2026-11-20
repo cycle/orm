@@ -55,6 +55,9 @@ final class MultiKeyCollection
         }
     }
 
+    /**
+     * @return array<array-key, array>
+     */
     public function getItemsSubset(string $index, array $values): array
     {
         return $this->getValues($this->data[$index], $values);
@@ -137,6 +140,9 @@ final class MultiKeyCollection
         return \array_merge(...$result);
     }
 
+    /**
+     * @return array<array-key, array>
+     */
     private function getValues(array &$dataSet, array $keys): array
     {
         $value = &$dataSet;

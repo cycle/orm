@@ -331,6 +331,7 @@ abstract class AbstractNode
         }
 
         foreach ($this->indexedData->getItemsSubset($index, $criteria) as &$subset) {
+            \assert(\is_array($subset[$container]));
             if (!\in_array($data, $subset[$container], true)) {
                 $subset[$container][] = &$data;
             }

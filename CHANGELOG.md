@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.1](https://github.com/cycle/orm/compare/v2.19.0...v2.19.1) (2026-11-21)
+
+
+### Documentation
+
+* list every Cycle package in the README ([#610](https://github.com/cycle/orm/issues/610)) ([245b29b](https://github.com/cycle/orm/commit/245b29b2dc5d71734cf13edfd20f0a2d2103aedc))
+
 ## [2.19.0](https://github.com/cycle/orm/compare/v2.18.1...v2.19.0) (2026-11-21)
 
 

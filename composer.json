@@ -12,7 +12,16 @@
         "docs": "https://cycle-orm.dev/docs",
         "chat": "https://discord.gg/spiralphp"
     },
-    "keywords": ["mysql", "mssql", "sqlite", "postgresql", "orm", "sql", "query-builder", "data-mapper"],
+    "keywords": [
+        "mysql",
+        "mssql",
+        "sqlite",
+        "postgresql",
+        "orm",
+        "sql",
+        "query-builder",
+        "data-mapper"
+    ],
     "authors": [
         {
             "name": "Anton Titov (wolfy-j)",
@@ -92,7 +101,9 @@
                 {
                     "from": "github",
                     "package": "cycle/skills",
-                    "skills": ["cycle-orm"]
+                    "skills": [
+                        "cycle-orm"
+                    ]
                 }
             ]
         }

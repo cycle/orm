@@ -1,4 +1,32 @@
-# CHANGELOG
+# Changelog
+
+## [2.19.0](https://github.com/cycle/orm/compare/v2.18.1...v2.19.0) (2026-11-21)
+
+
+### Features
+
+* require PHP 8.2 and polish the tooling ([#583](https://github.com/cycle/orm/issues/583)) ([13c204d](https://github.com/cycle/orm/commit/13c204de847bba7aed3a5ddc4da144246263fee1))
+
+
+### Bug Fixes
+
+* **parser:** give Psalm 7.12 the array types of the parser data trees ([#591](https://github.com/cycle/orm/issues/591)) ([7c5558a](https://github.com/cycle/orm/commit/7c5558a780e721047fd25a531dea57d107b40e73))
+
+
+### Documentation
+
+* add the mutation testing badge ([1ec0549](https://github.com/cycle/orm/commit/1ec0549df0a1dc9d3ee1e807e9071e141b32bdcf))
+* correct the active-record feature link ([#580](https://github.com/cycle/orm/issues/580)) ([d546fcf](https://github.com/cycle/orm/commit/d546fcf5e31cf09279b29caf2c7de896242e346b))
+* describe the agent skill in README ([#587](https://github.com/cycle/orm/issues/587)) ([e5d05cd](https://github.com/cycle/orm/commit/e5d05cd283b3cbbe57de9c3b19da6700cca5ae1c))
+* move the Discord badge to the first row ([#586](https://github.com/cycle/orm/issues/586)) ([29faa2e](https://github.com/cycle/orm/commit/29faa2ef2e4664f919ac12ebd6e57754a9a57939))
+* restructure the README ([#585](https://github.com/cycle/orm/issues/585)) ([a2b1212](https://github.com/cycle/orm/commit/a2b1212bf9a30b945a9182722f43118df40f7b05))
+
+
+### Dependencies
+
+* raise the minimum versions of the cycle packages ([#609](https://github.com/cycle/orm/issues/609)) ([5429ae5](https://github.com/cycle/orm/commit/5429ae5f1dc68fe9f3c055f69c2db5f2cc8e54f4))
+
+## CHANGELOG
 
 v2.7.1 (13.02.2024)
 --------------------

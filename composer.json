@@ -39,7 +39,7 @@
     ],
     "require": {
         "php": ">=8.2",
-        "cycle/database": "^2.23",
+        "cycle/database": "^2.24",
         "doctrine/instantiator": "^2.0",
         "spiral/core": "^3.18"
     },
@@ -47,7 +47,7 @@
         "ext-pdo": "*",
         "bamarni/composer-bin-plugin": "^1.9",
         "buggregator/trap": "^1.20",
-        "cycle/testing": "^0.1.1",
+        "cycle/testing": "^0.1.2",
         "doctrine/collections": "^2.6 || ^3.0",
         "illuminate/collections": "12 - 13",
         "llm/skills": "^1.20",

@@ -14,6 +14,26 @@ use Testo\Test;
 #[Covers(MultiKeyCollection::class)]
 final class MultiKeyCollectionTest
 {
+    public function itemsOfAnIndexAreListedAcrossAllKeyValues(): void
+    {
+        $collection = new MultiKeyCollection();
+        $collection->createIndex('i', ['a', 'b']);
+        $first = ['a' => 1, 'b' => 2, 'n' => 1];
+        $second = ['a' => 1, 'b' => 3, 'n' => 2];
+        $third = ['a' => 1, 'b' => 2, 'n' => 3];
+        $fourth = ['a' => 4, 'b' => 2, 'n' => 4];
+        foreach ([&$first, &$second, &$third, &$fourth] as &$item) {
+            $collection->addItem('i', $item);
+        }
+
+        // One list of items per full key: (1, 2), (1, 3), (4, 2).
+        Assert::same(\iterator_to_array($collection->getItems('i'), false), [
+            [$first, $third],
+            [$second],
+            [$fourth],
+        ]);
+    }
+
     public function countsItemsByKeyValues(): void
     {
         $collection = $this->collection(['a', 'b'], [['a' => 1, 'b' => 2], ['a' => 1, 'b' => 2], ['a' => 1, 'b' => 3]]);

@@ -43,6 +43,19 @@ final class TupleStorageTest
         $storage->getTuple($entity);
     }
 
+    public function firstTupleOfEntityIsKept(): void
+    {
+        $storage = new TupleStorage();
+        $entity = new \stdClass();
+        $first = $this->createTuple($entity);
+
+        $storage->attach($first);
+        $storage->attach($this->createTuple($entity));
+
+        Assert::count($storage, 1);
+        Assert::same($storage->getTuple($entity), $first);
+    }
+
     public function testSequence(): void
     {
         $storage = new TupleStorage();

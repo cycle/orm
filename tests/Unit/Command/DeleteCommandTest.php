@@ -53,4 +53,34 @@ final class DeleteCommandTest
         Assert::true($cmd->isExecuted());
         Assert::same($cmd->getAffectedRows(), 1);
     }
+
+    public function readyOnceEveryAwaitedScopeIsSet(): void
+    {
+        $cmd = new Delete(m::mock(DatabaseInterface::class), 'table', new State(Node::SCHEDULED_DELETE, []), null);
+        $cmd->waitScope('id', 'tenant');
+
+        Assert::false($cmd->isReady());
+
+        $cmd->setScope('id', 1);
+        $cmd->setScope('tenant', 2);
+
+        Assert::true($cmd->isReady());
+    }
+
+    public function affectedRowsAreUnknownBeforeExecution(): void
+    {
+        $cmd = new Delete(m::mock(DatabaseInterface::class), 'table', new State(Node::SCHEDULED_DELETE, []), null);
+
+        Expect::exception(new CommandException('The command was not run.'));
+
+        $cmd->getAffectedRows();
+    }
+
+    public function errorNamesAwaitedScope(): void
+    {
+        $cmd = new Delete(m::mock(DatabaseInterface::class), 'table', new State(Node::SCHEDULED_DELETE, []), null);
+        $cmd->waitScope('id', 'tenant');
+
+        Assert::same($cmd->__toError(), Delete::class . '(scope:id, scope:tenant)');
+    }
 }

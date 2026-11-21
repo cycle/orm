@@ -115,6 +115,22 @@ final class StateTest
         Assert::same($state->getValue('b'), 2);
     }
 
+    public function nullValueCountsOnlyWhenAllowed(): void
+    {
+        $state = new State(Node::MANAGED, ['a' => 1, 'b' => null, 'c' => 3, 'd' => null]);
+        $state->setRelation('c', null);
+        $state->setRelation('d', null);
+
+        Assert::true($state->hasValue('a'));
+        Assert::true($state->hasValue('b'));
+        Assert::false($state->hasValue('b', false));
+        Assert::true($state->hasValue('c', false));
+        Assert::true($state->hasValue('d'));
+        Assert::false($state->hasValue('d', false));
+        Assert::false($state->hasValue('missing'));
+        Assert::false($state->hasValue('missing', false));
+    }
+
     public function registeringValueReleasesWaitingField(): void
     {
         $state = new State(Node::NEW, []);

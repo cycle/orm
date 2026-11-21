@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Tests\Feature\Common\Relation\HasOne;
 
+use Cycle\ORM\Exception\ParserException;
 use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Relation;
@@ -17,6 +18,7 @@ use Cycle\ORM\Tests\Fixtures\SortByIDScope;
 use Cycle\ORM\Tests\Fixtures\User;
 use Cycle\Testing\ORM\OrmTestCase;
 use Testo\Assert;
+use Testo\Expect;
 use Testo\Lifecycle\BeforeTest;
 use Testo\Test;
 
@@ -221,6 +223,53 @@ final class HasOneLoadOptionsTest extends OrmTestCase
 
         Assert::same($a->firstComment->message, 'archived 1');
         Assert::same($b->firstComment->message, 'archived 2.1');
+    }
+
+    #[Test]
+    public function loadUsingAJoinedRelationReadsItsColumns(): void
+    {
+        $this->orm = $this->withCommentsSchema([
+            Relation::SCHEMA => [Relation::WHERE => ['@.level' => 1]],
+        ]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->with('firstComment', ['as' => 'first'])
+            ->load('firstComment', ['using' => 'first'])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($a->firstComment->message, 'msg 1');
+        Assert::same($b->firstComment->message, 'msg 2.1');
+    }
+
+    #[Test]
+    public function loadOptionTakesAScope(): void
+    {
+        $this->orm = $this->withCommentsSchema([]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->load('firstComment', ['load' => new Select\QueryScope(['@.level' => 4])])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($a->firstComment->message, 'msg 4');
+        Assert::null($b->firstComment);
+    }
+
+    #[Test]
+    public function postloadedRowOfAnotherParentFails(): void
+    {
+        $this->orm = $this->withCommentsSchema([]);
+        $select = (new Select($this->orm, User::class))
+            ->wherePK(1)
+            ->load('firstComment', [
+                'method' => JoinableLoader::POSTLOAD,
+                'load' => static fn(Select\QueryBuilder $q) => $q->orWhere('@.user_id', 2),
+            ]);
+
+        Expect::exception(ParserException::class)->withMessageContaining('Undefined reference');
+
+        $select->fetchAll();
     }
 
     #[BeforeTest]

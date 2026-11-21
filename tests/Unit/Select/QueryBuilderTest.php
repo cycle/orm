@@ -147,6 +147,35 @@ final class QueryBuilderTest
         Assert::same($query->getTokens()['where'][0][1][0], 'users.id');
     }
 
+    public function andWhereFollowsTheForward(): void
+    {
+        $query = new SelectQuery(['users']);
+        $query->leftJoin('posts')->on('posts.user_id', 'users.id');
+        $builder = (new QueryBuilder($query, new StubLoader()))->withForward('onWhere');
+
+        $builder->andWhere('published', true);
+
+        Assert::same($query->getTokens()['where'], []);
+        Assert::same($query->getTokens()['join'][1]['on'][1][0], 'AND');
+    }
+
+    public function closureInWhereArrayReceivesABuilder(): void
+    {
+        $query = new SelectQuery(['users']);
+        $builder = new QueryBuilder($query, new StubLoader());
+        $received = null;
+
+        $builder->where([
+            static function (QueryBuilder $nested) use (&$received): void {
+                $received = $nested;
+                $nested->where('active', true);
+            },
+        ]);
+
+        Assert::instanceOf($received, QueryBuilder::class);
+        Assert::same($query->getTokens()['where'][1][1][0], 'users.active');
+    }
+
     private function makeBuilder(): QueryBuilder
     {
         $query = new SelectQuery(['users']);

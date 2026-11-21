@@ -211,6 +211,21 @@ final class ManyToManyLoadOptionsTest extends OrmTestCase
     }
 
     #[Test]
+    public function loadUsingAJoinedRelationReadsItsColumns(): void
+    {
+        $this->orm = $this->withTagSchema([]);
+
+        [$a, $b] = (new Select($this->orm, User::class))
+            ->with('tags', ['as' => 'picked', 'where' => ['@.level' => ['>=' => 5]]])
+            ->load('tags', ['using' => 'picked', 'pivot' => ['using' => 'picked_pivot']])
+            ->orderBy('user.id')
+            ->fetchAll();
+
+        Assert::same($this->tagNames($a), ['tag e']);
+        Assert::same($this->tagNames($b), ['tag f']);
+    }
+
+    #[Test]
     public function testNullOptionsKeepRelationWhereAndOrderBy(): void
     {
         $this->orm = $this->withTagSchema([

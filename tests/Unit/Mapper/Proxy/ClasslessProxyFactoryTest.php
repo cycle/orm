@@ -13,6 +13,7 @@ use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 use Mockery as m;
 use Testo\Assert;
+use Testo\Expect;
 use Testo\Test;
 
 #[Test]
@@ -86,6 +87,31 @@ final class ClasslessProxyFactoryTest
         $entity->tags = ['tag'];
 
         Assert::same($factory->extractData($relMap, $entity), ['id' => 1, 'name' => 'foo']);
+    }
+
+    public function readingUnknownFieldFails(): never
+    {
+        $factory = new ClasslessProxyFactory();
+        $entity = $factory->create($this->relationMap(), 'classless_user', ['id']);
+
+        Expect::exception(\RuntimeException::class)->withMessage(\sprintf('Undefined property %s.name.', $entity::class));
+
+        $entity->name;
+    }
+
+    public function debugInfoHidesProxyInternals(): void
+    {
+        $factory = new ClasslessProxyFactory();
+        $entity = $factory->create($this->relationMap(), 'classless_user', ['id']);
+        $entity->id = 1;
+        $entity->tags = ['tag'];
+
+        $info = $entity->__debugInfo();
+
+        Assert::same($info['id'], 1);
+        Assert::same($info["\0" . $entity::class . "\0tags"], ['tag']);
+        Assert::false(\array_key_exists('__cycle_orm_rel_map', $info));
+        Assert::false(\array_key_exists('__cycle_orm_rel_data', $info));
     }
 
     private function relationMap(): RelationMap

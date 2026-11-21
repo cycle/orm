@@ -41,7 +41,43 @@ final class EntityProxyTest
         Assert::same($proxy->nickname, 'BOB');
     }
 
-    private function proxy(): ProxiedNote
+    public function unsetOfMagicFieldIsHandledByEntity(): void
+    {
+        $proxy = $this->proxy();
+        $proxy->nickname = 'bob';
+
+        unset($proxy->nickname);
+
+        Assert::null($proxy->nickname);
+    }
+
+    public function debugInfoHidesProxyInternals(): void
+    {
+        $proxy = $this->proxy();
+        $proxy->nickname = 'bob';
+
+        $info = $proxy->__debugInfo();
+
+        Assert::same(\array_values(\array_filter(
+            \array_keys($info),
+            static fn(string $key): bool => \str_starts_with($key, '__cycle_orm'),
+        )), []);
+        Assert::same($info["\0" . ProxiedNote::class . "\0magic"], ['nickname' => 'BOB']);
+    }
+
+    public function debugInfoOfEntityIsUsedWithoutProxyInternals(): void
+    {
+        $proxy = $this->proxy(DebuggedNote::class);
+
+        Assert::same($proxy->__debugInfo(), ['title' => 'note']);
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $class
+     * @return T
+     */
+    private function proxy(string $class = ProxiedNote::class): object
     {
         $schema = m::mock(SchemaInterface::class);
         $schema->allows('getOuterRelations')->andReturn([]);
@@ -54,7 +90,7 @@ final class EntityProxyTest
         $orm->allows('getFactory')->andReturn($factory);
 
         $proxyFactory = new ProxyEntityFactory(new ClosureHydrator(), new ClassPropertiesExtractor());
-        return $proxyFactory->create(RelationMap::build($orm, 'note'), ProxiedNote::class);
+        return $proxyFactory->create(RelationMap::build($orm, 'note'), $class);
     }
 }
 
@@ -77,6 +113,21 @@ class ProxiedNote
     public function __set(string $name, $value): void
     {
         $this->magic[$name] = \strtoupper($value);
+    }
+
+    public function __unset(string $name): void
+    {
+        unset($this->magic[$name]);
+    }
+}
+
+class DebuggedNote
+{
+    public $owner;
+
+    public function __debugInfo(): array
+    {
+        return ['title' => 'note', '__cycle_orm_rel_data' => [], '__cycle_orm_rel_map' => null];
     }
 }
 // phpcs:enable

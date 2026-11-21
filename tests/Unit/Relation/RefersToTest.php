@@ -40,6 +40,19 @@ final class RefersToTest
         Assert::same($tuple->state->getRelationStatus('parent'), RelationInterface::STATUS_DEFERRED);
     }
 
+    public function prepareWithoutValueTakesRelationFromState(): void
+    {
+        $tuple = $this->tuple();
+        $parent = new \stdClass();
+        $tuple->state->setRelation('parent', $parent);
+
+        $this->relation()->prepare($this->pool, $tuple, SpecialValue::notSet());
+
+        Assert::same($tuple->state->getRelation('parent'), $parent);
+        Assert::same($tuple->state->getRelationStatus('parent'), RelationInterface::STATUS_PROCESS);
+        Assert::notNull($this->pool->offsetGet($parent));
+    }
+
     public function prepareKeepsReferenceThatIsNotLoaded(): void
     {
         $tuple = $this->tuple();

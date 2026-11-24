@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\EmbeddedNode;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableInterface;
 use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
-use Cycle\Database\Query\SelectQuery;
 
 /**
  * Loads object sub-section (column subset).

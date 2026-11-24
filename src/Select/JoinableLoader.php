@@ -9,11 +9,11 @@ use Cycle\Database\StatementInterface;
 use Cycle\ORM\Exception\LoaderException;
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\Parser\AbstractNode;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\Loader\SubQueryLoader;
 use Cycle\ORM\Select\Traits\ColumnsTrait;
 use Cycle\ORM\Select\Traits\ScopeTrait;
+use Cycle\ORM\Service\SourceProviderInterface;
 
 /**
  * Provides ability to load relation data in a form of JOIN or external query.

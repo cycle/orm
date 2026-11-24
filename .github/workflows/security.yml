@@ -1,0 +1,64 @@
+---
+
+name: 🔐 Security analysis
+
+on:  # yamllint disable-line rule:truthy
+  pull_request:
+  push:
+    branches: [2.x]
+
+# `head_ref` is the PR source branch on `pull_request` events and empty on `push`
+# (falls back to `github.ref` = `refs/heads/<branch>`). Different PRs from different
+# branches → different groups, so they never cross-cancel. Same PR pushed again
+# → same group, the new run cancels the previous one.
+#
+# `cancel-in-progress` is only enabled on PR events: pushes to the default branch
+# (2.x) keep their full history of CI runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  security-analysis:
+    timeout-minutes: 4
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+        php-version:
+          - "8.5"
+        dependencies:
+          - highest
+    steps:
+      - name: 📦 Check out the codebase
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 🛠️ Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          ini-values: error_reporting=E_ALL
+          coverage: none
+
+      - name: 🛠️ Setup problem matchers
+        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+
+      - name: 🤖 Validate composer.json
+        run: composer validate --ansi --strict
+
+      - name: 📥 Install dependencies with composer
+        uses: ramsey/composer-install@v4
+        env:
+          COMPOSER_ROOT_VERSION: 2.x-dev
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+
+      - name: 🐛 Check installed packages for security vulnerability advisories
+        run: composer audit --ansi

@@ -1,10 +1,11 @@
-/.*
+/.*/
 !/.github/
 !/.well-known/
+!/.idea/
+/.idea/*
+!/.idea/icon.svg
 /runtime/
 /vendor/
-.env
-composer.lock
-*.db
-clover.xml
-docker-compose.override.yml
+/composer.lock
+/.env
+*.log

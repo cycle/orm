@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Heap;
 
-use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Heap\Traits\RelationTrait;
+use Cycle\ORM\Heap\Traits\WaitFieldTrait;
 use Cycle\ORM\Relation\RelationInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 

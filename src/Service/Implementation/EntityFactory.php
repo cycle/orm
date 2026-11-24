@@ -7,12 +7,12 @@ namespace Cycle\ORM\Service\Implementation;
 use Cycle\ORM\Heap\HeapInterface;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Reference\ReferenceInterface;
+use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Service\EntityFactoryInterface;
 use Cycle\ORM\Service\IndexProviderInterface;
 use Cycle\ORM\Service\MapperProviderInterface;
 use Cycle\ORM\Service\RelationProviderInterface;
-use Cycle\ORM\SchemaInterface;
-use Cycle\ORM\Select\LoaderInterface;
 use Cycle\ORM\Service\RoleResolverInterface;
 
 /**

@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="Unit" type="TestoRunConfiguration">
+        <option name="infectionGitDiffBase"/>
+        <option name="infectionMutators"/>
+        <option name="infectionOptions"/>
+        <option name="infectionStaticAnalysisTool"/>
+        <option name="infectionThreads"/>
+        <option name="suites">
+            <list>
+                <option value="Unit"/>
+            </list>
+        </option>
+        <option name="testoType"/>
+        <TestoRunnerSettings directory="$PROJECT_DIR$" method="" options="-q -n --teamcity"/>
+        <method v="2"/>
+    </configuration>
+</component>

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Special;
 
-use Cycle\ORM\Command\CommandInterface;
 use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\Command\CommandInterface;
 
 /**
  * Wraps multiple commands into one sequence.

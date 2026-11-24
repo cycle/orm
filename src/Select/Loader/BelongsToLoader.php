@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Loader;
 
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Parser\AbstractNode;
 use Cycle\ORM\Parser\SingularNode;
 use Cycle\ORM\Relation;
@@ -11,7 +12,6 @@ use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\JoinableLoader;
 use Cycle\ORM\Select\Traits\JoinOneTableTrait;
 use Cycle\ORM\Select\Traits\WhereTrait;
-use Cycle\Database\Query\SelectQuery;
 
 /**
  * Load parent data. Similar to HasOne but use POSTLOAD as default method.

@@ -15,7 +15,6 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\Parser\CompositeTypecast;
 use Cycle\ORM\Parser\Typecast;
 use Cycle\ORM\Parser\TypecastInterface;
-use Cycle\ORM\Service\SourceProviderInterface;
 use Cycle\ORM\Relation\RelationInterface;
 use Cycle\ORM\Select\Loader\ParentLoader;
 use Cycle\ORM\Select\Loader\SubclassLoader;
@@ -24,6 +23,7 @@ use Cycle\ORM\Select\Repository;
 use Cycle\ORM\Select\ScopeInterface;
 use Cycle\ORM\Select\Source;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Service\SourceProviderInterface;
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface as CoreFactory;
 

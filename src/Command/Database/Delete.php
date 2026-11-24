@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command\Database;
 
+use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\Command\DatabaseCommand;
 use Cycle\ORM\Command\ScopeCarrierInterface;
 use Cycle\ORM\Command\Traits\ErrorTrait;
@@ -12,7 +13,6 @@ use Cycle\ORM\Command\Traits\ScopeTrait;
 use Cycle\ORM\Exception\CommandException;
 use Cycle\ORM\Heap\Node;
 use Cycle\ORM\Heap\State;
-use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\MapperInterface;
 
 final class Delete extends DatabaseCommand implements ScopeCarrierInterface

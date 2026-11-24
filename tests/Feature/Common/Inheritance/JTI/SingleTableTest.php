@@ -1,0 +1,305 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cycle\ORM\Tests\Feature\Common\Inheritance\JTI;
+
+use Cycle\ORM\Heap\Heap;
+use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\SchemaInterface;
+use Cycle\ORM\Select;
+use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Employee;
+use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Engineer;
+use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Manager;
+use Cycle\ORM\Tests\Feature\Common\Inheritance\Fixture\Programator;
+use Testo\Assert;
+use Testo\Lifecycle\BeforeTest;
+use Testo\Test;
+
+final class SingleTableTest extends SimpleCasesTest
+{
+    protected const EMPLOYEE_DEFAULT_SORTING = ['employee_id' => 'ASC'];
+    protected const EMPLOYEE_1 = ['employee_id' => 1, 'name' => 'John', 'age' => 38];
+    protected const EMPLOYEE_2 = ['employee_id' => 2, 'name' => 'Anton', 'age' => 35];
+    protected const EMPLOYEE_3 = ['employee_id' => 3, 'name' => 'Kentarius', 'age' => 27];
+    protected const EMPLOYEE_4 = ['employee_id' => 4, 'name' => 'Valeriy', 'age' => 32];
+    protected const ENGINEER_2 = ['discriminator' => 'engineer', 'role_id' => 2, 'level' => 8, 'rank' => ''];
+    protected const ENGINEER_4 = ['discriminator' => 'engineer', 'role_id' => 4, 'level' => 10, 'rank' => ''];
+    protected const MANAGER_1 = ['discriminator' => 'manager', 'role_id' => 1, 'level' => 0, 'rank' => 'top'];
+    protected const MANAGER_3 = ['discriminator' => 'manager', 'role_id' => 3, 'level' => 0, 'rank' => 'bottom'];
+    protected const PROGRAMATOR_2 = ['subrole_id' => 2, 'language' => 'php'];
+    protected const PROGRAMATOR_4 = ['subrole_id' => 4, 'language' => 'go'];
+    protected const EMPLOYEE_1_LOADED = self::EMPLOYEE_1;
+    protected const EMPLOYEE_2_LOADED = self::EMPLOYEE_2;
+    protected const EMPLOYEE_3_LOADED = self::EMPLOYEE_3;
+    protected const EMPLOYEE_4_LOADED = self::EMPLOYEE_4;
+    protected const ENGINEER_2_LOADED = self::ENGINEER_2 + self::EMPLOYEE_2_LOADED;
+    protected const ENGINEER_4_LOADED = self::ENGINEER_4 + self::EMPLOYEE_4_LOADED;
+    protected const PROGRAMATOR_2_LOADED = self::PROGRAMATOR_2 + self::ENGINEER_2_LOADED;
+    protected const PROGRAMATOR_4_LOADED = self::PROGRAMATOR_4 + self::ENGINEER_4_LOADED;
+    protected const MANAGER_1_LOADED = self::MANAGER_1 + self::EMPLOYEE_1_LOADED;
+    protected const MANAGER_3_LOADED = self::MANAGER_3 + self::EMPLOYEE_3_LOADED;
+    protected const EMPLOYEE_ALL_LOADED = [
+        self::EMPLOYEE_1_LOADED,
+        self::EMPLOYEE_2_LOADED,
+        self::EMPLOYEE_3_LOADED,
+        self::EMPLOYEE_4_LOADED,
+    ];
+    protected const EMPLOYEE_INHERITED_LOADED = [
+        self::MANAGER_1_LOADED,
+        self::PROGRAMATOR_2_LOADED,
+        self::MANAGER_3_LOADED,
+        self::PROGRAMATOR_4_LOADED,
+    ];
+    protected const ENGINEER_ALL_LOADED = [self::ENGINEER_2_LOADED, self::ENGINEER_4_LOADED];
+    protected const ROLES_ALL_LOADED = [
+        self::EMPLOYEE_1_LOADED,
+        self::ENGINEER_2_LOADED,
+        self::EMPLOYEE_3_LOADED,
+        self::ENGINEER_4_LOADED,
+    ];
+    protected const PROGRAMATOR_ALL_LOADED = [self::PROGRAMATOR_2_LOADED, self::PROGRAMATOR_4_LOADED];
+    protected const MANAGER_ALL_LOADED = [self::MANAGER_1_LOADED, self::MANAGER_3_LOADED];
+
+    // todo: remove when STI will support classless entities and Schema::CHILDREN's roles
+    protected const PROGRAMATOR_ROLE = Programator::class;
+    protected const ENGINEER_ROLE = Engineer::class;
+
+    #[Test]
+    public function testFetchAllChildren(): void
+    {
+        /** @var Engineer[]|Manager[] $entities */
+        $entities = (new Select($this->orm, 'role'))->orderBy('role_id', 'ASC')->fetchAll();
+
+        Assert::same($entities[0]->role_id, 1);
+        Assert::instanceOf($entities[0], Manager::class);
+        Assert::same($entities[1]->role_id, 2);
+        Assert::instanceOf($entities[1], Engineer::class);
+        Assert::same($entities[2]->role_id, 3);
+        Assert::instanceOf($entities[2], Manager::class);
+        Assert::same($entities[3]->role_id, 4);
+        Assert::instanceOf($entities[3], Engineer::class);
+    }
+
+    #[Test]
+    public function testSelectEngineerAllDataWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, self::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->orderBy('role_id', 'ASC')
+            ->where('discriminator', '=', 'engineer');
+
+        Assert::equals($selector->fetchData(), self::PROGRAMATOR_ALL_LOADED);
+    }
+
+    #[Test]
+    public function testSelectEngineerAllDataWithoutInheritance(): void
+    {
+        $selector = (new Select($this->orm, self::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer');
+
+        Assert::equals($selector->fetchData(), self::ENGINEER_ALL_LOADED);
+    }
+
+    #[Test]
+    public function testSelectEngineerDataFirstWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, self::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer')
+            ->limit(1);
+
+        Assert::equals($selector->fetchData()[0], self::PROGRAMATOR_2_LOADED);
+    }
+
+    #[Test]
+    public function testSelectEngineerDataFirstWithoutInheritance(): void
+    {
+        $selector = (new Select($this->orm, self::ENGINEER_ROLE))
+            ->loadSubclasses(false)
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer')
+            ->limit(1);
+
+        Assert::equals($selector->fetchData()[0], self::ENGINEER_2_LOADED);
+    }
+
+    #[Test]
+    public function testSelectEngineerEntityFirstWithInheritance(): void
+    {
+        $selector = (new Select($this->orm, self::ENGINEER_ROLE))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'engineer')
+            ->limit(1);
+
+        Assert::instanceOf($selector->fetchOne(), Programator::class);
+    }
+
+    #[Test]
+    public function testSelectManagerAllData(): void
+    {
+        $selector = (new Select($this->orm, Manager::class))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'manager');
+
+        Assert::equals($selector->fetchData(), self::MANAGER_ALL_LOADED);
+    }
+
+    #[Test]
+    public function testSelectManagerDataFirst(): void
+    {
+        $selector = (new Select($this->orm, Manager::class))
+            // todo: this condition should be added automatically by STI
+            ->where('discriminator', '=', 'manager')
+            ->limit(1);
+
+        Assert::equals($selector->fetchData()[0], self::MANAGER_1_LOADED);
+    }
+
+    #[Test]
+    public function testCreateProgramator(): void
+    {
+        $programator = new Programator();
+        $programator->name = 'Merlin';
+        $programator->level = 50;
+        $programator->language = 'VanillaJS';
+
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(3);
+
+        $this->captureWriteQueries();
+        $this->save($programator);
+        $this->assertNumWrites(0);
+
+        Assert::same($programator->employee_id, 5);
+        Assert::same($programator->role_id, 5);
+        Assert::same($programator->subrole_id, 5);
+
+        /** @var Programator $programator */
+        $programator = (new Select($this->orm->withHeap(new Heap()), Programator::class))
+            ->wherePK($programator->subrole_id)
+            ->fetchOne();
+        Assert::same($programator->employee_id, 5);
+        Assert::same($programator->role_id, 5);
+        Assert::same($programator->subrole_id, 5);
+        Assert::same($programator->name, 'Merlin');
+        Assert::same($programator->level, 50);
+        Assert::same($programator->language, 'VanillaJS');
+    }
+
+    #[BeforeTest]
+    public function setUp(): void
+    {
+        JtiBaseTest::setUp();
+
+        $this->makeTable('employee_table', [
+            'employee_id_column' => 'primary',
+            'name_column' => 'string',
+            'age' => 'integer,nullable',
+        ]);
+
+        $this->makeTable('role_table', [
+            'role_id_column' => 'integer,nullable',
+            'subrole_id_column' => 'integer,nullable',
+            'discriminator' => 'string,nullable',
+            'level' => 'integer,nullable',
+            'rank' => 'string,nullable',
+            'language' => 'string,nullable',
+        ], fk: [
+            'role_id_column' => ['table' => 'employee_table', 'column' => 'employee_id_column'],
+        ]);
+        $this->makeIndex('role_table', ['role_id_column', 'subrole_id_column'], true);
+        $this->makeFK(
+            'role_table',
+            ['subrole_id_column', 'role_id_column'],
+            'role_table',
+            ['role_id_column', 'subrole_id_column'],
+            'NO ACTION',
+            'NO ACTION',
+        );
+
+        $this->getDatabase()->table('employee_table')->insertMultiple(
+            ['name_column', 'age'],
+            \array_map(static fn(array $value): array => \array_diff_key($value, ['employee_id' => 1]), [
+                self::EMPLOYEE_1,
+                self::EMPLOYEE_2,
+                self::EMPLOYEE_3,
+                self::EMPLOYEE_4,
+            ]),
+        );
+        $this->getDatabase()->table('role_table')->insertMultiple(
+            ['discriminator', 'role_id_column', 'level', 'rank'],
+            [
+                self::MANAGER_1,
+                self::ENGINEER_2,
+                self::MANAGER_3,
+                self::ENGINEER_4,
+            ],
+        );
+        $this->getDatabase()->table('role_table')->insertMultiple(
+            ['subrole_id_column', 'language'],
+            [
+                self::PROGRAMATOR_2,
+                self::PROGRAMATOR_4,
+            ],
+        );
+    }
+
+    protected function getSchemaArray(): array
+    {
+        return [
+            Employee::class => [
+                SchemaInterface::ROLE => 'employee',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'employee_table',
+                SchemaInterface::PRIMARY_KEY => 'employee_id',
+                SchemaInterface::COLUMNS => [
+                    'employee_id' => 'employee_id_column',
+                    'name' => 'name_column',
+                    'age',
+                ],
+                SchemaInterface::TYPECAST => ['employee_id' => 'int', 'age' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            Manager::class => [
+                SchemaInterface::ROLE => 'role',
+            ],
+            Engineer::class => [
+                SchemaInterface::ROLE => 'role',
+            ],
+            'role' => [
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'role_table',
+                SchemaInterface::PARENT => 'employee',
+                SchemaInterface::CHILDREN => [
+                    'engineer' => Engineer::class,
+                    'manager' => Manager::class,
+                ],
+                SchemaInterface::PRIMARY_KEY => 'role_id',
+                SchemaInterface::DISCRIMINATOR => 'discriminator',
+                SchemaInterface::COLUMNS => ['role_id' => 'role_id_column', 'level', 'rank', 'discriminator'],
+                SchemaInterface::TYPECAST => ['role_id' => 'int', 'level' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+            Programator::class => [
+                SchemaInterface::ROLE => 'subrole',
+                SchemaInterface::MAPPER => Mapper::class,
+                SchemaInterface::DATABASE => 'default',
+                SchemaInterface::TABLE => 'role_table',
+                SchemaInterface::PARENT => Engineer::class,
+                SchemaInterface::PRIMARY_KEY => 'subrole_id',
+                SchemaInterface::COLUMNS => ['subrole_id' => 'subrole_id_column', 'language'],
+                SchemaInterface::TYPECAST => ['subrole_id' => 'int'],
+                SchemaInterface::SCHEMA => [],
+                SchemaInterface::RELATIONS => [],
+            ],
+        ];
+    }
+}

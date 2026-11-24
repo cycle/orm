@@ -12,7 +12,16 @@
         "docs": "https://cycle-orm.dev/docs",
         "chat": "https://discord.gg/spiralphp"
     },
-    "keywords": ["mysql", "mssql", "sqlite", "postgresql", "orm", "sql", "query-builder", "data-mapper"],
+    "keywords": [
+        "mysql",
+        "mssql",
+        "sqlite",
+        "postgresql",
+        "orm",
+        "sql",
+        "query-builder",
+        "data-mapper"
+    ],
     "authors": [
         {
             "name": "Anton Titov (wolfy-j)",
@@ -38,24 +47,25 @@
         }
     ],
     "require": {
-        "php": ">=8.1",
-        "cycle/database": "^2.22.0",
-        "doctrine/instantiator": "^1.3.1 || ^2.0",
-        "spiral/core": "^2.8 || ^3.0"
+        "php": ">=8.2",
+        "cycle/database": "^2.24",
+        "doctrine/instantiator": "^2.0",
+        "spiral/core": "^3.18"
     },
     "require-dev": {
         "ext-pdo": "*",
-        "buggregator/trap": "^1.15",
-        "doctrine/collections": "^1.6 || ^2.0",
-        "illuminate/collections": "9 - 12",
-        "loophp/collection": "^6.0 || ^7.0",
-        "mockery/mockery": "^1.1",
-        "phpunit/phpunit": "^9.5",
-        "ramsey/uuid": "^4.0",
+        "bamarni/composer-bin-plugin": "^1.9",
+        "buggregator/trap": "^1.20",
+        "cycle/testing": "^0.1.2",
+        "doctrine/collections": "^2.6 || ^3.0",
+        "illuminate/collections": "12 - 13",
+        "llm/skills": "^1.20",
+        "loophp/collection": "^7.6",
+        "mockery/mockery": "^1.6.5",
+        "ramsey/uuid": "^4.10",
         "roxblnfk/unpoly": "^1.8",
-        "spiral/code-style": "~2.2.0",
-        "spiral/tokenizer": "^2.8 || ^3.0",
-        "vimeo/psalm": "^6.0"
+        "testo/bridge-mockery": "^0.1.2",
+        "testo/testo": "^0.10.60"
     },
     "suggest": {
         "llm/skills": "To sync the cycle-orm AI skill into your project"
@@ -67,13 +77,22 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Cycle\\ORM\\Tests\\": "tests/ORM/"
+            "Cycle\\ORM\\Tests\\": "tests/"
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true,
+            "llm/skills": true
+        }
     },
     "extra": {
+        "bamarni-bin": {
+            "bin-links": true,
+            "forward-command": false,
+            "target-directory": "vendor-bin"
+        },
         "branch-alias": {
             "dev-2.x": "2.x-dev"
         },
@@ -82,18 +101,44 @@
                 {
                     "from": "github",
                     "package": "cycle/skills",
-                    "skills": ["cycle-orm"]
+                    "skills": [
+                        "cycle-orm"
+                    ]
                 }
             ]
         }
     },
     "scripts": {
-        "cs:diff": "php-cs-fixer fix --dry-run -v --diff",
-        "cs:fix": "php-cs-fixer fix -v",
-        "psalm": "psalm",
-        "psalm:baseline": "psalm --set-baseline=psalm-baseline.xml",
-        "test": "phpunit --color=always",
-        "test:unit": "phpunit --exclude-group driver --colors=always",
-        "test:sqlite": "phpunit --group driver-sqlite --colors=always"
+        "cs:diff": "php-cs-fixer fix --dry-run -v --diff --config=vendor-bin/code-style/.php-cs-fixer.dist.php",
+        "cs:fix": "php-cs-fixer fix -v --config=vendor-bin/code-style/.php-cs-fixer.dist.php",
+        "psalm": "psalm -c vendor-bin/psalm/psalm.xml",
+        "psalm:baseline": "psalm -c vendor-bin/psalm/psalm.xml --set-baseline=vendor-bin/psalm/psalm-baseline.xml",
+        "psalm:ci": "psalm -c vendor-bin/psalm/psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4",
+        "db:down": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml down -v",
+        "db:up": "docker compose -f vendor/cycle/testing/resources/docker/compose.yaml up -d --wait",
+        "infect": [
+            "Composer\\Config::disableProcessTimeout",
+            "@putenv XDEBUG_MODE=coverage",
+            "@putenv DB_DRIVERS=sqlite",
+            "infection --configuration=infection.json --threads=max"
+        ],
+        "infect:ci": [
+            "Composer\\Config::disableProcessTimeout",
+            "@putenv XDEBUG_MODE=coverage",
+            "@putenv DB_DRIVERS=sqlite",
+            "infection --ansi --configuration=infection.json --logger-github --threads=max --show-mutations=0"
+        ],
+        "test": "testo",
+        "test:mysql": "testo --suite=Feature/MySQL --suite=Regression/MySQL",
+        "test:new-case": "cycle-testing new-case --template=orm",
+        "test:postgres": "testo --suite=Feature/Postgres --suite=Regression/Postgres",
+        "test:sqlite": "testo --suite=Feature/SQLite --suite=Regression/SQLite",
+        "test:sqlserver": "testo --suite=Feature/SQLServer --suite=Regression/SQLServer",
+        "test:unit": "testo --suite=Unit"
+    },
+    "scripts-descriptions": {
+        "infect": "Run mutation testing with Infection against the Unit and SQLite suites",
+        "infect:ci": "Run mutation testing in CI: GitHub annotations, the Stryker dashboard report and the MSI gate",
+        "test:new-case": "Create a regression case for an issue: composer test:new-case -- <issue>"
     }
 }

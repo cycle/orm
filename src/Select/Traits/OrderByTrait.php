@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Select\Traits;
 
-use Cycle\ORM\Select\QueryBuilder;
 use Cycle\Database\Query\SelectQuery;
+use Cycle\ORM\Select\QueryBuilder;
 
 /**
  * Provides the ability to configure relation specific where conditions.

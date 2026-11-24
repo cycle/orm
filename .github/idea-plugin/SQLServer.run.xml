@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="SQLServer" type="TestoRunConfiguration">
+        <option name="infectionGitDiffBase"/>
+        <option name="infectionMutators"/>
+        <option name="infectionOptions"/>
+        <option name="infectionStaticAnalysisTool"/>
+        <option name="infectionThreads"/>
+        <option name="suites">
+            <list>
+                <option value="Feature/SQLServer"/>
+                <option value="Regression/SQLServer"/>
+            </list>
+        </option>
+        <option name="testoType"/>
+        <TestoRunnerSettings directory="$PROJECT_DIR$" method="" options="-q -n --teamcity"/>
+        <method v="2"/>
+    </configuration>
+</component>

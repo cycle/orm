@@ -15,11 +15,11 @@ use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\TypecastInterface;
 use Cycle\ORM\Parser\UncastableInterface;
-use Cycle\ORM\Service\RelationProviderInterface;
-use Cycle\ORM\Service\TypecastProviderInterface;
 use Cycle\ORM\RelationMap;
 use Cycle\ORM\SchemaInterface;
 use Cycle\ORM\Select\SourceInterface;
+use Cycle\ORM\Service\RelationProviderInterface;
+use Cycle\ORM\Service\TypecastProviderInterface;
 
 /**
  * Provides basic capabilities to work with entities persisted in SQL databases.

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Mapper;
 
+use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
 use Cycle\ORM\Mapper\Traits\SingleTableTrait;
 use Cycle\ORM\ORMInterface;
-use Cycle\ORM\Mapper\Proxy\ProxyEntityFactory;
 use Cycle\ORM\SchemaInterface;
 
 /**

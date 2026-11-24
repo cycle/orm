@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cycle\ORM\Command;
 
-use Cycle\ORM\Heap\State;
 use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\Heap\State;
 
 abstract class StoreCommand extends DatabaseCommand implements StoreCommandInterface
 {

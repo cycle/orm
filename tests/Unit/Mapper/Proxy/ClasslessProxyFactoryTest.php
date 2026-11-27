@@ -114,6 +114,83 @@ final class ClasslessProxyFactoryTest
         Assert::false(\array_key_exists('__cycle_orm_rel_data', $info));
     }
 
+    public function extractRelationsOfEmptyNonProxyReturnsEmptyArray(): void
+    {
+        $factory = new ClasslessProxyFactory();
+
+        $relations = $factory->extractRelations($this->relationMap(), new \stdClass());
+
+        Assert::same($relations, []);
+    }
+
+    public function extractRelationsOfNonProxyPreservesObjectArrayAndNullValues(): void
+    {
+        $factory = new ClasslessProxyFactory();
+        $post = new \stdClass();
+        $entity = new \stdClass();
+        $entity->posts = $post;
+        $entity->tags = null;
+
+        $relations = $factory->extractRelations($this->relationMap(), $entity);
+
+        Assert::same($relations, ['posts' => $post, 'tags' => null]);
+    }
+
+    public function extractRelationsOfNonProxyFiltersNonRelationAndMissingProperties(): void
+    {
+        $factory = new ClasslessProxyFactory();
+        $entity = new \stdClass();
+        $entity->id = 1;
+        $entity->name = 'foo';
+        $entity->posts = ['post'];
+
+        $relations = $factory->extractRelations($this->relationMap(), $entity);
+
+        Assert::same($relations, ['posts' => ['post']]);
+    }
+
+    public function extractRelationsOfNonProxyHandlesPrivateAndProtectedProperties(): void
+    {
+        $factory = new ClasslessProxyFactory();
+        $entity = new class {
+            public int $id = 1;
+            protected array $posts = ['post'];
+            private ?string $tags = null;
+        };
+
+        $relations = $factory->extractRelations($this->relationMap(), $entity);
+
+        Assert::same($relations, ['posts' => ['post'], 'tags' => null]);
+    }
+
+    public function extractDataAndEntityToArrayWorkOnNonProxyObjects(): void
+    {
+        $factory = new ClasslessProxyFactory();
+        $relMap = $this->relationMap();
+        $entity = new \stdClass();
+        $entity->id = 1;
+        $entity->posts = ['post'];
+
+        Assert::same($factory->extractData($relMap, new \stdClass()), []);
+        Assert::same($factory->extractData($relMap, $entity), ['id' => 1]);
+        Assert::same($factory->entityToArray($entity), ['id' => 1, 'posts' => ['post']]);
+    }
+
+    public function entityToArrayPrefersPendingReferenceOverStoredRelationValue(): void
+    {
+        $factory = new ClasslessProxyFactory();
+        $entity = $factory->create($this->relationMap(), 'classless_user', ['id']);
+        $entity->id = 1;
+        $entity->posts = ['plain'];
+        $reference = new Reference('post', ['user_id' => 1]);
+        $entity->posts = $reference;
+        $entity->tags = ['tag'];
+
+        $data = $factory->entityToArray($entity);
+
+        Assert::same($data, ['posts' => $reference, 'id' => 1, 'tags' => ['tag']]);
+    }
+
     private function relationMap(): RelationMap
     {
         $relation = m::mock(ActiveRelationInterface::class);

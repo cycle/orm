@@ -71,7 +71,7 @@ class ClasslessProxyFactory
         foreach ((array) $entity as $key => $value) {
             $result[$key[0] === "\0" ? \substr($key, \strrpos($key, "\0", 1) + 1) : $key] = $value;
         }
-        $relations = $result['__cycle_orm_rel_data'];
+        $relations = $result['__cycle_orm_rel_data'] ?? [];
         unset($result['__cycle_orm_rel_map'], $result['__cycle_orm_rel_data']);
         return $relations + $result;
     }
